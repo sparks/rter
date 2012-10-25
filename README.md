@@ -11,3 +11,4 @@ Links
 * [Brainstorming Round Submission](https://mozillaignite.org/ideas/212/)
 * [Project Page](https://www.cim.mcgill.ca/sre/projects/rter/)
 * [Updates](https://www.cim.mcgill.ca/sre/projects/rter/blog.html)
+* [Panoia Street View Library](https://github.com/sparks/panoia)

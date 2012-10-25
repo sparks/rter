@@ -1,0 +1,62 @@
+<project name="DataVis" basedir="." default="main">
+
+	<property name="panoia.dir" value="../../"/>
+	
+	<property name="main-class" value="${ant.project.name}"/>
+
+	<property name="src.dir" value="."/>
+	<property name="build.dir" value="bin"/>
+	<property name="ref.dir" value="reference"/>
+
+	<path id="classpath">
+		<fileset dir="${panoia.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" includeantruntime="false"/>
+	</target>
+
+	<target name="jar" depends="compile">
+		<unjar dest="${build.dir}">
+			<patternset>
+				<include name="**/*.class"/>
+			</patternset>
+			<path refid="classpath"/>
+		</unjar>
+
+		<copy todir="${build.dir}/data" failonerror="false">
+			<fileset dir="./data"/>
+		</copy>
+
+		<jar destfile="${ant.project.name}.jar" basedir="${build.dir}">
+			<include name="**/*.class"/>
+			<include name="data/**/*"/>
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+			</manifest>
+		</jar>
+		
+		<antcall target="clean"/>
+	</target>
+
+	<target name="run" depends="compile">
+		<java classname="${main-class}" fork="true">
+			<classpath>
+				<path refid="classpath"/>
+				<path location="${build.dir}"/>
+			</classpath>
+		</java>
+	</target>
+	
+	<target name="main" depends="run">
+		<antcall target="clean"/>
+	</target>
+
+</project>
