@@ -16,6 +16,7 @@ public class Ignite extends PApplet {
 	ArrayList<BikeAccident> bikeAccidents;
 
 	PFont font;
+	int roadrand;
 
 	public void setup() {
 		size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
@@ -30,12 +31,16 @@ public class Ignite extends PApplet {
 		pano = new Pano(this);
 		pov = pano.getPov();
 
-		pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");
+		// pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");
 		// pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
 		// pano.setPosition(new LatLng(45.52059937f, -73.58165741f));
- 
+		pano.setPano("717wuQJ5lH4xB3Uw5vs4Pw");
+		// pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
+
 		carAccidents = CarAccident.ParseCsv(this);
 		bikeAccidents = BikeAccident.ParseCsv(this);
+
+		roadrand = round(random(0, 255));
 	}
 
 	public void draw() {
@@ -61,37 +66,45 @@ public class Ignite extends PApplet {
 			project(accident.latLng, accident.toString(), 500);
 		}
 
-		// drawPanoLinks();
-		
+		drawPanoLinks();
 		drawRoads();
 
 		//Mouse Ref Lin
-		stroke(255, 0, 0);
-		line(mouseX, 0, mouseX, height);
+		// stroke(255, 0, 0);
+		// line(mouseX, 0, mouseX, height);
 	}
 
 	public void mousePressed() {
 		pov.setHeading(pov.heading()+map(mouseX, 0, width, -fov/2, fov/2));
-		pano.jump();
+		pano.setPov(pov);
+
+		if (mouseButton == RIGHT) {
+			pano.jump();
+			roadrand = round(random(0, 255));
+		}
 	}
 
 	public void keyPressed() {
 		if(key == 'n') {
 			pano.jump();
+			roadrand = round(random(0, 255));
 		}
 	}
 
 	public void drawPanoLinks() {
-		stroke(255);
+		stroke(20);
+		strokeWeight(2);
+		fill(255, 200);
 		PanoLink[] links = pano.getLinks();
 		for(int i = 0;i < links.length;i++) {
 			int x = pano.headingToPixel(links[i].heading, fov, width);
-			line(x, 0, x, height);
+			// line(x, 0, x, height);
+			triangle(x, height-20, x-20, height-7, x+20, height-7);
 		}
 	}
 
 	public void drawRoads() {
-		fill(255, 50);
+		fill(roadrand, 255-roadrand, 0, 50);
 		stroke(255, 50);
 		PanoLink[] links = pano.getLinks();
 		for(int i = 0;i < links.length;i++) {

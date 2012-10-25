@@ -1,7 +1,9 @@
 <project name="DataVis" basedir="." default="main">
 
-	<property name="panoia.dir" value="../../"/>
-	
+	<property name="core.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
+	<property name="core-lib.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
+	<property name="contrib-lib.dir" value="/Users/sparky/Projects/processing/libraries/"/>
+
 	<property name="main-class" value="${ant.project.name}"/>
 
 	<property name="src.dir" value="."/>
@@ -9,7 +11,13 @@
 	<property name="ref.dir" value="reference"/>
 
 	<path id="classpath">
-		<fileset dir="${panoia.dir}">
+		<fileset dir="${core.dir}">
+			<include name="core.jar"/>
+		</fileset>
+		<fileset dir="${core-lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${contrib-lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>

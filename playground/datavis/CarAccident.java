@@ -43,7 +43,7 @@ public class CarAccident {
 		System.out.println(yPos);
 		*/
 		
-		System.out.println(length);
+		// System.out.println(length);
 		
 		parent.stroke(128);
 		parent.fill(255);
