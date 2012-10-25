@@ -1,5 +1,6 @@
-import panoia.*;
 import processing.core.*;
+import panoia.*;
+
 import java.io.*;
 import java.util.*;
 import java.lang.Math;
@@ -9,7 +10,7 @@ public class Ignite extends PApplet {
 	Pano pano;
 	PanoPov pov;
 
-	float fov = 360;
+	float fov = 270;
 
 	ArrayList<CarAccident> carAccidents;
 	ArrayList<BikeAccident> bikeAccidents;
@@ -21,25 +22,18 @@ public class Ignite extends PApplet {
 		// size(1024*3, 768);
 
 		background(0);
+		smooth();
 
 		font = createFont("Helvetica", 14);
 		textFont(font, 14);
 
 		pano = new Pano(this);
 		pov = pano.getPov();
-		// pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");
-		pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
+
+		pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");
+		// pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
 		// pano.setPosition(new LatLng(45.52059937f, -73.58165741f));
-
-
-		LatLng a = new LatLng(45.537719f, -73.622271f); //3qry8ACTZ8Mw6SQ1UaLNMg
-		LatLng b = new LatLng(45.537558f, -73.621739f); //gUV-eHyqZN3NlJQA6pZQNw
-
-		smooth();
-		stroke(255);
-		fill(255);
-		// noLoop();
-
+ 
 		carAccidents = CarAccident.ParseCsv(this);
 		bikeAccidents = BikeAccident.ParseCsv(this);
 	}
@@ -49,8 +43,8 @@ public class Ignite extends PApplet {
 
 		pushMatrix();
 		translate(width/2, 0);
-		// pano.drawThreeFold(width);
-		pano.drawTiles(fov, width);
+		pano.drawThreeFold(width);
+		// pano.drawTiles(fov, width);
 		popMatrix();
 
 		float alpha = 255;
@@ -67,9 +61,9 @@ public class Ignite extends PApplet {
 			project(accident.latLng, accident.toString(), 500);
 		}
 
-		drawPanoLinks();
+		// drawPanoLinks();
 		
-		pano.drawRoads();
+		drawRoads();
 
 		//Mouse Ref Lin
 		stroke(255, 0, 0);
@@ -93,6 +87,23 @@ public class Ignite extends PApplet {
 		for(int i = 0;i < links.length;i++) {
 			int x = pano.headingToPixel(links[i].heading, fov, width);
 			line(x, 0, x, height);
+		}
+	}
+
+	public void drawRoads() {
+		fill(255, 50);
+		stroke(255, 50);
+		PanoLink[] links = pano.getLinks();
+		for(int i = 0;i < links.length;i++) {
+			int x = pano.headingToPixel(links[i].heading, fov, width);
+			float squish = 6f;
+			quad(
+				x+width/14/squish, height/2+30, 
+				x-width/14/squish, height/2+30, 
+				x-width/14, height, 
+				x+width/14, height
+			);
+
 		}
 	}
 
