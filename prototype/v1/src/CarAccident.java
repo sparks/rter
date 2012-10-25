@@ -34,7 +34,7 @@ public class CarAccident {
 		String[] data = new String[29];
 		int errorCount = 0;
 		try {
-			File file = new File("CarCrashes2007.csv");
+			File file = new File("data/CarCrashes2007.csv");
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			
 			String line = reader.readLine(); // Skip the first one with title info

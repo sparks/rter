@@ -25,7 +25,7 @@ public class BikeAccident {
 		String[] data = new String[29];
 		int errorCount = 0;
 		try {
-			File file = new File("BikeAccidents.csv");
+			File file = new File("data/BikeAccidents.csv");
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			
 			String line = reader.readLine(); // Skip the first one with title info
