@@ -1,0 +1,5 @@
+0. Download libjing source file, current we only support -r103 
+#svn co http://libjingle.googlecode.com/svn/trunk/talk talk -r103
+
+1. Build libteaonly and ipcamera NDK library.
+

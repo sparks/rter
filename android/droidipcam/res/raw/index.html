@@ -1,0 +1,77 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<!-- A minimal Flowplayer setup to get you started -->
+  
+
+	<!-- 
+		include flowplayer JavaScript file that does  
+		Flash embedding and provides the Flowplayer API.
+	-->
+	<script type="text/javascript" src="player.js"></script>
+	
+	<!-- some minimal styling, can be removed -->
+	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	<!-- page title -->
+	<title>Android IP Camera</title>
+
+</head><body>
+
+	<div id="page">
+		
+		<h1>Android IP Camera</h1>
+	
+		<p>Click play button to view your android phone's camera</p>
+		
+		<!-- this A tag is where your Flowplayer will be placed. it can be anywhere -->
+		<a  
+			 href="live.flv"
+			 style="display:block;width:640px;height:480px"  
+             id="player">
+		</a> 
+	
+		<!-- this will install flowplayer inside previous A- tag. -->
+		<script>
+			flowplayer("player", "player_object.swf",{
+                        clip: {
+                            autoPlay: false,
+                            live: true,
+                            scaling: 'fit',
+                        },
+                        
+                        plugins: {
+                            controls: {
+                                url: 'player_controler.swf',
+                                playlist: false,
+                                fullscreen: true,
+                                volume: false,
+                                mute: false,
+                                stop: true,
+                                scrubber: false
+                                }
+                       }
+                    });
+		</script>
+	
+		<!-- 
+			after this line is purely informational stuff. 
+			does not affect on Flowplayer functionality 
+		-->
+		<p class="less">
+			If video is not smoothing, you can pause player for a while.
+		</p>
+		
+		<h2>About</h2>
+        
+        <p>
+			The project home page on <a href="http://code.google.com/p/ipcamera-for-android/">Google code</a> 
+		</p>
+
+		<p>
+		    If you have any problem please send mail to achang.zhou@gmail.com 
+		</p>
+		
+	</div>
+	
+	
+</body></html>

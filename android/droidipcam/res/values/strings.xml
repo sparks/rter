@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IP Camera</string>
+    
+    <string name="action_start">Start</string>
+    <string name="action_stop">Stop</string>
+ 
+    <string name="res_low">320x240</string>
+    <string name="res_medium">640x480</string>
+    <string name="res_high">1280x720</string>
+
+    <string name="msg_idle">Select video size, press Start to begin</string> 
+    <string name="msg_start_error">Can not start http server..</string>
+    <string name="msg_prepare_waiting">Checking camera ..</string>
+    <string name="msg_prepare_ok">Camera is OK. Using browser access: </string>
+    <string name="msg_prepare_error1">Your phone do not support MP4+AMR_BN format, please exit by menu.</string>
+    <string name="msg_prepare_error2">Prepareing is error, please try again.</string>
+    <string name="msg_streaming">Do streaming...</string>
+</resources>
