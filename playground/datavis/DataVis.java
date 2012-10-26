@@ -6,6 +6,7 @@ public class DataVis extends PApplet {
 	boolean debug = true;
 	
 	PFont font;
+	int fontSize = 16;
 	
 	ArrayList<CarAccident> carAccidents;
 	
@@ -15,7 +16,7 @@ public class DataVis extends PApplet {
 		size(1024, 768);
 		background(0);
 		
-		font = createFont("Arial", 16, true);
+		font = createFont("Arial", fontSize, true);
 		
 		temperaturePlot = new ScrollingPlot(this, new PVector(100, 100), "Temp.", -100, 100, color(0, 0, 255), color(255, 0, 0));
 		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
