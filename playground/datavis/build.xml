@@ -2,10 +2,13 @@
 
 	<property environment="env"/>
 
-	<property name="core.dir" value="C:\Users\Stephane\Applications\processing-1.5.1\lib"/>
-	<property name="panoia.dir" value="C:\Users\Stephane\Code\panoia\lib"/>
-	<!--<property name="core-lib.dir" value="${env.JAVA_HOME}"/>
-	<property name="contrib-lib.dir" value="${env.JAVA_HOME}"/>-->
+<!-- 	<property name="core.dir" value="C:\Users\Stephane\Applications\processing-1.5.1\lib"/>
+	<property name="core-lib.dir" value="C:\Users\Stephane\Code\panoia\lib"/>
+	<property name="contrib-lib.dir" value="C:\Users\Stephane\Code\panoia\lib"/> -->
+
+	<property name="core.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
+	<property name="core-lib.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
+	<property name="contrib-lib.dir" value="/Users/sparky/Projects/processing/libraries/"/>
 
 	<property name="main-class" value="${ant.project.name}"/>
 
@@ -17,14 +20,11 @@
 		<fileset dir="${core.dir}">
 			<include name="core.jar"/>
 		</fileset>
-		<!--<fileset dir="${core-lib.dir}">
+		<fileset dir="${core-lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
 		<fileset dir="${contrib-lib.dir}">
 			<include name="**/*.jar"/>
-		</fileset>-->
-		<fileset dir="${panoia.dir}">
-			<include name="**/*.*"/>
 		</fileset>
 	</path>
 	
