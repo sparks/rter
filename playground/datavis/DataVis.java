@@ -9,7 +9,7 @@ public class DataVis extends PApplet {
 	
 	ArrayList<CarAccident> carAccidents;
 	
-	ScrollingPlot temperaturePlot;
+	ScrollingPlot temperaturePlot, humidityPlot;
 
 	public void setup() {
 		size(1024, 768);
@@ -17,7 +17,8 @@ public class DataVis extends PApplet {
 		
 		font = createFont("Arial", 16, true);
 		
-		temperaturePlot = new ScrollingPlot(this, new PVector(100, 100), -100, 100, color(0, 0, 255), color(255, 0, 0));
+		temperaturePlot = new ScrollingPlot(this, new PVector(100, 100), "Temp.", -100, 100, color(0, 0, 255), color(255, 0, 0));
+		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
 		
 		carAccidents = CarAccident.ParseCsv(this);
 	}
@@ -29,15 +30,8 @@ public class DataVis extends PApplet {
 		temperaturePlot.update();
 		temperaturePlot.draw();
 		
-		/*
-		CarAccident test = carAccidents.get(1);
-		
-		textFont(font, 16);
-		fill(255);
-		textAlign(LEFT);
-		text(test.Latitude.toString(), 10, 20);
-		text(test.Longitude.toString(), 10, 60);
-		*/
+		humidityPlot.update();
+		humidityPlot.draw();
 		
 		for (CarAccident accident : carAccidents) {
 			accident.draw(45.5, -73.6, 1024, 768, 180, 90, 0);
