@@ -10,8 +10,6 @@ public class DataVis extends PApplet {
 	
 	ArrayList<CarAccident> carAccidents;
 	
-	ScrollingPlot temperaturePlot, humidityPlot;
-
 	public void setup() {
 		size(1024, 768);
 		background(0);

@@ -5,7 +5,7 @@ import processing.core.*;
 public class ScrollingPlot {
 	
 	final int barCount = 10;
-	final float graphSize = 100;
+	final float graphSize = 50;
 	
 	PApplet parent;
 	PVector position;
@@ -16,6 +16,9 @@ public class ScrollingPlot {
 	
 	int time, oldTime;
 	float[] values;
+
+	PFont font;
+	int fontSize = 16;
 	
 	public ScrollingPlot(PApplet parent, PVector position, String title, float min, float max, int low, int high) {
 		this.parent = parent;
@@ -29,6 +32,8 @@ public class ScrollingPlot {
 		this.mid = parent.color(255);
 		
 		values = new float[barCount];
+
+		font = parent.createFont("Arial", fontSize, true);
 		
 		for (int i = 0; i < barCount; i++)
 			values[i] = avg;
@@ -87,11 +92,11 @@ public class ScrollingPlot {
 		parent.line(position.x, middle, position.x + graphSize, middle);
 		
 		// Print plot title and y-axis values.
-		parent.textFont(parent.font, parent.fontSize);
+		parent.textFont(font, fontSize);
 		parent.textAlign(PConstants.CENTER);
 		parent.text(title, position.x + graphSize / 2, position.y - 10);
 		parent.textAlign(PConstants.RIGHT);
-		parent.text(String.format("%.1f", max), position.x - 5, position.y + parent.fontSize);
+		parent.text(String.format("%.1f", max), position.x - 5, position.y + fontSize);
 		parent.text(String.format("%.1f", min), position.x - 5, position.y + graphSize);
 	}
 	

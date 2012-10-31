@@ -18,9 +18,11 @@ public class Ignite extends PApplet {
 	PFont font;
 	int roadrand;
 
+	ScrollingPlot temperaturePlot, humidityPlot;
+
 	public void setup() {
-		size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
-		// size(1024*3, 768);
+		// size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
+		size(1024*3, 768);
 
 		background(0);
 		smooth();
@@ -34,11 +36,15 @@ public class Ignite extends PApplet {
 		// pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");
 		// pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
 		// pano.setPosition(new LatLng(45.52059937f, -73.58165741f));
-		pano.setPano("717wuQJ5lH4xB3Uw5vs4Pw");
+		// pano.setPano("717wuQJ5lH4xB3Uw5vs4Pw");
 		// pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
+		pano.setPano("wvuAA91CEZ5hP0afgwp_Wg");
 
 		carAccidents = CarAccident.ParseCsv(this);
 		bikeAccidents = BikeAccident.ParseCsv(this);
+
+		temperaturePlot = new ScrollingPlot(this, new PVector(100, 100), "Temp.", -100, 100, color(0, 0, 255), color(255, 0, 0));
+		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
 
 		roadrand = round(random(0, 255));
 	}
@@ -65,6 +71,16 @@ public class Ignite extends PApplet {
 			fill(0, 100, 0, alpha);
 			project(accident.latLng, accident.toString(), 500);
 		}
+
+		stroke(0);
+		fill(0, 100);
+		rect(20, 60, 420, 120);
+
+		temperaturePlot.update();
+		temperaturePlot.draw();
+		
+		humidityPlot.update();
+		humidityPlot.draw();
 
 		drawPanoLinks();
 		drawRoads();
