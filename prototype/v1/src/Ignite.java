@@ -1,11 +1,16 @@
 import processing.core.*;
+
 import panoia.*;
+
+import de.sciss.net.*;
+import java.net.SocketAddress;
+import java.io.IOException;
 
 import java.io.*;
 import java.util.*;
 import java.lang.Math;
 
-public class Ignite extends PApplet {
+public class Ignite extends PApplet implements OSCListener {
 
 	Pano pano;
 	PanoPov pov;
@@ -20,9 +25,11 @@ public class Ignite extends PApplet {
 
 	ScrollingPlot temperaturePlot, humidityPlot;
 
+	OSCServer osc_in;
+
 	public void setup() {
-		// size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
-		size(1024*3, 768);
+		size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
+		// size(1024*3, 768);
 
 		background(0);
 		smooth();
@@ -37,8 +44,9 @@ public class Ignite extends PApplet {
 		// pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
 		// pano.setPosition(new LatLng(45.52059937f, -73.58165741f));
 		// pano.setPano("717wuQJ5lH4xB3Uw5vs4Pw");
-		// pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
-		pano.setPano("wvuAA91CEZ5hP0afgwp_Wg");
+		pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
+		// pano.setPano("wvuAA91CEZ5hP0afgwp_Wg");
+		// pano.setPosition(new LatLng(45.506257f,-73.575718f));
 
 		carAccidents = CarAccident.ParseCsv(this);
 		bikeAccidents = BikeAccident.ParseCsv(this);
@@ -47,6 +55,19 @@ public class Ignite extends PApplet {
 		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
 
 		roadrand = round(random(0, 255));
+
+		/* ---- OSC ---- */
+
+		try {
+			osc_in = OSCServer.newUsing(OSCServer.UDP, 8001);
+			osc_in.start();
+		} catch(IOException e) {
+			System.err.println("Error initializing OSCServer ... exiting");
+			System.out.println(e);
+			System.exit(1);
+		}
+
+		osc_in.addOSCListener(this);
 	}
 
 	public void draw() {
@@ -72,15 +93,15 @@ public class Ignite extends PApplet {
 			project(accident.latLng, accident.toString(), 500);
 		}
 
-		stroke(0);
-		fill(0, 100);
-		rect(20, 60, 420, 120);
+		// stroke(0);
+		// fill(0, 100);
+		// rect(20, 60, 420, 120);
 
-		temperaturePlot.update();
-		temperaturePlot.draw();
+		// temperaturePlot.update();
+		// temperaturePlot.draw();
 		
-		humidityPlot.update();
-		humidityPlot.draw();
+		// humidityPlot.update();
+		// humidityPlot.draw();
 
 		drawPanoLinks();
 		drawRoads();
@@ -173,6 +194,30 @@ public class Ignite extends PApplet {
 		}
 
 		return true;
+	}
+
+	public synchronized void messageReceived(OSCMessage message, SocketAddress sender, long time) {
+		String raw_addr = message.getName();
+
+		if(raw_addr.startsWith("/")) raw_addr = raw_addr.substring(1);
+
+		String[] addr = raw_addr.split("/");
+
+		try {
+			if(addr[0].equals("panoid")) {
+				if(addr[1].equals("latlong") && message.getArgCount() == 2) {
+					float latitude = ((Number)message.getArg(0)).floatValue();
+					float longitude = ((Number)message.getArg(1)).floatValue();
+					pano.setPosition(new LatLng(latitude, longitude));
+				} else if(addr[1].equals("id") && message.getArgCount() == 1) {
+					String id = (String)message.getArg(0);
+					pano.setPano(id);
+				}
+			}
+		} catch(Exception e) {
+			System.out.println("Invalid OSC message contents");
+			return;
+		}
 	}
 
 	public static void main (String [] args) {
