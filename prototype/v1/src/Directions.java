@@ -63,15 +63,8 @@ public class Directions {
 
 	public void reset() {
 		pano.setPosition(start);
-		System.out.println("------Reset ------");
-		System.out.println(pano);
-		System.out.println(pano.getPosition());
-		System.out.println(steps);
 		float bearing = (float)pano.getPosition().getInitialBearing(steps[(current_step+1)%steps.length]);
-		System.out.println("Got bearing");
 		pano.setPov(new PanoPov(0, bearing, 0));
-		System.out.println("Set POV");
-		System.out.println("------------------");
 	}
 
 	public void draw() {
@@ -104,8 +97,10 @@ public class Directions {
 				pano.jump();
 			}
 
-			float bearing = (float)pano.getPosition().getInitialBearing(steps[(current_step+1)%steps.length]);
-			pano.setPov(new PanoPov(0, bearing, 0));
+			if(current_step+1 != steps.length) {
+				float bearing = (float)pano.getPosition().getInitialBearing(steps[(current_step+1)%steps.length]);
+				pano.setPov(new PanoPov(0, bearing, 0));
+			}
 
 			tileCache[cachedex] = pano.tileCache;
 			threeFoldCache[cachedex] = pano.threeFoldCache;
@@ -131,6 +126,8 @@ public class Directions {
 			pano.data = datacache[runer];
 			pano.pov = povcache[runer];
 		} else if(key == 'g') {
+			reset();
+			
 			cachedex = 0;
 
 			(new Thread(new Runnable() {
@@ -163,13 +160,7 @@ public class Directions {
 			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
 
 			String urlString = "http://maps.googleapis.com/maps/api/directions/xml?origin="+start.toUrlValue()+"&destination="+stop.toUrlValue()+"&sensor=false&units=metric&mode=driving";
-
-			System.out.println("----XML----");
-			System.out.println("Pano: "+pano.apikey);
-
 			// if(pano.apikey != null && !pano.apikey.equals("")) urlString += "&key="+pano.apikey;
-
-			System.out.println("URL: "+urlString);
 
 			URL url = new URL(urlString);
 
@@ -203,6 +194,7 @@ public class Directions {
 			return steps;
 		} catch(Exception e) {
 			//Probably no such street view, so ignore
+			System.err.println(e);
 			System.err.println("Panoia: Error no such streetview or malformed streetview...");
 			return null;
 		}

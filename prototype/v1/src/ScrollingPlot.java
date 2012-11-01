@@ -5,7 +5,7 @@ import processing.core.*;
 public class ScrollingPlot {
 	
 	final int barCount = 10;
-	final float graphSize = 50;
+	final float graphSize;
 	
 	PApplet parent;
 	PVector position;
@@ -20,7 +20,7 @@ public class ScrollingPlot {
 	PFont font;
 	int fontSize = 16;
 	
-	public ScrollingPlot(PApplet parent, PVector position, String title, float min, float max, int low, int high) {
+	public ScrollingPlot(PApplet parent, PVector position, String title, float min, float max, int low, int high, int graphSize) {
 		this.parent = parent;
 		this.position = position;
 		this.title = title;
@@ -30,6 +30,7 @@ public class ScrollingPlot {
 		this.low = low;
 		this.high = high;
 		this.mid = parent.color(255);
+		this.graphSize = graphSize;
 		
 		values = new float[barCount];
 
@@ -71,7 +72,7 @@ public class ScrollingPlot {
 				int height = (int)(amount * graphSize / 2);
 				int c = parent.lerpColor(mid, high, amount);
 				
-				setGradient((int)position.x + i * barCount, top, graphSize / barCount, height, mid, c);
+				setGradient((int)position.x + (int)(i * graphSize / barCount), top, graphSize / barCount, height, mid, c);
 			} else {
 			
 				if (values[i] < min) values[i] = min;
@@ -81,7 +82,7 @@ public class ScrollingPlot {
 				int height = (int)(amount * graphSize / 2);
 				int c = parent.lerpColor(mid, low, amount);
 				
-				setGradient((int)position.x + i * barCount, top, graphSize / barCount, height, c, mid);
+				setGradient((int)position.x + (int)(i * graphSize / barCount), top, graphSize / barCount, height, c, mid);
 			}
 		}
 		

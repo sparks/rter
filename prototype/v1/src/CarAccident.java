@@ -39,6 +39,8 @@ public class CarAccident {
 			
 			String line = reader.readLine(); // Skip the first one with title info
 			int col = 0;
+
+			int cc = 0;
 			
 			while ((line = reader.readLine()) != null) {
 				
@@ -52,6 +54,13 @@ public class CarAccident {
 				try {
 					float lat = Float.parseFloat(data[15]);
 					float lng = Float.parseFloat(data[16]);
+
+					if(cc < 2) {
+						System.out.println(lat);
+						System.out.println(lng);
+					}
+
+					cc++;
 
 					LatLng latLng = new LatLng(lat, lng);
 

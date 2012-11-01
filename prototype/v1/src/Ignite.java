@@ -25,6 +25,7 @@ public class Ignite extends PApplet implements OSCListener {
 
 	ScrollingPlot temperaturePlot, humidityPlot;
 
+	boolean osc_enable;
 	OSCServer osc_in;
 
 	Directions dir;
@@ -54,14 +55,14 @@ public class Ignite extends PApplet implements OSCListener {
 		carAccidents = CarAccident.ParseCsv(this);
 		bikeAccidents = BikeAccident.ParseCsv(this);
 
-		temperaturePlot = new ScrollingPlot(this, new PVector(100, 100), "Temp.", -100, 100, color(0, 0, 255), color(255, 0, 0));
-		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
+		temperaturePlot = new ScrollingPlot(this, new PVector(100*width/(1024*3), 100*height/768), "Temp.", -100, 100, color(0, 0, 255), color(255, 0, 0), 50*width/(1024*3));
+		humidityPlot = new ScrollingPlot(this, new PVector(300*width/(1024*3), 100*height/768), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255), 50*width/(1024*3));
 
 		roadrand = round(random(0, 255));
 
 		/* ---- Direction/Interp ---- */
 
-		dir = new Directions(this, pano, new LatLng(45.506903f, -73.570139f), new LatLng(45.506257f, -73.575718f), 60);
+		dir = new Directions(this, pano, new LatLng(45.506903f, -73.570139f), new LatLng(45.506227f, -73.576083f), 60);
 		dir.reset();
 
 		/* ---- OSC ---- */
@@ -101,15 +102,15 @@ public class Ignite extends PApplet implements OSCListener {
 			project(accident.latLng, accident.toString(), 500);
 		}
 
-		// stroke(0);
-		// fill(0, 100);
-		// rect(20, 60, 420, 120);
+		stroke(0);
+		fill(0, 100);
+		rect(20*width/(1024*3), 60*height/768, 420*width/(1024*3), 120*height/768);
 
-		// temperaturePlot.update();
-		// temperaturePlot.draw();
+		temperaturePlot.update();
+		temperaturePlot.draw();
 		
-		// humidityPlot.update();
-		// humidityPlot.draw();
+		humidityPlot.update();
+		humidityPlot.draw();
 
 		drawPanoLinks();
 		drawRoads();
@@ -135,7 +136,16 @@ public class Ignite extends PApplet implements OSCListener {
 		if(key == 'n') {
 			pano.jump();
 			roadrand = round(random(0, 255));
+		} else if(key == 'o') {
+			osc_enable = !osc_enable;
+		} else if(key == '1') {
+			pano.setPosition(new LatLng(45.506903f, -73.570139f));
+			pano.setPov(new PanoPov(0, 0, 0));
+		} else if(key == '2') {
+			pano.setPosition(new LatLng(45.506257f, -73.575718f));
+			pano.setPov(new PanoPov(0, 0, 0));
 		}
+
 		dir.keyPressed(key);
 	}
 
@@ -208,6 +218,7 @@ public class Ignite extends PApplet implements OSCListener {
 	}
 
 	public synchronized void messageReceived(OSCMessage message, SocketAddress sender, long time) {
+		if(!osc_enable) return;
 		String raw_addr = message.getName();
 
 		if(raw_addr.startsWith("/")) raw_addr = raw_addr.substring(1);
@@ -220,6 +231,7 @@ public class Ignite extends PApplet implements OSCListener {
 					float latitude = ((Number)message.getArg(0)).floatValue();
 					float longitude = ((Number)message.getArg(1)).floatValue();
 					pano.setPosition(new LatLng(latitude, longitude));
+					pano.setPov(new PanoPov(0, 0, 0));
 				} else if(addr[1].equals("id") && message.getArgCount() == 1) {
 					String id = (String)message.getArg(0);
 					pano.setPano(id);
