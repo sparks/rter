@@ -138,6 +138,7 @@ public class Ignite extends PApplet implements OSCListener {
 			roadrand = round(random(0, 255));
 		} else if(key == 'o') {
 			osc_enable = !osc_enable;
+			System.out.println("OSC_EN = "+osc_enable);
 		} else if(key == '1') {
 			pano.setPosition(new LatLng(45.506903f, -73.570139f));
 			pano.setPov(new PanoPov(0, 0, 0));
@@ -235,6 +236,8 @@ public class Ignite extends PApplet implements OSCListener {
 				} else if(addr[1].equals("id") && message.getArgCount() == 1) {
 					String id = (String)message.getArg(0);
 					pano.setPano(id);
+				} else if(addr[1].equals("jumpnow") && message.getArgCount() == 0) {
+					dir.animate();
 				}
 			}
 		} catch(Exception e) {

@@ -149,9 +149,13 @@ public class Directions {
 		} else if(key == 's') {
 			step();
 		} else if( key == 'a') {
-			anim_runer = 0;
-			anim = true;
+			animate();
 		}
+	}
+
+	public void animate() {
+		anim_runer = 0;
+		anim = true;
 	}
 
 	public Document getXML(LatLng start, LatLng stop) {
