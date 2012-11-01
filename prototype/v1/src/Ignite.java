@@ -31,8 +31,8 @@ public class Ignite extends PApplet implements OSCListener {
 	Directions dir;
 
 	public void setup() {
-		size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
-		// size(1024*3, 768);
+		//size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
+		size(1024*3, 768);
 
 		background(0);
 		smooth();
@@ -41,7 +41,7 @@ public class Ignite extends PApplet implements OSCListener {
 		font = createFont("Helvetica", 14);
 		textFont(font, 14);
 
-		pano = new Pano(this);
+		pano = new Pano(this, "AIzaSyDklHrdigHKgVYzrDAvSXaaR6Epx1_cygQ");
 		pov = pano.getPov();
 
 		// pano.setPano("3qry8ACTZ8Mw6SQ1UaLNMg");

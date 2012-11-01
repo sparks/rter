@@ -1,8 +1,8 @@
 <project name="Ignite" basedir="." default="main">
 
-	<property name="core.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
-	<property name="core-lib.dir" value="/Applications/Processing.app/Contents/Resources/Java/"/>
-	<property name="contrib-lib.dir" value="/Users/sparky/Projects/processing/libraries/"/>
+	<property name="core.dir" value="/home/sre/sparky/lib"/>
+	<property name="core-lib.dir" value="/home/sre/sparky/Projects/processing/libraries/"/>
+	<property name="contrib-lib.dir" value="/home/sre/sparky/Projects/processing/libraries/"/>
 	
 	<property name="main-class" value="${ant.project.name}"/>
 
