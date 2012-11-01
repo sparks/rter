@@ -80,46 +80,50 @@ public class Ignite extends PApplet implements OSCListener {
 	}
 
 	public void draw() {
-		background(0);
+		try {
+			background(0);
 
-		pushMatrix();
-		translate(width/2, 0);
-		pano.drawThreeFold(width);
-		// pano.drawTiles(fov, width);
-		popMatrix();
+			pushMatrix();
+			translate(width/2, 0);
+			pano.drawThreeFold(width);
+			// pano.drawTiles(fov, width);
+			popMatrix();
 
-		float alpha = 255;
-		for(CarAccident accident : carAccidents) {
-			stroke(0, alpha);
-			fill(0, 100, 0, alpha);
-			project(accident.latLng, accident.toString(), 500);
+			float alpha = 255;
+			for(CarAccident accident : carAccidents) {
+				stroke(0, alpha);
+				fill(0, 100, 0, alpha);
+				project(accident.latLng, accident.toString(), 500);
+			}
+
+			alpha = 255;
+			for(BikeAccident accident : bikeAccidents) {
+				stroke(0, alpha);
+				fill(0, 100, 0, alpha);
+				project(accident.latLng, accident.toString(), 500);
+			}
+
+			stroke(0);
+			fill(0, 100);
+			rect(20*width/(1024*3), 60*height/768, 420*width/(1024*3), 120*height/768);
+
+			temperaturePlot.update();
+			temperaturePlot.draw();
+			
+			humidityPlot.update();
+			humidityPlot.draw();
+
+			drawPanoLinks();
+			drawRoads();
+
+			dir.draw();
+
+			//Mouse Ref Lin
+			// stroke(255, 0, 0);
+			// line(mouseX, 0, mouseX, height);
+		} catch(Exception e) {
+			
 		}
-
-		alpha = 255;
-		for(BikeAccident accident : bikeAccidents) {
-			stroke(0, alpha);
-			fill(0, 100, 0, alpha);
-			project(accident.latLng, accident.toString(), 500);
-		}
-
-		stroke(0);
-		fill(0, 100);
-		rect(20*width/(1024*3), 60*height/768, 420*width/(1024*3), 120*height/768);
-
-		temperaturePlot.update();
-		temperaturePlot.draw();
-		
-		humidityPlot.update();
-		humidityPlot.draw();
-
-		drawPanoLinks();
-		drawRoads();
-
-		dir.draw();
-
-		//Mouse Ref Lin
-		// stroke(255, 0, 0);
-		// line(mouseX, 0, mouseX, height);
 	}
 
 	public void mousePressed() {
