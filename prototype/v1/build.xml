@@ -56,7 +56,7 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java classname="${main-class}" fork="true" maxmemory="1024m">
+		<java classname="${main-class}" fork="true" maxmemory="2048m">
 			<classpath>
 				<path refid="classpath"/>
 				<path location="${build.dir}"/>

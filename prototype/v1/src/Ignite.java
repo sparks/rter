@@ -27,12 +27,15 @@ public class Ignite extends PApplet implements OSCListener {
 
 	OSCServer osc_in;
 
+	Directions dir;
+
 	public void setup() {
 		size(displayWidth, (int)(displayWidth/(6.5f*fov/360)));
 		// size(1024*3, 768);
 
 		background(0);
 		smooth();
+		frameRate(10);
 
 		font = createFont("Helvetica", 14);
 		textFont(font, 14);
@@ -44,7 +47,7 @@ public class Ignite extends PApplet implements OSCListener {
 		// pano.setPosition(new LatLng(45.5110809f, -73.5700496f));
 		// pano.setPosition(new LatLng(45.52059937f, -73.58165741f));
 		// pano.setPano("717wuQJ5lH4xB3Uw5vs4Pw");
-		pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
+		// pano.setPano("FUhF2Lmri2qq6NZErDpn2Q");
 		// pano.setPano("wvuAA91CEZ5hP0afgwp_Wg");
 		// pano.setPosition(new LatLng(45.506257f,-73.575718f));
 
@@ -55,6 +58,11 @@ public class Ignite extends PApplet implements OSCListener {
 		humidityPlot = new ScrollingPlot(this, new PVector(300, 100), "Humid.", 0, 100, color(255, 128, 0), color(0, 0, 255));
 
 		roadrand = round(random(0, 255));
+
+		/* ---- Direction/Interp ---- */
+
+		dir = new Directions(this, pano, new LatLng(45.506903f, -73.570139f), new LatLng(45.506257f, -73.575718f), 60);
+		dir.reset();
 
 		/* ---- OSC ---- */
 
@@ -106,6 +114,8 @@ public class Ignite extends PApplet implements OSCListener {
 		drawPanoLinks();
 		drawRoads();
 
+		dir.draw();
+
 		//Mouse Ref Lin
 		// stroke(255, 0, 0);
 		// line(mouseX, 0, mouseX, height);
@@ -126,6 +136,7 @@ public class Ignite extends PApplet implements OSCListener {
 			pano.jump();
 			roadrand = round(random(0, 255));
 		}
+		dir.keyPressed(key);
 	}
 
 	public void drawPanoLinks() {
