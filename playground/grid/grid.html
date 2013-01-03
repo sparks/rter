@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Grid</title>
+	<script type="text/javascript" src="jquery.min.js"></script>
+
+	<script type="text/javascript" src="jquery.gridster.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="jquery.gridster.min.css">
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$(".gridster > ul").gridster({
+			    widget_margins: [10, 10],
+			    widget_base_dimensions: [140, 140]
+			});
+			$(".gridster > ul").width((140+20)*6);
+		});
+	</script>
+
+	<style type="text/css">
+		body {
+			background-color: rgb(101, 120, 120);
+			color: rgb(238, 238, 238);
+			margin: 0px;
+		}
+
+		.gridster {
+			background-color: rgb(255, 200, 80);
+			text-align: center;
+			margin: 25px auto 25px auto;
+		}
+
+		.gridster ul {
+			list-style: none;
+			margin: 0px auto 0px auto;
+			padding: 0px;
+		}
+
+		.gridster ul li {
+			background-color: rgb(101, 120, 120);
+		}
+	</style>
+</head>
+<body>
+	<div class="gridster">
+		<ul>
+			<li data-row="1" data-col="1" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="2" data-col="1" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="1" data-col="2" data-sizex="2" data-sizey="1"><img src="http://lorempixel.com/300/140" /></li>
+			<li data-row="2" data-col="2" data-sizex="2" data-sizey="2"><img src="http://lorempixel.com/300/300" /></li>
+			<li data-row="1" data-col="4" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="2" data-col="4" data-sizex="2" data-sizey="1"><img src="http://lorempixel.com/300/140" /></li>
+			<li data-row="3" data-col="4" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="1" data-col="5" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="3" data-col="5" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="1" data-col="6" data-sizex="1" data-sizey="1"><img src="http://lorempixel.com/140/140" /></li>
+			<li data-row="2" data-col="6" data-sizex="1" data-sizey="2"><img src="http://lorempixel.com/140/300" /></li>
+		</ul>
+	</div>
+</body>
+</html>
