@@ -20,31 +20,34 @@ func multiUpload() {
 	defer pread.Close()
 	mpwrite := multipart.NewWriter(pwrite)
 
-	go func() {
-		mpfilewrite, err := mpwrite.CreateFormFile("image", "adf.png")
-		if err != nil {
-			panic(err)
-		}
-		fi, err := os.Open("images/adf.png")
-		if err != nil {
-			panic(err)
-		}
-		defer fi.Close()
-		io.Copy(mpfilewrite, fi)
-		mpwrite.Close()
-		pwrite.Close()
-	}()
-
 	content_type := mpwrite.FormDataContentType()
 	fmt.Println(content_type)
 
-	resp, err := http.Post("http://localhost:8080/multiup", content_type, pread)
+	respchan := make(chan *http.Response)
+
+	go func() {
+		resp, err := http.Post("http://localhost:8080/multiup", content_type, pread)
+		if err != nil {
+			panic(err)
+		}
+		respchan <- resp
+	}()
+
+	mpfilewrite, err := mpwrite.CreateFormFile("image", "adf.png")
 	if err != nil {
 		panic(err)
 	}
+	fi, err := os.Open("images/adf.png")
+	if err != nil {
+		panic(err)
+	}
+	defer fi.Close()
+	io.Copy(mpfilewrite, fi)
+	mpwrite.Close()
+	pwrite.Close()
 
+	resp := <-respchan
 	fmt.Println(resp)
-
 	fmt.Println("Fire")
 }
 
