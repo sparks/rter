@@ -6,9 +6,11 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -148,18 +150,17 @@ func imgHandler(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.Split(r.URL.Path, "/")
 
-	buff, err := ioutil.ReadFile(imgPath + path[len(path)-1])
+	fi, err := os.Open(imgPath + path[len(path)-1])
 	if err != nil {
 		http.NotFound(w, r)
 		return
-		// panic(err)
 	}
+	defer fi.Close()
 
-	w.Write(buff)
+	io.Copy(w, fi)
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header)
 	p, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return
@@ -168,13 +169,30 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	ioutil.WriteFile("test.png", p, 0600)
 }
 
+func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Multi Start")
+	_, header, err := r.FormFile("image")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(header.Filename)
+	fmt.Println(header.Header)
+	fmt.Println("============\n")
+}
+
 func main() {
-	http.HandleFunc("/test.png", pngHandler)
+	http.HandleFunc("/images/test.png", pngHandler)
 	http.HandleFunc("/images/", imgHandler)
+
 	http.HandleFunc("/upload", uploadHandler)
+	http.HandleFunc("/multiup", multiUploadHandler)
+
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
+
 	http.HandleFunc("/", makeHandler(mainHandler))
+
 	http.ListenAndServe(":8080", nil)
 }
