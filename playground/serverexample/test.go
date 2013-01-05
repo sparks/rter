@@ -170,15 +170,22 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Multi Start")
-	_, header, err := r.FormFile("image")
+	file, header, err := r.FormFile("image")
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println(header.Filename)
 	fmt.Println(header.Header)
-	fmt.Println("============\n")
+	fmt.Println("==========================")
+
+	fo, err := os.Create(header.Filename)
+	if err != nil {
+		panic(err)
+	}
+	defer fo.Close()
+
+	io.Copy(fo, file)
 }
 
 func main() {
