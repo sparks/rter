@@ -2,12 +2,8 @@ package main
 
 import (
 	"html/template"
-	"image"
-	"image/color"
-	"image/png"
 	"io"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -20,18 +16,21 @@ type Page struct {
 }
 
 const lenPath = len("/view/")
-const imgPath = "images/"
 
-var templates = template.Must(template.ParseFiles("edit.html", "view.html", "main.html"))
+const imagePath = "images/"
+const templatePath = "templates/"
+const dataPath = "data/"
+
 var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
+var templates = template.Must(template.ParseFiles(templatePath+"edit.html", templatePath+"view.html", templatePath+"main.html"))
 
 func (p *Page) save() error {
-	filename := p.Title + ".txt"
+	filename := dataPath + p.Title + ".txt"
 	return ioutil.WriteFile(filename, p.Body, 0600)
 }
 
 func loadPage(title string) (*Page, error) {
-	filename := title + ".txt"
+	filename := dataPath + title + ".txt"
 	body, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -110,38 +109,7 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 	}
 }
 
-type Image struct{}
-
-func (i Image) ColorModel() color.Model {
-	return color.RGBAModel
-}
-
-func (i Image) Bounds() image.Rectangle {
-	return image.Rect(0, 0, 200, 200)
-}
-
-func (i Image) At(x, y int) color.Color {
-	xf := float64(x)
-	yf := float64(y)
-
-	a := []float64{.0000001, -0.00000012, -0.00000011, 0.0000009, 0.0000008, -0.0000007, -0.0000009, -0.0000001}
-	b := []float64{.0000005, -0.00000016, -0.000001, 0.0000005, -0.0000008, 0.0000007, -0.0000009, -0.0000003}
-	c := []float64{-.0000003, -0.00000012, -0.00000014, -0.00000013, 0.0000006, 0.0000007, -0.0000009, 0.000000111}
-
-	return color.RGBA{
-		uint8(a[0]*xf + a[1]*math.Pow(xf, 2) + a[2]*math.Pow(xf, 3) + a[3]*math.Pow(xf, 4) + a[4]*yf + a[5]*math.Pow(yf, 2) + a[6]*math.Pow(yf, 3) + a[7]*math.Pow(yf, 4)),
-		uint8(b[0]*xf + b[1]*math.Pow(xf, 2) + b[2]*math.Pow(xf, 3) + b[3]*math.Pow(xf, 4) + b[4]*yf + b[5]*math.Pow(yf, 2) + b[6]*math.Pow(yf, 3) + b[7]*math.Pow(yf, 4)),
-		uint8(c[0]*xf + c[1]*math.Pow(xf, 2) + c[2]*math.Pow(xf, 3) + c[3]*math.Pow(xf, 4) + c[4]*yf + c[5]*math.Pow(yf, 2) + c[6]*math.Pow(yf, 3) + c[7]*math.Pow(yf, 4)),
-		255,
-	}
-}
-
-func pngHandler(w http.ResponseWriter, r *http.Request) {
-	i := &Image{}
-	png.Encode(w, i)
-}
-
-func imgHandler(w http.ResponseWriter, r *http.Request) {
+func imageHandler(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasSuffix(r.URL.Path, ".png") {
 		http.NotFound(w, r)
 		return
@@ -149,7 +117,7 @@ func imgHandler(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.Split(r.URL.Path, "/")
 
-	fi, err := os.Open(imgPath + path[len(path)-1])
+	fi, err := os.Open(imagePath + path[len(path)-1])
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -165,7 +133,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ioutil.WriteFile("test.png", p, 0600)
+	ioutil.WriteFile(imagePath+"test.png", p, 0600)
 }
 
 func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -174,7 +142,7 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fo, err := os.Create(header.Filename)
+	fo, err := os.Create(imagePath + header.Filename)
 	if err != nil {
 		panic(err)
 	}
@@ -184,8 +152,7 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/images/test.png", pngHandler)
-	http.HandleFunc("/images/", imgHandler)
+	http.HandleFunc("/images/", imageHandler)
 
 	http.HandleFunc("/upload", uploadHandler)
 	http.HandleFunc("/multiup", multiUploadHandler)

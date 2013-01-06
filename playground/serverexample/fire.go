@@ -37,7 +37,7 @@ func multiUpload() {
 	if err != nil {
 		panic(err)
 	}
-	fi, err := os.Open("images/adf.png")
+	fi, err := os.Open("dots-1.png")
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +55,7 @@ func regUpload() {
 	fmt.Println("Ready")
 	fmt.Println("Set")
 
-	fi, err := os.Open("images/adf.png")
+	fi, err := os.Open("dots-1.png")
 	if err != nil {
 		panic(err)
 	}
