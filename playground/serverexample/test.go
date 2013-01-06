@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"image"
 	"image/color"
@@ -174,10 +173,6 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(header.Filename)
-	fmt.Println(header.Header)
-	fmt.Println("==========================")
 
 	fo, err := os.Create(header.Filename)
 	if err != nil {
