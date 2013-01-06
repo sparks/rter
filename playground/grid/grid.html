@@ -7,14 +7,20 @@
 	<script type="text/javascript" src="jquery.gridster.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="jquery.gridster.min.css">
 
+	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
+
 	<script type="text/javascript">
+		var layout;
 		$(document).ready(function() {
 			var was_dragged = false;
+			layout = [{"col":6,"row":2,"size_x":1,"size_y":1},{"col":1,"row":3,"size_x":1,"size_y":1},{"col":1,"row":4,"size_x":1,"size_y":1},{"col":3,"row":3,"size_x":2,"size_y":1},{"col":1,"row":1,"size_x":2,"size_y":2},{"col":3,"row":1,"size_x":1,"size_y":1},{"col":4,"row":2,"size_x":2,"size_y":1},{"col":4,"row":1,"size_x":1,"size_y":1},{"col":5,"row":1,"size_x":1,"size_y":1},{"col":5,"row":3,"size_x":1,"size_y":1},{"col":6,"row":1,"size_x":1,"size_y":1},{"col":5,"row":4,"size_x":1,"size_y":2}];
 
 			$(".gridster > ul").gridster({
 			    widget_margins: [10, 10],
 			    widget_base_dimensions: [140, 140],
 			});
+
+			var gridster = $(".gridster > ul").gridster().data('gridster');
 
 			$(".gridster > ul").width((140+20)*6);
 
@@ -37,6 +43,25 @@
 					was_dragged = true;
 				} else {
 					was_dragged = false;
+				}
+			});
+
+			$("#serialize").click(function(e) {
+				e.preventDefault();
+				$("#output").text(JSON.stringify(gridster.serialize()));
+			});
+
+			$("#reorder").click(function(e) {
+				e.preventDefault();
+				var chunk = $(".gridster > ul > li").first();
+				for(i = 0;i < layout.length;i++) {
+					if(chunk.length == 0) break;
+					console.log("("+chunk.attr("data-col")+", "+chunk.attr("data-col") + ") - (" + layout[i].col + ", " + layout[i].col +")");
+					chunk.attr("data-col", layout[i].col);
+					chunk.attr("data-row", layout[i].row);
+					chunk = chunk.next();
+					// alert("");
+					// console.log(i);
 				}
 			});
 		});
@@ -72,10 +97,33 @@
 			background-color: rgb(101, 101, 101);
 		}
 
+		#serialize, #reorder {
+			font-family: 'Unica One', cursive;
+			background-color: rgb(200, 200, 200);
+			padding: 10px;
+			max-width: 120px;
+			margin: auto;
+		}
+
+		#serialize a:link, #reorder a:link {
+			text-decoration: none;
+			font-weight: bold;
+			color: rgb(50, 50, 50);
+		}
+
+		#serialize a:hover, #reorder a:hover {
+			text-decoration: underline;
+		}
+
+		#serialize a:active, #serialize a:visited, #reorder a:active, #reorder a:visited {
+			color: rgb(50, 50, 50);
+		}
 	</style>
 </head>
 <body>
 	<p id="output"></p>
+	<div id="serialize"><a href="#">Serialize</a></div>
+	<div id="reorder"><a href="#">Reorder</a></div>
 	<div class="gridster">
 		<ul>
 			<li data-row="1" data-col="1" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
