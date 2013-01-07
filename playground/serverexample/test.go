@@ -26,6 +26,8 @@ const dataPath = "data/"
 var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 var templates = template.Must(template.ParseFiles(templatePath+"edit.html", templatePath+"view.html", templatePath+"main.html"))
 
+var db mysql.Conn
+
 func (p *Page) save() error {
 	filename := dataPath + p.Title + ".txt"
 	return ioutil.WriteFile(filename, p.Body, 0600)
@@ -140,33 +142,35 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("image")
-	if err != nil {
-		panic(err)
-	}
+	checkError(err)
 
-	fo, err := os.Create(imagePath + header.Filename)
-	if err != nil {
-		panic(err)
-	}
+	ins, err := db.Prepare("INSERT INTO content (phone_id, filepath) VALUES(?, ?)")
+	checkError(err)
+	
+	path := imagePath + header.Filename;
+	fo, err := os.Create(path)
+	checkError(err)
 	defer fo.Close()
-
+	
 	io.Copy(fo, file)
+	
+	_, err = ins.Run([]byte("look_a_phone"), []byte(path))
+	checkError(err)
+	
+	queryDB()
 }
 
-func main() {
-	
-	// Testing database connection, queries and output
-	db := mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
-	
-	err := db.Connect()
+func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
-	
+}
+
+func queryDB() {
 	rows, _, err := db.Query("select * from content")
-	if err != nil {
-		panic(err)
-	}
+	checkError(err)
+	
+	os.Stdout.Write([]byte("Current database contents\n"))
 	
 	for _, row := range rows {
 		for _, col := range row {
@@ -176,10 +180,22 @@ func main() {
 			} else {
 				// Type assertion required because []interface{} "type" is entirely unknown
 				val := col.([]byte)
-				os.Stdout.Write(append(val, []byte("  |  ")...))
+				os.Stdout.Write(append(val, []byte("\t|\t")...))
 			}
 		}
+		os.Stdout.Write([]byte("\n"))
 	}
+}
+
+func main() {
+	
+	// Testing database connection, queries and output
+	db = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
+	
+	err := db.Connect()
+	checkError(err)
+	
+	queryDB()
 	
 	// Resume normal operation
 	http.HandleFunc("/images/", imageHandler)

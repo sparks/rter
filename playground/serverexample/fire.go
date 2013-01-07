@@ -33,11 +33,11 @@ func multiUpload() {
 		respchan <- resp
 	}()
 
-	mpfilewrite, err := mpwrite.CreateFormFile("image", "adf.png")
+	mpfilewrite, err := mpwrite.CreateFormFile("image", "tomato.png")
 	if err != nil {
 		panic(err)
 	}
-	fi, err := os.Open("dots-1.png")
+	fi, err := os.Open("cat.png")
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +55,7 @@ func regUpload() {
 	fmt.Println("Ready")
 	fmt.Println("Set")
 
-	fi, err := os.Open("dots-1.png")
+	fi, err := os.Open("cat.png")
 	if err != nil {
 		panic(err)
 	}
