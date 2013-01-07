@@ -8,6 +8,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"github.com/ziutek/mymysql/mysql"
+	_ "github.com/ziutek/mymysql/native"
 )
 
 type Page struct {
@@ -152,6 +154,34 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	
+	// Testing database connection, queries and output
+	db := mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
+	
+	err := db.Connect()
+	if err != nil {
+		panic(err)
+	}
+	
+	rows, _, err := db.Query("select * from content")
+	if err != nil {
+		panic(err)
+	}
+	
+	for _, row := range rows {
+		for _, col := range row {
+			if col == nil {
+				null := []byte("NULL")
+				os.Stdout.Write(null)
+			} else {
+				// Type assertion required because []interface{} "type" is entirely unknown
+				val := col.([]byte)
+				os.Stdout.Write(append(val, []byte("  |  ")...))
+			}
+		}
+	}
+	
+	// Resume normal operation
 	http.HandleFunc("/images/", imageHandler)
 
 	http.HandleFunc("/upload", uploadHandler)
