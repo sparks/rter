@@ -8,10 +8,6 @@ import (
 	"os"
 )
 
-func main() {
-	multipartUpload()
-}
-
 func multipartUpload() {
 	fmt.Println("Ready")
 	fmt.Println("Set")
@@ -67,4 +63,8 @@ func checkError(error error) {
 	if error != nil {
 		panic(error)
 	}
+}
+
+func main() {
+	multipartUpload()
 }
