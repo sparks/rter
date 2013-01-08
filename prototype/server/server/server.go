@@ -6,8 +6,8 @@ const imagePath = "images/"
 const templatePath = "templates/"
 const dataPath = "data/"
 
-func checkError(err error) {
-	if err != nil {
-		panic(err)
+func checkError(error error) {
+	if error != nil {
+		panic(error)
 	}
 }

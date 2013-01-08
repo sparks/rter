@@ -8,8 +8,8 @@ import (
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	p, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	p, error := ioutil.ReadAll(r.Body)
+	if error != nil {
 		return
 	}
 
@@ -17,23 +17,23 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	file, header, err := r.FormFile("image")
-	checkError(err)
+	imageFile, header, error := r.FormFile("image")
+	checkError(error)
 
-	ins, err := db.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
-	checkError(err)
+	insert, error := database.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
+	checkError(error)
 
 	path := imagePath + header.Filename
-	fo, err := os.Create(path)
-	checkError(err)
-	defer fo.Close()
+	outputFile, error := os.Create(path)
+	checkError(error)
+	defer outputFile.Close()
 
-	io.Copy(fo, file)
+	io.Copy(outputFile, imageFile)
 
 	fakeLat := 45.129848
 	fakeLong := 40.357694
-	_, err = ins.Run([]byte("look_a_phone"), []byte(path), fakeLat, fakeLong)
-	checkError(err)
+	_, error = insert.Run([]byte("look_a_phone"), []byte(path), fakeLat, fakeLong)
+	checkError(error)
 
-	queryDB()
+	queryDatabase()
 }
