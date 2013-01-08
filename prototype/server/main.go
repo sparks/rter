@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	// Resume normal operation
 	server.SetupMySQL()
 
 	http.HandleFunc("/images/", server.ImageHandler)

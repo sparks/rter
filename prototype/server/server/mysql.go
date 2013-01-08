@@ -9,7 +9,6 @@ import (
 var db mysql.Conn
 
 func SetupMySQL() {
-	// Testing database connection, queries and output
 	db = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
 
 	err := db.Connect()
