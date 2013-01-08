@@ -9,64 +9,62 @@ import (
 )
 
 func main() {
-	multiUpload()
+	multipartUpload()
 }
 
-func multiUpload() {
+func multipartUpload() {
 	fmt.Println("Ready")
 	fmt.Println("Set")
 
-	pread, pwrite := io.Pipe()
-	defer pread.Close()
-	mpwrite := multipart.NewWriter(pwrite)
+	pipeReader, pipeWriter := io.Pipe()
+	defer pipeReader.Close()
+	multipartWriter := multipart.NewWriter(pipeWriter)
 
-	content_type := mpwrite.FormDataContentType()
-	fmt.Println(content_type)
+	contentType := multipartWriter.FormDataContentType()
+	fmt.Println(contentType)
 
-	respchan := make(chan *http.Response)
+	responseChannel := make(chan *http.Response)
 
 	go func() {
-		resp, err := http.Post("http://localhost:8080/multiup", content_type, pread)
-		if err != nil {
-			panic(err)
-		}
-		respchan <- resp
+		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
+		checkError(error)
+		responseChannel <- response
 	}()
 
-	mpfilewrite, err := mpwrite.CreateFormFile("image", "tomato.png")
-	if err != nil {
-		panic(err)
-	}
-	fi, err := os.Open("cat.png")
-	if err != nil {
-		panic(err)
-	}
-	defer fi.Close()
-	io.Copy(mpfilewrite, fi)
-	mpwrite.Close()
-	pwrite.Close()
+	multipartFileWriter, error := multipartWriter.CreateFormFile("image", "tomato.png")
+	checkError(error)
+	
+	imageFile, error := os.Open("cat.png")
+	checkError(error)
+	defer imageFile.Close()
+	
+	io.Copy(multipartFileWriter, imageFile)
+	multipartWriter.Close()
+	pipeWriter.Close()
 
-	resp := <-respchan
-	fmt.Println(resp)
+	response := <-responseChannel
+	fmt.Println(response)
 	fmt.Println("Fire")
 }
 
-func regUpload() {
+func regularUpload() {
 	fmt.Println("Ready")
 	fmt.Println("Set")
 
-	fi, err := os.Open("cat.png")
-	if err != nil {
-		panic(err)
-	}
-	defer fi.Close()
+	imageFile, error := os.Open("cat.png")
+	checkError(error)
+	defer imageFile.Close()
 
-	resp, err := http.Post("http://localhost:8080/upload", "image/png", fi)
-	if err != nil {
-		panic(err)
-	}
+	response, error := http.Post("http://localhost:8080/upload", "image/png", imageFile)
+	checkError(error)
 
-	fmt.Println(resp)
+	fmt.Println(response)
 
 	fmt.Println("Fire")
+}
+
+func checkError(error error) {
+	if error != nil {
+		panic(error)
+	}
 }
