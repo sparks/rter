@@ -144,7 +144,7 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("image")
 	checkError(err)
 
-	ins, err := db.Prepare("INSERT INTO content (phone_id, filepath) VALUES(?, ?)")
+	ins, err := db.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
 	checkError(err)
 	
 	path := imagePath + header.Filename;
@@ -154,7 +154,9 @@ func multiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	
 	io.Copy(fo, file)
 	
-	_, err = ins.Run([]byte("look_a_phone"), []byte(path))
+	fakeLat := 45.129848
+	fakeLong := 40.357694
+	_, err = ins.Run([]byte("look_a_phone"), []byte(path), fakeLat, fakeLong)
 	checkError(err)
 	
 	queryDB()
