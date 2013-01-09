@@ -13,6 +13,8 @@ func main() {
 	http.HandleFunc("/upload", server.UploadHandler)
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
 
+	http.HandleFunc("/ajax/", server.ClientAjax)
+
 	http.HandleFunc("/view/", server.MakeHandler(server.ViewHandler))
 	http.HandleFunc("/edit/", server.MakeHandler(server.EditHandler))
 	http.HandleFunc("/save/", server.MakeHandler(server.SaveHandler))

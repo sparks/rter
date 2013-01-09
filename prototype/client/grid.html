@@ -11,6 +11,10 @@
 
 	<script type="text/javascript">
 		var layout, gridster;
+		$.ajaxSetup ({  
+		    cache: false  
+		});  
+
 		$(document).ready(function() {
 			var was_dragged = false;
 			layout = [{"col":4,"row":2,"size_x":1,"size_y":1},{"col":1,"row":1,"size_x":1,"size_y":1},{"col":1,"row":2,"size_x":1,"size_y":1},{"col":4,"row":1,"size_x":2,"size_y":1},{"col":1,"row":3,"size_x":2,"size_y":2},{"col":3,"row":1,"size_x":1,"size_y":1},{"col":4,"row":3,"size_x":2,"size_y":1},{"col":4,"row":4,"size_x":1,"size_y":1},{"col":5,"row":2,"size_x":1,"size_y":1},{"col":5,"row":4,"size_x":1,"size_y":1},{"col":6,"row":1,"size_x":1,"size_y":1},{"col":2,"row":1,"size_x":1,"size_y":2}];
@@ -78,6 +82,30 @@
 
 				gridster.set_dom_grid_height();
 			});
+
+			$("#json").click(function(e) {
+				e.preventDefault();
+				// $.post(
+				// 	"http://localhost:8080/ajax/test", 
+				// 	JSON.stringify({socks:"hi", apples:"tt"}),
+				// 	function(a) {
+				// 		console.log(a);
+				// 	},
+				// 	"json"
+				// );
+
+				$.ajax({
+					url: "http://localhost:8080/ajax/test",
+					type: 'POST',
+					data: JSON.stringify({socks:"hi", apples:"tt"}),
+					processData: false,
+					dataType: "json",
+					contentType: 'application/json',
+					success: function(a) { console.log("ok");console.log(a); },
+					error: function(a) { console.log("error");console.log(a); }
+				});
+			});
+
 		});
 	</script>
 
@@ -111,7 +139,7 @@
 			background-color: rgb(101, 101, 101);
 		}
 
-		#serialize, #reorder {
+		.event {
 			font-family: 'Unica One', cursive;
 			background-color: rgb(200, 200, 200);
 			padding: 10px;
@@ -119,25 +147,28 @@
 			margin: auto;
 		}
 
-		#serialize a:link, #reorder a:link {
+		.event a:link {
 			text-decoration: none;
 			font-weight: bold;
 			color: rgb(50, 50, 50);
 		}
 
-		#serialize a:hover, #reorder a:hover {
+		.event a:hover {
 			text-decoration: underline;
 		}
 
-		#serialize a:active, #serialize a:visited, #reorder a:active, #reorder a:visited {
+		.event a:active, .event a:visited {
 			color: rgb(50, 50, 50);
 		}
 	</style>
 </head>
 <body>
 	<p id="output"></p>
-	<div id="serialize"><a href="#">Serialize</a></div>
-	<div id="reorder"><a href="#">Reorder</a></div>
+	
+	<div class="event" id="serialize"><a href="#">Serialize</a></div>
+	<div class="event" id="reorder"><a href="#">Reorder</a></div>
+	<div class="event" id="json"><a href="#">JSON</a></div>
+
 	<div class="gridster">
 		<ul>
 			<li data-row="1" data-col="1" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
