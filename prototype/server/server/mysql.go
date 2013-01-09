@@ -6,20 +6,20 @@ import (
 	"os"
 )
 
-var db mysql.Conn
+var database mysql.Conn
 
 func SetupMySQL() {
-	db = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
+	database = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
 
-	err := db.Connect()
-	checkError(err)
+	error := database.Connect()
+	checkError(error)
 
-	queryDB()
+	queryDatabase()
 }
 
-func queryDB() {
-	rows, _, err := db.Query("select * from content")
-	checkError(err)
+func queryDatabase() {
+	rows, _, error := database.Query("select * from content")
+	checkError(error)
 
 	os.Stdout.Write([]byte("Current database contents\n"))
 
