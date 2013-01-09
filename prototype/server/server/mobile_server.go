@@ -17,8 +17,11 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
+	
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
+	
+	name := r.FormValue("name")
 
 	insert, error := database.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
 	checkError(error)
@@ -32,7 +35,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	fakeLat := 45.129848
 	fakeLong := 40.357694
-	_, error = insert.Run([]byte("look_a_phone"), []byte(path), fakeLat, fakeLong)
+	_, error = insert.Run([]byte(name), []byte(path), fakeLat, fakeLong)
 	checkError(error)
 
 	queryDatabase()

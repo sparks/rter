@@ -27,14 +27,19 @@ func multipartUpload() {
 		responseChannel <- response
 	}()
 
-	multipartFileWriter, error := multipartWriter.CreateFormFile("image", "tomato.png")
+	multipartImageWriter, error := multipartWriter.CreateFormFile("image", "tomato.png")
+	checkError(error)
+	
+	multipartNameWriter, error := multipartWriter.CreateFormField("name")
 	checkError(error)
 	
 	imageFile, error := os.Open("cat.png")
 	checkError(error)
 	defer imageFile.Close()
 	
-	io.Copy(multipartFileWriter, imageFile)
+	io.Copy(multipartImageWriter, imageFile)
+	io.WriteString(multipartNameWriter, "phone_wut")
+	
 	multipartWriter.Close()
 	pipeWriter.Close()
 
