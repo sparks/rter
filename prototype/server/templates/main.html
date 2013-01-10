@@ -2,10 +2,10 @@
 <html>
 <head>
 	<title>Grid</title>
-	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="resources/jquery.js"></script>
 
-	<script type="text/javascript" src="jquery.gridster.js"></script>
-	<link rel="stylesheet" type="text/css" href="jquery.gridster.css">
+	<script type="text/javascript" src="resources/jquery.gridster.js"></script>
+	<link rel="stylesheet" type="text/css" href="resources/jquery.gridster.css">
 
 	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
 
@@ -86,14 +86,14 @@
 
 			$("#json").click(function(e) {
 				e.preventDefault();
-				$.post(
-					"http://localhost:8080/ajax/test", 
-					JSON.stringify({socks:"hi", apples:"tt"}),
-					function(a) {
-						console.log(a);
-					},
-					"json"
-				);
+				// $.post(
+				// 	"http://localhost:8080/ajax/test", 
+				// 	JSON.stringify({socks:"hi", apples:"tt"}),
+				// 	function(a) {
+				// 		console.log(a);
+				// 	},
+				// 	"json"
+				// );
 
 				$.ajax({
 					url: "http://localhost:8080/ajax/test",

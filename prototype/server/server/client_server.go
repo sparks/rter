@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"regexp"
 )
 
 type Message struct {
@@ -19,7 +18,6 @@ type Page struct {
 	Body  []byte
 }
 
-var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +27,14 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
+	if len(r.URL.Path) > 1 {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
 	p := &Page{"", []byte{}}
+
+	templates = template.Must(template.ParseFiles(templatePath + "main.html")) //TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
 
 	err := templates.ExecuteTemplate(w, "main.html", p)
 	if err != nil {
@@ -38,9 +43,9 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClientAjax(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-	w.Header().Set("Content-Type", "application.json")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Content-Type", "application/json")
 
 	fmt.Println("URL: ", r.URL)
 
