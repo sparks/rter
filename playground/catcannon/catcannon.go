@@ -2,66 +2,82 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 )
 
-func multipartUpload() {
-	fmt.Println("Ready")
-	fmt.Println("Set")
+func fetchStockImage(x, y int) image.Image {
+	resp, err := http.Get(fmt.Sprintf("http://lorempixel.com/%v/%v/", x, y))
+	checkError(err)
+
+	image, err := jpeg.Decode(resp.Body)
+	checkError(err)
+
+	return image
+}
+
+func loadFile(filename string) image.Image {
+	imageFile, error := os.Open(filename)
+	checkError(error)
+	defer imageFile.Close()
+
+	image, err := png.Decode(imageFile)
+	checkError(err)
+
+	return image
+}
+
+func multipartUpload(image image.Image) {
+	fmt.Println("Performing Multipart Image Upload:")
+	fmt.Println("==================================")
 
 	pipeReader, pipeWriter := io.Pipe()
-	defer pipeReader.Close()
-	multipartWriter := multipart.NewWriter(pipeWriter)
 
+	multipartWriter := multipart.NewWriter(pipeWriter)
 	contentType := multipartWriter.FormDataContentType()
 	fmt.Println(contentType)
-
-	responseChannel := make(chan *http.Response)
 
 	go func() {
 		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
-		responseChannel <- response
+
+		fmt.Println("Response:", response)
 	}()
 
-	multipartImageWriter, error := multipartWriter.CreateFormFile("image", "tomato.png")
+	multipartImageWriter, error := multipartWriter.CreateFormFile("image", "image.png")
 	checkError(error)
-	
+
+	error = png.Encode(multipartImageWriter, image)
+
+	checkError(error)
+
 	multipartNameWriter, error := multipartWriter.CreateFormField("name")
 	checkError(error)
-	
-	imageFile, error := os.Open("cat.png")
-	checkError(error)
-	defer imageFile.Close()
-	
-	io.Copy(multipartImageWriter, imageFile)
-	io.WriteString(multipartNameWriter, "phone_wut")
-	
-	multipartWriter.Close()
-	pipeWriter.Close()
 
-	response := <-responseChannel
-	fmt.Println(response)
-	fmt.Println("Fire")
+	io.WriteString(multipartNameWriter, "phone_identifier")
+
+	pipeWriter.Close()
+	multipartWriter.Close()
+	pipeReader.Close()
 }
 
-func regularUpload() {
-	fmt.Println("Ready")
-	fmt.Println("Set")
+func regularPNGUpload(filename string) {
+	fmt.Println("Performing Regular PNG Upload")
+	fmt.Println("=============================")
 
-	imageFile, error := os.Open("cat.png")
+	imageFile, error := os.Open(filename)
 	checkError(error)
 	defer imageFile.Close()
 
 	response, error := http.Post("http://localhost:8080/upload", "image/png", imageFile)
 	checkError(error)
 
-	fmt.Println(response)
-
-	fmt.Println("Fire")
+	fmt.Println("Response:", response)
 }
 
 func checkError(error error) {
@@ -71,5 +87,5 @@ func checkError(error error) {
 }
 
 func main() {
-	multipartUpload()
+	multipartUpload(fetchStockImage(200, 200))
 }
