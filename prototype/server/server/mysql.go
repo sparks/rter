@@ -1,9 +1,9 @@
 package server
 
 import (
+	"fmt"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
-	"os"
 )
 
 var database mysql.Conn
@@ -21,21 +21,18 @@ func queryDatabase() {
 	rows, _, error := database.Query("select * from content")
 	checkError(error)
 
-	os.Stdout.Write([]byte("Current database contents\n"))
+	fmt.Println("Current database contents")
 
 	for _, row := range rows {
 		for _, col := range row {
 			if col == nil {
-				null := []byte("NULL")
-				os.Stdout.Write(null)
+				fmt.Println("NULL")
 			} else {
 				// Type assertion required because []interface{} "type" is entirely unknown
 				val := col.([]byte)
-				os.Stdout.Write(append(val, []byte("\t|\t")...))
+				fmt.Print(string(val) + "\t|\t")
 			}
 		}
-		os.Stdout.Write([]byte("\n"))
+		fmt.Println()
 	}
 }
-
-// 

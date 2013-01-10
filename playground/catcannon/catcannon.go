@@ -11,6 +11,15 @@ import (
 	"os"
 )
 
+var phone_ids = []string{
+	"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
+	"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
+	"852decd1fbc083cf6853e46feebb08622d653602",
+	"e1830fcefc3f47647ffa08350348d7e34b142b0b",
+	"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
+	"acb519f53a55d9dea06efbcc804eda79d305282e",
+}
+
 func fetchStockImage(x, y int) image.Image {
 	resp, err := http.Get(fmt.Sprintf("http://lorempixel.com/%v/%v/", x, y))
 	checkError(err)
@@ -32,7 +41,7 @@ func loadFile(filename string) image.Image {
 	return image
 }
 
-func multipartUpload(image image.Image) {
+func multipartUpload(image image.Image, phone_id string, lat, long float64) {
 	fmt.Println("Performing Multipart Image Upload:")
 	fmt.Println("==================================")
 
@@ -42,24 +51,34 @@ func multipartUpload(image image.Image) {
 	contentType := multipartWriter.FormDataContentType()
 	fmt.Println(contentType)
 
+	responseChan := make(chan *http.Response)
+
 	go func() {
 		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
-
-		fmt.Println("Response:", response)
+		responseChan <- response
 	}()
 
-	multipartImageWriter, error := multipartWriter.CreateFormFile("image", "image.png")
+	imageWriter, error := multipartWriter.CreateFormFile("image", "image.png")
+	checkError(error)
+	error = png.Encode(imageWriter, image)
 	checkError(error)
 
-	error = png.Encode(multipartImageWriter, image)
-
+	idWriter, error := multipartWriter.CreateFormField("phone_id")
 	checkError(error)
+	io.WriteString(idWriter, phone_id)
 
-	multipartNameWriter, error := multipartWriter.CreateFormField("name")
+	latWriter, error := multipartWriter.CreateFormField("lat")
 	checkError(error)
+	io.WriteString(latWriter, fmt.Sprintf("%v", lat))
 
-	io.WriteString(multipartNameWriter, "phone_identifier")
+	longWriter, error := multipartWriter.CreateFormField("long")
+	checkError(error)
+	io.WriteString(longWriter, fmt.Sprintf("%v", long))
+
+	response := <-responseChan
+
+	fmt.Println(response.Header)
 
 	pipeWriter.Close()
 	multipartWriter.Close()
@@ -87,5 +106,6 @@ func checkError(error error) {
 }
 
 func main() {
-	multipartUpload(fetchStockImage(200, 200))
+	multipartUpload(fetchStockImage(200, 200), phone_ids[0], 34.3234211234, -79.2345134)
+	// fmt.Println(phone_ids[0])
 }

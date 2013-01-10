@@ -12,10 +12,13 @@
 	<script type="text/javascript">
 		var layout, gridster;
 <<<<<<< Updated upstream:prototype/client/grid.html
+<<<<<<< Updated upstream:prototype/client/grid.html
 		$.ajaxSetup ({  
 		    cache: false  
 		});  
 
+=======
+>>>>>>> Stashed changes:playground/grid/grid.html
 =======
 >>>>>>> Stashed changes:playground/grid/grid.html
 		$(document).ready(function() {
@@ -65,6 +68,7 @@
 				for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
 					gridster.remove_from_gridmap(chunk.coords().grid);
 
+<<<<<<< Updated upstream:prototype/client/grid.html
 					chunk = chunk.next();
 				}
 
@@ -83,6 +87,26 @@
 					chunk = chunk.next();
 				}
 
+=======
+					chunk = chunk.next();
+				}
+
+				chunk = gridster.$widgets.first();
+				for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
+					chunk.attr({
+						'data-col': layout[i].col,
+						'data-row': layout[i].row
+					});
+
+					chunk.coords().grid.col = layout[i].col;
+					chunk.coords().grid.row = layout[i].row;
+
+					gridster.add_to_gridmap(chunk.coords().grid, chunk);
+
+					chunk = chunk.next();
+				}
+
+>>>>>>> Stashed changes:playground/grid/grid.html
 				gridster.set_dom_grid_height();
 			});
 

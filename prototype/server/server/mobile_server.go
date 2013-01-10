@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -17,25 +18,29 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
-	
-	name := r.FormValue("name")
+
+	phone_id := r.FormValue("phone_id")
+
+	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
+	checkError(err)
+	long, err := strconv.ParseFloat(r.FormValue("long"), 64)
+	checkError(err)
 
 	insert, error := database.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
 	checkError(error)
 
 	path := imagePath + header.Filename
+
 	outputFile, error := os.Create(path)
 	checkError(error)
 	defer outputFile.Close()
 
 	io.Copy(outputFile, imageFile)
 
-	fakeLat := 45.129848
-	fakeLong := 40.357694
-	_, error = insert.Run([]byte(name), []byte(path), fakeLat, fakeLong)
+	_, error = insert.Run([]byte(phone_id), []byte(path), lat, long)
 	checkError(error)
 
 	queryDatabase()
