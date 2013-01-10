@@ -15,11 +15,7 @@ func main() {
 
 	http.HandleFunc("/ajax/", server.ClientAjax)
 
-	http.HandleFunc("/view/", server.MakeHandler(server.ViewHandler))
-	http.HandleFunc("/edit/", server.MakeHandler(server.EditHandler))
-	http.HandleFunc("/save/", server.MakeHandler(server.SaveHandler))
-
-	http.HandleFunc("/", server.MakeHandler(server.MainHandler))
+	http.HandleFunc("/", server.ClientHandler)
 
 	http.ListenAndServe(":8080", nil)
 }
