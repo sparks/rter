@@ -1,11 +1,13 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +21,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
-	imageFile, header, error := r.FormFile("image")
+	imageFile, _, error := r.FormFile("image")
 	checkError(error)
 
 	phone_id := r.FormValue("phone_id")
@@ -32,7 +34,8 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	insert, error := database.Prepare("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(?, ?, ?, ?)")
 	checkError(error)
 
-	path := imagePath + header.Filename
+	t := time.Now()
+	path := imagePath + fmt.Sprintf("%v", t.UnixNano()) + ".png"
 
 	outputFile, error := os.Create(path)
 	checkError(error)
@@ -42,6 +45,4 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, error = insert.Run([]byte(phone_id), []byte(path), lat, long)
 	checkError(error)
-
-	queryDatabase()
 }

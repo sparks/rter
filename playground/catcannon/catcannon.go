@@ -6,9 +6,11 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"time"
 )
 
 var phone_ids = []string{
@@ -76,13 +78,12 @@ func multipartUpload(image image.Image, phone_id string, lat, long float64) {
 	checkError(error)
 	io.WriteString(longWriter, fmt.Sprintf("%v", long))
 
-	response := <-responseChan
-
-	fmt.Println(response.Header)
-
 	pipeWriter.Close()
 	multipartWriter.Close()
 	pipeReader.Close()
+
+	response := <-responseChan
+	fmt.Println(response.Header)
 }
 
 func regularPNGUpload(filename string) {
@@ -106,6 +107,17 @@ func checkError(error error) {
 }
 
 func main() {
-	multipartUpload(fetchStockImage(200, 200), phone_ids[0], 34.3234211234, -79.2345134)
-	// fmt.Println(phone_ids[0])
+	num_clients := 4
+
+	go func() {
+		for {
+			for i := 0; i < num_clients; i++ {
+				multipartUpload(fetchStockImage(200, 200), phone_ids[i], rand.Float64()*40, rand.Float64()*180)
+			}
+			time.Sleep(30 * time.Second)
+		}
+	}()
+
+	var input string
+	fmt.Scanf("%s", &input)
 }

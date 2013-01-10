@@ -13,15 +13,11 @@ func SetupMySQL() {
 
 	error := database.Connect()
 	checkError(error)
-
-	queryDatabase()
 }
 
 func queryDatabase() {
 	rows, _, error := database.Query("select * from content")
 	checkError(error)
-
-	fmt.Println("Current database contents")
 
 	for _, row := range rows {
 		for _, col := range row {
