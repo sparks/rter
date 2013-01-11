@@ -21,7 +21,7 @@
     <!-- Simple strings. -->
     <string name="skeleton_app">rterCamera App</string>
     <string name="back">Back</string>
-    <string name="clear">Clear</string>
+    <string name="clear">Camera</string>
 
     <!-- This is a complex string containing style runs. -->
     <string name="main_label">Hello <u>th<ignore>e</ignore>re</u>, <i>you</i> <b>Activity</b>!</string>
