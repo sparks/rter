@@ -83,7 +83,7 @@ func multipartUpload(image image.Image, phone_id string, lat, long float64) {
 	pipeReader.Close()
 
 	response := <-responseChan
-	fmt.Println(response.Header)
+	fmt.Println(response.Status)
 }
 
 func regularPNGUpload(filename string) {

@@ -1,17 +1,24 @@
-MySQL random sample commands
-============================
+MySQL Tables
 
-All of these were actually used for our rtER MySQL database.
-Note that MySQL is case-insensitive, but keywords are usually capitalized for sanity/clarity.
+CREATE TABLE content (
+    uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    phone_id VARCHAR(64) NOT NULL, 
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    filepath VARCHAR(256) NOT NULL,
+    geolat DECIMAL(9,6),
+    geolong DECIMAL(9,6)
+);
 
-- Creating a table:
+CREATE TABLE whitelist (
+    uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    phone_id VARCHAR(64) NOT NULL UNIQUE
+);
 
-	mysql> CREATE TABLE content (uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, phone_id VARCHAR(64) NOT NULL, timestamp TIMESTAMP NOT NULL, filepath VARCHAR(256) NOT NULL);
-
-- Adding a column to a table:
-
-	mysql> ALTER TABLE content ADD geolat DECIMAL(9,6);
-
-- Altering column extra properties, in this case removing the timestamp's auto-update by simply not listing it:
-
-	mysql> ALTER TABLE content CHANGE `timestamp` `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+INSERT INTO whitelist (phone_id) VALUES
+("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98"),
+("b6200c5cc15cfbddde2874c40952a7aa25a869dd"),
+("852decd1fbc083cf6853e46feebb08622d653602"),
+("e1830fcefc3f47647ffa08350348d7e34b142b0b"),
+("48ad32292ff86b4148e0f754c2b9b55efad32d1e"),
+("acb519f53a55d9dea06efbcc804eda79d305282e")
+;

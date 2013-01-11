@@ -98,7 +98,7 @@
 				$.ajax({
 					url: "http://localhost:8080/ajax/test",
 					type: 'POST',
-					data: JSON.stringify({socks:"hi", apples:"tt"}),
+					data: JSON.stringify({socks:[9,10,11], apples:true}),
 					processData: false,
 					dataType: "json",
 					contentType: 'application/json',

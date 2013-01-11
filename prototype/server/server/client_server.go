@@ -21,16 +21,12 @@ type Page struct {
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
-	// title := r.URL.Path
-	// if !titleValidator.MatchString(title) {
-	// 	http.NotFound(w, r)
-	// 	return
-	// }
-
 	if len(r.URL.Path) > 1 {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+
+	// row, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
 
 	p := &Page{"", []byte{}}
 
@@ -64,7 +60,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 	b, _ := json.Marshal(m)
 
-	fmt.Println(string(b))
+	// fmt.Println(string(b))
 
 	w.Write(b)
 }
