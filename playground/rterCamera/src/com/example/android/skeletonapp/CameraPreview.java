@@ -473,14 +473,14 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
           fos.write(jpeg[0]);
           fos.close();
           
-    	  HttpPost httppost = new HttpPost("http://e-caffeine.net/nehil_sandbox/emer/post.php");
+    	  HttpPost httppost = new HttpPost("http://142.157.58.188:8082/nehil");
 
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
-          multipartEntity.addPart("Title", new StringBody("rTER"));
-          multipartEntity.addPart("Nick", new StringBody("Nick"));
+          multipartEntity.addPart("title", new StringBody("rTER"));
+//          multipartEntity.addPart("Nick", new StringBody("Nick"));
 //          multipartEntity.addPart("Email", new StringBody("Email"));
 //          multipartEntity.addPart("Description", new StringBody(Settings.SHARE.TEXT));
-          multipartEntity.addPart("Image", new FileBody(photo));
+          multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
 
           mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
