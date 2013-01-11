@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -23,7 +24,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	imageFile, _, error := r.FormFile("image")
+	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
 	phoneID := r.FormValue("phone_id")
@@ -33,9 +34,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	row, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
+	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
 
-	if len(row) == 0 {
+	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
 		return
 	}
@@ -48,7 +49,13 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	checkError(err)
 
 	t := time.Now()
-	path := imagePath + fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
+	path := imagePath
+
+	if strings.HasSuffix(header.Filename, ".png") {
+		path += fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
+	} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
+		path += fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano())
+	}
 
 	outputFile, error := os.Create(path)
 	checkError(error)

@@ -14,8 +14,13 @@ type Message struct {
 }
 
 type Page struct {
-	Title string
-	Body  []byte
+	Phones []*Phone
+}
+
+type Phone struct {
+	ID        string
+	Filepath  string
+	Lat, Long float64
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
@@ -26,13 +31,24 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// row, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
+	rows, _, err := database.Query("SELECT phone_id, filepath, geolat, geolong FROM content where (select count(*) from content as c where c.phone_id = content.phone_id and c.timestamp <= content.timestamp) <= 1;")
 
-	p := &Page{"", []byte{}}
+	phones := make([]*Phone, len(rows))
+
+	for i, row := range rows {
+		phones[i] = &Phone{
+			row.Str(0),
+			row.Str(1),
+			row.Float(2),
+			row.Float(3),
+		}
+	}
+
+	p := &Page{phones}
 
 	templates = template.Must(template.ParseFiles(templatePath + "main.html")) //TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
 
-	err := templates.ExecuteTemplate(w, "main.html", p)
+	err = templates.ExecuteTemplate(w, "main.html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
