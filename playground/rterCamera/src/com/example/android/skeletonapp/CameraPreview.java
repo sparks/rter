@@ -20,6 +20,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -28,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,7 +65,7 @@ public class CameraPreview extends Activity implements OnClickListener{
     PictureCallback mPicture = null;
     // The first rear facing camera
     int defaultCameraId;
-    static final int PHOTO_MODE = 1;
+    static boolean isFPS = false;
     
     
     private static final String TAG = "CameraPreview Activity";
@@ -159,16 +161,15 @@ public class CameraPreview extends Activity implements OnClickListener{
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		 Log.e(TAG, "onClick");
-		 mCamera.takePicture(null, null, photoCallback);
-		 Log.d(TAG, "takrpicture called");
-		 mPreview.inPreview = false;
-		 
-		 
-//		 final Timer t = new Timer();
-//		 TimerTask task = new TimerTask(){
-//			 { public void run() { mCamera.takePicture(null, null, mPicture); t.cancel(); }
-//		 };
-//		 t.schedule(task,5000);
+		 isFPS = !isFPS;
+		 Log.e(TAG, "onClick changes isFPS : " + isFPS);
+		 if(isFPS){
+			 
+			 mCamera.takePicture(null, null, photoCallback);
+			 Log.d(TAG, "takrpicture called");
+			 mPreview.inPreview = false;
+		 }
+
 	}
 	
 	Camera.PictureCallback photoCallback=new Camera.PictureCallback() {
@@ -179,8 +180,13 @@ public class CameraPreview extends Activity implements OnClickListener{
 	      mPreview.inPreview=true;
 	      
 	    try {
+	    	    	
 			Thread.sleep(5000);
-			mCamera.takePicture(null, null, photoCallback);
+			if(isFPS){
+				Log.d(TAG, "Picture taken");
+				mCamera.takePicture(null, null, photoCallback);
+			}
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -414,14 +420,23 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
 }
 
 class SavePhotoTask extends AsyncTask<byte[], String, String> {
-    static int count = 1;
+    
 	@Override
     protected String doInBackground(byte[]... jpeg) {
     	Log.e("SavePhotoTask", "Fileoutput");
+    	
+    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
+    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
+    	
+    	
+    	// save in SD Card
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    	String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
+    	
     	File photo=
           new File(Environment.getExternalStorageDirectory()+"/rter/",
-                   "Nehilphoto"+(count++)+".jpg");
-
+                   "Scenephoto"+timeStamp+".jpg");
+    	Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
       if (photo.exists()) {
         photo.delete();
       }
