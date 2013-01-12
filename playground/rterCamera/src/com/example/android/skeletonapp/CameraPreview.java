@@ -16,11 +16,14 @@
 
 package com.example.android.skeletonapp;
 
+import com.example.android.skeletonapp.overlay.*;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -42,10 +45,15 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.provider.Settings.Secure;
+import android.widget.FrameLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -78,6 +86,8 @@ import com.example.android.skeletonapp.R;
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class CameraPreview extends Activity implements OnClickListener{
     private Preview mPreview;
+    private FrameLayout mFrame; //need this to merge camera preview and openGL view
+    private CameraGLSurfaceView mGLView;
     Camera mCamera;
     int numberOfCameras;
     int cameraCurrentlyLocked;
@@ -99,13 +109,25 @@ public class CameraPreview extends Activity implements OnClickListener{
         // Hide the window title.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        //the frame layout will contain the camera preview and the gl view
+        mFrame = new FrameLayout(this);
 
         // Create a RelativeLayout container that will hold a SurfaceView,
         // and set it as the content of our activity.
         mPreview = new Preview(this);
         
-        setContentView(mPreview);
+        // openGLview
+        mGLView = new CameraGLSurfaceView(this);
+         
+        // add the two views to the frame
+        mFrame.addView(mPreview);
+        mFrame.addView(mGLView);
+        
         mPreview.setOnClickListener(this);
+        
+        setContentView(mFrame);
+        
         
         // Find the total number of cameras available
         numberOfCameras = Camera.getNumberOfCameras();
@@ -122,6 +144,13 @@ public class CameraPreview extends Activity implements OnClickListener{
 
 
     }
+    
+//    private void initGLView() {
+//        mGLView = new CameraGLSurfaceView(this);
+//        mGLView.setZOrderMediaOverlay(true);
+//        mGLView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+//        mGLView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+//    }
 //    private File getOutputMediaFile(String mediaTypeImage) {
 //		// TODO Auto-generated method stub
 //    	// To be safe, you should check that the SDCard is mounted
@@ -179,7 +208,6 @@ public class CameraPreview extends Activity implements OnClickListener{
         }
     }
 
-	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		 Log.e(TAG, "onClick");
@@ -270,6 +298,7 @@ public class CameraPreview extends Activity implements OnClickListener{
         super.onSaveInstanceState(outState);
     }
 }
+
 
 // ----------------------------------------------------------------------
 
