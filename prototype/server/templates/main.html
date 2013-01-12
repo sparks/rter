@@ -77,7 +77,7 @@
 		
 		function pushLayout(widget_layout) {
 			$.ajax({
-				url: "http://localhost:8080/ajax/pushlayout",
+				url: "/ajax/pushlayout",
 				type: 'POST',
 				data: JSON.stringify(widget_layout),
 				processData: false, //Prevent the data from being transformed into a query string
@@ -91,7 +91,7 @@
 
 		function getLayout() {
 			$.ajax({
-				url: "http://localhost:8080/ajax/getlayout",
+				url: "/ajax/getlayout",
 				type: 'POST',
 				data: [],
 				processData: false, //Prevent the data from being transformed into a query string

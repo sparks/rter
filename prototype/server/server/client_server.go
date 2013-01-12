@@ -59,8 +59,8 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClientAjax(w http.ResponseWriter, r *http.Request) {
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.URL.Path == "/ajax/pushlayout" {
