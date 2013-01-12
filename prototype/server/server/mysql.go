@@ -16,7 +16,7 @@ func SetupMySQL() {
 }
 
 func queryDatabase() {
-	rows, _, error := database.Query("select * from content")
+	rows, _, error := database.Query("select * from content;")
 	checkError(error)
 
 	for _, row := range rows {

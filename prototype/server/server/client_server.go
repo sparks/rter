@@ -7,25 +7,23 @@ import (
 	"net/http"
 )
 
-type Message struct {
-	Name string
-	Body string
-	Time int64
-}
-
 type Page struct {
-	Phones []*Phone
+	Phones []*PhoneContent
 }
 
-type Phone struct {
+type PhoneContent struct {
 	ContentID string  `json:"content_id"`
 	Filepath  string  `json:"filepath"`
 	Lat       float64 `json:"lat"`
 	Long      float64 `json:"long"`
-	Col       int     `json:"col"`
-	Row       int     `json:"row"`
-	SizeX     int     `json:"size_x"`
-	SizeY     int     `json:"size_y"`
+}
+
+type LayoutTile struct {
+	ContentID string `json:"content_id"`
+	Col       int    `json:"col"`
+	Row       int    `json:"row"`
+	SizeX     int    `json:"size_x"`
+	SizeY     int    `json:"size_y"`
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
@@ -36,20 +34,18 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	phones := make([]*Phone, len(rows))
+	rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+
+	phones := make([]*PhoneContent, len(rows))
 
 	for i, row := range rows {
-		phones[i] = &Phone{
+		phones[i] = &PhoneContent{
 			row.Str(0),
 			row.Str(1),
 			row.Float(2),
 			row.Float(3),
-			row.Int(4),
-			row.Int(5),
-			row.Int(6),
-			row.Int(7),
 		}
 	}
 
@@ -68,24 +64,19 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 	w.Header().Set("Content-Type", "application/json")
 
-	fmt.Println("URL: ", r.URL)
+	if r.URL.Path == "/ajax/pushlayout" {
+		decoder := json.NewDecoder(r.Body)
 
-	req := make([]byte, 100)
-	n, ok := r.Body.Read(req)
+		var layout []*LayoutTile
+		err := decoder.Decode(&layout)
+		checkError(err)
 
-	fmt.Println("Body Result: ", n, ok)
-	fmt.Println("Body", string(req))
+		v, err := json.Marshal(layout)
+		checkError(err)
 
-	socks := r.FormValue("socks")
-	apples := r.FormValue("apples")
+		fmt.Println(string(v))
+	} else if r.URL.Path == "/ajax/getlayout" {
+		// rows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout;")
 
-	fmt.Println("Form Values: ", socks, apples)
-
-	m := Message{"Alice", "Hello", 1294706395881547000}
-
-	b, _ := json.Marshal(m)
-
-	// fmt.Println(string(b))
-
-	w.Write(b)
+	}
 }

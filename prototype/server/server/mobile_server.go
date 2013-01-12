@@ -34,7 +34,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
+	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\";", phoneID)
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
@@ -70,9 +70,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(outputFile, imageFile)
 
 	if valid_pos {
-		_, _, error = database.Query("INSERT INTO content (content_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v)", phoneID, path, lat, long)
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v);", phoneID, path, lat, long)
 	} else {
-		_, _, error = database.Query("INSERT INTO content (content_id, filepath) VALUES(\"%s\", \"%s\")", phoneID, path)
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath) VALUES(\"%s\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
 }

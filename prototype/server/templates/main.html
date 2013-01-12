@@ -10,7 +10,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
 
 	<script type="text/javascript">
-		var phones, layout, gridster;
+		var phones, gridster;
 
 		$.ajaxSetup ({
 			cache: false
@@ -20,10 +20,10 @@
 			var was_dragged = false;
 
 			phones = {{.Phones}}
-			layout = [{"content_id":"852decd1fbc083cf6853e46feebb08622d653602","col":4,"row":1,"size_x":1,"size_y":1},{"content_id":"e1830fcefc3f47647ffa08350348d7e34b142b0b","col":4,"row":2,"size_x":1,"size_y":1},{"content_id":"952decd1fbc083cf6853e56f1ebb08622d653602","col":3,"row":1,"size_x":1,"size_y":1},{"content_id":"y1830fcefc3f47647ffa05351348d7e34b142b0b","col":4,"row":3,"size_x":1,"size_y":1}];
 
 			$(".gridster > ul").width((140+20)*6);
 
+			//Build gridster
 			gridster = $(".gridster > ul").gridster({
 				widget_margins: [10, 10],
 				widget_base_dimensions: [140, 140],
@@ -32,18 +32,27 @@
 
 			gridster.cols = 6 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
 
+			//Add all the widget without worrying about layout
 			for(var i = 0;i < phones.length;i++) {
 				var img = $(document.createElement('img')).attr('src', phones[i].filepath);
-				var a = $(document.createElement('a')).attr('href', '#').append(img);
-				var li = $(document.createElement('li')).attr('content_id', phones[i].content_id).append(a);
-				var coords = gridster.next_position(1, 1);
+				var a = $(document.createElement('a')).append(img);
+				a.attr('href', '#');
+				var li = $(document.createElement('li')).append(a);
+				li.attr('content_id', phones[i].content_id)
 				gridster.add_widget(li, 1, 1);
 			}
 
+			getLayout();
+
+			//Handle click in a useful way
 			$(".gridster > ul > li > a").click(function(e) {
 				e.preventDefault();
 				if(was_dragged) {
 					was_dragged = false;
+
+					if(gridster.$changed != null && (gridster.$changed).length > 1) {
+						pushLayout(gridster.serialize());
+					}
 				} else {
 					if($(this).parent().css("border-width") == "0px") {
 						$(this).parent().css("border", "3px solid red");
@@ -54,6 +63,7 @@
 				}
 			});
 
+			//Track dragging
 			$(".gridster > ul > li > a").mouseup(function(e) {
 				if($(this).parent().hasClass("dragging")) {
 					was_dragged = true;
@@ -61,104 +71,71 @@
 					was_dragged = false;
 				}
 			});
-
-			$("#serialize").click(function(e) {
-				e.preventDefault();
-				layout = gridster.serialize_changed();
-				$("#output").text(JSON.stringify(layout));
-			});
-
-			$("#reorder").click(function(e) {
-				e.preventDefault();
-
-				for(var i = 0;i < layout.length;i++) {
-					$w = $("[content_id='"+layout[i].content_id+"']").first();
-					gridster.remove_from_gridmap($w.coords().grid);
-				}
-
-				for(var i = 0;i < layout.length;i++) {
-					$w = $("[content_id='"+layout[i].content_id+"']").first();
-
-					if(!gridster.is_empty(layout[i].col, layout[i].row)) {
-						gridster.empty_cells(layout[i].col, layout[i].row, 1, 1);
-					}
-
-					//Perform the move
-					$w.attr({
-						'data-col': layout[i].col,
-						'data-row': layout[i].row
-					});
-
-					//Change the correct associated position inside the widget
-					$w.coords().grid.col = layout[i].col;
-					$w.coords().grid.row = layout[i].row;
-
-					//Push it back into the internal mapping
-					gridster.add_to_gridmap($w.coords().grid, $w);
-				}
-
-				for(var i = 0;i < layout.length;i++) {
-					$w = $("[content_id='"+layout[i].content_id+"']").first();
-					gridster.add_to_gridmap($w.coords().grid, $w);
-				}
-
-
-				// var chunk = gridster.$widgets.first();
-
-				// //Clear the internal mapping
-				// for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
-				// 	gridster.remove_from_gridmap(chunk.coords().grid);
-				// 	chunk = chunk.next();
-				// }
-
-				// chunk = gridster.$widgets.first();
-				// for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
-				// 	//Perform the move
-				// 	chunk.attr({
-				// 		'data-col': layout[i].col,
-				// 		'data-row': layout[i].row
-				// 	});
-
-				// 	//Change the correct associated position inside the widget
-				// 	chunk.coords().grid.col = layout[i].col;
-				// 	chunk.coords().grid.row = layout[i].row;
-
-				// 	//Push it back into the internal mapping
-				// 	gridster.add_to_gridmap(chunk.coords().grid, chunk);
-
-				// 	chunk = chunk.next();
-				// }
-
-				//Recompute the CSS height of the container
-				gridster.set_dom_grid_height();
-				//Assuming we don't want to record the change since we caused it
-				gridster.$changed = $([]);
-			});
-
-			$("#json").click(function(e) {
-				e.preventDefault();
-				// $.post(
-				// 	"http://localhost:8080/ajax/test", 
-				// 	JSON.stringify({socks:"hi", apples:"tt"}),
-				// 	function(a) {
-				// 		console.log(a);
-				// 	},
-				// 	"json"
-				// );
-
-				$.ajax({
-					url: "http://localhost:8080/ajax/test",
-					type: 'POST',
-					data: JSON.stringify({socks:[9,10,11], apples:true}),
-					processData: false,
-					dataType: "json",
-					contentType: 'application/json',
-					success: function(a) { console.log("ok");console.log(a); },
-					error: function(a) { console.log("error");console.log(a); }
-				});
-			});
-
 		});
+		
+		function pushLayout(widget_layout) {
+			$.ajax({
+				url: "http://localhost:8080/ajax/pushlayout",
+				type: 'POST',
+				data: JSON.stringify(widget_layout),
+				processData: false, //Prevent the data from being transformed into a query string
+				dataType: "json",
+				contentType: 'application/json',
+				success: function(data, status, err) { },
+				error: function(xhr, status, err) { }
+			});
+		}
+
+		function getLayout() {
+			$.ajax({
+				url: "http://localhost:8080/ajax/getlayout",
+				type: 'POST',
+				data: [],
+				processData: false, //Prevent the data from being transformed into a query string
+				dataType: "json",
+				contentType: 'application/json',
+				success: function(data, status, err) { if(data != null) { runLayout(data); } },
+				error: function(xhr, status, err) { }
+			});
+		}
+
+		function runLayout(widget_layout) {
+			for(var i = 0;i < widget_layout.length;i++) {
+				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+				gridster.remove_from_gridmap($w.coords().grid);
+			}
+
+			for(var i = 0;i < widget_layout.length;i++) {
+				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+
+				if(!gridster.is_empty(widget_layout[i].col, widget_layout[i].row)) {
+					gridster.empty_cells(widget_layout[i].col, widget_layout[i].row, 1, 1);
+				}
+
+				//Perform the move
+				$w.attr({
+					'data-col': widget_layout[i].col,
+					'data-row': widget_layout[i].row
+				});
+
+				//Change the correct associated position inside the widget
+				$w.coords().grid.col = widget_layout[i].col;
+				$w.coords().grid.row = widget_layout[i].row;
+
+				//Push it back into the internal mapping
+				gridster.add_to_gridmap($w.coords().grid, $w);
+			}
+
+			for(var i = 0;i < widget_layout.length;i++) {
+				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+				gridster.add_to_gridmap($w.coords().grid, $w);
+			}
+
+			//Recompute the CSS height of the container
+			gridster.set_dom_grid_height();
+			//Assuming we don't want to record the change since we caused it
+			gridster.$changed = $([]);
+		}
 	</script>
 
 	<style type="text/css">
