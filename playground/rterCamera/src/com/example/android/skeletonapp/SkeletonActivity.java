@@ -19,6 +19,7 @@ package com.example.android.skeletonapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings.Secure;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.provider.Settings.Secure;
 
 /**
  * This class provides a basic demonstration of how to write an Android
@@ -33,7 +35,7 @@ import android.widget.EditText;
  * displays and edits some internal text.
  */
 public class SkeletonActivity extends Activity {
-    
+	 
     static final private int BACK_ID = Menu.FIRST;
     static final private int CLEAR_ID = Menu.FIRST + 1;
 
