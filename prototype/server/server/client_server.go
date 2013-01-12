@@ -73,15 +73,30 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		for _, tile := range layout {
 			if phoneIDValidator.MatchString(tile.ContentID) {
 				tile.Sanitize()
-				_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d) ON DUPLICATE KEY UPDATE col=\"%s\", row=%d, size_x=%d, size_y=%d;", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
+				_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d) ON DUPLICATE KEY UPDATE col=%d, row=%d, size_x=%d, size_y=%d;", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
 				checkError(err)
 			}
 		}
-	} else if r.URL.Path == "/ajax/getlayout" {
-		// rows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout;")
 
-		// v, err := json.Marshal(layout)
-		// checkError(err)
+	} else if r.URL.Path == "/ajax/getlayout" {
+		rows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout ORDER BY col, row;")
+
+		layout := make([]*LayoutTile, len(rows))
+
+		for i, row := range rows {
+			layout[i] = &LayoutTile{
+				row.Str(0),
+				row.Int(1),
+				row.Int(2),
+				row.Int(3),
+				row.Int(4),
+			}
+		}
+
+		layoutJSON, err := json.Marshal(layout)
+		checkError(err)
+
+		w.Write(layoutJSON)
 	}
 }
 

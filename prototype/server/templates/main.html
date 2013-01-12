@@ -10,14 +10,14 @@
 	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
 
 	<script type="text/javascript">
-		var phones, gridster;
+		var phones, gridster, was_dragged;
 
 		$.ajaxSetup ({
 			cache: false
 		});
 
 		$(document).ready(function() {
-			var was_dragged = false;
+			was_dragged = false;
 
 			phones = {{.Phones}}
 
@@ -42,7 +42,9 @@
 				gridster.add_widget(li, 1, 1);
 			}
 
-			setInterval(getLayout, 5000);
+			getLayout()
+
+			setInterval(getLayout, 2000);
 
 			//Handle click in a useful way
 			$(".gridster > ul > li > a").click(function(e) {
@@ -96,7 +98,7 @@
 				timeout: 4000,
 				dataType: "json",
 				contentType: 'application/json',
-				success: function(data, status, err) { if(data != null) { runLayout(data); } },
+				success: function(data, status, err) { if(data != null && !gridster.drag_api.is_dragging) { runLayout(data); } },
 				error: function(xhr, status, err) { }
 			});
 		}
@@ -201,11 +203,11 @@
 <body>
 	<p id="output"></p>
 	
-	<div class="event" id="serialize"><a href="#">Serialize</a></div>
+<!-- 	<div class="event" id="serialize"><a href="#">Serialize</a></div>
 	<div class="event" id="reorder"><a href="#">Reorder</a></div>
 	<div class="event" id="json"><a href="#">JSON</a></div>
 
-	<div class="gridster">
+ -->	<div class="gridster">
 		<ul>
 		</ul>
 	</div>
