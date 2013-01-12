@@ -42,7 +42,7 @@
 				gridster.add_widget(li, 1, 1);
 			}
 
-			getLayout();
+			setInterval(getLayout, 5000);
 
 			//Handle click in a useful way
 			$(".gridster > ul > li > a").click(function(e) {
@@ -79,6 +79,7 @@
 				type: 'POST',
 				data: JSON.stringify(widget_layout),
 				processData: false, //Prevent the data from being transformed into a query string
+				timeout: 4000,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) { },
@@ -92,6 +93,7 @@
 				type: 'POST',
 				data: [],
 				processData: false, //Prevent the data from being transformed into a query string
+				timeout: 4000,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) { if(data != null) { runLayout(data); } },

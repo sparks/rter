@@ -4,12 +4,8 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 )
-
-var filenameValidator = regexp.MustCompile("^[a-zA-Z0-9_]*\\.?[a-zA-Z0-9_]+\\.[a-zA-Z0-9]+$")
-var folderNameValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
 func ImageHandler(w http.ResponseWriter, r *http.Request) {
 	if !(strings.HasSuffix(r.URL.Path, ".png") || strings.HasSuffix(r.URL.Path, ".jpeg") || strings.HasSuffix(r.URL.Path, ".jpg")) {

@@ -6,6 +6,7 @@ Run these commands to setup the MySQL databases for the rter project
     CREATE TABLE content (
          uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
          content_id VARCHAR(64) NOT NULL, 
+         content_type VARCHAR(64) NOT NULL,
          timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
          filepath VARCHAR(256) NOT NULL,
          geolat DECIMAL(9,6),
@@ -19,12 +20,11 @@ Run these commands to setup the MySQL databases for the rter project
     
     CREATE TABLE layout (
          uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
-         content_id VARCHAR(64) NOT NULL,
-         content_type VARCHAR(64) NOT NULL,
+         content_id VARCHAR(64) NOT NULL UNIQUE KEY,
          col INT(32) NOT NULL,
          row INT(32) NOT NULL,
-         size_x INT(32) NOT NULL,
-         size_y INT(32) NOT NULL
+         size_x INT(32) NOT NULL DEFAULT 1,
+         size_y INT(32) NOT NULL DEFAULT 1
     );
 
 

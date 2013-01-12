@@ -6,13 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
-
-var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	p, error := ioutil.ReadAll(r.Body)
@@ -70,9 +67,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(outputFile, imageFile)
 
 	if valid_pos {
-		_, _, error = database.Query("INSERT INTO content (content_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v);", phoneID, path, lat, long)
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolong) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, long)
 	} else {
-		_, _, error = database.Query("INSERT INTO content (content_id, filepath) VALUES(\"%s\", \"%s\");", phoneID, path)
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
 }

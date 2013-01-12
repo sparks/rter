@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -71,12 +70,32 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&layout)
 		checkError(err)
 
-		v, err := json.Marshal(layout)
-		checkError(err)
-
-		fmt.Println(string(v))
+		for _, tile := range layout {
+			if phoneIDValidator.MatchString(tile.ContentID) {
+				tile.Sanitize()
+				_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d) ON DUPLICATE KEY UPDATE col=\"%s\", row=%d, size_x=%d, size_y=%d;", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
+				checkError(err)
+			}
+		}
 	} else if r.URL.Path == "/ajax/getlayout" {
 		// rows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout;")
 
+		// v, err := json.Marshal(layout)
+		// checkError(err)
+	}
+}
+
+func (tile *LayoutTile) Sanitize() {
+	if tile.SizeX < 1 {
+		tile.SizeX = 1
+	}
+	if tile.SizeY < 1 {
+		tile.SizeY = 1
+	}
+	if tile.Col < 1 {
+		tile.Col = 1
+	}
+	if tile.Row < 1 {
+		tile.Row = 1
 	}
 }
