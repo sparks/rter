@@ -8,10 +8,11 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
-var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
+var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	p, error := ioutil.ReadAll(r.Body)
@@ -23,7 +24,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	imageFile, _, error := r.FormFile("image")
+	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
 	phoneID := r.FormValue("phone_id")
@@ -33,22 +34,34 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	row, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
+	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\"", phoneID)
 
-	if len(row) == 0 {
+	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
 		return
 	}
 
 	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
 
+	valid_pos := true
+
 	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
-	checkError(err)
+	if err != nil {
+		valid_pos = false
+	}
 	long, err := strconv.ParseFloat(r.FormValue("long"), 64)
-	checkError(err)
+	if err != nil {
+		valid_pos = false
+	}
 
 	t := time.Now()
-	path := imagePath + fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
+	path := imagePath
+
+	if strings.HasSuffix(header.Filename, ".png") {
+		path += fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
+	} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
+		path += fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano())
+	}
 
 	outputFile, error := os.Create(path)
 	checkError(error)
@@ -56,6 +69,31 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(outputFile, imageFile)
 
-	_, _, error = database.Query("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v)", phoneID, path, lat, long)
+	if valid_pos {
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v)", phoneID, path, lat, long)
+	} else {
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath) VALUES(\"%s\", \"%s\")", phoneID, path)
+	}
+	checkError(error)
+}
+
+func Nehil(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Nehil Request")
+
+	imageFile, header, error := r.FormFile("image")
+	checkError(error)
+
+	fmt.Println("Filename", header.Filename)
+
+	path := imagePath + header.Filename
+
+	outputFile, error := os.Create(path)
+	checkError(error)
+	defer outputFile.Close()
+
+	io.Copy(outputFile, imageFile)
+
+	fmt.Println("Done Writing")
+
 	checkError(error)
 }

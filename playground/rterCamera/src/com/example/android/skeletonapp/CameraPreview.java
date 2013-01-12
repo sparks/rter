@@ -50,6 +50,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+
+
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
 import com.example.android.skeletonapp.R;
@@ -421,13 +439,21 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
 
 class SavePhotoTask extends AsyncTask<byte[], String, String> {
     
+	private DefaultHttpClient mHttpClient;
+	
 	@Override
     protected String doInBackground(byte[]... jpeg) {
-    	Log.e("SavePhotoTask", "Fileoutput");
     	
-    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
-    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
+		Log.e("SavePhotoTask", "Fileoutput");
     	
+		
+		HttpParams params = new BasicHttpParams();
+        params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+        mHttpClient = new DefaultHttpClient(params);
+		
+		
+//    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
+//    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
     	
     	// save in SD Card
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
@@ -442,15 +468,46 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
       }
 
       try {
-        FileOutputStream fos=new FileOutputStream(photo.getPath());
-        
-        fos.write(jpeg[0]);
-        fos.close();
-      }
-      catch (java.io.IOException e) {
+    	  FileOutputStream fos=new FileOutputStream(photo.getPath());
+          
+          fos.write(jpeg[0]);
+          fos.close();
+          
+    	  HttpPost httppost = new HttpPost("http://142.157.58.188:8082/nehil");
+
+          MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
+          multipartEntity.addPart("title", new StringBody("rTER"));
+//          multipartEntity.addPart("Nick", new StringBody("Nick"));
+//          multipartEntity.addPart("Email", new StringBody("Email"));
+//          multipartEntity.addPart("Description", new StringBody(Settings.SHARE.TEXT));
+          multipartEntity.addPart("image", new FileBody(photo));
+          httppost.setEntity(multipartEntity);
+
+          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
+    	  
+    	  
+    	  
+      } catch (java.io.IOException e) { 
         Log.e("PictureDemo", "Exception in photoCallback", e);
+      } catch (Exception e) {
+        Log.e("ServerError", e.getLocalizedMessage(), e);
       }
 
       return(null);
+    }
+	
+	private class PhotoUploadResponseHandler implements ResponseHandler {
+
+        @Override
+        public Object handleResponse(HttpResponse response)
+                throws ClientProtocolException, IOException {
+
+            HttpEntity r_entity = response.getEntity();
+            String responseString = EntityUtils.toString(r_entity);
+            Log.d("UPLOAD", responseString);
+
+            return null;
+        }
+
     }
   }

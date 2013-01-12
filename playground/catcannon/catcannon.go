@@ -20,6 +20,12 @@ var phone_ids = []string{
 	"e1830fcefc3f47647ffa08350348d7e34b142b0b",
 	"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
 	"acb519f53a55d9dea06efbcc804eda79d305282e",
+	"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
+	"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
+	"952decd1fbc083cf6853e56f1ebb08622d653602",
+	"y1830fcefc3f47647ffa05351348d7e34b142b0b",
+	"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
+	"qcb519f53a55d9dea06ef5cc104eda79d305282e",
 }
 
 func fetchStockImage(x, y int) image.Image {
@@ -107,7 +113,7 @@ func checkError(error error) {
 }
 
 func main() {
-	num_clients := 4
+	num_clients := len(phone_ids)
 
 	go func() {
 		for {
