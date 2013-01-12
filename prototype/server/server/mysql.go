@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ziutek/mymysql/mysql"
 	_ "github.com/ziutek/mymysql/native"
+	_ "github.com/ziutek/mymysql/thrsafe" // Thread safe engine
 )
 
 var database mysql.Conn
