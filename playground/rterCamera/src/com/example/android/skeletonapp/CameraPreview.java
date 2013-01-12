@@ -21,10 +21,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,14 +45,22 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
@@ -59,6 +71,8 @@ import com.example.android.skeletonapp.R;
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class CameraPreview extends Activity implements OnClickListener{
     private Preview mPreview;
+    private FrameLayout mFrame; //need this to merge camera preview and openGL view
+    private CameraGLSurfaceView mGLView;
     Camera mCamera;
     int numberOfCameras;
     int cameraCurrentlyLocked;
@@ -77,13 +91,25 @@ public class CameraPreview extends Activity implements OnClickListener{
         // Hide the window title.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        mFrame = new FrameLayout(this);
 
         // Create a RelativeLayout container that will hold a SurfaceView,
         // and set it as the content of our activity.
         mPreview = new Preview(this);
         
-        setContentView(mPreview);
+        // openGLview
+        mGLView = new CameraGLSurfaceView(this);
+         
+        
+        mFrame.addView(mPreview);
+        mFrame.addView(mGLView);
+        
+        
         mPreview.setOnClickListener(this);
+        
+        setContentView(mFrame);
+        
         
         // Find the total number of cameras available
         numberOfCameras = Camera.getNumberOfCameras();
@@ -100,6 +126,13 @@ public class CameraPreview extends Activity implements OnClickListener{
 
 
     }
+    
+//    private void initGLView() {
+//        mGLView = new CameraGLSurfaceView(this);
+//        mGLView.setZOrderMediaOverlay(true);
+//        mGLView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+//        mGLView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+//    }
 //    private File getOutputMediaFile(String mediaTypeImage) {
 //		// TODO Auto-generated method stub
 //    	// To be safe, you should check that the SDCard is mounted
@@ -157,7 +190,6 @@ public class CameraPreview extends Activity implements OnClickListener{
         }
     }
 
-	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		 Log.e(TAG, "onClick");
@@ -246,6 +278,218 @@ public class CameraPreview extends Activity implements OnClickListener{
 	
 	protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+}
+
+class CameraGLRenderer implements GLSurfaceView.Renderer  {
+	Square mSquare;
+	private static final String TAG = "CameraGLRenderer";
+	
+	private final float[] mMVPMatrix = new float[16];
+    private final float[] mProjMatrix = new float[16];
+    private final float[] mVMatrix = new float[16];
+    private final float[] mRotationMatrix = new float[16];
+
+	public void onDrawFrame(GL10 gl) {
+		// Redraw background color
+        //GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+		
+		// Set the camera position (View matrix)
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+        // Calculate the projection and view transformation
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
+
+        // Draw square
+        mSquare.draw(mMVPMatrix);
+		
+	}
+
+	public void onSurfaceChanged(GL10 gl, int width, int height) {
+		GLES20.glViewport(0, 0, width, height);
+		
+		float ratio = (float) width / height;
+
+        // this projection matrix is applied to object coordinates
+        // in the onDrawFrame() method
+        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+		
+	}
+
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+		// Set the background frame color
+        //GLES20.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+		
+		// initialize a square
+	    mSquare = new Square();
+	}
+	
+	public static int loadShader(int type, String shaderCode){
+
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader(type);
+
+        // add the source code to the shader and compile it
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
+
+        return shader;
+    }
+	
+	/**
+     * Utility method for debugging OpenGL calls. Provide the name of the call
+     * just after making it:
+     *
+     * <pre>
+     * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+     * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
+     *
+     * If the operation is not successful, the check throws an error.
+     *
+     * @param glOperation - Name of the OpenGL call to check.
+     */
+    public static void checkGlError(String glOperation) {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            Log.e(TAG, glOperation + ": glError " + error);
+            throw new RuntimeException(glOperation + ": glError " + error);
+        }
+    }
+	
+}
+
+class CameraGLSurfaceView extends GLSurfaceView {
+
+	public CameraGLSurfaceView(Context context) {
+		super(context);
+		
+		//needed to overlay gl view over camera preview
+		this.setZOrderMediaOverlay(true);
+		
+        // Create an OpenGL ES 2.0 context
+        this.setEGLContextClientVersion(2);
+        
+        this.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        this.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        
+        // Set the Renderer for drawing on the GLSurfaceView
+        this.setRenderer(new CameraGLRenderer());
+        
+        
+        
+        // Render the view only when there is a change in the drawing data
+        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+	}
+}
+
+class Square {
+
+    private final String vertexShaderCode =
+        // This matrix member variable provides a hook to manipulate
+        // the coordinates of the objects that use this vertex shader
+        "uniform mat4 uMVPMatrix;" +
+
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        // the matrix must be included as a modifier of gl_Position
+        "  gl_Position = vPosition * uMVPMatrix;" +
+        "}";
+
+    private final String fragmentShaderCode =
+        "precision mediump float;" +
+        "uniform vec4 vColor;" +
+        "void main() {" +
+        "  gl_FragColor = vColor;" +
+        "}";
+
+    private final FloatBuffer vertexBuffer;
+    private final ShortBuffer drawListBuffer;
+    private final int mProgram;
+    private int mPositionHandle;
+    private int mColorHandle;
+    private int mMVPMatrixHandle;
+
+    // number of coordinates per vertex in this array
+    static final int COORDS_PER_VERTEX = 3;
+    static float squareCoords[] = { -1.0f,  1.0f, 0.0f,   // top left
+                                    -1.0f, -1.0f, 0.0f,   // bottom left
+                                     1.0f, -1.0f, 0.0f,   // bottom right
+                                     1.0f,  1.0f, 0.0f }; // top right
+
+    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
+    // Set color with red, green, blue and alpha (opacity) values
+    float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
+
+    public Square() {
+        // initialize vertex byte buffer for shape coordinates
+        ByteBuffer bb = ByteBuffer.allocateDirect(
+        // (# of coordinate values * 4 bytes per float)
+                squareCoords.length * 4);
+        bb.order(ByteOrder.nativeOrder());
+        vertexBuffer = bb.asFloatBuffer();
+        vertexBuffer.put(squareCoords);
+        vertexBuffer.position(0);
+
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+        // (# of coordinate values * 2 bytes per short)
+                drawOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
+        drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put(drawOrder);
+        drawListBuffer.position(0);
+
+        // prepare shaders and OpenGL program
+        int vertexShader = CameraGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
+                                                   vertexShaderCode);
+        int fragmentShader = CameraGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
+                                                     fragmentShaderCode);
+
+        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+    }
+
+    public void draw(float[] mvpMatrix) {
+        // Add program to OpenGL environment
+        GLES20.glUseProgram(mProgram);
+
+        // get handle to vertex shader's vPosition member
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+        // Prepare the triangle coordinate data
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                                     GLES20.GL_FLOAT, false,
+                                     vertexStride, vertexBuffer);
+
+        // get handle to fragment shader's vColor member
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+
+        // Set color for drawing the triangle
+        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        CameraGLRenderer.checkGlError("glGetUniformLocation");
+
+        // Apply the projection and view transformation
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        CameraGLRenderer.checkGlError("glUniformMatrix4fv");
+
+        // Draw the square
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length,
+                              GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 }
 
