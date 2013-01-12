@@ -41,6 +41,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.provider.Settings.Secure;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -84,6 +85,9 @@ public class CameraPreview extends Activity implements OnClickListener{
     // The first rear facing camera
     int defaultCameraId;
     static boolean isFPS = false;
+    
+    private String android_id = Secure.getString(getApplicationContext().getContentResolver(),
+            Secure.ANDROID_ID);
     
     
     private static final String TAG = "CameraPreview Activity";
@@ -276,7 +280,7 @@ public class CameraPreview extends Activity implements OnClickListener{
  */
 class Preview extends ViewGroup implements SurfaceHolder.Callback  {
     private final String TAG = "Preview";
-
+     
     SurfaceView mSurfaceView;
     SurfaceHolder mHolder;
     Size mPreviewSize;
