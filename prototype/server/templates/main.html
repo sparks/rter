@@ -10,24 +10,35 @@
 	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
 
 	<script type="text/javascript">
-		var layout, gridster;
+		var phones, layout, gridster;
+
 		$.ajaxSetup ({
 			cache: false
 		});
 
 		$(document).ready(function() {
-			var phones = {{.Phones}}
 			var was_dragged = false;
-			layout = [{"col":4,"row":2,"size_x":1,"size_y":1},{"col":1,"row":1,"size_x":1,"size_y":1},{"col":1,"row":2,"size_x":1,"size_y":1},{"col":4,"row":1,"size_x":2,"size_y":1},{"col":1,"row":3,"size_x":2,"size_y":2},{"col":3,"row":1,"size_x":1,"size_y":1},{"col":4,"row":3,"size_x":2,"size_y":1},{"col":4,"row":4,"size_x":1,"size_y":1},{"col":5,"row":2,"size_x":1,"size_y":1},{"col":5,"row":4,"size_x":1,"size_y":1},{"col":6,"row":1,"size_x":1,"size_y":1},{"col":2,"row":1,"size_x":1,"size_y":2}];
 
-			$(".gridster > ul").gridster({
-				widget_margins: [10, 10],
-				widget_base_dimensions: [140, 140],
-			});
-
-			gridster = $(".gridster > ul").gridster().data('gridster');
+			phones = {{.Phones}}
+			layout = [{"content_id":"852decd1fbc083cf6853e46feebb08622d653602","col":4,"row":1,"size_x":1,"size_y":1},{"content_id":"e1830fcefc3f47647ffa08350348d7e34b142b0b","col":4,"row":2,"size_x":1,"size_y":1},{"content_id":"952decd1fbc083cf6853e56f1ebb08622d653602","col":3,"row":1,"size_x":1,"size_y":1},{"content_id":"y1830fcefc3f47647ffa05351348d7e34b142b0b","col":4,"row":3,"size_x":1,"size_y":1}];
 
 			$(".gridster > ul").width((140+20)*6);
+
+			gridster = $(".gridster > ul").gridster({
+				widget_margins: [10, 10],
+				widget_base_dimensions: [140, 140],
+				serialize_params: function($w, wgd) { return { content_id: $w.attr('content_id'), col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y } }
+			}).data('gridster');
+
+			gridster.cols = 6 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
+
+			for(var i = 0;i < phones.length;i++) {
+				var img = $(document.createElement('img')).attr('src', phones[i].filepath);
+				var a = $(document.createElement('a')).attr('href', '#').append(img);
+				var li = $(document.createElement('li')).attr('content_id', phones[i].content_id).append(a);
+				var coords = gridster.next_position(1, 1);
+				gridster.add_widget(li, 1, 1);
+			}
 
 			$(".gridster > ul > li > a").click(function(e) {
 				e.preventDefault();
@@ -53,36 +64,75 @@
 
 			$("#serialize").click(function(e) {
 				e.preventDefault();
-				$("#output").text(JSON.stringify(gridster.serialize_changed()));
+				layout = gridster.serialize_changed();
+				$("#output").text(JSON.stringify(layout));
 			});
 
 			$("#reorder").click(function(e) {
 				e.preventDefault();
-				var chunk = gridster.$widgets.first();
 
-				for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
-					gridster.remove_from_gridmap(chunk.coords().grid);
-
-					chunk = chunk.next();
+				for(var i = 0;i < layout.length;i++) {
+					$w = $("[content_id='"+layout[i].content_id+"']").first();
+					gridster.remove_from_gridmap($w.coords().grid);
 				}
 
-				chunk = gridster.$widgets.first();
-				for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
-					chunk.attr({
+				for(var i = 0;i < layout.length;i++) {
+					$w = $("[content_id='"+layout[i].content_id+"']").first();
+
+					if(!gridster.is_empty(layout[i].col, layout[i].row)) {
+						gridster.empty_cells(layout[i].col, layout[i].row, 1, 1);
+					}
+
+					//Perform the move
+					$w.attr({
 						'data-col': layout[i].col,
 						'data-row': layout[i].row
 					});
 
-					chunk.coords().grid.col = layout[i].col;
-					chunk.coords().grid.row = layout[i].row;
+					//Change the correct associated position inside the widget
+					$w.coords().grid.col = layout[i].col;
+					$w.coords().grid.row = layout[i].row;
 
-					gridster.add_to_gridmap(chunk.coords().grid, chunk);
-
-					chunk = chunk.next();
+					//Push it back into the internal mapping
+					gridster.add_to_gridmap($w.coords().grid, $w);
 				}
 
-				gridster.$changed = $([]);
+				for(var i = 0;i < layout.length;i++) {
+					$w = $("[content_id='"+layout[i].content_id+"']").first();
+					gridster.add_to_gridmap($w.coords().grid, $w);
+				}
+
+
+				// var chunk = gridster.$widgets.first();
+
+				// //Clear the internal mapping
+				// for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
+				// 	gridster.remove_from_gridmap(chunk.coords().grid);
+				// 	chunk = chunk.next();
+				// }
+
+				// chunk = gridster.$widgets.first();
+				// for(var i = 0;chunk.length != 0 && i < layout.length;i++) {
+				// 	//Perform the move
+				// 	chunk.attr({
+				// 		'data-col': layout[i].col,
+				// 		'data-row': layout[i].row
+				// 	});
+
+				// 	//Change the correct associated position inside the widget
+				// 	chunk.coords().grid.col = layout[i].col;
+				// 	chunk.coords().grid.row = layout[i].row;
+
+				// 	//Push it back into the internal mapping
+				// 	gridster.add_to_gridmap(chunk.coords().grid, chunk);
+
+				// 	chunk = chunk.next();
+				// }
+
+				//Recompute the CSS height of the container
 				gridster.set_dom_grid_height();
+				//Assuming we don't want to record the change since we caused it
+				gridster.$changed = $([]);
 			});
 
 			$("#json").click(function(e) {
@@ -135,6 +185,11 @@
 			background-color: rgb(101, 120, 120);
 		}
 
+		.gridster ul li img {
+			max-width: 140px;
+			max-height: 140px;
+		}
+
 		#output {
 			margin: 20px auto 20px auto;
 			width: 600px;
@@ -173,18 +228,6 @@
 
 	<div class="gridster">
 		<ul>
-			<li data-row="1" data-col="1" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="2" data-col="1" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="3" data-col="1" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="1" data-col="2" data-sizex="2" data-sizey="1"><a href="#"><img src="http://lorempixel.com/300/140" /></a></li>
-			<li data-row="2" data-col="2" data-sizex="2" data-sizey="2"><a href="#"><img src="http://lorempixel.com/300/300" /></a></li>
-			<li data-row="1" data-col="4" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="2" data-col="4" data-sizex="2" data-sizey="1"><a href="#"><img src="http://lorempixel.com/300/140" /></a></li>
-			<li data-row="3" data-col="4" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="1" data-col="5" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="3" data-col="5" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="1" data-col="6" data-sizex="1" data-sizey="1"><a href="#"><img src="http://lorempixel.com/140/140" /></a></li>
-			<li data-row="2" data-col="6" data-sizex="1" data-sizey="2"><a href="#"><img src="http://lorempixel.com/140/300" /></a></li>
 		</ul>
 	</div>
 </body>

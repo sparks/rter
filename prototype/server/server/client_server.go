@@ -18,9 +18,14 @@ type Page struct {
 }
 
 type Phone struct {
-	ID        string
-	Filepath  string
-	Lat, Long float64
+	ContentID string  `json:"content_id"`
+	Filepath  string  `json:"filepath"`
+	Lat       float64 `json:"lat"`
+	Long      float64 `json:"long"`
+	Col       int     `json:"col"`
+	Row       int     `json:"row"`
+	SizeX     int     `json:"size_x"`
+	SizeY     int     `json:"size_y"`
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
@@ -31,7 +36,7 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, _, err := database.Query("SELECT phone_id, filepath, geolat, geolong FROM content where (select count(*) from content as c where c.phone_id = content.phone_id and c.timestamp <= content.timestamp) <= 1;")
+	rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
 	phones := make([]*Phone, len(rows))
 
@@ -41,6 +46,10 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 			row.Str(1),
 			row.Float(2),
 			row.Float(3),
+			row.Int(4),
+			row.Int(5),
+			row.Int(6),
+			row.Int(7),
 		}
 	}
 

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
+var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	p, error := ioutil.ReadAll(r.Body)
@@ -43,10 +43,16 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
 
+	valid_pos := true
+
 	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
-	checkError(err)
+	if err != nil {
+		valid_pos = false
+	}
 	long, err := strconv.ParseFloat(r.FormValue("long"), 64)
-	checkError(err)
+	if err != nil {
+		valid_pos = false
+	}
 
 	t := time.Now()
 	path := imagePath
@@ -63,6 +69,31 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(outputFile, imageFile)
 
-	_, _, error = database.Query("INSERT INTO content (phone_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v)", phoneID, path, lat, long)
+	if valid_pos {
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath, geolat, geolong) VALUES(\"%s\", \"%s\", %v, %v)", phoneID, path, lat, long)
+	} else {
+		_, _, error = database.Query("INSERT INTO content (content_id, filepath) VALUES(\"%s\", \"%s\")", phoneID, path)
+	}
+	checkError(error)
+}
+
+func Nehil(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Nehil Request")
+
+	imageFile, header, error := r.FormFile("image")
+	checkError(error)
+
+	fmt.Println("Filename", header.Filename)
+
+	path := imagePath + header.Filename
+
+	outputFile, error := os.Create(path)
+	checkError(error)
+	defer outputFile.Close()
+
+	io.Copy(outputFile, imageFile)
+
+	fmt.Println("Done Writing")
+
 	checkError(error)
 }
