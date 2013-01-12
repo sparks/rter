@@ -6,9 +6,9 @@
 			html { height: 100% }
 			body { height: 100%; margin: 0; padding: 0 }
 			p { margin: 10px }
+			button { margin: 10px  }
 			#map_canvas { width: 80%; height: 100%; float: left }
 			#sidebar { width: 20%; height: 100%; float: right }
-			#button { margin: 10px  }
 			#bounds { font-weight: bold }
 			#count { font-weight: bold }
 		</style>
@@ -17,10 +17,12 @@
 		</script>
 		<script type="text/javascript">
 			var map;
-			var markers = new Array();
+			var locations = new Array();
 			
 			var boundText;
 			var countText;
+			
+			var trottierLocation = new LatLng("123trottier456", 45.50745, -73.5793);
 			
 			function initialize() {
 				var mapOptions = {
@@ -39,9 +41,13 @@
 				});
 			}
 			
-			function addRandomMarker() {
-				//trottierLocation = new google.maps.LatLng(45.50745, -73.5793);
-				
+			function LatLng(content_id, lat, lng) {
+				this.content_id = content_id;
+				this.lat = lat;
+				this.lng = lng;
+			}
+			
+			function addRandomMarker() {				
 				var x = map.getBounds().getNorthEast().lat();
 				var w = map.getBounds().getSouthWest().lat() - x;
 				var y = map.getBounds().getNorthEast().lng();
@@ -50,20 +56,27 @@
 				var lat = x + Math.random() * w;
 				var lng = y + Math.random() * h;
 				
-				var location = new google.maps.LatLng(lat, lng);
+				var latLng = new LatLng("123gibberish456", lat, lng);
+				
+				addMarker(latLng);
+			}
+			
+			function addMarker(latLng) {
+				var location = new google.maps.LatLng(latLng.lat, latLng.lng);
 				
 				marker = new google.maps.Marker({
 					position: location,
 					map: map
 				});
-				markers.push(marker);
+				locations.push(latLng);
 				updateMarkerCount();
 			}
 			
 			function updateMarkerCount() {
 				var count = 0;
-				for (var i = 0; i < markers.length; i++) {
-					if (map.getBounds().contains(markers[i].getPosition()))
+				for (var i = 0; i < locations.length; i++) {
+					var marker = new google.maps.LatLng(locations[i].lat, locations[i].lng);
+					if (map.getBounds().contains(marker))
 						count++;
 				}
 				countText.innerHTML = count;
@@ -73,7 +86,8 @@
 	<body onload="initialize()">	
 		<div id="map_canvas" style="width:80%; height:100%" float=left></div>
 		<div id="sidebar" style="width:20%; height:100%">
-			<button id="button" onclick="addRandomMarker()">Add Random Marker</button>
+			<button onClick="addMarker(trottierLocation)">Add Marker on Trottier</button><br />
+			<button onclick="addRandomMarker()">Add Random Marker</button>
 			<p>Current map canvas bounds:</p>
 			<p id="bounds"></p>
 			<p>Number of markers on current map:</p>
