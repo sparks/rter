@@ -1,3 +1,8 @@
 *.DS_Store
 lib/
+
+#bin files
 *.class
+
+# folders
+**bin/	
