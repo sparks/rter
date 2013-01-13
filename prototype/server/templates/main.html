@@ -10,7 +10,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
 
 	<script type="text/javascript">
-		var phones, gridster, was_dragged;
+		var was_dragged, gridster, layout, phones;
 
 		$.ajaxSetup ({
 			cache: false
@@ -19,7 +19,8 @@
 		$(document).ready(function() {
 			was_dragged = false;
 
-			phones = {{.Phones}}
+			phones = {{.Phones}};
+			layout = {{.Layout}};
 
 			$(".gridster > ul").width((140+20)*6);
 
@@ -32,6 +33,10 @@
 
 			gridster.cols = 6 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
 
+			if(phones.length == 0) {
+				$(".gridster").append("<div class='error'>No Content Available</div>");
+			}
+
 			//Add all the widget without worrying about layout
 			for(var i = 0;i < phones.length;i++) {
 				var img = $(document.createElement('img')).attr('src', phones[i].filepath);
@@ -42,9 +47,8 @@
 				gridster.add_widget(li, 1, 1);
 			}
 
-			getLayout()
-
-			setInterval(getLayout, 2000);
+			updateLayout(layout);
+			setInterval(getContent, 2000);
 
 			//Handle click in a useful way
 			$(".gridster > ul > li > a").click(function(e) {
@@ -52,8 +56,9 @@
 				if(was_dragged) {
 					was_dragged = false;
 
-					if(gridster.$changed != null && (gridster.$changed).length > 1) {
-						pushLayout(gridster.serialize());
+					if(gridster.$changed != null && (gridster.$changed).length > 0) {
+						// pushLayout(gridster.serialize());
+						pushLayout(gridster.serialize_changed());
 					}
 				} else {
 					if($(this).parent().css("border-width") == "0px") {
@@ -75,63 +80,85 @@
 			});
 		});
 		
-		function pushLayout(widget_layout) {
+		function pushLayout(layout) {
 			$.ajax({
 				url: "/ajax/pushlayout",
 				type: 'POST',
-				data: JSON.stringify(widget_layout),
+				data: JSON.stringify(layout),
 				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 4000,
+				timeout: 1900,
 				dataType: "json",
 				contentType: 'application/json',
-				success: function(data, status, err) { },
-				error: function(xhr, status, err) { }
+				success: function(data, status, err) {
+
+				},
+				error: function(xhr, status, err) { 
+
+				}
 			});
 		}
 
-		function getLayout() {
+		function getContent() {
 			$.ajax({
 				url: "/ajax/getlayout",
 				type: 'POST',
 				data: [],
 				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 4000,
+				timeout: 1900,
 				dataType: "json",
 				contentType: 'application/json',
-				success: function(data, status, err) { if(data != null && !gridster.drag_api.is_dragging) { runLayout(data); } },
-				error: function(xhr, status, err) { }
+				success: function(data, status, err) {
+					$("#offline").hide();
+					if(data != null && !gridster.drag_api.is_dragging) {
+						updatePhones(data.phones);
+						updateLayout(data.layout);
+					}
+				},
+				error: function(xhr, status, err) { 
+					$("#offline").show();
+				}
 			});
 		}
 
-		function runLayout(widget_layout) {
-			for(var i = 0;i < widget_layout.length;i++) {
-				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+		function updatePhones(updated_phones) {
+			d = new Date();
+			for(var i = 0;i < updated_phones.length;i++) {
+				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
+				$i.attr('src', updated_phones[i].filepath);
+			}
+
+			phones = updated_phones;
+		}
+
+		function updateLayout(updated_layout) {
+			for(var i = 0;i < updated_layout.length;i++) {
+				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
 				gridster.remove_from_gridmap($w.coords().grid);
 			}
 
-			for(var i = 0;i < widget_layout.length;i++) {
-				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+			for(var i = 0;i < updated_layout.length;i++) {
+				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
 
-				if(!gridster.is_empty(widget_layout[i].col, widget_layout[i].row)) {
-					gridster.empty_cells(widget_layout[i].col, widget_layout[i].row, 1, 1);
+				if(!gridster.is_empty(updated_layout[i].col, updated_layout[i].row)) {
+					gridster.empty_cells(updated_layout[i].col, updated_layout[i].row, 1, 1);
 				}
 
 				//Perform the move
 				$w.attr({
-					'data-col': widget_layout[i].col,
-					'data-row': widget_layout[i].row
+					'data-col': updated_layout[i].col,
+					'data-row': updated_layout[i].row
 				});
 
 				//Change the correct associated position inside the widget
-				$w.coords().grid.col = widget_layout[i].col;
-				$w.coords().grid.row = widget_layout[i].row;
+				$w.coords().grid.col = updated_layout[i].col;
+				$w.coords().grid.row = updated_layout[i].row;
 
 				//Push it back into the internal mapping
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
 
-			for(var i = 0;i < widget_layout.length;i++) {
-				$w = $("[content_id='"+widget_layout[i].content_id+"']").first();
+			for(var i = 0;i < updated_layout.length;i++) {
+				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
 
@@ -139,26 +166,28 @@
 			gridster.set_dom_grid_height();
 			//Assuming we don't want to record the change since we caused it
 			gridster.$changed = $([]);
+			layout = updated_layout;
 		}
 	</script>
 
 	<style type="text/css">
 		body {
-			background-color: rgb(101, 120, 120);
-			color: rgb(238, 238, 238);
+			background-color: rgb(240, 240, 240);
 			margin: 0px;
 			text-align: center;
+			font-family: Arial;
 		}
 
 		.gridster {
-			background-color: rgb(255, 200, 80);
+			background-color: rgb(200, 200, 210);
 			text-align: center;
 			margin: 25px auto 25px auto;
+			min-width: 1000px
 		}
 
 		.gridster ul {
 			list-style: none;
-			margin: 0px auto 0px auto;
+			margin: 100px auto 0px auto;
 			padding: 0px;
 		}
 
@@ -198,16 +227,36 @@
 		.event a:active, .event a:visited {
 			color: rgb(50, 50, 50);
 		}
+
+		.error {
+			color: rgb(200, 0, 0);
+			font-weight: bold;
+		}
+
+		#offline {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			background-color: rgb(200, 50, 0);
+			color: rgb(200, 200, 200);
+			font-weight: bold;
+			width: 250px;
+			padding: 10px 0px 10px 0px;
+			display: none;
+		}
 	</style>
 </head>
 <body>
+	<div id="offline">Cannot Reach Server!</div>
 	<p id="output"></p>
-	
-<!-- 	<div class="event" id="serialize"><a href="#">Serialize</a></div>
+
+<!-- 	
+	<div class="event" id="serialize"><a href="#">Serialize</a></div>
 	<div class="event" id="reorder"><a href="#">Reorder</a></div>
 	<div class="event" id="json"><a href="#">JSON</a></div>
+ -->
 
- -->	<div class="gridster">
+	<div class="gridster">
 		<ul>
 		</ul>
 	</div>

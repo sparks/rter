@@ -6,8 +6,9 @@ import (
 	"net/http"
 )
 
-type Page struct {
-	Phones []*PhoneContent
+type PageContent struct {
+	Phones []*PhoneContent `json:"phones"`
+	Layout []*LayoutTile   `json:"layout"`
 }
 
 type PhoneContent struct {
@@ -33,26 +34,9 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
-
-	rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
-
-	phones := make([]*PhoneContent, len(rows))
-
-	for i, row := range rows {
-		phones[i] = &PhoneContent{
-			row.Str(0),
-			row.Str(1),
-			row.Float(2),
-			row.Float(3),
-		}
-	}
-
-	p := &Page{phones}
-
 	templates = template.Must(template.ParseFiles(templatePath + "main.html")) //TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
 
-	err = templates.ExecuteTemplate(w, "main.html", p)
+	err := templates.ExecuteTemplate(w, "main.html", fetchPageContent())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -79,25 +63,46 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if r.URL.Path == "/ajax/getlayout" {
-		rows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout ORDER BY col, row;")
-
-		layout := make([]*LayoutTile, len(rows))
-
-		for i, row := range rows {
-			layout[i] = &LayoutTile{
-				row.Str(0),
-				row.Int(1),
-				row.Int(2),
-				row.Int(3),
-				row.Int(4),
-			}
-		}
-
-		layoutJSON, err := json.Marshal(layout)
+		layoutJSON, err := json.Marshal(fetchPageContent())
 		checkError(err)
 
 		w.Write(layoutJSON)
 	}
+}
+
+func fetchPageContent() *PageContent {
+	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+
+	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	checkError(err)
+
+	phones := make([]*PhoneContent, len(phoneRows))
+
+	for i, row := range phoneRows {
+		phones[i] = &PhoneContent{
+			row.Str(0),
+			row.Str(1),
+			row.Float(2),
+			row.Float(3),
+		}
+	}
+
+	layoutRows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout ORDER BY col, row;")
+	checkError(err)
+
+	layout := make([]*LayoutTile, len(layoutRows))
+
+	for i, row := range layoutRows {
+		layout[i] = &LayoutTile{
+			row.Str(0),
+			row.Int(1),
+			row.Int(2),
+			row.Int(3),
+			row.Int(4),
+		}
+	}
+
+	return &PageContent{phones, layout}
 }
 
 func (tile *LayoutTile) Sanitize() {
