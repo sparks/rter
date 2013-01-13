@@ -139,6 +139,8 @@
 				}
 			}
 
+			checkOnScreen();
+
 			phones = updated_phones;
 		}
 
@@ -194,19 +196,24 @@
 			map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 						
 			google.maps.event.addListener(map, 'bounds_changed', function() {
-				bounds = map.getBounds();
-				for(var i = 0;i < phones.length;i++) {
-					$el = $("[content_id='"+phones[i].content_id+"'] > a > img").first();
-
-					if(phones[i].lat < bounds.Z.b || phones[i].lat > bounds.Z.d) {
-						$el.css("opacity", "0.3");
-					} else if(phones[i].lng < bounds.ca.b || phones[i].lng > bounds.ca.d) {
-						$el.css("opacity", "0.3");
-					} else {
-						$el.css("opacity", "1");
-					}
-				}
+				checkOnScreen()
 			});
+		}
+
+		function checkOnScreen() {
+			bounds = map.getBounds();
+
+			for(var i = 0;i < phones.length;i++) {
+				$el = $("[content_id='"+phones[i].content_id+"'] > a > img").first();
+
+				if(phones[i].lat < bounds.Z.b || phones[i].lat > bounds.Z.d) {
+					$el.css("opacity", "0.3");
+				} else if(phones[i].lng < bounds.ca.b || phones[i].lng > bounds.ca.d) {
+					$el.css("opacity", "0.3");
+				} else {
+					$el.css("opacity", "1");
+				}
+			}
 		}
 		
 		function addMarker(position) {
