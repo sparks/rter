@@ -7,8 +7,6 @@
 	<script type="text/javascript" src="resources/jquery.gridster.js"></script>
 	<link rel="stylesheet" type="text/css" href="resources/jquery.gridster.css">
 
-	<link href='http://fonts.googleapis.com/css?family=Unica+One' rel='stylesheet' type='text/css'>
-
 	<script type="text/javascript">
 		var was_dragged, gridster, layout, phones;
 
@@ -173,21 +171,24 @@
 	<style type="text/css">
 		body {
 			background-color: rgb(240, 240, 240);
+			/*background-color: rgb(255, 255, 255);*/
 			margin: 0px;
 			text-align: center;
 			font-family: Arial;
 		}
 
 		.gridster {
-			background-color: rgb(200, 200, 210);
+			background-color: rgb(255, 255, 255);
+			border-top: 1px solid rgb(170, 170, 170);
+			border-bottom: 1px solid rgb(170, 170, 170);
+			margin: 75px auto 25px auto;
 			text-align: center;
-			margin: 25px auto 25px auto;
-			min-width: 1000px
+			min-width: 1000px;
 		}
 
 		.gridster ul {
+			margin: 25px auto 25px auto;
 			list-style: none;
-			margin: 100px auto 0px auto;
 			padding: 0px;
 		}
 
@@ -206,28 +207,6 @@
 			background-color: rgb(101, 101, 101);
 		}
 
-		.event {
-			font-family: 'Unica One', cursive;
-			background-color: rgb(200, 200, 200);
-			padding: 10px;
-			max-width: 120px;
-			margin: auto;
-		}
-
-		.event a:link {
-			text-decoration: none;
-			font-weight: bold;
-			color: rgb(50, 50, 50);
-		}
-
-		.event a:hover {
-			text-decoration: underline;
-		}
-
-		.event a:active, .event a:visited {
-			color: rgb(50, 50, 50);
-		}
-
 		.error {
 			color: rgb(200, 0, 0);
 			font-weight: bold;
@@ -244,17 +223,47 @@
 			padding: 10px 0px 10px 0px;
 			display: none;
 		}
+
+		#header {
+			text-align: left;
+			margin: auto;
+		}
+
+		#titleblock {
+			margin: 10px 0px 0px 80px;
+		}
+
+		#rter {
+			margin: 0px 0px 0px 20px;
+			float: left;
+		}
+
+		#titleblock h2 {
+			margin: 0px;
+			padding-top: 7px;
+			font-size: 11pt;
+		}
+
+		#titleblock p {
+			font-size: 9pt;
+			margin: 0px;
+			padding: 0px;
+		}
 	</style>
 </head>
 <body>
 	<div id="offline">Cannot Reach Server!</div>
-	<p id="output"></p>
 
-<!-- 	
-	<div class="event" id="serialize"><a href="#">Serialize</a></div>
-	<div class="event" id="reorder"><a href="#">Reorder</a></div>
-	<div class="event" id="json"><a href="#">JSON</a></div>
- -->
+	<div id="header">
+		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
+
+		<div id="titleblock">
+			<h2>Real-Time Emergency Response</h2>
+			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
+		</div>
+	</div>
+
+	<div id="debug"></div>
 
 	<div class="gridster">
 		<ul>

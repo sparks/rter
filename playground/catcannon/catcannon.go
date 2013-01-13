@@ -50,18 +50,19 @@ func loadFile(filename string) image.Image {
 }
 
 func multipartUpload(image image.Image, phone_id string, lat, long float64) {
-	fmt.Println("Performing Multipart Image Upload:")
-	fmt.Println("==================================")
+	// fmt.Println("Performing Multipart Image Upload:")
+	// fmt.Println("==================================")
 
 	pipeReader, pipeWriter := io.Pipe()
 
 	multipartWriter := multipart.NewWriter(pipeWriter)
 	contentType := multipartWriter.FormDataContentType()
-	fmt.Println(contentType)
+	// fmt.Println(contentType)
 
 	responseChan := make(chan *http.Response)
 
 	go func() {
+		// response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
 		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
 		responseChan <- response
@@ -116,11 +117,13 @@ func main() {
 	num_clients := len(phone_ids)
 
 	go func() {
+		n := 0
 		for {
 			for i := 0; i < num_clients; i++ {
 				multipartUpload(fetchStockImage(200, 200), phone_ids[i], rand.Float64()*40, rand.Float64()*180)
+				fmt.Println(n, i)
 			}
-			time.Sleep(30 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
