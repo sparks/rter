@@ -32,6 +32,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -96,8 +97,7 @@ public class CameraPreview extends Activity implements OnClickListener{
     int defaultCameraId;
     static boolean isFPS = false;
     
-//    private String android_id = Secure.getString(getApplicationContext().getContentResolver(),
-//            Secure.ANDROID_ID);
+    private byte[] uid;
     
     
     private static final String TAG = "CameraPreview Activity";
@@ -119,7 +119,13 @@ public class CameraPreview extends Activity implements OnClickListener{
         
         // openGLview
         mGLView = new CameraGLSurfaceView(this);
-         
+        
+        
+        TelephonyManager tManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        String sUID = tManager.getDeviceId();
+        Log.e(TAG, "Fileoutput in phone id"+sUID+"and the length being "+sUID);
+        uid = convertStringToByteArray(sUID);
+        
         // add the two views to the frame
         mFrame.addView(mPreview);
         mFrame.addView(mGLView);
@@ -222,7 +228,7 @@ public class CameraPreview extends Activity implements OnClickListener{
 	Camera.PictureCallback photoCallback=new Camera.PictureCallback() {
 	    public void onPictureTaken(byte[] data, Camera camera) {
 	    	Log.e(TAG, "Inside Picture Callback");
-	    	new SavePhotoTask().execute(data);
+	    	new SavePhotoTask().execute(data, uid);
 	      camera.startPreview();
 	      mPreview.inPreview=true;
 	      
@@ -241,6 +247,15 @@ public class CameraPreview extends Activity implements OnClickListener{
 	       
 	    }
 	  };
+	  
+	  public byte[] convertStringToByteArray(String s) {
+	        
+	        byte[] theByteArray = s.getBytes();
+	        
+	        Log.e(TAG, "length of byte array"+ theByteArray.length);
+			return theByteArray;
+	        
+	    }
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
@@ -470,17 +485,29 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
 class SavePhotoTask extends AsyncTask<byte[], String, String> {
     
 	private DefaultHttpClient mHttpClient;
+	private File photo;
 	
 	@Override
-    protected String doInBackground(byte[]... jpeg) {
-    	
-		Log.e("SavePhotoTask", "Fileoutput");
-    	
+	protected void onPostExecute (String result) {
+		//delete the uploaded picture to free memory
+		if (photo.exists()) {
+	        photo.delete();
+	      }
+		Log.e("SavePhotoTask", "Photo deleted");
 		
+		
+	}
+	@Override
+    protected String doInBackground(byte[]... a) {
+		
+		String uid = new String(a[1]);
+		Log.e("SavePhotoTask", "Fileoutput in phone id"+uid);
 		HttpParams params = new BasicHttpParams();
         params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
         mHttpClient = new DefaultHttpClient(params);
 		
+        
+        
 		
 //    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
 //    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
@@ -489,7 +516,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
     	String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
     	
-    	File photo=
+    	photo=
           new File(Environment.getExternalStorageDirectory()+"/rter/",
                    "Scenephoto"+timeStamp+".jpg");
     	Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
@@ -500,14 +527,14 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
       try {
     	  FileOutputStream fos=new FileOutputStream(photo.getPath());
           
-          fos.write(jpeg[0]);
+          fos.write(a[0]);
           fos.close();
           
-    	  HttpPost httppost = new HttpPost("http://142.157.58.188:8082/nehil");
+    	  HttpPost httppost = new HttpPost("http://e-caffeine.net/nehil_sandbox/emer/post.php");
 
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
           multipartEntity.addPart("title", new StringBody("rTER"));
-//          multipartEntity.addPart("Nick", new StringBody("Nick"));
+          multipartEntity.addPart("phone_id", new StringBody(uid));
 //          multipartEntity.addPart("Email", new StringBody("Email"));
 //          multipartEntity.addPart("Description", new StringBody(Settings.SHARE.TEXT));
           multipartEntity.addPart("image", new FileBody(photo));
@@ -526,6 +553,8 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
       return(null);
     }
 	
+	
+	
 	private class PhotoUploadResponseHandler implements ResponseHandler {
 
         @Override
@@ -540,4 +569,8 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
         }
 
     }
+	
+	
+	
+	
   }
