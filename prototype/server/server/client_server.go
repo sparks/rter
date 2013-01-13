@@ -15,7 +15,7 @@ type PhoneContent struct {
 	ContentID string  `json:"content_id"`
 	Filepath  string  `json:"filepath"`
 	Lat       float64 `json:"lat"`
-	Long      float64 `json:"long"`
+	Lng       float64 `json:"lng"`
 }
 
 type LayoutTile struct {
@@ -71,9 +71,9 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPageContent() *PageContent {
-	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolong FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 	checkError(err)
 
 	phones := make([]*PhoneContent, len(phoneRows))

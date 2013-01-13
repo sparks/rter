@@ -49,7 +49,7 @@ func loadFile(filename string) image.Image {
 	return image
 }
 
-func multipartUpload(image image.Image, phone_id string, lat, long float64) {
+func multipartUpload(image image.Image, phone_id string, lat, lng float64) {
 	// fmt.Println("Performing Multipart Image Upload:")
 	// fmt.Println("==================================")
 
@@ -81,9 +81,9 @@ func multipartUpload(image image.Image, phone_id string, lat, long float64) {
 	checkError(error)
 	io.WriteString(latWriter, fmt.Sprintf("%v", lat))
 
-	longWriter, error := multipartWriter.CreateFormField("long")
+	lngWriter, error := multipartWriter.CreateFormField("lng")
 	checkError(error)
-	io.WriteString(longWriter, fmt.Sprintf("%v", long))
+	io.WriteString(lngWriter, fmt.Sprintf("%v", lng))
 
 	pipeWriter.Close()
 	multipartWriter.Close()
@@ -114,13 +114,16 @@ func checkError(error error) {
 }
 
 func main() {
+	rand.Seed(time.Now().Unix())
+
 	num_clients := len(phone_ids)
 
 	go func() {
 		n := 0
 		for {
 			for i := 0; i < num_clients; i++ {
-				multipartUpload(fetchStockImage(200, 200), phone_ids[i], rand.Float64()*40, rand.Float64()*180)
+				multipartUpload(fetchStockImage(200, 200), phone_ids[i], 45.50745+rand.Float64()/5-0.1, -73.5793+rand.Float64()/5-0.1)
+				fmt.Println(45.4+rand.Float64()/5, -73.4+rand.Float64()/5)
 				fmt.Println(n, i)
 			}
 			time.Sleep(5 * time.Second)

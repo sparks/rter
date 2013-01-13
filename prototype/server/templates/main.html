@@ -7,15 +7,25 @@
 	<script type="text/javascript" src="resources/jquery.gridster.js"></script>
 	<link rel="stylesheet" type="text/css" href="resources/jquery.gridster.css">
 
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&sensor=false"></script>
+
 	<script type="text/javascript">
-		var was_dragged, gridster, layout, phones;
+		Array.prototype.remove = function(from, to) {
+			var rest = this.slice((to || from) + 1 || this.length);
+			this.length = from < 0 ? this.length + from : from;
+			return this.push.apply(this, rest);
+		};
+
+		var was_dragged, gridster, layout, phones, pushing;
 
 		$.ajaxSetup ({
 			cache: false
 		});
 
 		$(document).ready(function() {
+			initialize();
 			was_dragged = false;
+			pushing = false;
 
 			phones = {{.Phones}};
 			layout = {{.Layout}};
@@ -46,6 +56,7 @@
 			}
 
 			updateLayout(layout);
+			updatePhones(phones);
 			setInterval(getContent, 2000);
 
 			//Handle click in a useful way
@@ -79,6 +90,7 @@
 		});
 		
 		function pushLayout(layout) {
+			pushing = true;
 			$.ajax({
 				url: "/ajax/pushlayout",
 				type: 'POST',
@@ -88,10 +100,10 @@
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
-
+					pushing = false;
 				},
 				error: function(xhr, status, err) { 
-
+					pushing = false;
 				}
 			});
 		}
@@ -107,7 +119,7 @@
 				contentType: 'application/json',
 				success: function(data, status, err) {
 					$("#offline").hide();
-					if(data != null && !gridster.drag_api.is_dragging) {
+					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
 						updatePhones(data.phones);
 						updateLayout(data.layout);
 					}
@@ -119,10 +131,12 @@
 		}
 
 		function updatePhones(updated_phones) {
-			d = new Date();
 			for(var i = 0;i < updated_phones.length;i++) {
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
 				$i.attr('src', updated_phones[i].filepath);
+				if(!updateMarker(updated_phones[i])) {
+					addMarker(updated_phones[i]);
+				}
 			}
 
 			phones = updated_phones;
@@ -166,13 +180,89 @@
 			gridster.$changed = $([]);
 			layout = updated_layout;
 		}
-	</script>
 
+		var map;
+		var locations = new Array();
+
+		function initialize() {
+			var mapOptions = {
+				center: new google.maps.LatLng(45.50745, -73.5793),
+				zoom: 10,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+
+			map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+						
+			google.maps.event.addListener(map, 'bounds_changed', function() {
+				bounds = map.getBounds();
+				for(var i = 0;i < phones.length;i++) {
+					$el = $("[content_id='"+phones[i].content_id+"'] > a > img").first();
+
+					if(phones[i].lat < bounds.Z.b || phones[i].lat > bounds.Z.d) {
+						$el.css("opacity", "0.3");
+					} else if(phones[i].lng < bounds.ca.b || phones[i].lng > bounds.ca.d) {
+						$el.css("opacity", "0.3");
+					} else {
+						$el.css("opacity", "1");
+					}
+				}
+			});
+		}
+		
+		function addMarker(position) {
+			//position should have lat, lng and content_id fields
+			
+			position.marker = new google.maps.Marker({
+				position: new google.maps.LatLng(position.lat, position.lng),
+				map: map,
+				icon: new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
+			});
+
+			locations.push(position);
+		}
+
+		function removeMarker(position) {
+			//position should have lat, lng and content_id fields
+
+			for(var i = 0;i < locations.length;i++) {
+				if(locations[i].content_id == position.content_id) {
+					locations[i].marker.setMap(null);
+					locations.remove(i);
+					return true;
+				}
+			}
+
+			if(position.marker != null) {
+				position.margin.setMap(null);
+				return true;
+			}
+
+			return false;
+		}
+
+		function updateMarker(position) {
+			for(var i = 0;i < locations.length;i++) {
+				if(locations[i].content_id == position.content_id) {
+					if(locations[i].lat != position.lat || locations.lng != position.lng) {
+						locations[i].marker.setPosition(new google.maps.LatLng(position.lat, position.lng));
+					}
+					if(locations[i].marker.getIcon().url != position.filepath) {
+						locations[i].marker.setIcon(
+							new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
+						);
+					}
+					return true;
+				}
+			}
+
+			return false;
+		}
+	</script>
 	<style type="text/css">
 		body {
 			background-color: rgb(240, 240, 240);
 			/*background-color: rgb(255, 255, 255);*/
-			margin: 0px;
+			margin: 0px auto 25px auto;
 			text-align: center;
 			font-family: Arial;
 		}
@@ -182,18 +272,18 @@
 			border-top: 1px solid rgb(170, 170, 170);
 			border-bottom: 1px solid rgb(170, 170, 170);
 			margin: 75px auto 25px auto;
-			text-align: center;
+			text-align: left;
 			min-width: 1000px;
 		}
 
 		.gridster ul {
-			margin: 25px auto 25px auto;
+			margin: 25px 0px 25px 60px;
 			list-style: none;
 			padding: 0px;
 		}
 
 		.gridster ul li {
-			background-color: rgb(101, 120, 120);
+			background-color: rgb(255, 255, 255);
 		}
 
 		.gridster ul li img {
@@ -215,13 +305,14 @@
 		#offline {
 			position: fixed;
 			top: 0px;
-			left: 0px;
+			right: 0px;
 			background-color: rgb(200, 50, 0);
 			color: rgb(200, 200, 200);
 			font-weight: bold;
 			width: 250px;
 			padding: 10px 0px 10px 0px;
 			display: none;
+			z-index: 100;
 		}
 
 		#header {
@@ -249,6 +340,15 @@
 			margin: 0px;
 			padding: 0px;
 		}
+
+		#map_canvas {
+			position: absolute;
+			top: 35px;
+			left: 1100px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+		}
 	</style>
 </head>
 <body>
@@ -265,7 +365,9 @@
 
 	<div id="debug"></div>
 
+
 	<div class="gridster">
+		<div id="map_canvas"></div>
 		<ul>
 		</ul>
 	</div>
