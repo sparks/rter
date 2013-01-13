@@ -84,6 +84,8 @@ public class CameraGLRenderer implements Renderer {
 	     
 	      // You OpenGL|ES rendering code here
 	      // ......
+	      
+	      // pulsate arrows
 	      if (arrowScaleIncrease) {
 	    	  float speed = (arrowScaleMax - arrowScale)*arrowScaleSpeed;
 	    	  if (speed < arrowScaleSpeedMin) speed = arrowScaleSpeedMin;
@@ -104,21 +106,20 @@ public class CameraGLRenderer implements Renderer {
 	      
 	      // FRAME
 	      gl.glLoadIdentity();
-	      //gl.glTranslatef(0.0f, 0.0f, -4.0f);
 	      indicatorFrame.draw(gl);
 	      
-	      // LEFT ARROW
+	      // RIGHT ARROW
 	      gl.glLoadIdentity();                 // Reset model-view matrix ( NEW )
 	      gl.glTranslatef(xTotal/2.0f - 15.0f/xTotal, 0.0f, -distance); // Translate left and into the screen ( NEW )
 	      gl.glScalef(arrowScale, arrowScale, 1.0f);
-	      arrowLeft.draw(gl);                   // Draw triangle ( NEW )
+	      arrowRight.draw(gl);                   // Draw triangle ( NEW )
 	  
-	      // RIGHT
+	      // LEFT
 	      gl.glLoadIdentity();
 	      gl.glTranslatef(-xTotal/2.0f + 15.0f/xTotal, 0.0f, -distance); // Translate left and into the screen ( NEW )
 	      gl.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 	      gl.glScalef(arrowScale, arrowScale, 1.0f);
-	      arrowRight.draw(gl);                       // Draw quad ( NEW )
+	      arrowLeft.draw(gl);                       // Draw quad ( NEW )
 	   }
 
 }
