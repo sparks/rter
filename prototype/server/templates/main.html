@@ -47,47 +47,51 @@
 
 			//Add all the widget without worrying about layout
 			for(var i = 0;i < phones.length;i++) {
-				var img = $(document.createElement('img')).attr('src', phones[i].filepath);
-				var a = $(document.createElement('a')).append(img);
-				a.attr('href', '#');
-				var li = $(document.createElement('li')).append(a);
-				li.attr('content_id', phones[i].content_id)
-				gridster.add_widget(li, 1, 1);
+				addPhoneAsWidget(phones[i]);
 			}
 
 			updateLayout(layout);
 			setInterval(getContent, 2000);
-
-			//Handle click in a useful way
-			$(".gridster > ul > li > a").click(function(e) {
-				e.preventDefault();
-				if(was_dragged) {
-					was_dragged = false;
-
-					if(gridster.$changed != null && (gridster.$changed).length > 0) {
-						// pushLayout(gridster.serialize());
-						pushLayout(gridster.serialize_changed());
-					}
-				} else {
-					if($(this).parent().css("border-width") == "0px") {
-						$(this).parent().css("border", "3px solid red");
-						// $("#output").text($(this).parent().css("padding"));
-					} else {
-						$(this).parent().css("border", "none");
-					}
-				}
-			});
-
-			//Track dragging
-			$(".gridster > ul > li > a").mouseup(function(e) {
-				if($(this).parent().hasClass("dragging")) {
-					was_dragged = true;
-				} else {
-					was_dragged = false;
-				}
-			});
 		});
-		
+
+		function addPhoneAsWidget(phone) {
+			var img = $(document.createElement('img')).attr('src', phone.filepath);
+			var a = $(document.createElement('a')).append(img);
+			a.click(widgetClickFunction);
+			a.mouseup(widgetMouseUpFunction);
+			a.attr('href', '#');
+			var li = $(document.createElement('li')).append(a);
+			li.attr('content_id', phone.content_id)
+			gridster.add_widget(li, 1, 1);
+		}
+
+		function widgetMouseUpFunction(e) {
+			if($(this).parent().hasClass("dragging")) {
+				was_dragged = true;
+			} else {
+				was_dragged = false;
+			}
+		}
+
+		function widgetClickFunction(e) {
+			e.preventDefault();
+			if(was_dragged) {
+				was_dragged = false;
+
+				if(gridster.$changed != null && (gridster.$changed).length > 0) {
+					// pushLayout(gridster.serialize());
+					pushLayout(gridster.serialize_changed());
+				}
+			} else {
+				if($(this).parent().css("border-width") == "0px") {
+					$(this).parent().css("border", "3px solid red");
+					// $("#output").text($(this).parent().css("padding"));
+				} else {
+					$(this).parent().css("border", "none");
+				}
+			}
+		}
+
 		function pushLayout(layout) {
 			pushing = true;
 			$.ajax({
@@ -133,12 +137,7 @@
 			for(var i = 0;i < updated_phones.length;i++) {
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
 				if($i.length == 0) {
-					var img = $(document.createElement('img')).attr('src', updated_phones[i].filepath);
-					var a = $(document.createElement('a')).append(img);
-					a.attr('href', '#');
-					var li = $(document.createElement('li')).append(a);
-					li.attr('content_id', updated_phones[i].content_id)
-					gridster.add_widget(li, 1, 1);
+					addPhoneAsWidget(updated_phones[i]);
 				} else {
 					$i.attr('src', updated_phones[i].filepath);
 				}
