@@ -132,15 +132,25 @@
 		function updatePhones(updated_phones) {
 			for(var i = 0;i < updated_phones.length;i++) {
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
-				$i.attr('src', updated_phones[i].filepath);
+				if($i.length == 0) {
+					var img = $(document.createElement('img')).attr('src', updated_phones[i].filepath);
+					var a = $(document.createElement('a')).append(img);
+					a.attr('href', '#');
+					var li = $(document.createElement('li')).append(a);
+					li.attr('content_id', updated_phones[i].content_id)
+					gridster.add_widget(li, 1, 1);
+				} else {
+					$i.attr('src', updated_phones[i].filepath);
+				}
+
 				if(!updateMarker(updated_phones[i])) {
 					addMarker(updated_phones[i]);
 				}
 			}
 
-			checkOnScreen();
-
 			phones = updated_phones;
+
+			checkOnScreen();
 		}
 
 		function updateLayout(updated_layout) {
