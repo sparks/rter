@@ -7,6 +7,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * right facing arrow
+ * the origin is on the left edge of the arrow
  * @author stepan
  *
  */

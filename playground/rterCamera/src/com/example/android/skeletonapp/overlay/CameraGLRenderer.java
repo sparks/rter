@@ -11,6 +11,7 @@ import android.opengl.GLSurfaceView.Renderer;
 public class CameraGLRenderer implements Renderer {
 	Arrow arrowLeft;
 	Arrow arrowRight;
+	IndicatorFrame indicatorFrame;
 
 	Context context;   // Application's context
 	
@@ -30,6 +31,7 @@ public class CameraGLRenderer implements Renderer {
 	      
 	      arrowLeft = new Arrow();
 	      arrowRight = new Arrow();
+	      indicatorFrame = new IndicatorFrame();
 	   }
 	   
 	   // Call back when the surface is first created or re-created
@@ -55,6 +57,8 @@ public class CameraGLRenderer implements Renderer {
 	      distance = 6.0f;
 	      xTotal = (float) (aspect*Math.tan(Math.toRadians(45.0/2))*distance*2);
 	      yTotal = (float) (Math.tan(Math.toRadians(45.0/2))*distance*2);
+	      
+	      indicatorFrame.resize(xTotal, yTotal, distance);
 	   
 	      // Set the viewport (display area) to cover the entire window
 	      gl.glViewport(0, 0, width, height);
@@ -70,6 +74,7 @@ public class CameraGLRenderer implements Renderer {
 	  
 	      // You OpenGL|ES display re-sizing code here
 	      // ......
+	      
 	   }
 	   
 	   // Call back to draw the current frame.
@@ -97,19 +102,23 @@ public class CameraGLRenderer implements Renderer {
 	    	  }
 	      }
 	      
-	      gl.glLoadIdentity();                 // Reset model-view matrix ( NEW )
+	      // FRAME
+	      gl.glLoadIdentity();
+	      //gl.glTranslatef(0.0f, 0.0f, -4.0f);
+	      indicatorFrame.draw(gl);
 	      
+	      // LEFT ARROW
+	      gl.glLoadIdentity();                 // Reset model-view matrix ( NEW )
 	      gl.glTranslatef(xTotal/2.0f - 15.0f/xTotal, 0.0f, -distance); // Translate left and into the screen ( NEW )
 	      gl.glScalef(arrowScale, arrowScale, 1.0f);
 	      arrowLeft.draw(gl);                   // Draw triangle ( NEW )
 	  
-	      // Translate right, relative to the previous translation ( NEW )
+	      // RIGHT
 	      gl.glLoadIdentity();
-	      
 	      gl.glTranslatef(-xTotal/2.0f + 15.0f/xTotal, 0.0f, -distance); // Translate left and into the screen ( NEW )
 	      gl.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 	      gl.glScalef(arrowScale, arrowScale, 1.0f);
-	      arrowLeft.draw(gl);                       // Draw quad ( NEW )
+	      arrowRight.draw(gl);                       // Draw quad ( NEW )
 	   }
 
 }
