@@ -14,6 +14,7 @@ import (
 )
 
 var phone_ids = []string{
+	"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
 	"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
 	"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
 	"852decd1fbc083cf6853e46feebb08622d653602",
@@ -62,8 +63,8 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64) {
 	responseChan := make(chan *http.Response)
 
 	go func() {
-		response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
-		// response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
+		// response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
+		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
 		responseChan <- response
 	}()
@@ -116,6 +117,7 @@ func checkError(error error) {
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	exit := make(chan bool)
 	num_clients := len(phone_ids)
 
 	go func() {
@@ -125,6 +127,11 @@ func main() {
 				multipartUpload(fetchStockImage(200, 200), phone_ids[i], 45.50745+rand.Float64()/5-0.1, -73.5793+rand.Float64()/5-0.1)
 				fmt.Println(45.4+rand.Float64()/5, -73.4+rand.Float64()/5)
 				fmt.Println(n, i)
+				select {
+				case <-exit:
+					return
+				default:
+				}
 			}
 			time.Sleep(5 * time.Second)
 		}
@@ -132,4 +139,6 @@ func main() {
 
 	var input string
 	fmt.Scanf("%s", &input)
+	fmt.Println("Waiting to exit ...")
+	exit <- true
 }
