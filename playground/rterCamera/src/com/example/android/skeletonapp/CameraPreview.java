@@ -96,8 +96,8 @@ public class CameraPreview extends Activity implements OnClickListener{
     int defaultCameraId;
     static boolean isFPS = false;
     
-    private String android_id = Secure.getString(getApplicationContext().getContentResolver(),
-            Secure.ANDROID_ID);
+//    private String android_id = Secure.getString(getApplicationContext().getContentResolver(),
+//            Secure.ANDROID_ID);
     
     
     private static final String TAG = "CameraPreview Activity";
@@ -140,9 +140,6 @@ public class CameraPreview extends Activity implements OnClickListener{
                     defaultCameraId = i;
                 }
             }
-//          
-
-
     }
     
 //    private void initGLView() {
