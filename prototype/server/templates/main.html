@@ -56,7 +56,6 @@
 			}
 
 			updateLayout(layout);
-			updatePhones(phones);
 			setInterval(getContent, 2000);
 
 			//Handle click in a useful way
@@ -196,7 +195,7 @@
 			map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 						
 			google.maps.event.addListener(map, 'bounds_changed', function() {
-				checkOnScreen()
+				checkOnScreen();
 			});
 		}
 
