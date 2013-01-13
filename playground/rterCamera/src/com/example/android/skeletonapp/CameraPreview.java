@@ -28,6 +28,8 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,6 +78,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 
 
 // Need the following import to get access to the app resources, since this
@@ -85,7 +91,7 @@ import com.example.android.skeletonapp.R;
 // ----------------------------------------------------------------------
 
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-public class CameraPreview extends Activity implements OnClickListener{
+public class CameraPreview extends Activity implements OnClickListener, LocationListener{
     private Preview mPreview;
     private FrameLayout mFrame; //need this to merge camera preview and openGL view
     private CameraGLSurfaceView mGLView;
@@ -98,6 +104,11 @@ public class CameraPreview extends Activity implements OnClickListener{
     static boolean isFPS = false;
     
     private byte[] uid;
+    private byte[] lat;
+    private byte[] lon;
+    
+    private LocationManager locationManager;
+    private String provider;
     
     
     private static final String TAG = "CameraPreview Activity";
@@ -146,6 +157,27 @@ public class CameraPreview extends Activity implements OnClickListener{
                     defaultCameraId = i;
                 }
             }
+            
+            
+         // Get the location manager
+    	 locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    	 // Define the criteria how to select the locatioin provider -> use
+    	 // default
+    	 Criteria criteria = new Criteria();
+    	 provider = locationManager.getBestProvider(criteria, false);
+    	 if(provider != null) {
+    		Location location = locationManager.getLastKnownLocation(provider);
+    		// Initialize the location fields
+    	   	if (location != null) {
+    	   	   System.out.println("Provider " + provider + " has been selected.");
+    	   	   onLocationChanged(location);
+    	   	} else {
+    	   	   Log.d(TAG, "Location not available");
+    	   	} 
+    	 }
+    	 
+  	       
+            
     }
     
 //    private void initGLView() {
@@ -191,6 +223,7 @@ public class CameraPreview extends Activity implements OnClickListener{
     protected void onResume() {
         super.onResume();
         Log.e(TAG, "onResume");
+        locationManager.requestLocationUpdates(provider, 400, 1, this);
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
         cameraCurrentlyLocked = defaultCameraId;
@@ -201,6 +234,7 @@ public class CameraPreview extends Activity implements OnClickListener{
     protected void onPause() {
         super.onPause();
         Log.e(TAG, "onPause");
+        locationManager.removeUpdates(this);
         // Because the Camera object is a shared resource, it's very
         // important to release it when the activity is paused.
         if (mCamera != null) {
@@ -228,7 +262,7 @@ public class CameraPreview extends Activity implements OnClickListener{
 	Camera.PictureCallback photoCallback=new Camera.PictureCallback() {
 	    public void onPictureTaken(byte[] data, Camera camera) {
 	    	Log.e(TAG, "Inside Picture Callback");
-	    	new SavePhotoTask().execute(data, uid);
+	    	new SavePhotoTask().execute(data, uid, lat, lon);
 	      camera.startPreview();
 	      mPreview.inPreview=true;
 	      
@@ -309,6 +343,35 @@ public class CameraPreview extends Activity implements OnClickListener{
 	protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
     }
+
+	@Override
+	public void onLocationChanged(Location location) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "Location Changed");
+		String lati =  "" + (location.getLatitude());
+		String longi = "" + (location.getLongitude());
+		lat = convertStringToByteArray(lati);
+		lon = convertStringToByteArray(longi);
+		
+	}
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 
@@ -490,10 +553,11 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 	@Override
 	protected void onPostExecute (String result) {
 		//delete the uploaded picture to free memory
+		Log.d("SavePhotoTask", "Upload Complete");
 		if (photo.exists()) {
 	        photo.delete();
 	      }
-		Log.e("SavePhotoTask", "Photo deleted");
+		Log.d("SavePhotoTask", "Photo deleted");
 		
 		
 	}
@@ -501,7 +565,10 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
     protected String doInBackground(byte[]... a) {
 		
 		String uid = new String(a[1]);
-		Log.e("SavePhotoTask", "Fileoutput in phone id"+uid);
+		String lat = new String(a[2]);
+		String lon = new String(a[3]);
+		
+		Log.d("SavePhotoTask", "phone id "+uid+" lat: "+lat +" lon: " + lon);
 		HttpParams params = new BasicHttpParams();
         params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
         mHttpClient = new DefaultHttpClient(params);
@@ -535,13 +602,13 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
           multipartEntity.addPart("title", new StringBody("rTER"));
           multipartEntity.addPart("phone_id", new StringBody(uid));
-//          multipartEntity.addPart("Email", new StringBody("Email"));
-//          multipartEntity.addPart("Description", new StringBody(Settings.SHARE.TEXT));
+          multipartEntity.addPart("lat", new StringBody(lat));
+          multipartEntity.addPart("lon", new StringBody(lon));
           multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
-
+          
           mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
-    	  
+          Log.e("SavePhotoTask", "Upload executed");
     	  
     	  
       } catch (java.io.IOException e) { 
