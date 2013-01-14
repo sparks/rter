@@ -8,6 +8,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class IndicatorFrame {
 	private FloatBuffer vertexBuffer; // Buffer for vertex-array
+	
+	public static enum Colour {
+		RED, GREEN, BLUE
+	}
 
 	private float[] vertices = { // Vertices for the arrow
 			// TOP
@@ -31,9 +35,11 @@ public class IndicatorFrame {
 			0.9f, 0.9f, 0.0f, // 2. left-top-left
 			1.0f, 0.9f, 0.0f // 3. right-top-left
 	};
+	
+	private Colour currentColour = Colour.BLUE;
 
 	// Constructor - Setup the vertex buffer
-	public IndicatorFrame() {
+	public IndicatorFrame() {		
 		// Setup vertex array buffer. Vertices in float. A float has 4 bytes
 		ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
 		vbb.order(ByteOrder.nativeOrder()); // Use native byte order
@@ -95,11 +101,30 @@ public class IndicatorFrame {
 		// Render all the faces
 		for (int face = 0; face < 4; face++) {
 			// Set the color for each of the faces
-			gl.glColor4f(0.0f, 0.9f, 0.0f, 0.5f);
+			switch (this.currentColour) {
+			case RED:
+				gl.glColor4f(0.9f, 0.0f, 0.0f, 0.8f);
+				break;
+			case GREEN:
+				gl.glColor4f(0.0f, 0.9f, 0.0f, 0.8f);
+				break;
+			case BLUE:
+				gl.glColor4f(0.0f, 0.0f, 0.9f, 0.8f);
+				break;
+			}
 
 			// Draw the primitive from the vertex-array directly
 			gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, face * 4, 4);
 		}
 		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
+	}
+	
+	/**
+	 * not thread safe
+	 * 
+	 * @param colour
+	 */
+	public void colour(Colour colour){
+		this.currentColour = colour;
 	}
 }

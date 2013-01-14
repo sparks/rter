@@ -50,7 +50,7 @@ public class OverlayController implements SensorEventListener {
 		this.mGLView = new CameraGLSurfaceView(context);
 		this.mGLRenderer = this.mGLView.getGLRenderer();
 		
-		orientationFilter = new MovingAverage(20);
+		orientationFilter = new MovingAverage(30);
 	}
 
 	/**

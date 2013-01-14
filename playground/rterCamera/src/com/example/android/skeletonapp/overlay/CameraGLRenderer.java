@@ -2,6 +2,9 @@ package com.example.android.skeletonapp.overlay;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import com.example.android.skeletonapp.overlay.IndicatorFrame.Colour;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.opengl.GLSurfaceView;
@@ -32,7 +35,7 @@ public class CameraGLRenderer implements Renderer {
 	// pulsating variables
 	float arrowPulsateScale = 1.0f;
 	float arrowPulsateSpeed = 0.1f;
-	float arrowPulsateSpeedMin = 0.008f;
+	float arrowPulsateSpeedMin = 0.01f;
 	float arrowPulsateMax = 1.2f;
 	float arrowPulsateMin = 0.9f;
 	boolean arrowPulsateIncrease = true;
@@ -58,22 +61,22 @@ public class CameraGLRenderer implements Renderer {
 			case LEFT:
 				displayLeft = true;
 				displayRight = false;
-				// color frame red
+				indicatorFrame.colour(Colour.RED);
 				break;
 			case RIGHT:
 				displayLeft = false;
 				displayRight = true;
-				// color frame red
+				indicatorFrame.colour(Colour.RED);
 				break;
 			case NONE:
 				displayLeft = false;
 				displayRight = false;
-				// color frame green
+				indicatorFrame.colour(Colour.GREEN);
 				break;
 			case FREE:
 				displayLeft = false;
 				displayRight = false;
-				// color frame blue
+				indicatorFrame.colour(Colour.BLUE);
 				break;
 			}
 		}
