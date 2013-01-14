@@ -136,7 +136,9 @@ public class CameraPreview extends Activity implements OnClickListener {
 				defaultCameraId = i;
 			}
 		}
-		//
+		
+		// test, point north
+		this.overlay.setDesiredOrientation(0.0f);
 
 	}
 
