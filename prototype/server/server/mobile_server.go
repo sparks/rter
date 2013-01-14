@@ -21,6 +21,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Receiving Multiupload")
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
@@ -28,10 +29,11 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
+		fmt.Println("Invalid phone_id")
 		return
 	}
 
-	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\";", phoneID)
+	rows, _, err := database.Query("SELECT * FROM phones where phone_id = \"%v\";", phoneID)
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
@@ -72,6 +74,8 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
+
+	fmt.Println("Added Content")
 }
 
 func Nehil(w http.ResponseWriter, r *http.Request) {
