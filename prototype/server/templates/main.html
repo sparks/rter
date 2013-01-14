@@ -51,14 +51,12 @@
 			}
 
 			$("#test").click(function(e) {
-				// e.preventDefault();
-				// if($("#closeup:first").is(":hidden")) {
-				// 	showPhoneDetail(phones[0]);
-				// } else {
-				// 	hideDetail();
-				// }
 				e.preventDefault();
-				getContent();
+				if($("#closeup:first").is(":hidden")) {
+					showPhoneDetail(phones[0]);
+				} else {
+					hideDetail();
+				}
 			});
 
 			$("#closeup_close").click(function(e) {
@@ -67,7 +65,7 @@
 			});
 
 			updateLayout(layout);
-			// setInterval(getContent, 2000);
+			setInterval(getContent, 2000);
 		});
 
 		function showPhoneDetail(phone) {
