@@ -408,6 +408,12 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
         mCamera = camera;
         if (mCamera != null) {
             mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
+            
+            Camera.Parameters p = camera.getParameters();
+            p.set("jpeg-quality", 70);
+            p.setPictureFormat(PixelFormat.JPEG);
+            p.setPictureSize(640, 480);
+            camera.setParameters(p);
             requestLayout();
         }
         Log.e(TAG, "Camera Set");
@@ -597,18 +603,18 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
           fos.write(a[0]);
           fos.close();
           
-    	  HttpPost httppost = new HttpPost("http://e-caffeine.net/nehil_sandbox/emer/post.php");
+    	  HttpPost httppost = new HttpPost("http://rter.cim.mcgill.ca:8080/multiup");
 
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
           multipartEntity.addPart("title", new StringBody("rTER"));
-          multipartEntity.addPart("phone_id", new StringBody(uid));
+          multipartEntity.addPart("phone_id", new StringBody("48ad32292ff86b4148e0f754c2b9b55efad32d1e")); //should be changed to uid
           multipartEntity.addPart("lat", new StringBody(lat));
-          multipartEntity.addPart("lon", new StringBody(lon));
+          multipartEntity.addPart("lng", new StringBody(lon));
           multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
-          
-          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
           Log.e("SavePhotoTask", "Upload executed");
+          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
+          
     	  
     	  
       } catch (java.io.IOException e) { 
