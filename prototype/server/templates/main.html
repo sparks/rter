@@ -145,15 +145,17 @@
 		}
 
 		function getContent() {
+			console.log("getting content");
 			$.ajax({
 				url: "/ajax/getlayout",
 				type: 'POST',
-				data: [],
+				data: JSON.stringify({}),
 				processData: false, //Prevent the data from being transformed into a query string
 				timeout: 1900,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
+					console.log("got content");
 					$("#offline").hide();
 					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
 						updatePhones(data.phones);
@@ -161,6 +163,9 @@
 					}
 				},
 				error: function(xhr, status, err) { 
+					// console.log(xhr);
+					console.log(status);
+					console.log(err);
 					$("#offline").show();
 				}
 			});
@@ -333,8 +338,8 @@
 	    var center = view.center;
 	    var radius = 2*view.size.width;
 	    var FOV = 30;
-		// var myCircle = new Path.Circle(center, radius);
-	    // myCircle.fillColor = new GrayColor(0.15, alpha);
+		var myCircle = new Path.Circle(center, radius);
+	    myCircle.fillColor = new GrayColor(0.15, alpha);
 
 	    var cone = new Path();
 	    cone.style = {
@@ -509,6 +514,12 @@
 			margin: 0px;
 			height: 300px;
 			width: 300px;
+		}
+
+		#view {
+			height: 620px;
+			max-width: 620px;
+			max-height: 620px;
 		}
 
 		#view img {
