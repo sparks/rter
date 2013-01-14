@@ -31,7 +31,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, _, err := database.Query("SELECT * FROM whitelist where phone_id = \"%v\";", phoneID)
+	rows, _, err := database.Query("SELECT * FROM phones where phone_id = \"%v\";", phoneID)
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
