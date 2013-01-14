@@ -585,19 +585,28 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 //    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
 //    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
     	
-    	// save in SD Card
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-    	String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
-    	
-    	photo=
-          new File(Environment.getExternalStorageDirectory()+"/rter/",
-                   "Scenephoto"+timeStamp+".jpg");
-    	Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
-      if (photo.exists()) {
-        photo.delete();
-      }
-
-      try {
+        //get the address of SD card and check if it exists and makes a folder rter
+        String root = (Environment.getExternalStorageDirectory()).toString();
+        File rootDir = new File(Environment
+                .getExternalStorageDirectory()
+                + File.separator + "rter" + File.separator);
+        rootDir.mkdirs();
+        if(root != null){
+        	Log.d("SavePhotoTask", "The address of the external storage is " + root );
+        	// save in SD Card
+        	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        	String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
+        	
+        	photo = new File(rootDir,"Scenephoto"+timeStamp+".jpg");
+        	Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
+          if (photo.exists()) {
+            photo.delete();
+          }
+        }
+        else{
+        	Log.e("SavePhotoTask", "SD card or anyother exernal storage doesnt esxist." );
+        }
+        try {
     	  FileOutputStream fos=new FileOutputStream(photo.getPath());
           
           fos.write(a[0]);
