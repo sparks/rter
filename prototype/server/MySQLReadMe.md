@@ -32,7 +32,7 @@ Run these commands to setup the MySQL databases for the rter project
 
 Some usefull commands.
 
-    INSERT INTO whitelist (phone_id) VALUES
+    INSERT INTO phone (phone_id) VALUES
 	    ("1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98"),
         ("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98"),
         ("b6200c5cc15cfbddde2874c40952a7aa25a869dd"),

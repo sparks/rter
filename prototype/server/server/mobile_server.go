@@ -21,6 +21,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Receiving Multiupload")
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
@@ -28,6 +29,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
+		fmt.Println("Invalid phone_id")
 		return
 	}
 
