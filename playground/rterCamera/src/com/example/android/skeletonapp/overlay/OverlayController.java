@@ -3,6 +3,7 @@ package com.example.android.skeletonapp.overlay;
 import java.util.Arrays;
 
 import com.example.android.skeletonapp.overlay.CameraGLRenderer.Indicate;
+import com.example.android.skeletonapp.util.*;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -41,11 +42,15 @@ public class OverlayController implements SensorEventListener {
 
 	// max orientation tolerance in degrees
 	public float orientationTolerance = 10.0f;
+	
+	private MovingAverage orientationFilter;
 
 	public OverlayController(Context context) {
 		this.context = context;
 		this.mGLView = new CameraGLSurfaceView(context);
 		this.mGLRenderer = this.mGLView.getGLRenderer();
+		
+		orientationFilter = new MovingAverage(20);
 	}
 
 	/**
@@ -139,7 +144,8 @@ public class OverlayController implements SensorEventListener {
 		SensorManager.getOrientation(outR, orientationValues);
 
 		// this angle tells us the orientation
-		this.currentOrientation = (float) Math.toDegrees(orientationValues[0]);
+		this.orientationFilter.pushValue((float) Math.toDegrees(orientationValues[0]));
+		this.currentOrientation = this.orientationFilter.getValue();
 
 		// this is not used currently, 90 when phone facing the sky, -90 when
 		// facing the ground
