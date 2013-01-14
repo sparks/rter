@@ -161,7 +161,7 @@ public class CameraGLRenderer implements Renderer {
 			// RIGHT ARROW
 			if(displayRight) {
 				gl.glLoadIdentity(); // Reset model-view matrix ( NEW )
-				gl.glTranslatef(xTotal / 2.0f - 15.0f / xTotal, 0.0f, -distance);
+				gl.glTranslatef(xTotal / 2.0f - 0.05f*xTotal, 0.0f, -distance);
 				gl.glScalef(arrowScale, arrowScale, 1.0f);
 				arrowRight.draw(gl); // Draw triangle ( NEW )
 			}
@@ -169,7 +169,7 @@ public class CameraGLRenderer implements Renderer {
 			// LEFT
 			if(displayLeft) {
 				gl.glLoadIdentity();
-				gl.glTranslatef(-xTotal / 2.0f + 15.0f / xTotal, 0.0f, -distance);
+				gl.glTranslatef(-xTotal / 2.0f + 0.05f*xTotal, 0.0f, -distance);
 				gl.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 				gl.glScalef(arrowScale, arrowScale, 1.0f);
 				arrowLeft.draw(gl); // Draw quad ( NEW )

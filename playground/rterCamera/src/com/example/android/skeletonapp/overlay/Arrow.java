@@ -15,9 +15,9 @@ public class Arrow {
 	private FloatBuffer vertexBuffer; // Buffer for vertex-array
 
 	private float[] vertices = { // Vertices for the arrow
-			0.0f, -1.0f, 0.0f, // 0. left-bottom
-			1.0f, 0.0f, 0.0f, // 1. right-bottom
-			0.0f, 1.0f, 0.0f, // 2. left-top
+			-1.0f, -1.0f, 0.0f, // 0. left-bottom
+			0.0f, 0.0f, 0.0f, // 1. right-bottom
+			-1.0f, 1.0f, 0.0f, // 2. left-top
 	};
 
 	// Constructor - Setup the vertex buffer
