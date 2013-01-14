@@ -251,16 +251,17 @@
 
 		var main_map;
 		var locations = new Array();
+		var montreal = new google.maps.LatLng(45.50745, -73.5793);
 
 		function initialize() {
 			var mainMapOptions = {
-				center: new google.maps.LatLng(45.50745, -73.5793),
+				center: montreal,
 				zoom: 10,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 			};
 
 			var closeupMapOptions = {
-				center: new google.maps.LatLng(45.50745, -73.5793),
+				center: montreal,
 				zoom: 18,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				disableDefaultUI: true,
@@ -300,6 +301,10 @@
 				position: new google.maps.LatLng(position.lat, position.lng),
 				map: main_map,
 				icon: new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
+			});
+			
+			google.maps.event.addListener(position.marker, 'click', function() {
+				// TODO: Do things like open the preview pane here.
 			});
 
 			locations.push(position);
