@@ -236,8 +236,11 @@
 
 			var closeupMapOptions = {
 				center: new google.maps.LatLng(45.50745, -73.5793),
-				zoom: 10,
+				zoom: 18,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				disableDefaultUI: true,
+				disableDoubleClickZoom: true,
+				draggable: false
 			};
 
 
@@ -320,51 +323,110 @@
 	<script type="text/paperscript" canvas="heading_selector">
 	    // Adapted from the following Processing example:
 	    // http://processing.org/learning/topics/follow3.html
-	    var center = view.center;
-	    var radius = 0.4*view.size.width;
-	    var FOV = 30;
-		var myCircle = new Path.Circle(center, radius);
-	    myCircle.fillColor = new GrayColor(0.15);
+	    var alpha = 0.7;
 
-	    var path = new Path();
-	    path.style = {
-	    	fillColor: new GrayColor(0.3),
-	    	strokeColor: new GrayColor(0.3),
+	    var center = view.center;
+	    var radius = 2*view.size.width;
+	    var FOV = 30;
+		// var myCircle = new Path.Circle(center, radius);
+	    // myCircle.fillColor = new GrayColor(0.15, alpha);
+
+	    var cone = new Path();
+	    cone.style = {
+	    	fillColor: new GrayColor(0.3, alpha),
+	    	strokeColor: new GrayColor(0.3, alpha),
 	    	strokeWidth: 1,
 	    	strokeCap: 'butt',
 	    	closed: true
 	    };
 
-		path.add(center);
-		var ray_vector = new Point(radius, 0);
-	    path.add(center + ray_vector.rotate(FOV));
-	    path.arcTo(center + ray_vector, center + ray_vector.rotate(-FOV));
+	    var cone_vector = new Point(radius, 0);
+		cone.add(center);
+	    cone.add(center + cone_vector.rotate(FOV));
+	    cone.arcTo(center + cone_vector, center + cone_vector.rotate(-FOV));
+
+	    var target = new Path();
+	    target.style = {
+	    	strokeColor: new RgbColor(0.6, 0, 0),
+	    	strokeWidth: 3,
+	    	strokeCap: 'round'
+	    };
+
+	    var target_vector = new Point(radius, 0);
+	    target.add(center);
+	    target.add(center+cone_vector);
+	    target.visible = false;
+
+	    placeLetter(center+new Point(0, radius+4), "S");
+	    placeLetter(center+new Point(0, -radius+4), "N");
+	    placeLetter(center+new Point(-radius, 0), "W");
+	    placeLetter(center+new Point(radius, 0), "E");
+
+	    var cutearrow = new Path();
+	    cutearrow.style = {
+	    	fillColor: new GrayColor(0.4),
+	    	strokeColor: new GrayColor(1),
+	    	strokeWidth: 2,
+	    	strokeCap: 'butt',
+	    	closed: true
+	    };
+
+	    var cutearrow_vector = new Point(radius, 0);
+	    cutearrow.add(center+new Point(6, 0));
+	    cutearrow.add(center+new Point(0, 12));
+	    cutearrow.add(center+new Point(-6, 0));
+	    cutearrow.add(center+new Point(0, 2));
+	    cutearrow.add(center+new Point(6, 0));
+
+	    cutearrow.scale(2);
+	    cutearrow.translate(0, 60);
+	    cutearrow.rotate(-90, center);
+
+	    function placeLetter(point, letter) {
+	    	var text = new PointText(point);
+	    	text.paragraphStyle.justification = 'center';
+	    	text.fillColor = 'black';
+	    	text.content = letter;
+	    }
+
+	    function coneTo(angle) {
+	    	cone.rotate(angle-cone_vector.angle, center);
+	    	cone_vector.angle = angle;
+	    }
+
+	    function targetTo(angle) {
+	    	target.rotate(angle-target_vector.angle, center);
+	    	target_vector.angle = angle;
+	    }
+
+	    function cutearrowTo(angle) {
+	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
+	    	cutearrow_vector.angle = angle;
+	    }
 
 	    function onMouseDown(event) {
-	    	path.rotate((event.point-center).angle-ray_vector.angle, center);
-	    	ray_vector.angle = (event.point-center).angle;
+		    mouseHandle(event);
 	    }
 
 	    function onMouseDrag(event) {
-	    	path.rotate((event.point-center).angle-ray_vector.angle, center);
-	    	ray_vector.angle = (event.point-center).angle;
+	    	mouseHandle(event);
 	    }
 
-	    // var text = new PointText(start+new Point(0, 90));
-	    // text.paragraphStyle.justification = 'center';
-	    // text.characterStyle.fontSize = 15;
-	    // text.fillColor = 'black';
+	    function mouseHandle(event) {
+	    	cutearrowTo((event.point-center).angle);
+	    }
 
-	    // var symbol = new Symbol(text);
-
-	    // // Set the initial content of the text item:
-	    // text.content = 'S';
-
-	    // s1 = symbol.place(start+new Point(0, 90))
-
-	    // s2 = symbol.place(start+new Point(0, -90))
-	    // console.log(s2);
-	    // s2.content="N";
+	    function onFrame(event) {
+	    	if(Math.abs(cutearrow_vector.angle-cone_vector.angle) > FOV) {
+		    	if(event.count%60 < 30) {
+		    		cutearrow.strokeColor = new RgbColor(0.8, 0, 0);
+		    	} else {
+		    		cutearrow.strokeColor = new GrayColor(1);
+		    	}
+		    } else {
+		    	cutearrow.strokeColor = new GrayColor(1);
+		    }
+	    }
     </script>
 
 	<style type="text/css">
@@ -426,16 +488,18 @@
 
 		#heading_selector {
 			position: absolute;
-			top: 0px;
+			top: 170px;
 			left: 665px;
 			margin: 0px;
 			height: 300px;
 			width: 300px;
+			z-index: 2;
 		}
 
 		#closeup_map_canvas {
+			z-index: 1;
 			position: absolute;
-			top: 320px;
+			top: 170px;
 			left: 665px;
 			margin: 0px;
 			height: 300px;
