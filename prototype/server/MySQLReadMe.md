@@ -10,7 +10,7 @@ Run these commands to setup the MySQL databases for the rter project
          timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
          filepath VARCHAR(256) NOT NULL,
          geolat DECIMAL(9,6),
-         geolong DECIMAL(9,6)
+         geolng DECIMAL(9,6)
     );
     
     CREATE TABLE whitelist (
