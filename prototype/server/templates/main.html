@@ -16,7 +16,11 @@
 			return this.push.apply(this, rest);
 		};
 
-		var was_dragged, gridster, layout, phones, pushing;
+		var gridster;
+		var was_dragged, pushing;
+
+		var selected_widget;
+		var layout, phones;
 
 		$.ajaxSetup ({
 			cache: false
@@ -50,34 +54,18 @@
 				addPhoneAsWidget(phones[i]);
 			}
 
-			$("#test").click(function(e) {
-				e.preventDefault();
-				if($("#closeup:first").is(":hidden")) {
-					showPhoneDetail(phones[0]);
-				} else {
-					hideDetail();
-				}
-			});
-
 			$("#closeup_close").click(function(e) {
 				e.preventDefault();
 				hideDetail();
+				clearSelectedWidget();
 			});
 
 			updateLayout(layout);
 			setInterval(getContent, 2000);
 		});
 
-		function showPhoneDetail(phone) {
-			// var $i = $("<img />");
-			// $i.attr("src", phone.filepath);
-			// $i.height(400);
-			// $i.css("margin", "auto");
-			// $i.css("max-width", 400);
-			// $i.css("max-height", 400);
-
-			// $("#closeup > div").append($i);
-
+		function showDetail($w) {
+			$("#view > img").attr("src", $w.data('content').filepath);
 			$("#closeup").slideDown("fast");
 		}
 
@@ -85,6 +73,20 @@
 			$("#closeup").slideUp("fast", function() {
 				// $("#closeup > div").empty();
 			});
+		}
+
+		function refreshDetail() {
+			if(selected_widget != null) {
+				$i = $("#view > img");
+				if($i.attr("src") != selected_widget.data('content').filepath) {
+					$i.data("next_src",  selected_widget.data('content').filepath);
+					$i.fadeOut("fast", function() {
+						$(this).attr('src', $(this).data("next_src"));
+						$(this).removeData("next_src");
+						$(this).fadeIn("fast");
+					});
+				}
+			}
 		}
 
 		function addPhoneAsWidget(phone) {
@@ -95,6 +97,7 @@
 			a.attr('href', '#');
 			var li = $(document.createElement('li')).append(a);
 			li.attr('content_id', phone.content_id)
+			li.data('content', phone)
 			gridster.add_widget(li, 1, 1);
 		}
 
@@ -110,18 +113,31 @@
 			e.preventDefault();
 			if(was_dragged) {
 				was_dragged = false;
-
 				if(gridster.$changed != null && (gridster.$changed).length > 0) {
 					// pushLayout(gridster.serialize());
 					pushLayout(gridster.serialize_changed());
 				}
 			} else {
-				if($(this).parent().css("border-width") == "0px") {
-					$(this).parent().css("border", "3px solid red");
-					// $("#output").text($(this).parent().css("padding"));
-				} else {
-					$(this).parent().css("border", "none");
-				}
+				selectWidget($(this).parent());
+			}
+		}
+
+		function selectWidget($w) {
+			if(selected_widget == null || (selected_widget != null && selected_widget.attr("content_id") != $w.attr("content_id"))) {
+				$w.css("border", "3px solid #33D011");
+				clearSelectedWidget();
+				showDetail($w);
+				selected_widget = $w;
+			} else {
+				hideDetail();
+				clearSelectedWidget();
+			}
+		}
+
+		function clearSelectedWidget() {
+			if(selected_widget != null) {
+				selected_widget.css("border", "none");
+				selected_widget = null;
 			}
 		}
 
@@ -168,10 +184,13 @@
 
 		function updatePhones(updated_phones) {
 			for(var i = 0;i < updated_phones.length;i++) {
+				$w = $("[content_id='"+updated_phones[i].content_id+"']");
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
 				if($i.length == 0) {
 					addPhoneAsWidget(updated_phones[i]);
 				} else if($i.attr("src") != updated_phones[i].filepath) {
+					$w.data('content', updated_phones[i]);
+
 					$i.data("next_src",  updated_phones[i].filepath);
 					$i.fadeOut("fast", function() {
 						$(this).attr('src', $(this).data("next_src"));
@@ -188,6 +207,7 @@
 			phones = updated_phones;
 
 			checkOnScreen();
+			refreshDetail();
 		}
 
 		function updateLayout(updated_layout) {
@@ -326,8 +346,6 @@
 	<script type="text/javascript" src="resources/paper.js"></script>
 
 	<script type="text/paperscript" canvas="heading_selector">
-	    // Adapted from the following Processing example:
-	    // http://processing.org/learning/topics/follow3.html
 	    var alpha = 0.7;
 
 	    var center = view.center;
@@ -467,6 +485,7 @@
 
 		.gridster ul li {
 			vertical-align: middle;
+			border: none;
 		}
 
 		.gridster ul li img {
@@ -485,7 +504,7 @@
 
 		#closeup {
 			border-bottom: none;
-			/*display: non*/;
+			display: none;
 		}
 
 		#closeup .container {
