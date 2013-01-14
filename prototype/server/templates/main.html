@@ -7,7 +7,7 @@
 	<script type="text/javascript" src="resources/jquery.gridster.js"></script>
 	<link rel="stylesheet" type="text/css" href="resources/jquery.gridster.css">
 
-	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&sensor=false"></script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
 
 	<script type="text/javascript">
 		Array.prototype.remove = function(from, to) {
@@ -30,7 +30,6 @@
 			phones = {{.Phones}};
 			layout = {{.Layout}};
 
-			$(".gridster > ul").width((140+20)*6);
 
 			//Build gridster
 			gridster = $(".gridster > ul").gridster({
@@ -39,7 +38,8 @@
 				serialize_params: function($w, wgd) { return { content_id: $w.attr('content_id'), col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y } }
 			}).data('gridster');
 
-			gridster.cols = 6 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
+			gridster.cols = 4 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
+			$(".gridster > ul").width(gridster.min_widget_width*gridster.cols);
 
 			if(phones.length == 0) {
 				$(".gridster").append("<div class='error'>No Content Available</div>");
@@ -47,47 +47,84 @@
 
 			//Add all the widget without worrying about layout
 			for(var i = 0;i < phones.length;i++) {
-				var img = $(document.createElement('img')).attr('src', phones[i].filepath);
-				var a = $(document.createElement('a')).append(img);
-				a.attr('href', '#');
-				var li = $(document.createElement('li')).append(a);
-				li.attr('content_id', phones[i].content_id)
-				gridster.add_widget(li, 1, 1);
+				addPhoneAsWidget(phones[i]);
 			}
+
+			$("#test").click(function(e) {
+				e.preventDefault();
+				if($("#closeup:first").is(":hidden")) {
+					showPhoneDetail(phones[0]);
+				} else {
+					hideDetail();
+				}
+			});
+
+			$("#closeup_close").click(function(e) {
+				e.preventDefault();
+				hideDetail();
+			});
 
 			updateLayout(layout);
 			setInterval(getContent, 2000);
-
-			//Handle click in a useful way
-			$(".gridster > ul > li > a").click(function(e) {
-				e.preventDefault();
-				if(was_dragged) {
-					was_dragged = false;
-
-					if(gridster.$changed != null && (gridster.$changed).length > 0) {
-						// pushLayout(gridster.serialize());
-						pushLayout(gridster.serialize_changed());
-					}
-				} else {
-					if($(this).parent().css("border-width") == "0px") {
-						$(this).parent().css("border", "3px solid red");
-						// $("#output").text($(this).parent().css("padding"));
-					} else {
-						$(this).parent().css("border", "none");
-					}
-				}
-			});
-
-			//Track dragging
-			$(".gridster > ul > li > a").mouseup(function(e) {
-				if($(this).parent().hasClass("dragging")) {
-					was_dragged = true;
-				} else {
-					was_dragged = false;
-				}
-			});
 		});
-		
+
+		function showPhoneDetail(phone) {
+			// var $i = $("<img />");
+			// $i.attr("src", phone.filepath);
+			// $i.height(400);
+			// $i.css("margin", "auto");
+			// $i.css("max-width", 400);
+			// $i.css("max-height", 400);
+
+			// $("#closeup > div").append($i);
+
+			$("#closeup").slideDown("fast");
+		}
+
+		function hideDetail() {
+			$("#closeup").slideUp("fast", function() {
+				// $("#closeup > div").empty();
+			});
+		}
+
+		function addPhoneAsWidget(phone) {
+			var img = $(document.createElement('img')).attr('src', phone.filepath);
+			var a = $(document.createElement('a')).append(img);
+			a.click(widgetClickFunction);
+			a.mouseup(widgetMouseUpFunction);
+			a.attr('href', '#');
+			var li = $(document.createElement('li')).append(a);
+			li.attr('content_id', phone.content_id)
+			gridster.add_widget(li, 1, 1);
+		}
+
+		function widgetMouseUpFunction(e) {
+			if($(this).parent().hasClass("dragging")) {
+				was_dragged = true;
+			} else {
+				was_dragged = false;
+			}
+		}
+
+		function widgetClickFunction(e) {
+			e.preventDefault();
+			if(was_dragged) {
+				was_dragged = false;
+
+				if(gridster.$changed != null && (gridster.$changed).length > 0) {
+					// pushLayout(gridster.serialize());
+					pushLayout(gridster.serialize_changed());
+				}
+			} else {
+				if($(this).parent().css("border-width") == "0px") {
+					$(this).parent().css("border", "3px solid red");
+					// $("#output").text($(this).parent().css("padding"));
+				} else {
+					$(this).parent().css("border", "none");
+				}
+			}
+		}
+
 		function pushLayout(layout) {
 			pushing = true;
 			$.ajax({
@@ -108,15 +145,17 @@
 		}
 
 		function getContent() {
+			console.log("getting content");
 			$.ajax({
 				url: "/ajax/getlayout",
 				type: 'POST',
-				data: [],
+				data: JSON.stringify({}),
 				processData: false, //Prevent the data from being transformed into a query string
 				timeout: 1900,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
+					console.log("got content");
 					$("#offline").hide();
 					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
 						updatePhones(data.phones);
@@ -124,6 +163,9 @@
 					}
 				},
 				error: function(xhr, status, err) { 
+					// console.log(xhr);
+					console.log(status);
+					console.log(err);
 					$("#offline").show();
 				}
 			});
@@ -132,15 +174,25 @@
 		function updatePhones(updated_phones) {
 			for(var i = 0;i < updated_phones.length;i++) {
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
-				$i.attr('src', updated_phones[i].filepath);
+				if($i.length == 0) {
+					addPhoneAsWidget(updated_phones[i]);
+				} else if($i.attr("src") != updated_phones[i].filepath) {
+					$i.data("next_src",  updated_phones[i].filepath);
+					$i.fadeOut("fast", function() {
+						$(this).attr('src', $(this).data("next_src"));
+						$(this).removeData("next_src");
+						$(this).fadeIn("fast");
+					});
+				}
+
 				if(!updateMarker(updated_phones[i])) {
 					addMarker(updated_phones[i]);
 				}
 			}
 
-			checkOnScreen();
-
 			phones = updated_phones;
+
+			checkOnScreen();
 		}
 
 		function updateLayout(updated_layout) {
@@ -182,25 +234,36 @@
 			layout = updated_layout;
 		}
 
-		var map;
+		var main_map;
 		var locations = new Array();
 
 		function initialize() {
-			var mapOptions = {
+			var mainMapOptions = {
 				center: new google.maps.LatLng(45.50745, -73.5793),
 				zoom: 10,
-				mapTypeId: google.maps.MapTypeId.ROADMAP
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
 			};
 
-			map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-						
-			google.maps.event.addListener(map, 'bounds_changed', function() {
+			var closeupMapOptions = {
+				center: new google.maps.LatLng(45.50745, -73.5793),
+				zoom: 18,
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				disableDefaultUI: true,
+				disableDoubleClickZoom: true,
+				draggable: false
+			};
+
+
+			main_map = new google.maps.Map(document.getElementById("main_map_canvas"), mainMapOptions);
+			closeup_map = new google.maps.Map(document.getElementById("closeup_map_canvas"), closeupMapOptions);
+	
+			google.maps.event.addListener(main_map, 'bounds_changed', function() {
 				checkOnScreen();
 			});
 		}
 
 		function checkOnScreen() {
-			bounds = map.getBounds();
+			bounds = main_map.getBounds();
 
 			for(var i = 0;i < phones.length;i++) {
 				$el = $("[content_id='"+phones[i].content_id+"'] > a > img").first();
@@ -220,7 +283,7 @@
 			
 			position.marker = new google.maps.Marker({
 				position: new google.maps.LatLng(position.lat, position.lng),
-				map: map,
+				map: main_map,
 				icon: new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
 			});
 
@@ -264,37 +327,248 @@
 			return false;
 		}
 	</script>
+
+	<script type="text/javascript" src="resources/paper.js"></script>
+
+	<script type="text/paperscript" canvas="heading_selector">
+	    // Adapted from the following Processing example:
+	    // http://processing.org/learning/topics/follow3.html
+	    var alpha = 0.7;
+
+	    var center = view.center;
+	    var radius = 2*view.size.width;
+	    var FOV = 30;
+		var myCircle = new Path.Circle(center, radius);
+	    myCircle.fillColor = new GrayColor(0.15, alpha);
+
+	    var cone = new Path();
+	    cone.style = {
+	    	fillColor: new GrayColor(0.3, alpha),
+	    	strokeColor: new GrayColor(0.3, alpha),
+	    	strokeWidth: 1,
+	    	strokeCap: 'butt',
+	    	closed: true
+	    };
+
+	    var cone_vector = new Point(radius, 0);
+		cone.add(center);
+	    cone.add(center + cone_vector.rotate(FOV));
+	    cone.arcTo(center + cone_vector, center + cone_vector.rotate(-FOV));
+
+	    var target = new Path();
+	    target.style = {
+	    	strokeColor: new RgbColor(0.6, 0, 0),
+	    	strokeWidth: 3,
+	    	strokeCap: 'round'
+	    };
+
+	    var target_vector = new Point(radius, 0);
+	    target.add(center);
+	    target.add(center+cone_vector);
+	    target.visible = false;
+
+	    placeLetter(center+new Point(0, radius+4), "S");
+	    placeLetter(center+new Point(0, -radius+4), "N");
+	    placeLetter(center+new Point(-radius, 0), "W");
+	    placeLetter(center+new Point(radius, 0), "E");
+
+	    var cutearrow = new Path();
+	    cutearrow.style = {
+	    	fillColor: new GrayColor(0.4),
+	    	strokeColor: new GrayColor(1),
+	    	strokeWidth: 2,
+	    	strokeCap: 'butt',
+	    	closed: true
+	    };
+
+	    var cutearrow_vector = new Point(radius, 0);
+	    cutearrow.add(center+new Point(6, 0));
+	    cutearrow.add(center+new Point(0, 12));
+	    cutearrow.add(center+new Point(-6, 0));
+	    cutearrow.add(center+new Point(0, 2));
+	    cutearrow.add(center+new Point(6, 0));
+
+	    cutearrow.scale(2);
+	    cutearrow.translate(0, 60);
+	    cutearrow.rotate(-90, center);
+
+	    function placeLetter(point, letter) {
+	    	var text = new PointText(point);
+	    	text.paragraphStyle.justification = 'center';
+	    	text.fillColor = 'black';
+	    	text.content = letter;
+	    }
+
+	    function coneTo(angle) {
+	    	cone.rotate(angle-cone_vector.angle, center);
+	    	cone_vector.angle = angle;
+	    }
+
+	    function targetTo(angle) {
+	    	target.rotate(angle-target_vector.angle, center);
+	    	target_vector.angle = angle;
+	    }
+
+	    function cutearrowTo(angle) {
+	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
+	    	cutearrow_vector.angle = angle;
+	    }
+
+	    function onMouseDown(event) {
+		    mouseHandle(event);
+	    }
+
+	    function onMouseDrag(event) {
+	    	mouseHandle(event);
+	    }
+
+	    function mouseHandle(event) {
+	    	cutearrowTo((event.point-center).angle);
+	    }
+
+	    function onFrame(event) {
+	    	if(Math.abs(cutearrow_vector.angle-cone_vector.angle) > FOV) {
+		    	if(event.count%60 < 30) {
+		    		cutearrow.strokeColor = new RgbColor(0.8, 0, 0);
+		    	} else {
+		    		cutearrow.strokeColor = new GrayColor(1);
+		    	}
+		    } else {
+		    	cutearrow.strokeColor = new GrayColor(1);
+		    }
+	    }
+    </script>
+
 	<style type="text/css">
 		body {
 			background-color: rgb(240, 240, 240);
-			/*background-color: rgb(255, 255, 255);*/
-			margin: 0px auto 25px auto;
+			margin: 0px auto 75px auto;
 			text-align: center;
 			font-family: Arial;
 		}
 
-		.gridster {
+		.stripe {
 			background-color: rgb(255, 255, 255);
 			border-top: 1px solid rgb(170, 170, 170);
 			border-bottom: 1px solid rgb(170, 170, 170);
-			margin: 75px auto 25px auto;
+			margin: 0px;
+			padding: 10px 0px 10px 0px;
+			min-width: 995px;
+		}
+
+		.container {
+			position: relative;
+			margin: 0px auto 0px auto;
 			text-align: left;
-			min-width: 1000px;
+			width: 975px;
 		}
 
 		.gridster ul {
-			margin: 25px 0px 25px 60px;
-			list-style: none;
+			margin: 0px;
 			padding: 0px;
+			list-style: none;
 		}
 
 		.gridster ul li {
-			background-color: rgb(255, 255, 255);
+			vertical-align: middle;
 		}
 
 		.gridster ul li img {
 			max-width: 140px;
 			max-height: 140px;
+		}
+
+		#main_map_canvas {
+			position: absolute;
+			top: 10px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+		}
+
+		#closeup {
+			border-bottom: none;
+			/*display: non*/;
+		}
+
+		#closeup .container {
+			margin: 10px auto 10px auto;
+		}
+
+		#heading_selector {
+			position: absolute;
+			top: 170px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+			z-index: 2;
+		}
+
+		#closeup_map_canvas {
+			z-index: 1;
+			position: absolute;
+			top: 170px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+		}
+
+		#view {
+			height: 620px;
+			max-width: 620px;
+			max-height: 620px;
+		}
+
+		#view img {
+			height: 620px;
+			margin-left: 10px;
+			max-width: 620px;
+			max-height: 620px;
+		}
+
+		#closeup_close {
+			position: absolute;
+			top: 0px;
+			left: 990px;
+			font-size: 10pt;
+		}
+
+		#closeup_close a:link, #closeup_close a:active, #closeup_close a:visited {
+			text-decoration: none;
+			color: rgb(75, 75, 75);
+		}
+
+		#closeup_close a:hover {
+			text-decoration: underline;
+		}
+
+		#header {
+			text-align: left;
+			margin: 0px auto 40px auto;
+		}
+
+		#titleblock {
+			margin: 10px 0px 0px 80px;
+		}
+
+		#rter {
+			margin: 0px 0px 0px 20px;
+			float: left;
+		}
+
+		#titleblock h2 {
+			margin: 0px;
+			padding-top: 7px;
+			font-size: 11pt;
+		}
+
+		#titleblock p {
+			font-size: 9pt;
+			margin: 0px;
+			padding: 0px;
 		}
 
 		#output {
@@ -321,44 +595,20 @@
 			z-index: 100;
 		}
 
-		#header {
-			text-align: left;
-			margin: auto;
-		}
-
-		#titleblock {
-			margin: 10px 0px 0px 80px;
-		}
-
-		#rter {
-			margin: 0px 0px 0px 20px;
-			float: left;
-		}
-
-		#titleblock h2 {
-			margin: 0px;
-			padding-top: 7px;
-			font-size: 11pt;
-		}
-
-		#titleblock p {
-			font-size: 9pt;
-			margin: 0px;
-			padding: 0px;
-		}
-
-		#map_canvas {
-			position: absolute;
-			top: 35px;
-			left: 1100px;
-			margin: 0px;
-			height: 300px;
-			width: 300px;
+		#test {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			padding: 10px;
+			background-color: rgb(0, 0, 0);
+			color: rgb(255, 255, 255);
 		}
 	</style>
 </head>
 <body>
 	<div id="offline">Cannot Reach Server!</div>
+
+	<div><a href="#" id="test">Test</a></div>
 
 	<div id="header">
 		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
@@ -371,11 +621,20 @@
 
 	<div id="debug"></div>
 
-
-	<div class="gridster">
-		<div id="map_canvas"></div>
-		<ul>
-		</ul>
+	<div class="stripe" id="closeup">
+		<div class="container">
+			<div id="view"><img src="images/e1830fcefc3f47647ffa08350348d7e34b142b0b/1358118755088279000.png" /></div>
+			<canvas id="heading_selector" width="300" height="300"></canvas>
+			<div id="closeup_map_canvas"></div>
+			<div id="closeup_close"><a href="#">[close]</a></div>
+		</div>
+	</div>
+	<div class="stripe">
+		<div class="container gridster">
+			<ul>
+			</ul>
+			<div id="main_map_canvas"></div>
+		</div>
 	</div>
 </body>
 </html>

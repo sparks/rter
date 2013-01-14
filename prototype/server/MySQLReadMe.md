@@ -10,7 +10,7 @@ Run these commands to setup the MySQL databases for the rter project
          timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
          filepath VARCHAR(256) NOT NULL,
          geolat DECIMAL(9,6),
-         geolong DECIMAL(9,6)
+         geolng DECIMAL(9,6)
     );
     
     CREATE TABLE whitelist (
@@ -28,9 +28,10 @@ Run these commands to setup the MySQL databases for the rter project
     );
 
 
-Some usefull commands
+Some usefull commands.
 
     INSERT INTO whitelist (phone_id) VALUES
+	    ("1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98"),
         ("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98"),
         ("b6200c5cc15cfbddde2874c40952a7aa25a869dd"),
         ("852decd1fbc083cf6853e46feebb08622d653602"),
