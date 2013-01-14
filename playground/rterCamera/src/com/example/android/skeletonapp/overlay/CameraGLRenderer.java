@@ -25,12 +25,17 @@ public class CameraGLRenderer implements Renderer {
 	float aspect;
 	float xTotal, yTotal, distance;
 
-	float arrowScaleSpeed = 0.05f;
-	float arrowScaleSpeedMin = 0.008f;
 	float arrowScale = 1.0f;
 	float arrowScaleMax = 1.2f;
 	float arrowScaleMin = 0.2f;
-	boolean arrowScaleIncrease = true;
+	
+	// pulsating variables
+	float arrowPulsateScale = 1.0f;
+	float arrowPulsateSpeed = 0.1f;
+	float arrowPulsateSpeedMin = 0.008f;
+	float arrowPulsateMax = 1.2f;
+	float arrowPulsateMin = 0.9f;
+	boolean arrowPulsateIncrease = true;
 
 	boolean displayLeft = false;
 	boolean displayRight = false;
@@ -133,25 +138,27 @@ public class CameraGLRenderer implements Renderer {
 		// ......
 
 		// pulsate arrows
-//		if (arrowScaleIncrease) {
-//			float speed = (arrowScaleMax - arrowScale) * arrowScaleSpeed;
-//			if (speed < arrowScaleSpeedMin)
-//				speed = arrowScaleSpeedMin;
-//			arrowScale += speed;
-//			if (arrowScale >= arrowScaleMax) {
-//				arrowScale = arrowScaleMax;
-//				arrowScaleIncrease = false;
-//			}
-//		} else {
-//			float speed = (arrowScale - arrowScaleMin) * arrowScaleSpeed;
-//			if (speed < arrowScaleSpeedMin)
-//				speed = arrowScaleSpeedMin;
-//			arrowScale -= speed;
-//			if (arrowScale <= arrowScaleMin) {
-//				arrowScale = arrowScaleMin;
-//				arrowScaleIncrease = true;
-//			}
-//		}
+		if (arrowPulsateIncrease) {
+			float speed = (arrowPulsateMax - arrowPulsateScale) * arrowPulsateSpeed;
+			if (speed < arrowPulsateSpeedMin)
+				speed = arrowPulsateSpeedMin;
+			arrowPulsateScale += speed;
+			if (arrowPulsateScale >= arrowPulsateMax) {
+				arrowPulsateScale = arrowPulsateMax;
+				arrowPulsateIncrease = false;
+			}
+		} else {
+			float speed = (arrowPulsateScale - arrowPulsateMin) * arrowPulsateSpeed;
+			if (speed < arrowPulsateSpeedMin)
+				speed = arrowPulsateSpeedMin;
+			arrowPulsateScale -= speed;
+			if (arrowPulsateScale <= arrowPulsateMin) {
+				arrowPulsateScale = arrowPulsateMin;
+				arrowPulsateIncrease = true;
+			}
+		}
+		
+		float arrowScale_tmp = arrowPulsateScale * arrowScale;
 
 		synchronized(lock) {
 			// FRAME
@@ -161,17 +168,17 @@ public class CameraGLRenderer implements Renderer {
 			// RIGHT ARROW
 			if(displayRight) {
 				gl.glLoadIdentity(); // Reset model-view matrix ( NEW )
-				gl.glTranslatef(xTotal / 2.0f - 0.05f*xTotal, 0.0f, -distance);
-				gl.glScalef(arrowScale, arrowScale, 1.0f);
+				gl.glTranslatef(xTotal / 2.0f - 0.1f*xTotal, 0.0f, -distance);
+				gl.glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
 				arrowRight.draw(gl); // Draw triangle ( NEW )
 			}
 
 			// LEFT
 			if(displayLeft) {
 				gl.glLoadIdentity();
-				gl.glTranslatef(-xTotal / 2.0f + 0.05f*xTotal, 0.0f, -distance);
+				gl.glTranslatef(-xTotal / 2.0f + 0.1f*xTotal, 0.0f, -distance);
 				gl.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-				gl.glScalef(arrowScale, arrowScale, 1.0f);
+				gl.glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
 				arrowLeft.draw(gl); // Draw quad ( NEW )
 			}
 		}
