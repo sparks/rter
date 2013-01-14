@@ -171,8 +171,13 @@
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
 				if($i.length == 0) {
 					addPhoneAsWidget(updated_phones[i]);
-				} else {
-					$i.attr('src', updated_phones[i].filepath);
+				} else if($i.attr("src") != updated_phones[i].filepath) {
+					$i.data("next_src",  updated_phones[i].filepath);
+					$i.fadeOut("fast", function() {
+						$(this).attr('src', $(this).data("next_src"));
+						$(this).removeData("next_src");
+						$(this).fadeIn("fast");
+					});
 				}
 
 				if(!updateMarker(updated_phones[i])) {
