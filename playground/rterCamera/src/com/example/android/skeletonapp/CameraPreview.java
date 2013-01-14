@@ -28,12 +28,13 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
-import android.location.Location;
-import android.location.LocationListener;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
@@ -95,6 +96,9 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     private Preview mPreview;
     private FrameLayout mFrame; //need this to merge camera preview and openGL view
     private CameraGLSurfaceView mGLView;
+    OverlayController overlay;
+    SensorManager mSensorManager;
+    Sensor mAcc, mMag;
     Camera mCamera;
     int numberOfCameras;
     int cameraCurrentlyLocked;
@@ -110,6 +114,9 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     private LocationManager locationManager;
     private String provider;
     
+    // to prevent sleeping
+    PowerManager pm;
+    PowerManager.WakeLock wl;
     
     private static final String TAG = "CameraPreview Activity";
 	protected static final String MEDIA_TYPE_IMAGE = null;	
@@ -120,6 +127,14 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         // Hide the window title.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // openGL overlay
+        overlay = new OverlayController(this);
+        
+        // orientation
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         
         //the frame layout will contain the camera preview and the gl view
         mFrame = new FrameLayout(this);
@@ -129,7 +144,7 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         mPreview = new Preview(this);
         
         // openGLview
-        mGLView = new CameraGLSurfaceView(this);
+        mGLView = overlay.getGLView();
         
         
         TelephonyManager tManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
@@ -176,7 +191,13 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     	   	} 
     	 }
     	 
-  	       
+    	 // power mangaer
+    	 pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    	 wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG);
+    	 
+    	 // test, set desired orienation to north
+    	 this.overlay.letFreeRoam(false);
+    	 this.overlay.setDesiredOrientation(0.0f);
             
     }
     
@@ -228,6 +249,13 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         mCamera = Camera.open();
         cameraCurrentlyLocked = defaultCameraId;
         mPreview.setCamera(mCamera);
+
+        //sensors
+        mSensorManager.registerListener(overlay, mAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(overlay, mMag, SensorManager.SENSOR_DELAY_NORMAL);
+        
+        //acquire wake lock to make sure camera preview remains on and bright
+        wl.acquire();
     }
 
     @Override
@@ -243,44 +271,49 @@ public class CameraPreview extends Activity implements OnClickListener, Location
             mCamera = null;
             mPreview.inPreview = false;
         }
+
+        mSensorManager.unregisterListener(overlay);
+        
+      //release wake lock to allow phone to sleep
+        wl.release();
     }
 
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		 Log.e(TAG, "onClick");
-		 isFPS = !isFPS;
-		 Log.e(TAG, "onClick changes isFPS : " + isFPS);
-		 if(isFPS){
-			 
-			 mCamera.takePicture(null, null, photoCallback);
-			 Log.d(TAG, "takrpicture called");
-			 mPreview.inPreview = false;
-		 }
+		Log.e(TAG, "onClick");
+		isFPS = !isFPS;
+		Log.e(TAG, "onClick changes isFPS : " + isFPS);
+		if (isFPS) {
+
+			mCamera.takePicture(null, null, photoCallback);
+			Log.d(TAG, "takrpicture called");
+			mPreview.inPreview = false;
+		}
 
 	}
 	
 	Camera.PictureCallback photoCallback=new Camera.PictureCallback() {
-	    public void onPictureTaken(byte[] data, Camera camera) {
-	    	Log.e(TAG, "Inside Picture Callback");
-	    	new SavePhotoTask().execute(data, uid, lat, lon);
-	      camera.startPreview();
-	      mPreview.inPreview=true;
-	      
-	    try {
-	    	    	
-			Thread.sleep(5000);
-			if(isFPS){
-				Log.d(TAG, "Picture taken");
-				mCamera.takePicture(null, null, photoCallback);
-			}
-			
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	       
-	    }
-	  };
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Log.e(TAG, "Inside Picture Callback");
+            new SavePhotoTask().execute(data, uid, lat, lon);
+          camera.startPreview();
+          mPreview.inPreview=true;
+
+        try {
+
+            Thread.sleep(5000);
+            if(isFPS){
+                Log.d(TAG, "Picture taken");
+                mCamera.takePicture(null, null, photoCallback);
+            }
+
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        }
+      };
 	  
 	  public byte[] convertStringToByteArray(String s) {
 	        
@@ -370,10 +403,8 @@ public class CameraPreview extends Activity implements OnClickListener, Location
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
-		
 	}
 }
-
 
 // ----------------------------------------------------------------------
 
@@ -408,6 +439,12 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
         mCamera = camera;
         if (mCamera != null) {
             mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
+            
+            Camera.Parameters p = camera.getParameters();
+            p.set("jpeg-quality", 70);
+            p.setPictureFormat(PixelFormat.JPEG);
+            p.setPictureSize(640, 480);
+            camera.setParameters(p);
             requestLayout();
         }
         Log.e(TAG, "Camera Set");
@@ -432,8 +469,8 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
         // We purposely disregard child measurements because act as a
         // wrapper to a SurfaceView that centers the camera preview instead
         // of stretching it.
-    	Log.e(TAG, "onMeasure");
-    	final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+        Log.e(TAG, "onMeasure");
+        final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
         final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
         setMeasuredDimension(width, height);
 
@@ -444,8 +481,8 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-    	Log.e(TAG, "onLayout");
-    	if (changed && getChildCount() > 0) {
+        Log.e(TAG, "onLayout");
+        if (changed && getChildCount() > 0) {
             final View child = getChildAt(0);
 
             final int width = r - l;
@@ -474,8 +511,8 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
     public void surfaceCreated(SurfaceHolder holder) {
         // The Surface has been created, acquire the camera and tell it where
         // to draw.
-    	
-    	try {
+        
+        try {
             if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
                 Log.e(TAG, "setPreviewDisplay(holder)");
@@ -530,12 +567,12 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // Now that the size is known, set up the camera parameters and begin
         // the preview.
-    	if (inPreview) {
+        if (inPreview) {
             mCamera.stopPreview();
             
         }
-    	
-    	Camera.Parameters parameters = mCamera.getParameters();
+        
+        Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
         requestLayout();
         mCamera.setParameters(parameters);
@@ -547,70 +584,79 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback  {
 
 class SavePhotoTask extends AsyncTask<byte[], String, String> {
     
-	private DefaultHttpClient mHttpClient;
-	private File photo;
-	
-	@Override
-	protected void onPostExecute (String result) {
-		//delete the uploaded picture to free memory
-		Log.d("SavePhotoTask", "Upload Complete");
-		if (photo.exists()) {
-	        photo.delete();
-	      }
-		Log.d("SavePhotoTask", "Photo deleted");
-		
-		
-	}
-	@Override
+    private DefaultHttpClient mHttpClient;
+    private File photo;
+
+    @Override
+    protected void onPostExecute (String result) {
+        //delete the uploaded picture to free memory
+        Log.d("SavePhotoTask", "Upload Complete");
+        if (photo.exists()) {
+            photo.delete();
+          }
+        Log.d("SavePhotoTask", "Photo deleted");
+
+
+    }
+    @Override
     protected String doInBackground(byte[]... a) {
-		
-		String uid = new String(a[1]);
-		String lat = new String(a[2]);
-		String lon = new String(a[3]);
-		
-		Log.d("SavePhotoTask", "phone id "+uid+" lat: "+lat +" lon: " + lon);
-		HttpParams params = new BasicHttpParams();
+
+        String uid = new String(a[1]);
+        String lat = new String(a[2]);
+        String lon = new String(a[3]);
+
+        Log.d("SavePhotoTask", "phone id "+uid+" lat: "+lat +" lon: " + lon);
+        HttpParams params = new BasicHttpParams();
         params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
         mHttpClient = new DefaultHttpClient(params);
-		
-        
-        
-		
-//    	String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
-//    	Log.e("SavePhotoTask", "Base64 string is :" + temp);
-    	
-    	// save in SD Card
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-    	String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
-    	
-    	photo=
-          new File(Environment.getExternalStorageDirectory()+"/rter/",
-                   "Scenephoto"+timeStamp+".jpg");
-    	Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
-      if (photo.exists()) {
-        photo.delete();
-      }
 
-      try {
-    	  FileOutputStream fos=new FileOutputStream(photo.getPath());
+        
+        
+
+//      String temp=Base64.encodeToString(jpeg[0], Base64.DEFAULT);
+//      Log.e("SavePhotoTask", "Base64 string is :" + temp);
+        
+        //get the address of SD card and check if it exists and makes a folder rter
+        String root = (Environment.getExternalStorageDirectory()).toString();
+        File rootDir = new File(Environment
+                .getExternalStorageDirectory()
+                + File.separator + "rter" + File.separator);
+        rootDir.mkdirs();
+        if(root != null){
+            Log.d("SavePhotoTask", "The address of the external storage is " + root );
+            // save in SD Card
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+            String timeStamp = new SimpleDateFormat("_yyyy_MM_dd_hh_mm_ss_SSS").format(new Date());
+            
+            photo = new File(rootDir,"Scenephoto"+timeStamp+".jpg");
+            Log.d("SavePhotoTask", "Saving pic" +  "Scenephoto"+timeStamp+".jpg");
+          if (photo.exists()) {
+            photo.delete();
+          }
+        }
+        else{
+            Log.e("SavePhotoTask", "SD card or anyother exernal storage doesnt esxist." );
+        }
+        try {
+          FileOutputStream fos=new FileOutputStream(photo.getPath());
           
           fos.write(a[0]);
           fos.close();
           
-    	  HttpPost httppost = new HttpPost("http://e-caffeine.net/nehil_sandbox/emer/post.php");
+          HttpPost httppost = new HttpPost("http://rter.cim.mcgill.ca:8080/multiup");
 
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
           multipartEntity.addPart("title", new StringBody("rTER"));
-          multipartEntity.addPart("phone_id", new StringBody(uid));
+          multipartEntity.addPart("phone_id", new StringBody("48ad32292ff86b4148e0f754c2b9b55efad32d1e")); //should be changed to uid
           multipartEntity.addPart("lat", new StringBody(lat));
-          multipartEntity.addPart("lon", new StringBody(lon));
+          multipartEntity.addPart("lng", new StringBody(lon));
           multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
-          
-          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
           Log.e("SavePhotoTask", "Upload executed");
-    	  
-    	  
+          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
+          
+          
+          
       } catch (java.io.IOException e) { 
         Log.e("PictureDemo", "Exception in photoCallback", e);
       } catch (Exception e) {
@@ -619,10 +665,10 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 
       return(null);
     }
-	
-	
-	
-	private class PhotoUploadResponseHandler implements ResponseHandler {
+
+
+
+    private class PhotoUploadResponseHandler implements ResponseHandler {
 
         @Override
         public Object handleResponse(HttpResponse response)
@@ -636,8 +682,8 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
         }
 
     }
-	
-	
-	
-	
+
+
+
+
   }

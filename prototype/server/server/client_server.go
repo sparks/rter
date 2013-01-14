@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"sync"
 )
 
 type PageContent struct {
@@ -27,6 +28,8 @@ type LayoutTile struct {
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
+
+var writeLock sync.Mutex
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
@@ -54,6 +57,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&layout)
 		checkError(err)
 
+		writeLock.Lock()
 		for _, tile := range layout {
 			if phoneIDValidator.MatchString(tile.ContentID) {
 				tile.Sanitize()
@@ -61,6 +65,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 				checkError(err)
 			}
 		}
+		writeLock.Unlock()
 
 	} else if r.URL.Path == "/ajax/getlayout" {
 		layoutJSON, err := json.Marshal(fetchPageContent())
