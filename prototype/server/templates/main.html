@@ -320,25 +320,51 @@
 	<script type="text/paperscript" canvas="heading_selector">
 	    // Adapted from the following Processing example:
 	    // http://processing.org/learning/topics/follow3.html
-	    var start = view.center;
-		var myCircle = new Path.Circle(start, 70.71);
-	    myCircle.fillColor = 'black';
+	    var center = view.center;
+	    var radius = 0.4*view.size.width;
+	    var FOV = 30;
+		var myCircle = new Path.Circle(center, radius);
+	    myCircle.fillColor = new GrayColor(0.15);
 
 	    var path = new Path();
 	    path.style = {
-	    	strokeColor: '#E4141B',
+	    	fillColor: new GrayColor(0.3),
+	    	strokeColor: new GrayColor(0.3),
 	    	strokeWidth: 1,
-	    	strokeCap: 'butt'
+	    	strokeCap: 'butt',
+	    	closed: true
 	    };
 
-	    var segments = path.segments;
-	    console.log(start);
-	    path.add(start + new Point(0, 0));
-	    path.add(start + new Point(50, 50));
-	    path.arcTo(start+ new Point(0, 70.71),start+ new Point(-50, 50));
-	    path.closed = true;
-	    path.fillColor = new RgbColor(1, 0, 0);
+		path.add(center);
+		var ray_vector = new Point(radius, 0);
+	    path.add(center + ray_vector.rotate(FOV));
+	    path.arcTo(center + ray_vector, center + ray_vector.rotate(-FOV));
 
+	    function onMouseDown(event) {
+	    	path.rotate((event.point-center).angle-ray_vector.angle, center);
+	    	ray_vector.angle = (event.point-center).angle;
+	    }
+
+	    function onMouseDrag(event) {
+	    	path.rotate((event.point-center).angle-ray_vector.angle, center);
+	    	ray_vector.angle = (event.point-center).angle;
+	    }
+
+	    // var text = new PointText(start+new Point(0, 90));
+	    // text.paragraphStyle.justification = 'center';
+	    // text.characterStyle.fontSize = 15;
+	    // text.fillColor = 'black';
+
+	    // var symbol = new Symbol(text);
+
+	    // // Set the initial content of the text item:
+	    // text.content = 'S';
+
+	    // s1 = symbol.place(start+new Point(0, 90))
+
+	    // s2 = symbol.place(start+new Point(0, -90))
+	    // console.log(s2);
+	    // s2.content="N";
     </script>
 
 	<style type="text/css">
