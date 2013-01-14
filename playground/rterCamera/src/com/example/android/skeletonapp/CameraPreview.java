@@ -34,6 +34,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
@@ -113,6 +114,9 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     private LocationManager locationManager;
     private String provider;
     
+    // to prevent sleeping
+    PowerManager pm;
+    PowerManager.WakeLock wl;
     
     private static final String TAG = "CameraPreview Activity";
 	protected static final String MEDIA_TYPE_IMAGE = null;	
@@ -187,6 +191,10 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     	   	} 
     	 }
     	 
+    	 // power mangaer
+    	 pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    	 wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG);
+    	 
     	 // test, set desired orienation to north
     	 this.overlay.letFreeRoam(false);
     	 this.overlay.setDesiredOrientation(0.0f);
@@ -245,6 +253,9 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         //sensors
         mSensorManager.registerListener(overlay, mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(overlay, mMag, SensorManager.SENSOR_DELAY_NORMAL);
+        
+        //acquire wake lock to make sure camera preview remains on and bright
+        wl.acquire();
     }
 
     @Override
@@ -262,6 +273,9 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         }
 
         mSensorManager.unregisterListener(overlay);
+        
+      //release wake lock to allow phone to sleep
+        wl.release();
     }
 
 	public void onClick(View v) {
