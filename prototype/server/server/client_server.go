@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"regexp"
 	"sync"
 )
 
@@ -30,6 +31,8 @@ type LayoutTile struct {
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
 
 var writeLock sync.Mutex
+
+var rowsMatchedValidator = regexp.MustCompile(".*0.*0.*0")
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
@@ -61,8 +64,16 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		for _, tile := range layout {
 			if phoneIDValidator.MatchString(tile.ContentID) {
 				tile.Sanitize()
-				_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d) ON DUPLICATE KEY UPDATE col=%d, row=%d, size_x=%d, size_y=%d;", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
+				
+				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID) 
 				checkError(err)
+				
+				// Check that no rows were matched via a ghetto regex, since the Result object returned contains no public field for matched rows, only affected rows.
+				if rowsMatchedValidator.MatchString(res.Message()) {
+					_, res, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d);", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
+					checkError(err)
+				}
+				
 			}
 		}
 		writeLock.Unlock()
