@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>rtER VOST Client</title>
+
+	<style type="text/css">
+		body {
+			background-color: rgb(240, 240, 240);
+			margin: 0px auto 75px auto;
+			text-align: center;
+			font-family: Arial;
+		}
+
+		.stripe {
+			background-color: rgb(255, 255, 255);
+			border-top: 1px solid rgb(170, 170, 170);
+			border-bottom: 1px solid rgb(170, 170, 170);
+			margin: 0px;
+			padding: 10px 0px 10px 0px;
+			min-width: 995px;
+		}
+
+		.container {
+			position: relative;
+			margin: 0px auto 0px auto;
+			text-align: left;
+			width: 975px;
+		}
+
+		.gridster ul {
+			margin: 0px;
+			padding: 0px;
+			list-style: none;
+		}
+
+		.gridster ul li {
+			vertical-align: middle;
+		}
+
+		.gridster ul li img {
+			max-width: 140px;
+			max-height: 140px;
+		}
+
+		#main_map_canvas {
+			position: absolute;
+			top: 10px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+		}
+
+		#closeup {
+			border-bottom: none;
+			/*display: non*/;
+		}
+
+		#closeup .container {
+			margin: 10px auto 10px auto;
+		}
+
+		#heading_selector {
+			position: absolute;
+			top: 170px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+			z-index: 2;
+		}
+
+		#closeup_map_canvas {
+			z-index: 1;
+			position: absolute;
+			top: 170px;
+			left: 665px;
+			margin: 0px;
+			height: 300px;
+			width: 300px;
+		}
+
+		#view {
+			height: 620px;
+			max-width: 620px;
+			max-height: 620px;
+		}
+
+		#view img {
+			height: 620px;
+			margin-left: 10px;
+			max-width: 620px;
+			max-height: 620px;
+		}
+
+		#closeup_close {
+			position: absolute;
+			top: 0px;
+			left: 990px;
+			font-size: 10pt;
+		}
+
+		#closeup_close a:link, #closeup_close a:active, #closeup_close a:visited {
+			text-decoration: none;
+			color: rgb(75, 75, 75);
+		}
+
+		#closeup_close a:hover {
+			text-decoration: underline;
+		}
+
+		#header {
+			text-align: left;
+			margin: 0px auto 40px auto;
+		}
+
+		#titleblock {
+			margin: 10px 0px 0px 80px;
+		}
+
+		#rter {
+			margin: 0px 0px 0px 20px;
+			float: left;
+		}
+
+		#titleblock h2 {
+			margin: 0px;
+			padding-top: 7px;
+			font-size: 11pt;
+		}
+
+		#titleblock p {
+			font-size: 9pt;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		#output {
+			margin: 20px auto 20px auto;
+			width: 600px;
+			background-color: rgb(101, 101, 101);
+		}
+
+		.error {
+			color: rgb(200, 0, 0);
+			font-weight: bold;
+		}
+
+		#offline {
+			position: fixed;
+			top: 0px;
+			right: 0px;
+			background-color: rgb(200, 50, 0);
+			color: rgb(200, 200, 200);
+			font-weight: bold;
+			width: 250px;
+			padding: 10px 0px 10px 0px;
+			display: none;
+			z-index: 100;
+		}
+
+		#test {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			padding: 10px;
+			background-color: rgb(0, 0, 0);
+			color: rgb(255, 255, 255);
+		}
+	</style>
+</head>
+<body>
+	<div id="header">
+		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
+
+		<div id="titleblock">
+			<h2>Real-Time Emergency Response</h2>
+			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
+		</div>
+	</div>
+	<div class="stripe">
+		<div class="container gridster">
+			<h1>Submit New Content</h1>
+
+			<form action="">
+				<h4>Description</h4>
+				<textarea type="text" name="description" rows="10" cols="60"></textarea><br />
+				<h4>URL (optional)</h4>
+				<textarea type="text" name="url" rows="1" cols="60"></textarea><br />
+				<h4>Image (optional)</h4>
+				<input type="file" name="image" /><br />
+				<br />
+				<input type="submit" value="Submit" /><br />
+			</form>
+		</div>
+	</div>
+</body>
+</html>
