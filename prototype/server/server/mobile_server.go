@@ -74,6 +74,8 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
+
+	fmt.Println("Added Content")
 }
 
 func Nehil(w http.ResponseWriter, r *http.Request) {
