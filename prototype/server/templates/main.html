@@ -51,11 +51,17 @@
 			}
 
 			$("#test").click(function(e) {
-				if ($("#closeup:first").is(":hidden")) {
+				e.preventDefault();
+				if($("#closeup:first").is(":hidden")) {
 					showPhoneDetail(phones[0]);
 				} else {
 					hideDetail();
 				}
+			});
+
+			$("#closeup_close").click(function(e) {
+				e.preventDefault();
+				hideDetail();
 			});
 
 			updateLayout(layout);
@@ -308,6 +314,33 @@
 			return false;
 		}
 	</script>
+
+	<script type="text/javascript" src="resources/paper.js"></script>
+
+	<script type="text/paperscript" canvas="heading_selector">
+	    // Adapted from the following Processing example:
+	    // http://processing.org/learning/topics/follow3.html
+	    var start = view.center;
+		var myCircle = new Path.Circle(start, 70.71);
+	    myCircle.fillColor = 'black';
+
+	    var path = new Path();
+	    path.style = {
+	    	strokeColor: '#E4141B',
+	    	strokeWidth: 1,
+	    	strokeCap: 'butt'
+	    };
+
+	    var segments = path.segments;
+	    console.log(start);
+	    path.add(start + new Point(0, 0));
+	    path.add(start + new Point(50, 50));
+	    path.arcTo(start+ new Point(0, 70.71),start+ new Point(-50, 50));
+	    path.closed = true;
+	    path.fillColor = new RgbColor(1, 0, 0);
+
+    </script>
+
 	<style type="text/css">
 		body {
 			background-color: rgb(240, 240, 240);
@@ -366,7 +399,6 @@
 		}
 
 		#heading_selector {
-			background-color: rgb(100, 100, 100);
 			position: absolute;
 			top: 0px;
 			left: 665px;
@@ -389,6 +421,22 @@
 			margin-left: 10px;
 			max-width: 620px;
 			max-height: 620px;
+		}
+
+		#closeup_close {
+			position: absolute;
+			top: 0px;
+			left: 990px;
+			font-size: 10pt;
+		}
+
+		#closeup_close a:link, #closeup_close a:active, #closeup_close a:visited {
+			text-decoration: none;
+			color: rgb(75, 75, 75);
+		}
+
+		#closeup_close a:hover {
+			text-decoration: underline;
 		}
 
 		#header {
@@ -470,8 +518,9 @@
 	<div class="stripe" id="closeup">
 		<div class="container">
 			<div id="view"><img src="images/e1830fcefc3f47647ffa08350348d7e34b142b0b/1358118755088279000.png" /></div>
-			<canvas id="heading_selector"></canvas>
+			<canvas id="heading_selector" width="300" height="300"></canvas>
 			<div id="closeup_map_canvas"></div>
+			<div id="closeup_close"><a href="#">[close]</a></div>
 		</div>
 	</div>
 	<div class="stripe">
