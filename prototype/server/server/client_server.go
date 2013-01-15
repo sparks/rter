@@ -2,10 +2,15 @@ package server
 
 import (
 	"encoding/json"
+	_"fmt"
 	"html/template"
+	_"io"
 	"net/http"
+	_"os"
 	"regexp"
+	_"strings"
 	"sync"
+	_"time"
 )
 
 type PageContent struct {
@@ -47,6 +52,38 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func SubmitHandler(w http.ResponseWriter, r *http.Request) {
+	// imageFile, header, error := r.FormFile("image")
+	// checkError(error)
+	
+	description := r.FormValue("description")
+	url := r.FormValue("url")
+	
+	id := "client"
+	/*
+	os.Mkdir(imagePath + id, os.ModeDir | 0755)
+	
+	t := time.Now()
+	path := imagePath
+	
+	if strings.HasSuffix(header.Filename, ".png") {
+		path += fmt.Sprintf("%v/%v.png", id, t.UnixNano())
+	} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
+		path += fmt.Sprintf("%v/%v.jpg", id, t.UnixNano())
+	}
+	
+	outputFile, error := os.Create(path)
+	checkError(error)
+	defer outputFile.Close()
+	
+	io.Copy(outputFile, imageFile)
+	*/
+	_, _, error := database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, "nope", description, url)
+	checkError(error)
+	
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func ClientAjax(w http.ResponseWriter, r *http.Request) {
