@@ -64,7 +64,7 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	
 	hasher := md5.New()
-	hasher.Write([]byte(string(t.UnixNano())))
+	hasher.Write([]byte(fmt.Sprintf("%v", t.UnixNano())))
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 	
 	if error != nil {
