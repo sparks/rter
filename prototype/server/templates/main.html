@@ -103,7 +103,7 @@
 				$i = $("#view > img");
 
 				if($i.attr("src") != selected_widget.data('content').filepath) {
-					crossfadeImg($i, selected_widget.data('content_id').filepath);
+					crossfadeImg($i, selected_widget.data('content').filepath);
 
 					closeup_map.setCenter(new google.maps.LatLng(selected_widget.data('content').lat, selected_widget.data('content').lng));
 					google.maps.event.trigger(closeup_map, 'resize');
