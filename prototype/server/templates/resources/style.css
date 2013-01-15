@@ -28,10 +28,14 @@ body {
 }
 
 .gridster ul li {
-	vertical-align: middle;
+	position: relative;
 }
 
 .gridster ul li img {
+	margin: auto;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
 	max-width: 140px;
 	max-height: 140px;
 }
@@ -76,14 +80,15 @@ body {
 
 #view {
 	height: 620px;
-	max-width: 620px;
-	max-height: 620px;
+	position: relative;
 }
 
 #view img {
-	height: 620px;
-	margin-left: 10px;
-	max-width: 620px;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	margin: auto auto auto 10px;
+	width: 620px;
 	max-height: 620px;
 }
 
