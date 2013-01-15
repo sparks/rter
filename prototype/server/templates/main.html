@@ -128,9 +128,6 @@
 
 			gridster.add_widget($li, 1, 1);
 
-			console.log($li.data("content"))
-			console.log(content.$el);
-
 			$li.data('content', content);
 			content.$el = $li;
 		}
@@ -289,11 +286,15 @@
 
 		function updateLayout(layout) {
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 				gridster.remove_from_gridmap($w.coords().grid);
 			}
 
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 
 				if(!gridster.is_empty(layout[i].col, layout[i].row)) {
@@ -315,6 +316,8 @@
 			}
 
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
