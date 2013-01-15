@@ -10,6 +10,7 @@ func main() {
 
 	// http.HandleFunc("/upload", server.UploadHandler)
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
+	http.HandleFunc("/submit", server.SubmitHandler)
 
 	http.HandleFunc("/ajax/", server.ClientAjax)
 
@@ -18,6 +19,6 @@ func main() {
 	http.HandleFunc("/images/", server.ImageHandler)
 	http.HandleFunc("/resources/", server.ResourceHandler)
 	http.HandleFunc("/templates/", server.HTMLHandler)
-
+	
 	http.ListenAndServe(":8080", nil)
 }

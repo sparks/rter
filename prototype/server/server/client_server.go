@@ -2,31 +2,33 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"io"
 	"net/http"
+	"os"
 	"regexp"
+	"strings"
 	"sync"
+	"time"
 )
 
 type PageContent struct {
-	Phones []*PhoneContent `json:"phones"`
-	Layout []*LayoutTile   `json:"layout"`
+	Content []*ContentChunk `json:"content"`
 }
 
-type PhoneContent struct {
-	ContentID string  `json:"content_id"`
-	Filepath  string  `json:"filepath"`
-	Lat       float64 `json:"lat"`
-	Lng       float64 `json:"lng"`
-	Heading   float64 `json:"heading"`
-}
-
-type LayoutTile struct {
-	ContentID string `json:"content_id"`
-	Col       int    `json:"col"`
-	Row       int    `json:"row"`
-	SizeX     int    `json:"size_x"`
-	SizeY     int    `json:"size_y"`
+type ContentChunk struct {
+	ContentID     string  `json:"content_id"`
+	ConentType    string  `json:"content_type"`
+	Filepath      string  `json:"filepath"`
+	Lat           float64 `json:"lat"`
+	Lng           float64 `json:"lng"`
+	Heading       float64 `json:"heading"`
+	TargetHeading float64 `json:"target_heading"`
+	Col           int     `json:"col"`
+	Row           int     `json:"row"`
+	SizeX         int     `json:"size_x"`
+	SizeY         int     `json:"size_y"`
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
@@ -49,6 +51,42 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func SubmitHandler(w http.ResponseWriter, r *http.Request) {
+	description := r.FormValue("description")
+	url := r.FormValue("url")
+	imageFile, header, error := r.FormFile("image")
+	
+	id := "client"
+	
+	if error != nil {
+		path := imagePath + "client/default.png"
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		checkError(error)
+	} else {
+		os.Mkdir(imagePath + id, os.ModeDir | 0755)
+	
+		t := time.Now()
+		path := imagePath
+		
+		if strings.HasSuffix(header.Filename, ".png") {
+			path += fmt.Sprintf("%v/%v.png", id, t.UnixNano())
+		} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
+			path += fmt.Sprintf("%v/%v.jpg", id, t.UnixNano())
+		}
+		
+		outputFile, error := os.Create(path)
+		checkError(error)
+		defer outputFile.Close()
+		
+		io.Copy(outputFile, imageFile)
+		
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		checkError(error)
+	}
+	
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func ClientAjax(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -57,21 +95,21 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/ajax/pushlayout" {
 		decoder := json.NewDecoder(r.Body)
 
-		var layout []*LayoutTile
+		var layout []*ContentChunk
 		err := decoder.Decode(&layout)
 		checkError(err)
 
 		writeLock.Lock()
-		for _, tile := range layout {
-			if phoneIDValidator.MatchString(tile.ContentID) {
-				tile.Sanitize()
+		for _, chunk := range layout {
+			if phoneIDValidator.MatchString(chunk.ContentID) {
+				chunk.SanitizeLayout()
 
-				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID)
+				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY, chunk.ContentID)
 				checkError(err)
 
 				// Check that no rows were matched via a ghetto regex, since the Result object returned contains no public field for matched rows, only affected rows.
 				if rowsMatchedValidator.MatchString(res.Message()) {
-					_, res, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d);", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
+					_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d);", chunk.ContentID, chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY)
 					checkError(err)
 				}
 
@@ -80,70 +118,61 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		writeLock.Unlock()
 
 	} else if r.URL.Path == "/ajax/getlayout" {
-		layoutJSON, err := json.Marshal(fetchPageContent())
+		layoutJSON, err := json.Marshal(fetchPageContent().Content)
 		checkError(err)
 
 		w.Write(layoutJSON)
 	} else if r.URL.Path == "/ajax/pushheading" {
-		// decoder := json.NewDecoder(r.Body)
+		decoder := json.NewDecoder(r.Body)
 
-		// var heading interface{}
-		// err := decoder.Decode(&heading)
-		// checkError(err)
+		var headingChunk *ContentChunk
+		err := decoder.Decode(&headingChunk)
+		checkError(err)
 
-		// v, err := json.Marshal(heading)
-		// fmt.Println(string(v))
+		_, _, err = database.Query("UPDATE phones SET target_heading=%v WHERE phone_id=\"%s\";", headingChunk.TargetHeading, headingChunk.ContentID)
+		checkError(err)
 	}
-
 }
 
 func fetchPageContent() *PageContent {
-	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	rows, _, err := database.Query("SELECT content.content_id, content.content_type, content.filepath, content.geolat, content.geolng, content.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN (layout, phones) ON (layout.content_id = content.content_id AND phones.phone_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+
 	checkError(err)
 
-	phones := make([]*PhoneContent, len(phoneRows))
+	content := make([]*ContentChunk, len(rows))
 
-	for i, row := range phoneRows {
-		phones[i] = &PhoneContent{
-			row.Str(0),
-			row.Str(1),
-			row.Float(2),
-			row.Float(3),
-			row.Float(4),
+	for i, row := range rows {
+		content[i] = &ContentChunk{
+			row.Str(0),   //content_id
+			row.Str(1),   //content_type
+			row.Str(2),   //filepath
+			row.Float(3), //geolat
+			row.Float(4), //geolng
+			row.Float(5), //heading
+			row.Float(6), //target_heading
+			row.Int(7),   //col
+			row.Int(8),   //row
+			row.Int(9),   //size_x
+			row.Int(10),  //size_y
 		}
 	}
 
-	layoutRows, _, err := database.Query("SELECT content_id, col, row, size_x, size_y FROM layout ORDER BY col, row;")
-	checkError(err)
-
-	layout := make([]*LayoutTile, len(layoutRows))
-
-	for i, row := range layoutRows {
-		layout[i] = &LayoutTile{
-			row.Str(0),
-			row.Int(1),
-			row.Int(2),
-			row.Int(3),
-			row.Int(4),
-		}
-	}
-
-	return &PageContent{phones, layout}
+	return &PageContent{content}
 }
 
-func (tile *LayoutTile) Sanitize() {
-	if tile.SizeX < 1 {
-		tile.SizeX = 1
+func (chunk *ContentChunk) SanitizeLayout() {
+	if chunk.SizeX < 1 {
+		chunk.SizeX = 1
 	}
-	if tile.SizeY < 1 {
-		tile.SizeY = 1
+	if chunk.SizeY < 1 {
+		chunk.SizeY = 1
 	}
-	if tile.Col < 1 {
-		tile.Col = 1
+	if chunk.Col < 1 {
+		chunk.Col = 1
 	}
-	if tile.Row < 1 {
-		tile.Row = 1
+	if chunk.Row < 1 {
+		chunk.Row = 1
 	}
 }

@@ -84,5 +84,17 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	checkError(error)
 
+	rows, _, err = database.Query("SELECT target_heading from phones where phone_id=\"%s\"", phoneID)
+	checkError(err)
+
+	if len(rows) > 0 {
+		switch v := rows[0][0].(type) {
+		case []byte:
+			w.Write(v)
+		default:
+			w.Write([]byte(""))
+		}
+	}
+
 	fmt.Println("upload complete, phone_id", phoneID)
 }
