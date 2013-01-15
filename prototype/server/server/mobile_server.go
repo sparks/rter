@@ -28,7 +28,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("upload failed, phone_id malformed:", phone_id)
+		fmt.Println("upload failed, phone_id malformed:", phoneID)
 		return
 	}
 
@@ -36,7 +36,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("upload failed, phone_id invalid:", phone_id)
+		fmt.Println("upload failed, phone_id invalid:", phoneID)
 		return
 	}
 
@@ -84,5 +84,5 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	checkError(error)
 
-	fmt.Println("upload complete, phone_id", phone_id)
+	fmt.Println("upload complete, phone_id", phoneID)
 }
