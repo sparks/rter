@@ -6,6 +6,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"mime/multipart"
 	"net/http"
@@ -96,6 +97,9 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 
 	response := <-responseChan
 	fmt.Println(response.Status)
+	r, _ := io
+	util.ReadAll(response.Body)
+	fmt.Println(string(r))
 }
 
 func regularPNGUpload(filename string) {

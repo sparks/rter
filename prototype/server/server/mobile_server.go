@@ -17,7 +17,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ioutil.WriteFile(imagePath + "test.png", p, 0600)
+	ioutil.WriteFile(imagePath+"test.png", p, 0600)
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(imagePath + phoneID, os.ModeDir | 0755)
+	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -83,6 +83,18 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
+
+	rows, _, err = database.Query("SELECT target_heading from phones where phone_id=\"%s\"", phoneID)
+	checkError(err)
+
+	if len(rows) > 0 {
+		switch v := rows[0][0].(type) {
+		case []byte:
+			w.Write(v)
+		default:
+			w.Write([]byte(""))
+		}
+	}
 
 	fmt.Println("upload complete, phone_id", phoneID)
 }
