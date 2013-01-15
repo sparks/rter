@@ -97,7 +97,7 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     private Preview mPreview;
     private FrameLayout mFrame; //need this to merge camera preview and openGL view
     private CameraGLSurfaceView mGLView;
-    OverlayController overlay;
+    private OverlayController overlay;
     SensorManager mSensorManager;
     Sensor mAcc, mMag;
     Camera mCamera;
@@ -304,9 +304,11 @@ public class CameraPreview extends Activity implements OnClickListener, Location
 	Camera.PictureCallback photoCallback=new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera) {
             Log.e(TAG, "Inside Picture Callback");
-            new SavePhotoTask().execute(data, uid, lat, lon);
-          camera.startPreview();
-          mPreview.inPreview=true;
+            //get orientation
+            orientation = convertStringToByteArray( "" + overlay.getCurrentOrientation());
+            new SavePhotoTask().execute(data, uid, lat, lon, orientation);
+            camera.startPreview();
+            mPreview.inPreview=true;
 
         try {
 
@@ -390,7 +392,7 @@ public class CameraPreview extends Activity implements OnClickListener, Location
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
 		Log.d(TAG, "Location Changed");
-		String lati =  "" + (location.getLatitude());
+		String lati = "" + (location.getLatitude());
 		String longi = "" + (location.getLongitude());
 		lat = convertStringToByteArray(lati);
 		lon = convertStringToByteArray(longi);
@@ -613,8 +615,9 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
         String uid = new String(a[1]);
         String lat = new String(a[2]);
         String lon = new String(a[3]);
+        String orient = new String(a[4]);
 
-        Log.d("SavePhotoTask", "phone id "+uid+" lat: "+lat +" lon: " + lon);
+        Log.d("SavePhotoTask", "phone id "+uid+" lat: "+lat +" lon: " + lon + " orient: " + orient);
         HttpParams params = new BasicHttpParams();
         params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
         mHttpClient = new DefaultHttpClient(params);
@@ -659,6 +662,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
           multipartEntity.addPart("phone_id", new StringBody(uid)); //"48ad32292ff86b4148e0f754c2b9b55efad32d1e")); //should be changed to uid
           multipartEntity.addPart("lat", new StringBody(lat));
           multipartEntity.addPart("lng", new StringBody(lon));
+          multipartEntity.addPart("heading", new StringBody(orient));
           multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
           Log.e("SavePhotoTask", "Upload executed");
