@@ -20,54 +20,65 @@
 
 <!-- The top view is a layout manager that places its child views into
      a row, here set to be vertical (so the first is at the top) -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-    <!-- First view is a text editor.  We want it to use all available
+    <!--
+         First view is a text editor.  We want it to use all available
          horizontal space, and stretch to fill whatever vertical space
          is available to it.  Note the use of the "id" attribute, which
-         allows us to find this object from the Java code. -->
-    <EditText android:id="@+id/editor"
-        android:layout_width="match_parent" android:layout_height="0dip"
-        android:autoText="true"
-        android:capitalize="sentences"
-        android:layout_weight="1"
-        android:freezesText="true" >
-        <requestFocus />
-    </EditText>
+         allows us to find this object from the Java code.
+    -->
 
-    <!-- Next view is another linear layout manager, now horizontal.  We
+
+    <!--
+         Next view is another linear layout manager, now horizontal.  We
          give it a custom background; see colors.xml for the definition
-         of drawable/semi_black-->
+         of drawable/semi_black
+    -->
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Phone ID:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
     <LinearLayout
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:background="@drawable/semi_black">
-
-        <!-- On the left: the "back" button.  See styles.xml for the
-             definition of style/ActionButton, which we use to hold
-             common attributes that are used for both this and the
-             clear button.  See strings.xml for the definition of
-             string/back. -->
-        <Button android:id="@+id/back" style="@style/ActionButton"
-            android:text="@string/back" />
-
-        <!-- In the middle: a custom image, -->
-        <ImageView android:id="@+id/image"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:paddingLeft="4dip" android_paddingRight="4dip"
-            android:src="@drawable/violet" />
-
-        <!-- On the right: another button, this time with its text color
-             changed to red.  Again, see colors.xml for the definition. -->
-        <Button android:id="@+id/clear" style="@style/ActionButton"
-            android:text="@string/clear" android:textColor="@color/red" />
-
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/semi_black"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
     </LinearLayout>
 
+    <android.widget.Space
+        android:id="@+id/space1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.widget.Space
+        android:id="@+id/space2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Spinner
+        android:id="@+id/phone_id"
+        android:layout_width="234dp"
+        android:layout_height="58dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/spinner_padding" />
+
+    <Button
+        android:id="@+id/camera"
+        style="@style/ActionButton"
+        android:layout_width="136dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/button_padding"
+        android:text="@string/clear"
+        android:textColor="@color/red" />
+
 </LinearLayout>
-
-

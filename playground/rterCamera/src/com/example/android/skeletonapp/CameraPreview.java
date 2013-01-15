@@ -22,6 +22,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -107,9 +108,12 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     int defaultCameraId;
     static boolean isFPS = false;
     
+    String selected_uid;	// passed from other activity right now
+    
     private byte[] uid;
     private byte[] lat;
     private byte[] lon;
+    private byte[] orientation;
     
     private LocationManager locationManager;
     private String provider;
@@ -150,7 +154,12 @@ public class CameraPreview extends Activity implements OnClickListener, Location
         TelephonyManager tManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         String sUID = tManager.getDeviceId();
         Log.e(TAG, "Fileoutput in phone id"+sUID+"and the length being "+sUID);
-        uid = convertStringToByteArray(sUID);
+//        uid = convertStringToByteArray(sUID);
+        
+        // passed from other activity right now
+        Intent intent = getIntent();
+        selected_uid = intent.getStringExtra("phoneID");
+        uid = convertStringToByteArray(selected_uid);
         
         // add the two views to the frame
         mFrame.addView(mPreview);
@@ -647,7 +656,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 
           MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);  
           multipartEntity.addPart("title", new StringBody("rTER"));
-          multipartEntity.addPart("phone_id", new StringBody("48ad32292ff86b4148e0f754c2b9b55efad32d1e")); //should be changed to uid
+          multipartEntity.addPart("phone_id", new StringBody(uid)); //"48ad32292ff86b4148e0f754c2b9b55efad32d1e")); //should be changed to uid
           multipartEntity.addPart("lat", new StringBody(lat));
           multipartEntity.addPart("lng", new StringBody(lon));
           multipartEntity.addPart("image", new FileBody(photo));
