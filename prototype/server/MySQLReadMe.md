@@ -11,13 +11,13 @@ Run these commands to setup the MySQL databases for the rter project
          filepath VARCHAR(256) NOT NULL,
          geolat DECIMAL(9,6),
          geolng DECIMAL(9,6),
-         heading DECIMAL(3, 2)
+         heading DECIMAL(9, 6)
     );
     
     CREATE TABLE phones (
          uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
          phone_id VARCHAR(64) NOT NULL UNIQUE,
-         target_heading DECIMAL(3, 2)
+         target_heading DECIMAL(9, 6)
     );
     
     CREATE TABLE layout (

@@ -21,7 +21,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Receiving Multiupload")
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
@@ -29,7 +28,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("Invalid phone_id")
+		fmt.Println("upload failed, phone_id malformed:", phoneID)
 		return
 	}
 
@@ -37,20 +36,28 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
+		fmt.Println("upload failed, phone_id invalid:", phoneID)
 		return
 	}
 
 	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
 
 	valid_pos := true
+	valid_heading := true
 
 	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
 	if err != nil {
 		valid_pos = false
 	}
+
 	lng, err := strconv.ParseFloat(r.FormValue("lng"), 64)
 	if err != nil {
 		valid_pos = false
+	}
+
+	heading, err := strconv.ParseFloat(r.FormValue("heading"), 64)
+	if err != nil {
+		valid_heading = false
 	}
 
 	t := time.Now()
@@ -68,33 +75,14 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(outputFile, imageFile)
 
-	if valid_pos {
+	if valid_pos && valid_heading {
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
+	} else if valid_pos {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
 	} else {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
 
-	fmt.Println("Added Content")
-}
-
-func Nehil(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Nehil Request")
-
-	imageFile, header, error := r.FormFile("image")
-	checkError(error)
-
-	fmt.Println("Filename", header.Filename)
-
-	path := imagePath + header.Filename
-
-	outputFile, error := os.Create(path)
-	checkError(error)
-	defer outputFile.Close()
-
-	io.Copy(outputFile, imageFile)
-
-	fmt.Println("Done Writing")
-
-	checkError(error)
+	fmt.Println("upload complete, phone_id", phoneID)
 }

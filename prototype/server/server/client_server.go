@@ -18,6 +18,7 @@ type PhoneContent struct {
 	Filepath  string  `json:"filepath"`
 	Lat       float64 `json:"lat"`
 	Lng       float64 `json:"lng"`
+	Heading   float64 `json:"heading"`
 }
 
 type LayoutTile struct {
@@ -64,16 +65,16 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		for _, tile := range layout {
 			if phoneIDValidator.MatchString(tile.ContentID) {
 				tile.Sanitize()
-				
-				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID) 
+
+				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", tile.Col, tile.Row, tile.SizeX, tile.SizeY, tile.ContentID)
 				checkError(err)
-				
+
 				// Check that no rows were matched via a ghetto regex, since the Result object returned contains no public field for matched rows, only affected rows.
 				if rowsMatchedValidator.MatchString(res.Message()) {
 					_, res, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d);", tile.ContentID, tile.Col, tile.Row, tile.SizeX, tile.SizeY)
 					checkError(err)
 				}
-				
+
 			}
 		}
 		writeLock.Unlock()
@@ -83,13 +84,23 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		checkError(err)
 
 		w.Write(layoutJSON)
+	} else if r.URL.Path == "/ajax/pushheading" {
+		// decoder := json.NewDecoder(r.Body)
+
+		// var heading interface{}
+		// err := decoder.Decode(&heading)
+		// checkError(err)
+
+		// v, err := json.Marshal(heading)
+		// fmt.Println(string(v))
 	}
+
 }
 
 func fetchPageContent() *PageContent {
 	// rows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN layout ON (layout.content_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 	checkError(err)
 
 	phones := make([]*PhoneContent, len(phoneRows))
@@ -100,6 +111,7 @@ func fetchPageContent() *PageContent {
 			row.Str(1),
 			row.Float(2),
 			row.Float(3),
+			row.Float(4),
 		}
 	}
 

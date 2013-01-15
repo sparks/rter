@@ -18,7 +18,12 @@
 			return this.push.apply(this, rest);
 		};
 
-		var was_dragged, gridster, layout, phones, pushing;
+		var gridster;
+		var was_dragged, pushing;
+		var offline_count = 0;
+
+		var selected_widget;
+		var layout, phones;
 
 		$.ajaxSetup ({
 			cache: false
@@ -31,7 +36,6 @@
 
 			phones = {{.Phones}};
 			layout = {{.Layout}};
-
 
 			//Build gridster
 			gridster = $(".gridster > ul").gridster({
@@ -52,41 +56,48 @@
 				addPhoneAsWidget(phones[i]);
 			}
 
-			$("#test").click(function(e) {
-				e.preventDefault();
-				if($("#closeup:first").is(":hidden")) {
-					showPhoneDetail(phones[0]);
-				} else {
-					hideDetail();
-				}
-			});
-
 			$("#closeup_close").click(function(e) {
 				e.preventDefault();
 				hideDetail();
+				clearSelectedWidget();
 			});
 
 			updateLayout(layout);
 			setInterval(getContent, 2000);
 		});
 
-		function showPhoneDetail(phone) {
-			// var $i = $("<img />");
-			// $i.attr("src", phone.filepath);
-			// $i.height(400);
-			// $i.css("margin", "auto");
-			// $i.css("max-width", 400);
-			// $i.css("max-height", 400);
-
-			// $("#closeup > div").append($i);
-
-			$("#closeup").slideDown("fast");
+		function showDetail($w) {
+			$("#view > img").attr("src", $w.data('content').filepath);
+			closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
+			google.maps.event.trigger(closeup_map, 'resize')
+			$("#closeup").slideDown("fast", function() {
+				google.maps.event.trigger(closeup_map, 'resize')
+			});
+			coneTo($w.data('content').heading);
+			cutearrowTo($w.data('content').heading);
 		}
 
 		function hideDetail() {
 			$("#closeup").slideUp("fast", function() {
 				// $("#closeup > div").empty();
 			});
+		}
+
+		function refreshDetail() {
+			if(selected_widget != null) {
+				$i = $("#view > img");
+				if($i.attr("src") != selected_widget.data('content').filepath) {
+					$i.data("next_src",  selected_widget.data('content').filepath);
+					$i.fadeOut("fast", function() {
+						$(this).attr('src', $(this).data("next_src"));
+						$(this).removeData("next_src");
+						$(this).fadeIn("fast");
+					});
+					closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
+					google.maps.event.trigger(closeup_map, 'resize')
+					coneTo($w.data('content').heading);
+				}
+			}
 		}
 
 		function addPhoneAsWidget(phone) {
@@ -97,6 +108,7 @@
 			a.attr('href', '#');
 			var li = $(document.createElement('li')).append(a);
 			li.attr('content_id', phone.content_id)
+			li.data('content', phone)
 			gridster.add_widget(li, 1, 1);
 		}
 
@@ -112,19 +124,48 @@
 			e.preventDefault();
 			if(was_dragged) {
 				was_dragged = false;
-
 				if(gridster.$changed != null && (gridster.$changed).length > 0) {
 					// pushLayout(gridster.serialize());
 					pushLayout(gridster.serialize_changed());
 				}
 			} else {
-				if($(this).parent().css("border-width") == "0px") {
-					$(this).parent().css("border", "3px solid red");
-					// $("#output").text($(this).parent().css("padding"));
-				} else {
-					$(this).parent().css("border", "none");
-				}
+				selectWidget($(this).parent());
 			}
+		}
+
+		function selectWidget($w) {
+			if(selected_widget == null || (selected_widget != null && selected_widget.attr("content_id") != $w.attr("content_id"))) {
+				$w.css("border", "3px solid #33D011");
+				clearSelectedWidget();
+				showDetail($w);
+				selected_widget = $w;
+			} else {
+				hideDetail();
+				clearSelectedWidget();
+			}
+		}
+
+		function clearSelectedWidget() {
+			if(selected_widget != null) {
+				selected_widget.css("border", "none");
+				selected_widget = null;
+			}
+		}
+
+		function pushHeading(heading) {
+			$.ajax({
+				url: "/ajax/pushheading",
+				type: 'POST',
+				data: JSON.stringify({content_id: selected_widget.attr("content_id"), heading: heading}),
+				processData: false, //Prevent the data from being transformed into a query string
+				timeout: 1900,
+				dataType: "json",
+				contentType: 'application/json',
+				success: function(data, status, err) {
+				},
+				error: function(xhr, status, err) { 
+				}
+			});
 		}
 
 		function pushLayout(layout) {
@@ -157,23 +198,30 @@
 				contentType: 'application/json',
 				success: function(data, status, err) {
 					$("#offline").hide();
+					offline_count = 0;
 					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
 						updatePhones(data.phones);
 						updateLayout(data.layout);
 					}
 				},
 				error: function(xhr, status, err) { 
-					$("#offline").show();
+					offline_count++;
+					if(status == "error" || offline_count > 3) {
+						$("#offline").show();
+					}
 				}
 			});
 		}
 
 		function updatePhones(updated_phones) {
 			for(var i = 0;i < updated_phones.length;i++) {
+				$w = $("[content_id='"+updated_phones[i].content_id+"']");
 				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
 				if($i.length == 0) {
 					addPhoneAsWidget(updated_phones[i]);
 				} else if($i.attr("src") != updated_phones[i].filepath) {
+					$w.data('content', updated_phones[i]);
+
 					$i.data("next_src",  updated_phones[i].filepath);
 					$i.fadeOut("fast", function() {
 						$(this).attr('src', $(this).data("next_src"));
@@ -190,6 +238,7 @@
 			phones = updated_phones;
 
 			checkOnScreen();
+			refreshDetail();
 		}
 
 		function updateLayout(updated_layout) {
@@ -231,7 +280,7 @@
 			layout = updated_layout;
 		}
 
-		var main_map;
+		var main_map, closeup_map;
 		var locations = new Array();
 		var montreal = new google.maps.LatLng(45.50745, -73.5793);
 
@@ -244,7 +293,7 @@
 
 			var closeupMapOptions = {
 				center: montreal,
-				zoom: 18,
+				zoom: 17,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				disableDefaultUI: true,
 				disableDoubleClickZoom: true,
@@ -285,9 +334,11 @@
 				icon: new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
 			});
 			
-			google.maps.event.addListener(position.marker, 'click', function() {
-				// TODO: Do things like open the preview pane here.
-			});
+			(function(content_id) {
+				google.maps.event.addListener(position.marker, 'click', function(marker) {
+					selectWidget($("[content_id='"+content_id+"']"));
+				});
+			})(position.content_id);
 
 			locations.push(position);
 		}
@@ -333,8 +384,6 @@
 	<script type="text/javascript" src="resources/paper.js"></script>
 
 	<script type="text/paperscript" canvas="heading_selector">
-	    // Adapted from the following Processing example:
-	    // http://processing.org/learning/topics/follow3.html
 	    var alpha = 0.7;
 
 	    var center = view.center;
@@ -407,6 +456,8 @@
 	    	cone_vector.angle = angle;
 	    }
 
+	    window.coneTo = coneTo;
+
 	    function targetTo(angle) {
 	    	target.rotate(angle-target_vector.angle, center);
 	    	target_vector.angle = angle;
@@ -417,12 +468,18 @@
 	    	cutearrow_vector.angle = angle;
 	    }
 
+	    window.cutearrowTo = cutearrowTo;
+
 	    function onMouseDown(event) {
 		    mouseHandle(event);
 	    }
 
 	    function onMouseDrag(event) {
 	    	mouseHandle(event);
+	    }
+
+	    function onMouseUp(event) {
+	    	window.pushHeading(cutearrow_vector.angle);
 	    }
 
 	    function mouseHandle(event) {
@@ -445,31 +502,32 @@
 <body>
 	<div id="offline">Cannot Reach Server!</div>
 
-	<div><a href="#" id="test">Test</a></div>
-
 	<div id="header">
 		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
 
 		<div id="titleblock">
 			<h2>Real-Time Emergency Response</h2>
+
 			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
 		</div>
 	</div>
 
-	<div id="debug"></div>
-
 	<div class="stripe" id="closeup">
 		<div class="container">
-			<div id="view"><img src="images/e1830fcefc3f47647ffa08350348d7e34b142b0b/1358118755088279000.png" /></div>
+			<div id="view"><img src="" /></div>
+
 			<canvas id="heading_selector" width="300" height="300"></canvas>
 			<div id="closeup_map_canvas"></div>
+
 			<div id="closeup_close"><a href="#">[close]</a></div>
 		</div>
 	</div>
+
 	<div class="stripe">
 		<div class="container gridster">
 			<ul>
 			</ul>
+
 			<div id="main_map_canvas"></div>
 			<form action="templates/submit.html">
 				<input type="submit" value="Submit New Content">
