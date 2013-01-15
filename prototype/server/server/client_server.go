@@ -84,11 +84,11 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 	} else if r.URL.Path == "/ajax/pushheading" {
 		decoder := json.NewDecoder(r.Body)
 
-		var targetHeading *ContentChunk
-		err := decoder.Decode(&targetHeading)
+		var headingChunk *ContentChunk
+		err := decoder.Decode(&headingChunk)
 		checkError(err)
 
-		_, _, err = database.Query("UPDATE phone_id SET target_heading=%v WHERE phone_id=\"%s\";", targetHeading.TargetHeading, targetHeading.ContentID)
+		_, _, err = database.Query("UPDATE phones SET target_heading=%v WHERE phone_id=\"%s\";", headingChunk.TargetHeading, headingChunk.ContentID)
 		checkError(err)
 	}
 }

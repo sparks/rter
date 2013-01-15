@@ -31,12 +31,12 @@
 		});
 
 		var replacer = function(key, value) {
-			if (key=="col"||key=="row"||key=="size_x"||key=="size_y"||key=="target_heading") {
+			if (key == "" || key == "col" || key == "row" || key == "size_x" || key == "size_y" || key == "target_heading" || key == "content_id") {
 				return value;
 			} else {
 				return undefined;
 			}
-		}
+		};
 
 
 		$(document).ready(function() {
@@ -105,12 +105,13 @@
 				if($i.attr("src") != selected_widget.data('content').filepath) {
 					crossfadeImg($i, selected_widget.data('content_id').filepath);
 
-					closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng));
+					closeup_map.setCenter(new google.maps.LatLng(selected_widget.data('content').lat, selected_widget.data('content').lng));
 					google.maps.event.trigger(closeup_map, 'resize');
 
-					coneTo($w.data('content').heading);
-					cutearrowTo($w.data('content_id').target_heading);
+					coneTo(selected_widget.data('content').heading);
 				}
+
+				cutearrowTo(selected_widget.data('content').target_heading);
 			}
 		}
 
@@ -182,24 +183,27 @@
 			}
 		}
 
-		function setTargetHeading(heading) {
-			pushing_target = true;
-			selected_widget.data('content').target_heading = heading;
-			$.ajax({
-				url: "/ajax/pushheading",
-				type: 'POST',
-				data: JSON.stringify(selected_widget.data('content'), replacer),
-				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 2400,
-				dataType: "json",
-				contentType: 'application/json',
-				success: function(data, status, err) {
-					pushing_target = false;
-				},
-				error: function(xhr, status, err) { 
-					pushing_target = false;
-				}
-			});
+		function setTargetHeading(new_target_heading) {
+			if(selected_widget != null) {
+				pushing_target = true;
+				selected_widget.data('content').target_heading = new_target_heading;
+
+				$.ajax({
+					url: "/ajax/pushheading",
+					type: 'POST',
+					data: JSON.stringify(selected_widget.data('content'), replacer),
+					processData: false, //Prevent the data from being transformed into a query string
+					timeout: 2400,
+					dataType: "json",
+					contentType: 'application/json',
+					success: function(data, status, err) {
+						pushing_target = false;
+					},
+					error: function(xhr, status, err) { 
+						pushing_target = false;
+					}
+				});
+			}
 		}
 
 		function pushLayout(layout) {
