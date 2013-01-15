@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 	"regexp"
@@ -86,14 +85,14 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		w.Write(layoutJSON)
 	} else if r.URL.Path == "/ajax/pushheading" {
-		decoder := json.NewDecoder(r.Body)
+		// decoder := json.NewDecoder(r.Body)
 
-		var heading interface{}
-		err := decoder.Decode(&heading)
-		checkError(err)
+		// var heading interface{}
+		// err := decoder.Decode(&heading)
+		// checkError(err)
 
-		v, err := json.Marshal(heading)
-		fmt.Println(string(v))
+		// v, err := json.Marshal(heading)
+		// fmt.Println(string(v))
 	}
 
 }

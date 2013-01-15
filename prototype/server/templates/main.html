@@ -20,6 +20,7 @@
 
 		var gridster;
 		var was_dragged, pushing;
+		var offline_count = 0;
 
 		var selected_widget;
 		var layout, phones;
@@ -35,7 +36,6 @@
 
 			phones = {{.Phones}};
 			layout = {{.Layout}};
-
 
 			//Build gridster
 			gridster = $(".gridster > ul").gridster({
@@ -153,7 +153,6 @@
 		}
 
 		function pushHeading(heading) {
-			pushing = true;
 			$.ajax({
 				url: "/ajax/pushheading",
 				type: 'POST',
@@ -199,13 +198,17 @@
 				contentType: 'application/json',
 				success: function(data, status, err) {
 					$("#offline").hide();
+					offline_count = 0;
 					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
 						updatePhones(data.phones);
 						updateLayout(data.layout);
 					}
 				},
 				error: function(xhr, status, err) { 
-					$("#offline").show();
+					offline_count++;
+					if(status == "error" || offline_count > 3) {
+						$("#offline").show();
+					}
 				}
 			});
 		}
@@ -504,24 +507,27 @@
 
 		<div id="titleblock">
 			<h2>Real-Time Emergency Response</h2>
+
 			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
 		</div>
 	</div>
 
-	<div id="debug"></div>
-
 	<div class="stripe" id="closeup">
 		<div class="container">
-			<div id="view"><img src="images/e1830fcefc3f47647ffa08350348d7e34b142b0b/1358118755088279000.png" /></div>
+			<div id="view"><img src="" /></div>
+
 			<canvas id="heading_selector" width="300" height="300"></canvas>
 			<div id="closeup_map_canvas"></div>
+
 			<div id="closeup_close"><a href="#">[close]</a></div>
 		</div>
 	</div>
+
 	<div class="stripe">
 		<div class="container gridster">
 			<ul>
 			</ul>
+
 			<div id="main_map_canvas"></div>
 		</div>
 	</div>

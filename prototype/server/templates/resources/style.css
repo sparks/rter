@@ -28,14 +28,12 @@ body {
 }
 
 .gridster ul li {
-	position: relative;
+	text-align: center;
+	line-height: 140px;
 }
 
 .gridster ul li img {
-	margin: auto;
-	position: absolute;
-	top: 0px;
-	bottom: 0px;
+	vertical-align: middle;
 	max-width: 140px;
 	max-height: 140px;
 }
@@ -79,17 +77,17 @@ body {
 }
 
 #view {
-	height: 620px;
-	position: relative;
+	width: 620px;
+	margin: auto auto auto 10px;
+	text-align: center;
+	min-height: 620px;
+	line-height: 620px;
 }
 
 #view img {
-	position: absolute;
-	top: 0px;
-	bottom: 0px;
-	margin: auto auto auto 10px;
+	margin: auto;
+	vertical-align: middle;
 	width: 620px;
-	max-height: 620px;
 }
 
 #closeup_close {
