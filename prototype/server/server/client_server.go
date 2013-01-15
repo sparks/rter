@@ -40,7 +40,7 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates = template.Must(template.ParseFiles(templatePath + "main.html")) //TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
+	templates = template.Must(template.ParseFiles(templatePath + "main.html")) // TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
 
 	err := templates.ExecuteTemplate(w, "main.html", fetchPageContent())
 	if err != nil {
