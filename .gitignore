@@ -7,3 +7,5 @@ lib/
 # folders
 **bin/	
 
+*.png
+*.jpg
