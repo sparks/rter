@@ -97,8 +97,7 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 
 	response := <-responseChan
 	fmt.Println(response.Status)
-	r, _ := io
-	util.ReadAll(response.Body)
+	r, _ := ioutil.ReadAll(response.Body)
 	fmt.Println(string(r))
 }
 

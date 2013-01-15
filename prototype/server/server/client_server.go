@@ -39,8 +39,12 @@ var rowsMatchedValidator = regexp.MustCompile(".*0.*0.*0")
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
+		if !HTMLHandler(w, r) {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		} else {
+			return
+		}
 	}
 
 	templates = template.Must(template.ParseFiles(templatePath + "main.html")) // TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
@@ -55,35 +59,35 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	description := r.FormValue("description")
 	url := r.FormValue("url")
 	imageFile, header, error := r.FormFile("image")
-	
+
 	id := "client"
-	
+
 	if error != nil {
 		path := imagePath + "client/default.png"
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	} else {
-		os.Mkdir(imagePath + id, os.ModeDir | 0755)
-	
+		os.Mkdir(imagePath+id, os.ModeDir|0755)
+
 		t := time.Now()
 		path := imagePath
-		
+
 		if strings.HasSuffix(header.Filename, ".png") {
 			path += fmt.Sprintf("%v/%v.png", id, t.UnixNano())
 		} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
 			path += fmt.Sprintf("%v/%v.jpg", id, t.UnixNano())
 		}
-		
+
 		outputFile, error := os.Create(path)
 		checkError(error)
 		defer outputFile.Close()
-		
+
 		io.Copy(outputFile, imageFile)
-		
+
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	}
-	
+
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
@@ -135,7 +139,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPageContent() *PageContent {
-	rows, _, err := database.Query("SELECT content.content_id, content.content_type, content.filepath, content.geolat, content.geolng, content.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y FROM content LEFT JOIN (layout, phones) ON (layout.content_id = content.content_id AND phones.phone_id = content.content_id) WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	rows, _, err := database.Query("SELECT content.content_id, content.content_type, content.filepath, content.geolat, content.geolng, content.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y FROM content  LEFT JOIN layout ON layout.content_id = content.content_id LEFT JOIN phones ON phones.phone_id = content.content_id WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
 	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 

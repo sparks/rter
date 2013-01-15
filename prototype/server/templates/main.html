@@ -124,22 +124,25 @@
 			$a.attr('href', '#');
 
 			var $li = $(document.createElement('li')).append($a);
-			$li.attr('content_id', content.content_id)
+			$li.attr('content_id', content.content_id);
+
+			gridster.add_widget($li, 1, 1);
+
+			console.log($li.data("content"))
+			console.log(content.$el);
 
 			$li.data('content', content);
 			content.$el = $li;
-
-			gridster.add_widget($li, 1, 1);
 		}
 
 		function updateWidget($w, content) {
-			$w.data('content', content);
-			content.$el = $w;
-
-			$i = $w.filter("a > img");
+			$i = $w.children().first().children().first();
 			if($i.attr("src") != content.filepath) {
 				crossfadeImg($i, content.filepath);
 			}
+
+			$w.data('content', content);
+			content.$el = $w;
 		}
 
 		function widgetMouseUpFunction(e) {
@@ -355,14 +358,16 @@
 			bounds = main_map.getBounds();
 
 			for(var i = 0;i < content.length;i++) {
-				$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
+				if(content.content_type == "mobile") {
+					$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
 
-				if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
-					$el.css("opacity", "0.3");
-				} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
-					$el.css("opacity", "0.3");
-				} else {
-					$el.css("opacity", "1");
+					if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
+						$el.css("opacity", "0.3");
+					} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
+						$el.css("opacity", "0.3");
+					} else {
+						$el.css("opacity", "1");
+					}
 				}
 			}
 		}
@@ -554,7 +559,7 @@
 		</div>
 	</div>
 
-	<div id="submit"><a href="/templates/submit.html">Submit New Content</a></div>
+	<div id="submit"><a href="/submit.html">Submit New Content</a></div>
 
 	<div class="stripe" id="closeup">
 		<div class="container">
