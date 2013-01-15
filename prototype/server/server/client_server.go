@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -56,22 +57,25 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
 	imageFile, header, error := r.FormFile("image")
 	
-	id := "client"
+	t := time.Now()
+	
+	hasher := md5.New()
+	hasher.Write([]byte(string(t.UnixNano())))
+	id := fmt.Sprintf("%x", hasher.Sum(nil))
 	
 	if error != nil {
 		path := imagePath + "client/default.png"
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	} else {
-		os.Mkdir(imagePath + id, os.ModeDir | 0755)
+		os.Mkdir(imagePath + "client", os.ModeDir | 0755)
 	
-		t := time.Now()
-		path := imagePath
+		path := imagePath + "client/"
 		
 		if strings.HasSuffix(header.Filename, ".png") {
-			path += fmt.Sprintf("%v/%v.png", id, t.UnixNano())
+			path += fmt.Sprintf("%v.png", id)
 		} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
-			path += fmt.Sprintf("%v/%v.jpg", id, t.UnixNano())
+			path += fmt.Sprintf("%v.jpg", id)
 		}
 		
 		outputFile, error := os.Create(path)
