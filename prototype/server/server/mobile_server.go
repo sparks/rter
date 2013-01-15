@@ -17,7 +17,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ioutil.WriteFile(imagePath+"test.png", p, 0600)
+	ioutil.WriteFile(imagePath + "test.png", p, 0600)
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
+	os.Mkdir(imagePath + phoneID, os.ModeDir | 0755)
 
 	valid_pos := true
 	valid_heading := true
