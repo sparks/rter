@@ -92,7 +92,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		case []byte:
 			w.Write(v)
 		default:
-			w.Write([]byte(""))
+			w.Write([]byte("0.0"))
 		}
 	}
 

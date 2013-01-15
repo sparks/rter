@@ -98,7 +98,7 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 	response := <-responseChan
 	fmt.Println(response.Status)
 	r, _ := ioutil.ReadAll(response.Body)
-	fmt.Println(string(r))
+	fmt.Println("Response Body", string(r))
 }
 
 func regularPNGUpload(filename string) {
