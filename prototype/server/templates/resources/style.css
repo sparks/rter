@@ -132,6 +132,29 @@ body {
 	padding: 0px;
 }
 
+#submit {
+	background-color: rgb(255, 255, 255);
+	border: 1px solid rgb(170, 170, 170);
+	border-bottom: none;
+	width: 180px;
+	height: 35px;
+	line-height: 30px;
+	vertical-align: middle;
+	margin: auto;
+	position: relative;
+	left: 400px;
+	font-size: 11pt
+}
+
+#submit a:link, #submit a:visited, #submit a:active {
+	text-decoration: none;
+	color: rgb(170, 170, 170);
+}
+
+#submit a:hover {
+	text-decoration: underline;
+}
+
 #output {
 	margin: 20px auto 20px auto;
 	width: 600px;

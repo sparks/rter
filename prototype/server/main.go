@@ -18,7 +18,6 @@ func main() {
 
 	http.HandleFunc("/images/", server.ImageHandler)
 	http.HandleFunc("/resources/", server.ResourceHandler)
-	http.HandleFunc("/templates/", server.HTMLHandler)
-	
+
 	http.ListenAndServe(":8080", nil)
 }
