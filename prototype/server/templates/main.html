@@ -153,7 +153,20 @@
 		}
 
 		function pushHeading(heading) {
-			console.log(heading);
+			pushing = true;
+			$.ajax({
+				url: "/ajax/pushheading",
+				type: 'POST',
+				data: JSON.stringify({content_id: selected_widget.attr("content_id"), heading: heading}),
+				processData: false, //Prevent the data from being transformed into a query string
+				timeout: 1900,
+				dataType: "json",
+				contentType: 'application/json',
+				success: function(data, status, err) {
+				},
+				error: function(xhr, status, err) { 
+				}
+			});
 		}
 
 		function pushLayout(layout) {
