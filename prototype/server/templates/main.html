@@ -19,41 +19,53 @@
 		};
 
 		var gridster;
-		var was_dragged, pushing;
-		var offline_count = 0;
+		var was_dragged, pushing_target, pushing_layout;
+		var offline_count;
 
 		var selected_widget;
-		var layout, phones;
+		var content;
+		var clicked;
 
 		$.ajaxSetup ({
 			cache: false
 		});
 
+		var replacer = function(key, value) {
+			if (key=="col"||key=="row"||key=="size_x"||key=="size_y"||key=="target_heading") {
+				return value;
+			} else {
+				return undefined;
+			}
+		}
+
+
 		$(document).ready(function() {
 			initialize();
 			was_dragged = false;
-			pushing = false;
+			pushing_target = false;
+			pusing_layout = false;
+			selected_widget = null;
+			offline_count = 0;
 
-			phones = {{.Phones}};
-			layout = {{.Layout}};
+			content = {{.Content}};
 
 			//Build gridster
 			gridster = $(".gridster > ul").gridster({
 				widget_margins: [10, 10],
 				widget_base_dimensions: [140, 140],
-				serialize_params: function($w, wgd) { return { content_id: $w.attr('content_id'), col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y } }
+				serialize_params: function($w, wgd) { return { content_id: $w.data('content').content_id, col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y } }
 			}).data('gridster');
 
 			gridster.cols = 4 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
 			$(".gridster > ul").width(gridster.min_widget_width*gridster.cols);
 
-			if(phones.length == 0) {
+			if(content.length == 0) {
 				$(".gridster").append("<div class='error'>No Content Available</div>");
 			}
 
 			//Add all the widget without worrying about layout
-			for(var i = 0;i < phones.length;i++) {
-				addPhoneAsWidget(phones[i]);
+			for(var i = 0;i < content.length;i++) {
+				addAsWidget(content[i]);
 			}
 
 			$("#closeup_close").click(function(e) {
@@ -62,54 +74,71 @@
 				clearSelectedWidget();
 			});
 
-			updateLayout(layout);
-			setInterval(getContent, 2000);
+			updateLayout(content);
+			setInterval(getContent, 2500);
 		});
 
 		function showDetail($w) {
 			$("#view > img").attr("src", $w.data('content').filepath);
+
 			closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
 			google.maps.event.trigger(closeup_map, 'resize')
+
+			coneTo($w.data('content').heading);
+			cutearrowTo($w.data('content').target_heading);
+
 			$("#closeup").slideDown("fast", function() {
 				google.maps.event.trigger(closeup_map, 'resize')
 			});
-			coneTo($w.data('content').heading);
-			cutearrowTo($w.data('content').heading);
 		}
 
 		function hideDetail() {
 			$("#closeup").slideUp("fast", function() {
-				// $("#closeup > div").empty();
+
 			});
 		}
 
 		function refreshDetail() {
 			if(selected_widget != null) {
 				$i = $("#view > img");
+
 				if($i.attr("src") != selected_widget.data('content').filepath) {
-					$i.data("next_src",  selected_widget.data('content').filepath);
-					$i.fadeOut("fast", function() {
-						$(this).attr('src', $(this).data("next_src"));
-						$(this).removeData("next_src");
-						$(this).fadeIn("fast");
-					});
-					closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
-					google.maps.event.trigger(closeup_map, 'resize')
+					crossfadeImg($i, selected_widget.data('content_id').filepath);
+
+					closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng));
+					google.maps.event.trigger(closeup_map, 'resize');
+
 					coneTo($w.data('content').heading);
+					cutearrowTo($w.data('content_id').target_heading);
 				}
 			}
 		}
 
-		function addPhoneAsWidget(phone) {
-			var img = $(document.createElement('img')).attr('src', phone.filepath);
-			var a = $(document.createElement('a')).append(img);
-			a.click(widgetClickFunction);
-			a.mouseup(widgetMouseUpFunction);
-			a.attr('href', '#');
-			var li = $(document.createElement('li')).append(a);
-			li.attr('content_id', phone.content_id)
-			li.data('content', phone)
-			gridster.add_widget(li, 1, 1);
+		function addAsWidget(content) {
+			var $img = $(document.createElement('img')).attr('src', content.filepath);
+
+			var $a = $(document.createElement('a')).append($img);
+			$a.click(widgetClickFunction);
+			$a.mouseup(widgetMouseUpFunction);
+			$a.attr('href', '#');
+
+			var $li = $(document.createElement('li')).append($a);
+			$li.attr('content_id', content.content_id)
+
+			$li.data('content', content);
+			content.$el = $li;
+
+			gridster.add_widget($li, 1, 1);
+		}
+
+		function updateWidget($w, content) {
+			$w.data('content', content);
+			content.$el = $w;
+
+			$i = $w.filter("a > img");
+			if($i.attr("src") != content.filepath) {
+				crossfadeImg($i, content.filepath);
+			}
 		}
 
 		function widgetMouseUpFunction(e) {
@@ -125,8 +154,8 @@
 			if(was_dragged) {
 				was_dragged = false;
 				if(gridster.$changed != null && (gridster.$changed).length > 0) {
-					// pushLayout(gridster.serialize());
-					pushLayout(gridster.serialize_changed());
+					pushLayout(gridster.serialize());
+					// pushLayout(gridster.serialize_changed());
 				}
 			} else {
 				selectWidget($(this).parent());
@@ -134,10 +163,11 @@
 		}
 
 		function selectWidget($w) {
-			if(selected_widget == null || (selected_widget != null && selected_widget.attr("content_id") != $w.attr("content_id"))) {
-				$w.css("border", "3px solid #33D011");
-				clearSelectedWidget();
-				showDetail($w);
+			if(selected_widget == null || (selected_widget != null && selected_widget.data('content').content_id != $w.data('content').content_id)) {
+				//If nothing selected or we are not clickling on the same one
+				$w.css("border", "3px solid #33D011"); 
+				clearSelectedWidget(); //Clear old one
+				showDetail($w); //Closeup
 				selected_widget = $w;
 			} else {
 				hideDetail();
@@ -152,37 +182,41 @@
 			}
 		}
 
-		function pushHeading(heading) {
+		function setTargetHeading(heading) {
+			pushing_target = true;
+			selected_widget.data('content').target_heading = heading;
 			$.ajax({
 				url: "/ajax/pushheading",
 				type: 'POST',
-				data: JSON.stringify({content_id: selected_widget.attr("content_id"), heading: heading}),
+				data: JSON.stringify(selected_widget.data('content'), replacer),
 				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 1900,
+				timeout: 2400,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
+					pushing_target = false;
 				},
 				error: function(xhr, status, err) { 
+					pushing_target = false;
 				}
 			});
 		}
 
 		function pushLayout(layout) {
-			pushing = true;
+			pushing_layout = true;
 			$.ajax({
 				url: "/ajax/pushlayout",
 				type: 'POST',
 				data: JSON.stringify(layout),
 				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 1900,
+				timeout: 2400,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
-					pushing = false;
+					pushing_layout = false;
 				},
 				error: function(xhr, status, err) { 
-					pushing = false;
+					pushing_layout = false;
 				}
 			});
 		}
@@ -191,85 +225,90 @@
 			$.ajax({
 				url: "/ajax/getlayout",
 				type: 'POST',
-				data: JSON.stringify({}),
+				data: "",
 				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 1900,
+				timeout: 2400,
 				dataType: "json",
 				contentType: 'application/json',
 				success: function(data, status, err) {
 					$("#offline").hide();
 					offline_count = 0;
-					if(data != null && !gridster.drag_api.is_dragging && !pushing) {
-						updatePhones(data.phones);
-						updateLayout(data.layout);
+
+					if(data != null && !gridster.drag_api.is_dragging && !pushing_layout && !pushing_target) {
+						updateContent(data);
+						updateLayout(content);
 					}
 				},
 				error: function(xhr, status, err) { 
 					offline_count++;
 					if(status == "error" || offline_count > 3) {
 						$("#offline").show();
+						$("#offline > span").html(status);
 					}
 				}
 			});
 		}
 
-		function updatePhones(updated_phones) {
-			for(var i = 0;i < updated_phones.length;i++) {
-				$w = $("[content_id='"+updated_phones[i].content_id+"']");
-				$i = $("[content_id='"+updated_phones[i].content_id+"'] > a > img").first();
-				if($i.length == 0) {
-					addPhoneAsWidget(updated_phones[i]);
-				} else if($i.attr("src") != updated_phones[i].filepath) {
-					$w.data('content', updated_phones[i]);
+		function updateContent(updated_content) {
+			for(var i = 0;i < updated_content.length;i++) {
+				$w = $("[content_id='"+updated_content[i].content_id+"']");
+				$i = $("[content_id='"+updated_content[i].content_id+"'] > a > img");
 
-					$i.data("next_src",  updated_phones[i].filepath);
-					$i.fadeOut("fast", function() {
-						$(this).attr('src', $(this).data("next_src"));
-						$(this).removeData("next_src");
-						$(this).fadeIn("fast");
-					});
+				if($w.length == 0) {
+					addAsWidget(updated_content[i]);
+				} else {
+					updateWidget($w, updated_content[i]);
 				}
 
-				if(!updateMarker(updated_phones[i])) {
-					addMarker(updated_phones[i]);
+				if(!updateMarker(updated_content[i])) {
+					addMarker(updated_content[i]);
 				}
 			}
 
-			phones = updated_phones;
+			content = updated_content;
 
 			checkOnScreen();
 			refreshDetail();
 		}
 
-		function updateLayout(updated_layout) {
-			for(var i = 0;i < updated_layout.length;i++) {
-				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
+		function crossfadeImg($i, new_src) {
+			$i.data("next_src",  new_src);
+			$i.fadeOut("fast", function() {
+				$(this).attr('src', $(this).data("next_src"));
+				$(this).removeData("next_src");
+				$(this).fadeIn("fast");
+			});
+		}
+
+		function updateLayout(layout) {
+			for(var i = 0;i < layout.length;i++) {
+				$w = layout[i].$el;
 				gridster.remove_from_gridmap($w.coords().grid);
 			}
 
-			for(var i = 0;i < updated_layout.length;i++) {
-				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
+			for(var i = 0;i < layout.length;i++) {
+				$w = layout[i].$el;
 
-				if(!gridster.is_empty(updated_layout[i].col, updated_layout[i].row)) {
-					gridster.empty_cells(updated_layout[i].col, updated_layout[i].row, 1, 1);
+				if(!gridster.is_empty(layout[i].col, layout[i].row)) {
+					gridster.empty_cells(layout[i].col, layout[i].row, 1, 1);
 				}
 
 				//Perform the move
 				$w.attr({
-					'data-col': updated_layout[i].col,
-					'data-row': updated_layout[i].row
+					'data-col': layout[i].col,
+					'data-row': layout[i].row
 				});
 
 				//Change the correct associated position inside the widget
-				$w.coords().grid.col = updated_layout[i].col;
-				$w.coords().grid.row = updated_layout[i].row;
+				$w.coords().grid.col = layout[i].col;
+				$w.coords().grid.row = layout[i].row;
 
 				//Push it back into the internal mapping
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
 
-			for(var i = 0;i < updated_layout.length;i++) {
-				$w = $("[content_id='"+updated_layout[i].content_id+"']").first();
+			for(var i = 0;i < layout.length;i++) {
+				$w = layout[i].$el;
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
 
@@ -277,7 +316,6 @@
 			gridster.set_dom_grid_height();
 			//Assuming we don't want to record the change since we caused it
 			gridster.$changed = $([]);
-			layout = updated_layout;
 		}
 
 		var main_map, closeup_map;
@@ -312,12 +350,12 @@
 		function checkOnScreen() {
 			bounds = main_map.getBounds();
 
-			for(var i = 0;i < phones.length;i++) {
-				$el = $("[content_id='"+phones[i].content_id+"'] > a > img").first();
+			for(var i = 0;i < content.length;i++) {
+				$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
 
-				if(phones[i].lat < bounds.Z.b || phones[i].lat > bounds.Z.d) {
+				if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
 					$el.css("opacity", "0.3");
-				} else if(phones[i].lng < bounds.ca.b || phones[i].lng > bounds.ca.d) {
+				} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
 					$el.css("opacity", "0.3");
 				} else {
 					$el.css("opacity", "1");
@@ -479,7 +517,7 @@
 	    }
 
 	    function onMouseUp(event) {
-	    	window.pushHeading(cutearrow_vector.angle);
+	    	window.setTargetHeading(cutearrow_vector.angle);
 	    }
 
 	    function mouseHandle(event) {
@@ -500,7 +538,7 @@
     </script>
 </head>
 <body>
-	<div id="offline">Cannot Reach Server!</div>
+	<div id="offline">Cannot Reach Server: <span></span></div>
 
 	<div id="header">
 		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
