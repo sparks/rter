@@ -21,7 +21,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Receiving Multiupload")
 	imageFile, header, error := r.FormFile("image")
 	checkError(error)
 
@@ -29,7 +28,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("Invalid phone_id")
+		fmt.Println("upload failed, phone_id malformed:", phone_id)
 		return
 	}
 
@@ -37,6 +36,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
+		fmt.Println("upload failed, phone_id invalid:", phone_id)
 		return
 	}
 
@@ -84,26 +84,5 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	checkError(error)
 
-	fmt.Println("Added Content")
-}
-
-func Nehil(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Nehil Request")
-
-	imageFile, header, error := r.FormFile("image")
-	checkError(error)
-
-	fmt.Println("Filename", header.Filename)
-
-	path := imagePath + header.Filename
-
-	outputFile, error := os.Create(path)
-	checkError(error)
-	defer outputFile.Close()
-
-	io.Copy(outputFile, imageFile)
-
-	fmt.Println("Done Writing")
-
-	checkError(error)
+	fmt.Println("upload complete, phone_id", phone_id)
 }

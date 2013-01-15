@@ -8,9 +8,8 @@ import (
 func main() {
 	server.SetupMySQL()
 
-	http.HandleFunc("/upload", server.UploadHandler)
+	// http.HandleFunc("/upload", server.UploadHandler)
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
-	// http.HandleFunc("/nehil", server.Nehil)
 
 	http.HandleFunc("/ajax/", server.ClientAjax)
 
