@@ -43,14 +43,21 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
 
 	valid_pos := true
+	valid_heading := true
 
 	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
 	if err != nil {
 		valid_pos = false
 	}
+
 	lng, err := strconv.ParseFloat(r.FormValue("lng"), 64)
 	if err != nil {
 		valid_pos = false
+	}
+
+	heading, err := strconv.ParseFloat(r.FormValue("heading"), 64)
+	if err != nil {
+		valid_heading = false
 	}
 
 	t := time.Now()
@@ -68,7 +75,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(outputFile, imageFile)
 
-	if valid_pos {
+	if valid_pos && valid_heading {
+		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
+	} else if valid_pos {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
 	} else {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)

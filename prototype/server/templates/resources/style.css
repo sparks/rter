@@ -47,6 +47,7 @@ body {
 
 #closeup {
 	border-bottom: none;
+	display: none;
 }
 
 #closeup .container {

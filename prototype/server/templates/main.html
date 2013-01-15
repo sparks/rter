@@ -73,6 +73,8 @@
 			$("#closeup").slideDown("fast", function() {
 				google.maps.event.trigger(closeup_map, 'resize')
 			});
+			coneTo($w.data('content').heading);
+			cutearrowTo($w.data('content').heading);
 		}
 
 		function hideDetail() {
@@ -93,6 +95,7 @@
 					});
 					closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
 					google.maps.event.trigger(closeup_map, 'resize')
+					coneTo($w.data('content').heading);
 				}
 			}
 		}
@@ -147,6 +150,10 @@
 				selected_widget.css("border", "none");
 				selected_widget = null;
 			}
+		}
+
+		function pushHeading(heading) {
+			console.log(heading);
 		}
 
 		function pushLayout(layout) {
@@ -433,6 +440,8 @@
 	    	cone_vector.angle = angle;
 	    }
 
+	    window.coneTo = coneTo;
+
 	    function targetTo(angle) {
 	    	target.rotate(angle-target_vector.angle, center);
 	    	target_vector.angle = angle;
@@ -443,12 +452,18 @@
 	    	cutearrow_vector.angle = angle;
 	    }
 
+	    window.cutearrowTo = cutearrowTo;
+
 	    function onMouseDown(event) {
 		    mouseHandle(event);
 	    }
 
 	    function onMouseDrag(event) {
 	    	mouseHandle(event);
+	    }
+
+	    function onMouseUp(event) {
+	    	window.pushHeading(cutearrow_vector.angle);
 	    }
 
 	    function mouseHandle(event) {
@@ -470,8 +485,6 @@
 </head>
 <body>
 	<div id="offline">Cannot Reach Server!</div>
-
-	<div><a href="#" id="test">Test</a></div>
 
 	<div id="header">
 		<div id="rter"><a href="/"><img src="/images/rter.png" width="50" /></a></div>
