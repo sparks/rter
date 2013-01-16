@@ -64,6 +64,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -107,6 +109,8 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     // The first rear facing camera
     int defaultCameraId;
     static boolean isFPS = false;
+    
+    static float justtesting;
     
     String selected_uid;	// passed from other activity right now
     
@@ -205,8 +209,8 @@ public class CameraPreview extends Activity implements OnClickListener, Location
     	 wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG);
     	 
     	 // test, set desired orienation to north
-    	 this.overlay.letFreeRoam(false);
-    	 this.overlay.setDesiredOrientation(0.0f);
+    	 overlay.letFreeRoam(false);
+    	 overlay.setDesiredOrientation(0.0f);
             
     }
     
@@ -306,7 +310,7 @@ public class CameraPreview extends Activity implements OnClickListener, Location
             Log.e(TAG, "Inside Picture Callback");
             //get orientation
             orientation = convertStringToByteArray( "" + overlay.getCurrentOrientation());
-            new SavePhotoTask().execute(data, uid, lat, lon, orientation);
+            new SavePhotoTask(overlay).execute(data, uid, lat, lon, orientation);
             camera.startPreview();
             mPreview.inPreview=true;
 
@@ -334,6 +338,10 @@ public class CameraPreview extends Activity implements OnClickListener, Location
 			return theByteArray;
 	        
 	    }
+	  
+	  public void setDesiredOrientation(float orientation) {
+		  overlay.setDesiredOrientation(orientation);
+	  }
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
@@ -597,6 +605,12 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
     
     private DefaultHttpClient mHttpClient;
     private File photo;
+    
+    OverlayController overlay;
+    
+    public SavePhotoTask(OverlayController overlay) {
+    	this.overlay = overlay;
+    }
 
     @Override
     protected void onPostExecute (String result) {
@@ -666,7 +680,21 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
           multipartEntity.addPart("image", new FileBody(photo));
           httppost.setEntity(multipartEntity);
           Log.e("SavePhotoTask", "Upload executed");
-          mHttpClient.execute(httppost, new PhotoUploadResponseHandler());
+          HttpResponse response = mHttpClient.execute(httppost);
+          
+          Log.e("got response", response.toString());
+          
+          HttpEntity r_entity = response.getEntity();
+          String responseString = EntityUtils.toString(r_entity);
+          if(responseString != null) {
+        	  Log.e("response with orientation: ", responseString);
+          } else {
+        	  Log.e("response with orientation: ", "null");
+          }
+          
+          overlay.setDesiredOrientation(Float.parseFloat(responseString));
+
+          
           
           
           
@@ -689,7 +717,9 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 
             HttpEntity r_entity = response.getEntity();
             String responseString = EntityUtils.toString(r_entity);
-            Log.d("UPLOAD", responseString);
+            Log.e("response with orientation: ", responseString);
+            
+            //overlay.setDesiredOrientation(Float.parseFloat(responseString));
 
             return null;
         }
