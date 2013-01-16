@@ -12,6 +12,7 @@ body {
 	margin: 0px;
 	padding: 10px 0px 10px 0px;
 	min-width: 995px;
+	min-height: 320px;
 }
 
 .container {
