@@ -1,20 +1,15 @@
 package com.example.android.skeletonapp.overlay;
 
-import java.util.Arrays;
-
 import com.example.android.skeletonapp.overlay.CameraGLRenderer.Indicate;
 import com.example.android.skeletonapp.util.*;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build;
 import android.util.Log;
 
-@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 /**
  * NORTH: 0 deg
  * EAST: +90 deg
@@ -69,7 +64,10 @@ public class OverlayController implements SensorEventListener {
 	public void letFreeRoam(boolean freeRoam) {
 		this.freeRoam = freeRoam;
 	}
-
+	
+	public float getCurrentOrientation() {
+		return this.currentOrientation;
+	}
 	/**
 	 * Set the desired absolute bearing Should be between +180 and -180, but
 	 * will work otherwise
@@ -156,7 +154,7 @@ public class OverlayController implements SensorEventListener {
 		// down
 		this.deviceOrientation = (float) Math.toDegrees(orientationValues[2]);
 
-		// Log.e(TAG, "x,y,z: " + Arrays.toString(orientationValues));
+		//Log.e(TAG, "x,y,z: " + Arrays.toString(orientationValues));
 
 		if (this.freeRoam) {
 			this.mGLRenderer.indicateTurn(Indicate.FREE, 0.0f);

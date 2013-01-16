@@ -24,7 +24,13 @@
      own application, the package name must be changed from "com.example.*"
      to come from a domain that you own or have control over. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.android.skeletonapp">
+    package="com.example.android.skeletonapp"
+    android:versionCode="1"
+    android:versionName="0.1" >
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="17" />
     
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
@@ -38,7 +44,9 @@
     <uses-permission android:name="android.permission.RECORD_VIDEO"></uses-permission>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>              
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>    
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+    
 
     <!-- This package contains an application...  The 'label' is the name
          to display to the user for the overall application, and provides
@@ -67,7 +75,7 @@
 
         </activity>
         
-        <activity android:name="com.example.android.skeletonapp.CameraPreview" android:label="Graphics/CameraPreview" android:screenOrientation="landscape">
+        <activity android:name="com.example.android.skeletonapp.CameraPreviewActivity" android:label="Graphics/CameraPreview" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

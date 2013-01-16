@@ -6,8 +6,6 @@ import javax.microedition.khronos.opengles.GL10;
 import com.example.android.skeletonapp.overlay.IndicatorFrame.Colour;
 
 import android.content.Context;
-import android.hardware.Sensor;
-import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 
 import android.opengl.GLSurfaceView.Renderer;
