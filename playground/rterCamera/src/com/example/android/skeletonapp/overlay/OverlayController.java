@@ -159,7 +159,7 @@ public class OverlayController implements SensorEventListener {
 		// down
 		this.deviceOrientation = (float) Math.toDegrees(orientationValues[2]);
 
-		// Log.e(TAG, "x,y,z: " + Arrays.toString(orientationValues));
+		//Log.e(TAG, "x,y,z: " + Arrays.toString(orientationValues));
 
 		if (this.freeRoam) {
 			this.mGLRenderer.indicateTurn(Indicate.FREE, 0.0f);
