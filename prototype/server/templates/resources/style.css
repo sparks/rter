@@ -162,9 +162,10 @@ body {
 	background-color: rgb(101, 101, 101);
 }
 
-.error {
+#nocontent {
 	color: rgb(200, 0, 0);
 	font-weight: bold;
+	display: none;
 }
 
 #offline {

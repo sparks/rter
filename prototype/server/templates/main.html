@@ -60,7 +60,7 @@
 			$(".gridster > ul").width(gridster.min_widget_width*gridster.cols);
 
 			if(content.length == 0) {
-				$(".gridster").append("<div class='error'>No Content Available</div>");
+				$("#nocontent").show();
 			}
 
 			//Add all the widget without worrying about layout
@@ -254,6 +254,10 @@
 		}
 
 		function updateContent(updated_content) {
+			if(updated_content.length != 0) {
+				$("#nocontent").hide();
+			}
+			
 			for(var i = 0;i < updated_content.length;i++) {
 				$w = $("[content_id='"+updated_content[i].content_id+"']");
 				$i = $("[content_id='"+updated_content[i].content_id+"'] > a > img");
@@ -595,6 +599,7 @@
 			</ul>
 
 			<div id="main_map_canvas"></div>
+			<div id="nocontent">No Content Available</div>
 		</div>
 	</div>
 </body>
