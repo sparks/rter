@@ -19,7 +19,7 @@
 		};
 
 		var gridster;
-		var was_dragged, pushing_target, pushing_layout;
+		var was_dragged, pushing_target, pushing_layout, pushing_description;
 		var offline_count;
 
 		var selected_widget;
@@ -29,14 +29,6 @@
 		$.ajaxSetup ({
 			cache: false
 		});
-
-		var replacer = function(key, value) {
-			if (key == "" || key == "col" || key == "row" || key == "size_x" || key == "size_y" || key == "target_heading" || key == "content_id") {
-				return value;
-			} else {
-				return undefined;
-			}
-		};
 
 
 		$(document).ready(function() {
@@ -74,18 +66,38 @@
 				clearSelectedWidget();
 			});
 
+			$("#closeuptext > div > a").click(function(e) {
+				e.preventDefault();
+				if(selected_widget != null) {
+					selected_widget.data("content").description = $("#closeuptext > textarea").val();
+					pushDescription(selected_widget.data("content"));
+				}
+			});
+
 			updateLayout(content);
 			setInterval(getContent, 2500);
 		});
 
 		function showDetail($w) {
-			$("#view > img").attr("src", $w.data('content').filepath);
+			if(selected_widget == null || selected_widget.data('content').filepath != $w.data('content').filepath) {
+				crossfadeImg($("#view > img"), $w.data('content').filepath);
+			}
 
 			closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
 			google.maps.event.trigger(closeup_map, 'resize')
 
 			coneTo($w.data('content').heading);
 			cutearrowTo($w.data('content').target_heading);
+
+			if($w.data("content").url.length != 0) {
+				$("#closeuplink").show();
+				$("#closeuplink > a").attr("href", $w.data("content").url);
+				$("#closeuplink > a").html($w.data("content").url);
+			} else {
+				$("#closeuplink").hide();
+			}
+
+			$("#closeuptext > textarea").val($w.data("content").description);
 
 			$("#closeup").slideDown("fast", function() {
 				google.maps.event.trigger(closeup_map, 'resize')
@@ -191,7 +203,13 @@
 				$.ajax({
 					url: "/ajax/pushheading",
 					type: 'POST',
-					data: JSON.stringify(selected_widget.data('content'), replacer),
+					data: JSON.stringify(selected_widget.data('content'), function(key, value) {
+						if (key == "" || key == "target_heading" || key == "content_id") {
+							return value;
+						} else {
+							return undefined;
+						}
+					}),
 					processData: false, //Prevent the data from being transformed into a query string
 					timeout: 2400,
 					dataType: "json",
@@ -204,6 +222,31 @@
 					}
 				});
 			}
+		}
+
+		function pushDescription(description) {
+			pushing_description = true;
+			$.ajax({
+				url: "/ajax/pushdescription",
+				type: 'POST',
+				data: JSON.stringify(selected_widget.data('content'), function(key, value) {
+					if (key == "" || key == "description" || key == "content_id") {
+						return value;
+					} else {
+						return undefined;
+					}
+				}),
+				processData: false, //Prevent the data from being transformed into a query string
+				timeout: 2400,
+				dataType: "json",
+				contentType: 'application/json',
+				success: function(data, status, err) {
+					pushing_description = false;
+				},
+				error: function(xhr, status, err) { 
+					pushing_description = false;
+				}
+			});
 		}
 
 		function pushLayout(layout) {
@@ -238,7 +281,7 @@
 					$("#offline").hide();
 					offline_count = 0;
 
-					if(data != null && !gridster.drag_api.is_dragging && !pushing_layout && !pushing_target) {
+					if(data != null && !gridster.drag_api.is_dragging && !pushing_layout && !pushing_target && !pushing_description) {
 						updateContent(data);
 						updateLayout(content);
 					}
@@ -257,7 +300,7 @@
 			if(updated_content.length != 0) {
 				$("#nocontent").hide();
 			}
-			
+
 			for(var i = 0;i < updated_content.length;i++) {
 				$w = $("[content_id='"+updated_content[i].content_id+"']");
 				$i = $("[content_id='"+updated_content[i].content_id+"'] > a > img");
@@ -584,10 +627,18 @@
 
 	<div class="stripe" id="closeup">
 		<div class="container">
-			<div id="view"><img src="" /></div>
+			<div id="view">
+				<img src="" />
+			</div>
+			<div id="closeuplink"><a target="_blank" href="http://dev.mysql.com/doc/refman/5.0/en/create-table.html">http://dev.mysql.com/doc/refman/5.0/en/create-table.html</a></div>
 
 			<canvas id="heading_selector" width="300" height="300"></canvas>
 			<div id="closeup_map_canvas"></div>
+
+			<div id="closeuptext">
+				<textarea>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut eni minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip e commodo consequat. Duis aute irure dolor in reprehenderit in volup velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occa cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+				<div><a href="#">Save</a></div>
+			</div>
 
 			<div id="closeup_close"><a href="#">[close]</a></div>
 		</div>

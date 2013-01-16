@@ -64,8 +64,8 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 	responseChan := make(chan *http.Response)
 
 	go func() {
-		response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
-		// response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
+		// response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
+		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
 		responseChan <- response
 	}()
@@ -131,7 +131,7 @@ func main() {
 		n := 0
 		for {
 			for i := 0; i < num_clients; i++ {
-				multipartUpload(fetchStockImage(200, 150), phone_ids[i], 45.50745+rand.Float64()/5-0.1, -73.5793+rand.Float64()/5-0.1, -180.0+rand.Float64()*360.0)
+				multipartUpload(fetchStockImage(200, 200), phone_ids[i], 45.50745+rand.Float64()/5-0.1, -73.5793+rand.Float64()/5-0.1, -180.0+rand.Float64()*360.0)
 				fmt.Println(45.4+rand.Float64()/5, -73.4+rand.Float64()/5)
 				fmt.Println(n, i)
 				select {

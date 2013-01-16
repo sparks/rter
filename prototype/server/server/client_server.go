@@ -19,17 +19,23 @@ type PageContent struct {
 }
 
 type ContentChunk struct {
-	ContentID     string  `json:"content_id"`
-	ConentType    string  `json:"content_type"`
-	Filepath      string  `json:"filepath"`
+	ContentID  string `json:"content_id"`
+	ConentType string `json:"content_type"`
+
+	Filepath string `json:"filepath"`
+	URL      string `json:"url"`
+
+	Description string `json:"description"`
+
 	Lat           float64 `json:"lat"`
 	Lng           float64 `json:"lng"`
 	Heading       float64 `json:"heading"`
 	TargetHeading float64 `json:"target_heading"`
-	Col           int     `json:"col"`
-	Row           int     `json:"row"`
-	SizeX         int     `json:"size_x"`
-	SizeY         int     `json:"size_y"`
+
+	Col   int `json:"col"`
+	Row   int `json:"row"`
+	SizeX int `json:"size_x"`
+	SizeY int `json:"size_y"`
 }
 
 var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
@@ -139,6 +145,15 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		_, _, err = database.Query("UPDATE phones SET target_heading=%v WHERE phone_id=\"%s\";", headingChunk.TargetHeading, headingChunk.ContentID)
 		checkError(err)
+	} else if r.URL.Path == "/ajax/pushdescription" {
+		decoder := json.NewDecoder(r.Body)
+
+		var descChunk *ContentChunk
+		err := decoder.Decode(&descChunk)
+		checkError(err)
+
+		_, _, err = database.Query("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=\"%s\"  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=\"%s\";", descChunk.ContentID, descChunk.Description)
+		checkError(err)
 	}
 }
 
@@ -147,7 +162,7 @@ func fetchPageContent() *PageContent {
 
 	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	rows, _, err := database.Query("select c1.content_id, c1.content_type, c1.filepath, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
+	rows, _, err := database.Query("select c1.content_id, c1.content_type, c1.filepath, c1.url, c1.description, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
 
 	checkError(err)
 
@@ -158,14 +173,16 @@ func fetchPageContent() *PageContent {
 			row.Str(0),   //content_id
 			row.Str(1),   //content_type
 			row.Str(2),   //filepath
-			row.Float(3), //geolat
-			row.Float(4), //geolng
-			row.Float(5), //heading
-			row.Float(6), //target_heading
-			row.Int(7),   //col
-			row.Int(8),   //row
-			row.Int(9),   //size_x
-			row.Int(10),  //size_y
+			row.Str(3),   //url
+			row.Str(4),   //description
+			row.Float(5), //geolat
+			row.Float(6), //geolng
+			row.Float(7), //heading
+			row.Float(8), //target_heading
+			row.Int(9),   //col
+			row.Int(10),  //row
+			row.Int(11),  //size_x
+			row.Int(12),  //size_y
 		}
 	}
 

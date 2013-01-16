@@ -57,26 +57,6 @@ body {
 	margin: 10px auto 10px auto;
 }
 
-#heading_selector {
-	position: absolute;
-	top: 170px;
-	left: 665px;
-	margin: 0px;
-	height: 300px;
-	width: 300px;
-	z-index: 2;
-}
-
-#closeup_map_canvas {
-	z-index: 1;
-	position: absolute;
-	top: 170px;
-	left: 665px;
-	margin: 0px;
-	height: 300px;
-	width: 300px;
-}
-
 #view {
 	width: 620px;
 	margin: auto auto auto 10px;
@@ -89,6 +69,77 @@ body {
 	margin: auto;
 	vertical-align: middle;
 	width: 620px;
+}
+
+#closeuplink {
+	text-align: center;
+	width: 620px;
+	margin: 20px auto auto 0px;
+	display: none;
+}
+
+#closeuplink a:link, #closeuplink a:active, #closeuplink a:visited {
+	text-decoration: none;
+	color: rgb(75, 75, 75);
+}
+
+#closeuplink a:hover {
+	text-decoration: underline;
+}
+
+#closeuptext {
+	position: absolute;
+	left: 665px;
+	top: 380px;
+	text-align: right;
+	width: 300px;
+}
+
+#closeuptext textarea {
+	text-align: left;
+	width: 298px;
+	height: 200px;
+}
+
+#closeuptext div {
+	background-color: rgb(255, 255, 255);
+	border: 1px solid rgb(170, 170, 170);
+	width: 100px;
+	height: 35px;
+	line-height: 35px;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 11pt;
+	margin: 0px 0px auto auto;
+}
+
+#closeuptext a:link, #closeuptext a:visited, #closeuptext a:active {
+	text-decoration: none;
+	color: rgb(75, 75, 75);
+}
+
+#closeuptext a:hover {
+	text-decoration: underline;
+}
+
+#heading_selector {
+	position: absolute;
+	top: 50px;
+	left: 665px;
+	margin: 0px;
+	height: 300px;
+	width: 300px;
+	z-index: 2;
+}
+
+#closeup_map_canvas {
+	z-index: 1;
+	position: absolute;
+	top: 50px;
+	left: 665px;
+	margin: 0px;
+	height: 300px;
+	width: 300px;
 }
 
 #closeup_close {
@@ -139,7 +190,7 @@ body {
 	border-bottom: none;
 	width: 180px;
 	height: 35px;
-	line-height: 30px;
+	line-height: 35px;
 	vertical-align: middle;
 	margin: auto;
 	position: relative;
@@ -149,7 +200,7 @@ body {
 
 #submit a:link, #submit a:visited, #submit a:active {
 	text-decoration: none;
-	color: rgb(170, 170, 170);
+	color: rgb(75, 75, 75);
 }
 
 #submit a:hover {
