@@ -502,6 +502,9 @@
 	    }
 
 	    function coneTo(angle) {
+	    	angle = angle-90;
+	    	if(angle < -180) angle += 360;
+
 	    	cone.rotate(angle-cone_vector.angle, center);
 	    	cone_vector.angle = angle;
 	    }
@@ -514,6 +517,9 @@
 	    }
 
 	    function cutearrowTo(angle) {
+	    	angle = angle-90;
+	    	if(angle < -180) angle += 360;
+
 	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
 	    	cutearrow_vector.angle = angle;
 	    }
@@ -529,11 +535,19 @@
 	    }
 
 	    function onMouseUp(event) {
-	    	window.setTargetHeading(cutearrow_vector.angle);
+	    	var angle = cutearrow_vector.angle;
+	    	angle = angle+90;
+	    	if(angle > 180) {
+	    		angle -= 360;
+	    	}
+	    	window.setTargetHeading(angle);
 	    }
 
 	    function mouseHandle(event) {
-	    	cutearrowTo((event.point-center).angle);
+	    	angle = (event.point-center).angle;
+	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
+	    	cutearrow_vector.angle = angle;
+
 	    }
 
 	    function onFrame(event) {
