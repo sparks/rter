@@ -3,7 +3,7 @@ MySQL Setup
 
 Run these commands to setup the MySQL databases for the rter project
 
-	CREATE TABLE content (
+	CREATE TABLE test (
 		uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		content_id VARCHAR(64) NOT NULL,
 		content_type VARCHAR(64) NOT NULL,
@@ -13,7 +13,8 @@ Run these commands to setup the MySQL databases for the rter project
 		geolng DECIMAL(9,6),
 		heading DECIMAL(9, 6),
 		description TEXT,
-		url VARCHAR(256)
+		url VARCHAR(256),
+		KEY (content_id, timestamp)
 	);
 
 	CREATE TABLE phones (
@@ -50,4 +51,4 @@ Some usefull commands.
 		("qcb519f53a55d9dea06ef5cc104eda79d305282e")
 	;
 
-	delete from content;alter table content AUTO_INCREMENT=1;
+	delete from content where uid >= 0;alter table content AUTO_INCREMENT=1;

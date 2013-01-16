@@ -60,22 +60,22 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	description := r.FormValue("description")
 	url := r.FormValue("url")
 	imageFile, header, error := r.FormFile("image")
-	
+
 	t := time.Now()
-	
+
 	hasher := md5.New()
 	hasher.Write([]byte(fmt.Sprintf("%v", t.UnixNano())))
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
-	
+
 	if error != nil {
 		path := imagePath + "client/default.png"
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	} else {
-		os.Mkdir(imagePath + "client", os.ModeDir | 0755)
-	
+		os.Mkdir(imagePath+"client", os.ModeDir|0755)
+
 		path := imagePath + "client/"
-		
+
 		if strings.HasSuffix(header.Filename, ".png") {
 			path += fmt.Sprintf("%v.png", id)
 		} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
@@ -143,9 +143,11 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPageContent() *PageContent {
-	rows, _, err := database.Query("SELECT content.content_id, content.content_type, content.filepath, content.geolat, content.geolng, content.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y FROM content  LEFT JOIN layout ON layout.content_id = content.content_id LEFT JOIN phones ON phones.phone_id = content.content_id WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+	// rows, _, err := database.Query("SELECT content.content_id, content.content_type, content.filepath, content.geolat, content.geolng, content.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y FROM content  LEFT JOIN layout ON layout.content_id = content.content_id LEFT JOIN phones ON phones.phone_id = content.content_id WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
 	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
+
+	rows, _, err := database.Query("select c1.content_id, c1.content_type, c1.filepath, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
 
 	checkError(err)
 
