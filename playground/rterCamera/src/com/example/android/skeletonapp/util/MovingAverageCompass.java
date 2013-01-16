@@ -1,20 +1,24 @@
 package com.example.android.skeletonapp.util;
 
 /**
- * A simple moving average implementation.
+ * A simple moving average implementation for compass directions.
+ * 
+ * Gets rid of averaging anomality due to discontinuity from -180 to 180 on the compass.
  *
  * SMA (Simple moving average) sometimes called rolling average, or running average (mean).
  * see: http://en.wikipedia.org/wiki/Moving_average.
  *
  * @author scottkirkwood
  */
-public class MovingAverage {
+public class MovingAverageCompass {
     private float circularBuffer[];
     private float mean;
     private int circularIndex;
     private int count;
+    
+    private int negativeCount;
 
-    public MovingAverage(int size) {
+    public MovingAverageCompass(int size) {
         circularBuffer = new float[size];
         reset();
     }
@@ -23,12 +27,28 @@ public class MovingAverage {
      * Get the current moving average.
      */
     public float getValue() {
-        return mean;
+        if (negativeCount >= circularBuffer.length) {
+        	return -mean;
+        } else {
+        	return mean;
+        }
     }
 
     /**
      */
     public void pushValue(float x) {
+    	if (x < 0) {
+    		if(negativeCount < circularBuffer.length) {
+    			negativeCount++;
+    		}
+    	} else {
+    		if(negativeCount > 0) {
+    			negativeCount--;
+    		}
+    	}
+    	
+    	x = Math.abs(x);
+    	
         if (count++ == 0) {
             primeBuffer(x);
         }
@@ -44,6 +64,7 @@ public class MovingAverage {
         count = 0;
         circularIndex = 0;
         mean = 0;
+        negativeCount = 0;
     }
 
     public long getCount() {

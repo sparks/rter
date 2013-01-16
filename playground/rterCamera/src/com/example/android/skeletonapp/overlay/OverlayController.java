@@ -1,5 +1,7 @@
 package com.example.android.skeletonapp.overlay;
 
+import java.util.Arrays;
+
 import com.example.android.skeletonapp.overlay.CameraGLRenderer.Indicate;
 import com.example.android.skeletonapp.util.*;
 
@@ -38,14 +40,14 @@ public class OverlayController implements SensorEventListener {
 	// max orientation tolerance in degrees
 	public float orientationTolerance = 10.0f;
 	
-	private MovingAverage orientationFilter;
+	private MovingAverageCompass orientationFilter;
 
 	public OverlayController(Context context) {
 		this.context = context;
 		this.mGLView = new CameraGLSurfaceView(context);
 		this.mGLRenderer = this.mGLView.getGLRenderer();
 		
-		orientationFilter = new MovingAverage(30);
+		orientationFilter = new MovingAverageCompass(30);
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class OverlayController implements SensorEventListener {
 		// down
 		this.deviceOrientation = (float) Math.toDegrees(orientationValues[2]);
 
-		//Log.e(TAG, "x,y,z: " + Arrays.toString(orientationValues));
+		//Log.e(TAG, "x: " + this.currentOrientation);
 
 		if (this.freeRoam) {
 			this.mGLRenderer.indicateTurn(Indicate.FREE, 0.0f);
