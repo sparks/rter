@@ -22,7 +22,10 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	imageFile, header, error := r.FormFile("image")
-	checkError(error)
+	// checkError(error)
+	if error != nil {
+		return
+	}
 
 	phoneID := r.FormValue("phone_id")
 
@@ -92,7 +95,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		case []byte:
 			w.Write(v)
 		default:
-			w.Write([]byte(""))
+			w.Write([]byte("0.0"))
 		}
 	}
 

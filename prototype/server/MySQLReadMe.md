@@ -13,7 +13,8 @@ Run these commands to setup the MySQL databases for the rter project
 		geolng DECIMAL(9,6),
 		heading DECIMAL(9, 6),
 		description TEXT,
-		url VARCHAR(256)
+		url VARCHAR(256),
+		KEY (content_id, timestamp)
 	);
 
 	CREATE TABLE phones (
@@ -34,7 +35,7 @@ Run these commands to setup the MySQL databases for the rter project
 
 Some usefull commands.
 
-	INSERT INTO phone (phone_id) VALUES
+	INSERT INTO phones (phone_id) VALUES
 		("1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98"),
 		("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98"),
 		("b6200c5cc15cfbddde2874c40952a7aa25a869dd"),
@@ -50,4 +51,4 @@ Some usefull commands.
 		("qcb519f53a55d9dea06ef5cc104eda79d305282e")
 	;
 
-	delete from content;alter table content AUTO_INCREMENT=1;
+	delete from content where uid >= 0;alter table content AUTO_INCREMENT=1;

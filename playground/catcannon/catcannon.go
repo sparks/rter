@@ -64,8 +64,8 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 	responseChan := make(chan *http.Response)
 
 	go func() {
-		// response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
-		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
+		response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
+		// response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
 		responseChan <- response
 	}()
@@ -97,9 +97,8 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 
 	response := <-responseChan
 	fmt.Println(response.Status)
-	r, _ := io
-	util.ReadAll(response.Body)
-	fmt.Println(string(r))
+	r, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("Response Body", string(r))
 }
 
 func regularPNGUpload(filename string) {

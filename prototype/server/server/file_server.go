@@ -71,34 +71,31 @@ func ResourceHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, fi)
 }
 
-func HTMLHandler(w http.ResponseWriter, r *http.Request) {
+func HTMLHandler(w http.ResponseWriter, r *http.Request) bool {
 	if strings.HasSuffix(r.URL.Path, ".html") {
 		w.Header().Set("Content-Type", "text/html")
 	} else {
-		http.NotFound(w, r)
-		return
+		return false
 	}
-	
+
 	path := strings.Split(r.URL.Path, "/")
-	
-	if len(path) < 3 {
-		http.NotFound(w, r)
-		return
+
+	if len(path) < 2 {
+		return false
 	}
-	
-	if !validateFilePath(path[2:]) {
-		http.NotFound(w, r)
-		return
+
+	if !validateFilePath(path[1:]) {
+		return false
 	}
-	
-	page, err := os.Open(templatePath + strings.Join(path[2:], "/"))
+
+	page, err := os.Open(templatePath + strings.Join(path[1:], "/"))
 	if err != nil {
-		http.NotFound(w, r)
-		return
+		return false
 	}
 	defer page.Close()
-	
+
 	io.Copy(w, page)
+	return true
 }
 
 func validateFilePath(path []string) bool {

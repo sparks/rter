@@ -60,7 +60,7 @@
 			$(".gridster > ul").width(gridster.min_widget_width*gridster.cols);
 
 			if(content.length == 0) {
-				$(".gridster").append("<div class='error'>No Content Available</div>");
+				$("#nocontent").show();
 			}
 
 			//Add all the widget without worrying about layout
@@ -103,7 +103,7 @@
 				$i = $("#view > img");
 
 				if($i.attr("src") != selected_widget.data('content').filepath) {
-					crossfadeImg($i, selected_widget.data('content_id').filepath);
+					crossfadeImg($i, selected_widget.data('content').filepath);
 
 					closeup_map.setCenter(new google.maps.LatLng(selected_widget.data('content').lat, selected_widget.data('content').lng));
 					google.maps.event.trigger(closeup_map, 'resize');
@@ -124,22 +124,22 @@
 			$a.attr('href', '#');
 
 			var $li = $(document.createElement('li')).append($a);
-			$li.attr('content_id', content.content_id)
+			$li.attr('content_id', content.content_id);
+
+			gridster.add_widget($li, 1, 1);
 
 			$li.data('content', content);
 			content.$el = $li;
-
-			gridster.add_widget($li, 1, 1);
 		}
 
 		function updateWidget($w, content) {
-			$w.data('content', content);
-			content.$el = $w;
-
-			$i = $w.filter("a > img");
+			$i = $w.children().first().children().first();
 			if($i.attr("src") != content.filepath) {
 				crossfadeImg($i, content.filepath);
 			}
+
+			$w.data('content', content);
+			content.$el = $w;
 		}
 
 		function widgetMouseUpFunction(e) {
@@ -254,6 +254,10 @@
 		}
 
 		function updateContent(updated_content) {
+			if(updated_content.length != 0) {
+				$("#nocontent").hide();
+			}
+			
 			for(var i = 0;i < updated_content.length;i++) {
 				$w = $("[content_id='"+updated_content[i].content_id+"']");
 				$i = $("[content_id='"+updated_content[i].content_id+"'] > a > img");
@@ -286,11 +290,15 @@
 
 		function updateLayout(layout) {
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 				gridster.remove_from_gridmap($w.coords().grid);
 			}
 
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 
 				if(!gridster.is_empty(layout[i].col, layout[i].row)) {
@@ -312,6 +320,8 @@
 			}
 
 			for(var i = 0;i < layout.length;i++) {
+				if(layout[i].col == 0 && layout[i].row == 0) continue;
+
 				$w = layout[i].$el;
 				gridster.add_to_gridmap($w.coords().grid, $w);
 			}
@@ -355,14 +365,16 @@
 			bounds = main_map.getBounds();
 
 			for(var i = 0;i < content.length;i++) {
-				$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
+				if(content.content_type == "mobile") {
+					$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
 
-				if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
-					$el.css("opacity", "0.3");
-				} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
-					$el.css("opacity", "0.3");
-				} else {
-					$el.css("opacity", "1");
+					if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
+						$el.css("opacity", "0.3");
+					} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
+						$el.css("opacity", "0.3");
+					} else {
+						$el.css("opacity", "1");
+					}
 				}
 			}
 		}
@@ -494,6 +506,9 @@
 	    }
 
 	    function coneTo(angle) {
+	    	angle = angle-90;
+	    	if(angle < -180) angle += 360;
+
 	    	cone.rotate(angle-cone_vector.angle, center);
 	    	cone_vector.angle = angle;
 	    }
@@ -506,6 +521,9 @@
 	    }
 
 	    function cutearrowTo(angle) {
+	    	angle = angle-90;
+	    	if(angle < -180) angle += 360;
+
 	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
 	    	cutearrow_vector.angle = angle;
 	    }
@@ -521,11 +539,19 @@
 	    }
 
 	    function onMouseUp(event) {
-	    	window.setTargetHeading(cutearrow_vector.angle);
+	    	var angle = cutearrow_vector.angle;
+	    	angle = angle+90;
+	    	if(angle > 180) {
+	    		angle -= 360;
+	    	}
+	    	window.setTargetHeading(angle);
 	    }
 
 	    function mouseHandle(event) {
-	    	cutearrowTo((event.point-center).angle);
+	    	angle = (event.point-center).angle;
+	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
+	    	cutearrow_vector.angle = angle;
+
 	    }
 
 	    function onFrame(event) {
@@ -554,6 +580,8 @@
 		</div>
 	</div>
 
+	<div id="submit"><a href="/submit.html">Submit New Content</a></div>
+
 	<div class="stripe" id="closeup">
 		<div class="container">
 			<div id="view"><img src="" /></div>
@@ -571,9 +599,7 @@
 			</ul>
 
 			<div id="main_map_canvas"></div>
-			<form action="templates/submit.html">
-				<input type="submit" value="Submit New Content">
-			</form>
+			<div id="nocontent">No Content Available</div>
 		</div>
 	</div>
 </body>
