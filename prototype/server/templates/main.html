@@ -408,7 +408,7 @@
 			bounds = main_map.getBounds();
 
 			for(var i = 0;i < content.length;i++) {
-				if(content.content_type == "mobile") {
+				if(content[i].content_type == "mobile") {
 					$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
 
 					if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
