@@ -19,8 +19,6 @@ package com.example.android.skeletonapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,9 +27,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
-import android.provider.Settings.Secure;
 
 /**
  * This class provides a basic demonstration of how to write an Android
@@ -41,10 +37,7 @@ import android.provider.Settings.Secure;
 public class SkeletonActivity extends Activity {
 	 
     static final private int BACK_ID = Menu.FIRST;
-    static final private int CLEAR_ID = Menu.FIRST + 1;
-
-    private EditText mEditor;
-    
+    static final private int CLEAR_ID = Menu.FIRST + 1;    
     
     int phoneIDselected = 0;
     
@@ -94,18 +87,13 @@ public class SkeletonActivity extends Activity {
         ArrayAdapter<String> idAdapter = new ArrayAdapter<String>(this,
         		android.R.layout.simple_spinner_dropdown_item, phoneIDnumber);
         idSelect.setAdapter(idAdapter);
-        
-        // Find the text editor view inside the layout, because we
-        // want to do various programmatic things with it.
-//        mEditor = (EditText) findViewById(R.id.editor);
 
         // Hook up button presses to the appropriate event handler.
-//        ((Button) findViewById(R.id.back)).setOnClickListener(mBackListener);
         ((Button) findViewById(R.id.camera)).setOnClickListener(mCameraListener);
         
+        // phone ID spinner
         idSelect.setOnItemSelectedListener(mPhoneIDSelectListener);
         
-//        mEditor.setText(getText(R.string.main_label));
     }
 
     /**
@@ -151,14 +139,11 @@ public class SkeletonActivity extends Activity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        
-    	
     	switch (item.getItemId()) {
         case BACK_ID:
             finish();
             return true;
         case CLEAR_ID:
-        	
             return true;
         }
 
@@ -203,7 +188,7 @@ public class SkeletonActivity extends Activity {
     
     private void openCamera() {
 		// TODO Auto-generated method stub
-    	Intent i = new Intent(this, CameraPreview.class);
+    	Intent i = new Intent(this, CameraPreviewActivity.class);
     	i.putExtra("phoneID", this.phoneID[this.phoneIDselected]);
     	startActivity(i);
 	}

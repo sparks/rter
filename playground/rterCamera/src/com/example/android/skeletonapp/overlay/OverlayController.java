@@ -1,20 +1,15 @@
 package com.example.android.skeletonapp.overlay;
 
-import java.util.Arrays;
-
 import com.example.android.skeletonapp.overlay.CameraGLRenderer.Indicate;
 import com.example.android.skeletonapp.util.*;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build;
 import android.util.Log;
 
-@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 /**
  * NORTH: 0 deg
  * EAST: +90 deg

@@ -1,12 +1,9 @@
 package com.example.android.skeletonapp.overlay;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 
-@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class CameraGLSurfaceView extends GLSurfaceView {
 	protected CameraGLRenderer camGLRenderer;
 
