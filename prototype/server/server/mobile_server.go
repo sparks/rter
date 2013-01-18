@@ -79,13 +79,10 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(outputFile, imageFile)
 
 	if valid_pos && valid_heading {
-		fmt.Println("Got Heading and Position")
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
 	} else if valid_pos {
-		fmt.Println("Got Position")
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
 	} else {
-		fmt.Println("Image Data Only")
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
 	checkError(error)
@@ -102,5 +99,5 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println("upload complete, phone_id", phoneID)
+	fmt.Println("upload complete, phone_id", phoneID, ", heading", valid_heading, ", position", valid_pos)
 }
