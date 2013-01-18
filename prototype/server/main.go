@@ -19,5 +19,5 @@ func main() {
 	http.HandleFunc("/images/", server.ImageHandler)
 	http.HandleFunc("/resources/", server.ResourceHandler)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":80", nil)
 }
