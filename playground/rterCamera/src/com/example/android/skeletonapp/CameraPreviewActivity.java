@@ -18,6 +18,7 @@ package com.example.android.skeletonapp;
 
 import com.example.android.skeletonapp.overlay.*;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -75,6 +76,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	private static final String TAG = "CameraPreview Activity";
 	protected static final String MEDIA_TYPE_IMAGE = null;
 	
+	@SuppressLint("ParserError")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -139,14 +141,20 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// Define the criteria how to select the location provider -> use
 		// default
+		
+		if ( !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+			Log.e(TAG, "GPS not available");
+	    }	
 		Criteria criteria = new Criteria();
 		provider = locationManager.getBestProvider(criteria, false);
+		Log.e(TAG, "Requesting location");
+		locationManager.requestLocationUpdates(provider, 0, 1, this);
 		if (provider != null) {
 			Location location = locationManager.getLastKnownLocation(provider);
 			// Initialize the location fields
 			if (location != null) {
 				System.out.println("Provider " + provider
-						+ " has been selected.");
+						+ " has been selected. and location "+ location);
 				onLocationChanged(location);
 			} else {
 				Log.d(TAG, "Location not available");
@@ -166,7 +174,6 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.e(TAG, "onResume");
 		locationManager.requestLocationUpdates(provider, 400, 1, this);
 		// Open the default i.e. the first rear facing camera.
 		mCamera = Camera.open();
