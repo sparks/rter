@@ -2,6 +2,7 @@ package main
 
 import (
 	"./server"
+	"log"
 	"net/http"
 )
 
@@ -19,5 +20,5 @@ func main() {
 	http.HandleFunc("/images/", server.ImageHandler)
 	http.HandleFunc("/resources/", server.ResourceHandler)
 
-	http.ListenAndServe(":80", nil)
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
