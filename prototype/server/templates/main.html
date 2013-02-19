@@ -411,9 +411,9 @@
 				if(content[i].content_type == "mobile") {
 					$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
 
-					if(content[i].lat < bounds.Z.b || content[i].lat > bounds.Z.d) {
+					if(content[i].lat < Math.min(bounds.getNorthEast().lat(), bounds.getSouthWest().lat()) || content[i].lat > Math.max(bounds.getNorthEast().lat(), bounds.getSouthWest().lat())) {
 						$el.css("opacity", "0.3");
-					} else if(content[i].lng < bounds.ca.b || content[i].lng > bounds.ca.d) {
+					} else if(content[i].lng < Math.min(bounds.getNorthEast().lng(), bounds.getSouthWest().lng()) || content[i].lng > Math.max(bounds.getNorthEast().lng(), bounds.getSouthWest().lng())) {
 						$el.css("opacity", "0.3");
 					} else {
 						$el.css("opacity", "1");
