@@ -28,6 +28,7 @@
 	* New tabs as a view into a tag. Ranking in this view is unique.
 * Timeline
 * Logging
+* Timefilter/scrubber
 
 ## More Features!
 * Sort by
