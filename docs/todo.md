@@ -1,7 +1,8 @@
 #ToDos
 
-## General
+## Mobile
 * Make APK available on website
+* Compatibility
 
 ## Server
 * init.d task to launch server
@@ -14,6 +15,7 @@
 * Provide a lock on the mobile user control
 
 ## New Features
+* Better closeup view (in context)
 * Twitter integration
 	* Specific twitter view
 	* Source single tweets

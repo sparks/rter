@@ -1,16 +1,5 @@
 # McGill Water Scenario
 
-## Call Plan
-
-* Call RedWind and present scenario
-	* <s>Present our flooding scenario - this is what happens and what we did in real case..</s>
-	* <s>Present functions </s>
-	* Ask them for their ideas how they would use it to solve the scenario (without us presenting the solution)
-	* Present our concepted / prototyped solution (and we can present our ideas how they could run the scenario there to test)
-	* Wrap up the call 
-	* Leave the homework for them to test the scenario (to really test it there!)
-* Call back in a week of two after they have tried it out...
-
 ## Scenario
 In this short scenario we are going to present a scenario based loosely on real events that occured at McGill. We want to use this scenario to help us think together about the features of our system and how they could be used in an emergency. In particular our data filtering system and how it can be used collaboratively.
 

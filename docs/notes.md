@@ -16,8 +16,7 @@
 * What about finding voids, negative geo search
 * Shared information across boundaries
 * A tag which represents a location
-* Issues of control over the remote user
-* Issues of not "loosing assets"
+* Issues of control over the remote user. Issues of not "loosing assets"
 * "Team leaders with people under him groups by functional areas, by job as Adriana said"
 
 ## Salient information
