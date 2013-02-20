@@ -6,7 +6,7 @@
 . /etc/init.d/functions
 
 start() {
-	export RTER_TEMPLATE_DIR='/usr/share/rter/templates/'
+	export RTER_DIR='/usr/share/rter/'
 	start-stop-daemon --start --exec /usr/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid
 }
 
