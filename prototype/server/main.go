@@ -20,8 +20,6 @@ func main() {
 		}
 	}
 
-	log.Println("hello all")
-
 	server.SetupMySQL()
 
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
