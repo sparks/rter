@@ -6,11 +6,11 @@ import (
 	"regexp"
 )
 
-var rter_dir = os.Getenv("RTER_DIR")
+var rterDir = os.Getenv("RTER_DIR")
 
-var ImagePath = filepath.Join(rter_dir, "images")
-var TemplatePath = filepath.Join(rter_dir, "templates")
-var ResourcePath = filepath.Join(rter_dir, "templates", "resources")
+var ImagePath = filepath.Join(rterDir, "images")
+var TemplatePath = filepath.Join(rterDir, "templates")
+var ResourcePath = filepath.Join(rterDir, "templates", "resources")
 
 var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 

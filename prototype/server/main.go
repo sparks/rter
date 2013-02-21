@@ -4,9 +4,24 @@ import (
 	"./server"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
+
+	logOutputFile := os.Getenv("RTER_LOGFILE")
+
+	if logOutputFile != "" {
+		logFile, err := os.Create(logOutputFile)
+		if err == nil {
+			log.SetOutput(logFile)
+		} else {
+			log.Println(err)
+		}
+	}
+
+	log.Println("hello all")
+
 	server.SetupMySQL()
 
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
