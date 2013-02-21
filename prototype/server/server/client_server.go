@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -38,7 +39,7 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(templatePath + "main.html"))
+var templates = template.Must(template.ParseFiles(filepath.Join(TemplatePath, "main.html")))
 
 var writeLock sync.Mutex
 
@@ -53,8 +54,6 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	templates = template.Must(template.ParseFiles(templatePath + "main.html")) // TODO: For dev only, remove if deployed. Reloads HTML every request instead of caching
 
 	err := templates.ExecuteTemplate(w, "main.html", fetchPageContent())
 	if err != nil {
@@ -74,13 +73,13 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	if error != nil {
-		path := imagePath + "client/default.png"
+		path := filepath.Join(ImagePath, "client", "default.png")
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	} else {
-		os.Mkdir(imagePath+"client", os.ModeDir|0755)
+		os.Mkdir(ImagePath+"client", os.ModeDir|0755)
 
-		path := imagePath + "client/"
+		path := filepath.Join(ImagePath, "client")
 
 		if strings.HasSuffix(header.Filename, ".png") {
 			path += fmt.Sprintf("%v.png", id)

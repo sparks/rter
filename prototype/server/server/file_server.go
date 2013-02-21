@@ -4,72 +4,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
-
-func ImageHandler(w http.ResponseWriter, r *http.Request) {
-	if !(strings.HasSuffix(r.URL.Path, ".png") || strings.HasSuffix(r.URL.Path, ".jpeg") || strings.HasSuffix(r.URL.Path, ".jpg")) {
-		// fmt.Println("Wrong Suffix")
-		http.NotFound(w, r)
-		return
-	}
-
-	path := strings.Split(r.URL.Path, "/")
-
-	if len(path) < 3 {
-		// fmt.Println("Path too short")
-		http.NotFound(w, r)
-		return
-	}
-
-	if !validateFilePath(path[2:]) {
-		// fmt.Println("Invalid Path")
-		http.NotFound(w, r)
-		return
-	}
-
-	fi, err := os.Open(imagePath + strings.Join(path[2:], "/"))
-	if err != nil {
-		// fmt.Println("No such file")
-		http.NotFound(w, r)
-		return
-	}
-	defer fi.Close()
-
-	io.Copy(w, fi)
-}
-
-func ResourceHandler(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, ".js") {
-		w.Header().Set("Content-Type", "application/javascript")
-	} else if strings.HasSuffix(r.URL.Path, ".css") {
-		w.Header().Set("Content-Type", "text/css")
-	} else {
-		http.NotFound(w, r)
-		return
-	}
-
-	path := strings.Split(r.URL.Path, "/")
-
-	if len(path) < 3 {
-		http.NotFound(w, r)
-		return
-	}
-
-	if !validateFilePath(path[2:]) {
-		http.NotFound(w, r)
-		return
-	}
-
-	fi, err := os.Open(resourcePath + strings.Join(path[2:], "/"))
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-	defer fi.Close()
-
-	io.Copy(w, fi)
-}
 
 func HTMLHandler(w http.ResponseWriter, r *http.Request) bool {
 	if strings.HasSuffix(r.URL.Path, ".html") {
@@ -88,7 +25,8 @@ func HTMLHandler(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
-	page, err := os.Open(templatePath + strings.Join(path[1:], "/"))
+	page, err := os.Open(filepath.Join(TemplatePath, filepath.Join(path[1:]...)))
+
 	if err != nil {
 		return false
 	}

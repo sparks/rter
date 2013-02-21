@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,7 +18,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ioutil.WriteFile(imagePath+"test.png", p, 0600)
+	ioutil.WriteFile(ImagePath+"test.png", p, 0600)
 }
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +32,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !phoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("upload failed, phone_id malformed:", phoneID)
+		log.Println("upload failed, phone_id malformed:", phoneID)
 		return
 	}
 
@@ -39,11 +40,11 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rows) == 0 {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		fmt.Println("upload failed, phone_id invalid:", phoneID)
+		log.Println("upload failed, phone_id invalid:", phoneID)
 		return
 	}
 
-	os.Mkdir(imagePath+phoneID, os.ModeDir|0755)
+	os.Mkdir(ImagePath+phoneID, os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -64,7 +65,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t := time.Now()
-	path := imagePath
+	path := ImagePath
 
 	if strings.HasSuffix(header.Filename, ".png") {
 		path += fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
@@ -99,5 +100,5 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println("upload complete, phone_id", phoneID, ", heading", valid_heading, ", position", valid_pos)
+	log.Println("upload complete, phone_id", phoneID, ", heading", valid_heading, ", position", valid_pos)
 }

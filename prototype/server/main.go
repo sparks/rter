@@ -17,8 +17,8 @@ func main() {
 
 	http.HandleFunc("/", server.ClientHandler)
 
-	http.HandleFunc("/images/", server.ImageHandler)
-	http.HandleFunc("/resources/", server.ResourceHandler)
+	http.Handle("/images/", http.StripPrefix("/images", http.FileServer(http.Dir(server.ImagePath))))
+	http.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(server.ResourcePath))))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
