@@ -1,13 +1,19 @@
 #!/bin/bash
-# chkconfig: 2345 20 80
-# description: Description comes here....
-
-# Source function library.
-. /etc/init.d/functions
+#/etc/init.d/rter.sh
+#
+### BEGIN INIT INFO
+# Provides:          rter
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Run the rtER web server 
+# Description:       Run the rtER web server for client/mobile 
+### END INIT INFO
 
 start() {
 	export RTER_DIR='/usr/share/rter/'
-	start-stop-daemon --start --exec /usr/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid
+	start-stop-daemon --start --background --exec /usr/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid
 }
 
 stop() {
