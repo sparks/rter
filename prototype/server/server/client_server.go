@@ -39,7 +39,7 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(filepath.Join(TemplatePath, "main.html")))
+var templates = template.Must(template.ParseFiles(filepath.Join(TemplatePath, "index.html")))
 
 var writeLock sync.Mutex
 
@@ -47,17 +47,12 @@ var rowsMatchedValidator = regexp.MustCompile(".*0.*0.*0")
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
-		if !HTMLHandler(w, r) {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		} else {
-			return
+		http.ServeFile(w, r, filepath.Join(TemplatePath, r.URL.Path))
+	} else {
+		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	}
-
-	err := templates.ExecuteTemplate(w, "main.html", fetchPageContent())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -101,9 +96,9 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ClientAjax(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-	w.Header().Set("Content-Type", "application/json")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	// w.Header().Set("Content-Type", "application/json")
 
 	if r.URL.Path == "/ajax/pushlayout" {
 		decoder := json.NewDecoder(r.Body)
