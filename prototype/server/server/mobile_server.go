@@ -13,9 +13,9 @@ import (
 )
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
-	imageFile, header, error := r.FormFile("image")
-	// checkError(error)
-	if error != nil {
+	imageFile, header, err := r.FormFile("image")
+	// checkError(err)
+	if err != nil {
 		return
 	}
 
@@ -64,20 +64,22 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano()))
 	}
 
-	outputFile, error := os.Create(path)
-	checkError(error)
+	outputFile, err := os.Create(path)
+	checkError(err)
 	defer outputFile.Close()
 
 	io.Copy(outputFile, imageFile)
 
+	path = path[len(rterDir):]
+
 	if valid_pos && valid_heading {
-		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
+		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
 	} else if valid_pos {
-		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
+		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
 	} else {
-		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
+		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
 	}
-	checkError(error)
+	checkError(err)
 
 	rows, _, err = database.Query("SELECT target_heading from phones where phone_id=\"%s\"", phoneID)
 	checkError(err)

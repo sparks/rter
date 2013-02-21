@@ -12,13 +12,13 @@ var database mysql.Conn
 func SetupMySQL() {
 	database = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
 
-	error := database.Connect()
-	checkError(error)
+	err := database.Connect()
+	checkError(err)
 }
 
 func queryDatabase() {
-	rows, _, error := database.Query("select * from content;")
-	checkError(error)
+	rows, _, err := database.Query("select * from content;")
+	checkError(err)
 
 	for _, row := range rows {
 		for _, col := range row {

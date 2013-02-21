@@ -59,7 +59,7 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	description := r.FormValue("description")
 	url := r.FormValue("url")
-	imageFile, header, error := r.FormFile("image")
+	imageFile, header, err := r.FormFile("image")
 
 	t := time.Now()
 
@@ -67,10 +67,11 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	hasher.Write([]byte(fmt.Sprintf("%v", t.UnixNano())))
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	if error != nil {
+	if err != nil {
 		path := filepath.Join(ImagePath, "client", "default.png")
-		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
-		checkError(error)
+		path = path[len(rterDir):]
+		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		checkError(err)
 	} else {
 		os.Mkdir(filepath.Join(ImagePath, "client"), os.ModeDir|0755)
 
@@ -82,14 +83,16 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 			path = filepath.Join(path, fmt.Sprintf("%v.jpg", id))
 		}
 
-		outputFile, error := os.Create(path)
-		checkError(error)
+		outputFile, err := os.Create(path)
+		checkError(err)
 		defer outputFile.Close()
 
 		io.Copy(outputFile, imageFile)
 
-		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
-		checkError(error)
+		path = path[len(rterDir):]
+
+		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		checkError(err)
 	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
