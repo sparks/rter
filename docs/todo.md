@@ -5,7 +5,6 @@
 * Compatibility
 
 ## Server
-* init.d task to launch server
 * drop privileges 
 
 ## Fixes and Improvements

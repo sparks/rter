@@ -19,6 +19,8 @@
 * Issues of control over the remote user. Issues of not "loosing assets"
 * "Team leaders with people under him groups by functional areas, by job as Adriana said"
 
+* Recent element view
+
 ## Salient information
 
 * EOC is 30+ people

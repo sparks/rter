@@ -11,16 +11,16 @@ This document is a sketch of the information flow and technologies being used or
              (selected media/content) |  (2)           (3) | (I/O user content: sound files)
                                       |                    |
     -------------------    (1)     -------------------------------------   (4)   --------------------------
-    | VOST Web Client | ---------  | rtER Server | Spatialized User    | ------- | Video Streaming Server |
+    | VOST Web Client | ---------  | rtER Server | Geospatial User     | ------- | Video Streaming Server |
     |                 | (content)  |             | Meta-Content Server | (URIs)  |                        |
     -------------------            -------------------------------------         --------------------------
-                                            | (5)       (meta-data) | (6)       (7) | (video stream)
-                                            |                       |               |
-                                            |                      -------------------
-                                            ---------------------- | rtER Mobile App |
-                                                                   |                 |
-                                                                   -------------------
-
+                |                           | (5)       (meta-data) | (6)       (7) | (video stream)    |
+                |                           |                       |               |                   |
+                |                           |                      -------------------                  |
+                |                           ---------------------- | rtER Mobile App |                  |
+                |                                                  |                 |                  |
+                |                                                  -------------------                  |
+                -----------------------------------------------------------------------------------------
 ## Details and Technologies
 
 ### Immersive Command Center
@@ -28,7 +28,6 @@ CAVE environment with top down projected maps and immersive street view (develop
 
 * Queries for most relevant and highly ranked data from the rtER server via (2).
 * (2) not currently implemented like uses HTTP/GET with xml/json. Queries returned include URIs for content.
-* [Video](http://vimeo.com/52631497)
 
 ### VOST Web Client
 Collaborative application for VOST volunteers (developped for round 2). Shows user content which can be collaboratively manipulated discussed and promoted.
@@ -37,7 +36,6 @@ Collaborative application for VOST volunteers (developped for round 2). Shows us
  * Submit content ranking via (1) HTTP/GET, usually AJAX, data JSON.
  * Submit new content via HTTP/POST, mime-multipart for images.
  * Submit other content manipulation via (1) again HTTP/POST via AJAX with JSON.
- * [Video](http://vimeo.com/57946497)
 
 
 ### rtER Server / Spatialized User Meta-Content Server
@@ -58,7 +56,6 @@ Mobile application to stream video. Allows users to be directed where to film by
 * (5) Desired heading information relayed from VOST volunteers.
 * (6) Heading and location information from phone. Video stream information.
 * (7) Video stream.
-* [Video](http://vimeo.com/57946497)
 
 ### Video Stream Server
 
@@ -132,12 +129,84 @@ No matter what we do we will have to use a special 'live' video player since bro
 * WebSocket is not the normal way of getting video into browsers, but for live feeds there is no common standard yet
 * DASH is not widely used yet, but browsers (Chrome, Firefox) have prototype implementations since 2012
 
+## RESTful
 
+### Collections and Items
 
+* User (attributes)
+	* UID
+	* Trust Level
+	* Role
+	* Created Time
+* Roles (attributes)
+	* UID
+	* Permissions
+* Item (types)
+	* Video
+	* Image
+	* Twitter
+		* Single tweets
+		* Twitter search
+	* News/Web page
+	* Text element
+	* Audio (ISAS)
+* Item (attributes)
+	* UID
+	* Type
+	* Start Time
+	* Stop Time
+	* Lat/Lng/Heading
+	* User/Creator
+	* URI (content)
+	* URI (thumbnail)
+	* URI (upload)
+* Comments (child of item) (attributes)
+	* UID
+	* Item UID
+	* Author
+	* Time
+	* Text
+* Taxonomy 
+	* UID
+	* Time Created
+	* Automated
+	* Term
+	* User/Creator
+* Shared Ranking (child of Taxonomy)
+	* UID
+	* Taxonomy ID
+	* Timestamp
+	* Ranking (N item reference list)
 
+### Resources
 
+* /users/ GET all users (json)
+* /users/?query GET subquery (json)
+* /users/:id GET returns user object (json)
+* /users/ POST Create user, return obj (json form/mime))
+* /users/:id PUT Update user, return obj (json form/mime))
+* /users/:id DELETE, return obj (json form/mime))
 
+* /items/ GET all items (json)
+* /items/?query GET subquery (time, location, type etc) (json)
+* /items/:id GET (json)
+* /items/ POST Create item, return obj + upload URI for image/video/other bins (json form/mime)
+* /items/:id PUT Update item, return obj + upload URI for image/video/other bins (json form/mime)
+* /items/:id DELETE, return obj (json/mime)
 
+* /items/:id/comments/ GET all comments (json)
+* /items/:id/comments/?query GET subquery (json)
+* /items/:id/comments/:id GET comment (json)
+* /items/:id/comments/ POST Create comment, return obj (json form/mime))
+* /items/:id/comments/:id PUT Update comment, return obj (json form/mime))
+* /items/:id/comments/:id DELETE, return obj (json form/mime)
 
+* /taxonomies/ GET (json)
+* /taxonomies/?query GET (json)
+* /taxonomies/:id/ GET (json)
+* /taxonomies/ POST (json)
+* /taxonomies/:id PUT (json)
 
+* /taxonomies/:id/ranking/ GET (json)
+* /taxonomies/:id/ranking/ PUT (json)
 
