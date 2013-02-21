@@ -9,7 +9,6 @@ import (
 func main() {
 	server.SetupMySQL()
 
-	// http.HandleFunc("/upload", server.UploadHandler)
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
 	http.HandleFunc("/submit", server.SubmitHandler)
 

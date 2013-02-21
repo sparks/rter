@@ -72,14 +72,14 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 		_, _, error = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
 		checkError(error)
 	} else {
-		os.Mkdir(ImagePath+"client", os.ModeDir|0755)
+		os.Mkdir(filepath.Join(ImagePath, "client"), os.ModeDir|0755)
 
 		path := filepath.Join(ImagePath, "client")
 
 		if strings.HasSuffix(header.Filename, ".png") {
-			path += fmt.Sprintf("%v.png", id)
+			path = filepath.Join(path, fmt.Sprintf("%v.png", id))
 		} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
-			path += fmt.Sprintf("%v.jpg", id)
+			path = filepath.Join(path, fmt.Sprintf("%v.jpg", id))
 		}
 
 		outputFile, error := os.Create(path)

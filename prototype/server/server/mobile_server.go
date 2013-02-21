@@ -3,23 +3,14 @@ package server
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
-
-func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	p, error := ioutil.ReadAll(r.Body)
-	if error != nil {
-		return
-	}
-
-	ioutil.WriteFile(ImagePath+"test.png", p, 0600)
-}
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	imageFile, header, error := r.FormFile("image")
@@ -44,7 +35,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(ImagePath+phoneID, os.ModeDir|0755)
+	os.Mkdir(filepath.Join(ImagePath, phoneID), os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -68,9 +59,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	path := ImagePath
 
 	if strings.HasSuffix(header.Filename, ".png") {
-		path += fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano())
+		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano()))
 	} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
-		path += fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano())
+		path = filepath.Join(path, fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano()))
 	}
 
 	outputFile, error := os.Create(path)
