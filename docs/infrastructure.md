@@ -138,6 +138,12 @@ No matter what we do we will have to use a special 'live' video player since bro
 	* Trust Level
 	* Role
 	* Created Time
+* User Direction (child of User)
+	* User ID 
+	* Controlling User ID
+	* Command
+	* Heading/Lat/Lng
+	* Update Time
 * Roles (attributes)
 	* UID
 	* Permissions
@@ -186,6 +192,8 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /users/ POST Create user, return obj (json form/mime))
 * /users/:id PUT Update user, return obj (json form/mime))
 * /users/:id DELETE, return obj (json form/mime))
+* /users/:id/direct/ GET get current direction and lock for user
+* /users/:id/direct/ PUT (try) and set/unset direction and/or lock (atomicity issues)
 
 * /items/ GET all items (json)
 * /items/?query GET subquery (time, location, type etc) (json)
