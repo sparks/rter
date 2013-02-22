@@ -28,6 +28,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -243,6 +244,9 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 			(new Thread(new Runnable() {
 				public void run() {
 					Log.e(TAG, "Inside Picture Callback");
+					Looper.prepare();
+					
+					
 					// get orientation
 					frameInfo.orientation = convertStringToByteArray(""
 							+ overlay.getCurrentOrientation());

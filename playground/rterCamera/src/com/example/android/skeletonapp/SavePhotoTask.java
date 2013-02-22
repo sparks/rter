@@ -51,8 +51,8 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 	protected String doInBackground(byte[]... a) {
 
 		String uid = new String(a[1]);
-		String lat = new String(a[2]);
-		String lon = new String(a[3]);
+		String lat = "45.506886";//new String(a[2]);
+		String lon = "-73.577478";//new String(a[3]);
 		String orient = new String(a[4]);
 
 		Log.d("SavePhotoTask", "phone id " + uid + " lat: " + lat + " lon: "
@@ -93,7 +93,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 			fos.close();
 
 			HttpPost httppost = new HttpPost(
-					"http://rter.cim.mcgill.ca:8080/multiup");
+					"http://rter.cim.mcgill.ca/multiup");
 
 			MultipartEntity multipartEntity = new MultipartEntity(
 					HttpMultipartMode.BROWSER_COMPATIBLE);
