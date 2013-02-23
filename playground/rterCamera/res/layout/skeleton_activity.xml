@@ -53,17 +53,17 @@
         android:gravity="center_horizontal"
         android:orientation="horizontal" >
     </LinearLayout>
-
-    <android.widget.Space
+<!--  
+    <android.widget.View
         android:id="@+id/space1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <android.widget.Space
+    <android.widget.View
         android:id="@+id/space2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
+-->
     <Spinner
         android:id="@+id/phone_id"
         android:layout_width="234dp"
