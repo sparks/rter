@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.example.android.skeletonapp.overlay.OverlayController;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -47,12 +48,21 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 
 	}
 
+	@SuppressLint("ParserError")
 	@Override
 	protected String doInBackground(byte[]... a) {
-
+		
+		String lat ="", lon = "";
+		
 		String uid = new String(a[1]);
-		String lat = "45.506886";//new String(a[2]);
-		String lon = "-73.577478";//new String(a[3]);
+		if(a[2] != null && a[3] != null){
+		lat = new String(a[2]);
+		lon = new String(a[3]);
+		}
+		else{
+			Log.e("SavePhotoTask", "ERROR::No Location!!");
+		}
+		
 		String orient = new String(a[4]);
 
 		Log.d("SavePhotoTask", "phone id " + uid + " lat: " + lat + " lon: "
@@ -93,7 +103,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 			fos.close();
 
 			HttpPost httppost = new HttpPost(
-					"http://rter.cim.mcgill.ca/multiup");
+					"http://rter.cim.mcgill.ca:80/multiup");
 
 			MultipartEntity multipartEntity = new MultipartEntity(
 					HttpMultipartMode.BROWSER_COMPATIBLE);
