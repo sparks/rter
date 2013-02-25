@@ -38,3 +38,7 @@
 	* By content type
 	* By associated "task" or response group?
 * Automated tagging features to do this tagging
+
+## Even More Features!
+* Auto window tiling mechanism for multi screen. Breakout UI/UX elements accross windows
+* Free roam mode for phone

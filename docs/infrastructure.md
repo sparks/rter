@@ -21,6 +21,7 @@ This document is a sketch of the information flow and technologies being used or
                 |                                                  |                 |                  |
                 |                                                  -------------------                  |
                 -----------------------------------------------------------------------------------------
+
 ## Details and Technologies
 
 ### Immersive Command Center
@@ -129,7 +130,7 @@ No matter what we do we will have to use a special 'live' video player since bro
 * WebSocket is not the normal way of getting video into browsers, but for live feeds there is no common standard yet
 * DASH is not widely used yet, but browsers (Chrome, Firefox) have prototype implementations since 2012
 
-## RESTful
+## RESTful API
 
 ### Collections and Items
 
