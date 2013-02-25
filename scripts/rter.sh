@@ -12,12 +12,14 @@
 ### END INIT INFO
 
 start() {
-	export RTER_DIR='/usr/share/rter/'
-	start-stop-daemon --start --background --exec /usr/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid
+	export RTER_DIR='/usr/local/share/rter/'
+	export RTER_LOGFILE='/var/log/rter.log'
+	setcap 'cap_net_bind_service=+ep' /usr/local/share/rter/rter
+	start-stop-daemon --start --background --exec /usr/local/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid --chuid rter
 }
 
 stop() {
-	start-stop-daemon --stop --exec /usr/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid
+	start-stop-daemon --stop --exec /usr/local/share/rter/rter --pidfile /var/run/rter.pid
 }
 
 case "$1" in 
