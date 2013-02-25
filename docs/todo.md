@@ -5,7 +5,6 @@
 * Compatibility
 
 ## Server
-* drop privileges 
 
 ## Fixes and Improvements
 * Fix comment system
