@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -43,8 +42,6 @@ var templates = template.Must(template.ParseFiles(filepath.Join(TemplatePath, "i
 
 var writeLock sync.Mutex
 
-var rowsMatchedValidator = regexp.MustCompile(".*0.*0.*0")
-
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
 		http.ServeFile(w, r, filepath.Join(TemplatePath, r.URL.Path))
@@ -70,7 +67,7 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		path := filepath.Join(ImagePath, "client", "default.png")
 		path = path[len(rterDir):]
-		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		_, err = db.Exec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 		checkError(err)
 	} else {
 		os.Mkdir(filepath.Join(ImagePath, "client"), os.ModeDir|0755)
@@ -91,7 +88,7 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 
 		path = path[len(rterDir):]
 
-		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(\"%s\", \"web\", \"%s\", \"%s\", \"%s\");", id, path, description, url)
+		_, err = db.Exec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 		checkError(err)
 	}
 
@@ -115,15 +112,16 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 			if phoneIDValidator.MatchString(chunk.ContentID) {
 				chunk.SanitizeLayout()
 
-				_, res, err := database.Query("UPDATE layout SET col=%d, row=%d, size_x=%d, size_y=%d WHERE content_id=\"%s\";", chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY, chunk.ContentID)
+				rows, err := db.Query("SELECT uid FROM layout WHERE content_id=?", chunk.ContentID)
 				checkError(err)
 
-				// Check that no rows were matched via a ghetto regex, since the Result object returned contains no public field for matched rows, only affected rows.
-				if rowsMatchedValidator.MatchString(res.Message()) {
-					_, _, err = database.Query("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(\"%s\", %d, %d, %d, %d);", chunk.ContentID, chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY)
+				if rows.Next() {
+					_, err := db.Exec("UPDATE layout SET col=?, row=?, size_x=?, size_y=? WHERE content_id=?;", chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY, chunk.ContentID)
+					checkError(err)
+				} else {
+					_, err = db.Exec("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(?, ?, ?, ?, ?);", chunk.ContentID, chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY)
 					checkError(err)
 				}
-
 			}
 		}
 		writeLock.Unlock()
@@ -140,7 +138,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&headingChunk)
 		checkError(err)
 
-		_, _, err = database.Query("UPDATE phones SET target_heading=%v WHERE phone_id=\"%s\";", headingChunk.TargetHeading, headingChunk.ContentID)
+		_, err = db.Query("UPDATE phones SET target_heading=? WHERE phone_id=?;", headingChunk.TargetHeading, headingChunk.ContentID)
 		checkError(err)
 	} else if r.URL.Path == "/ajax/pushdescription" {
 		decoder := json.NewDecoder(r.Body)
@@ -149,7 +147,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&descChunk)
 		checkError(err)
 
-		_, _, err = database.Query("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=\"%s\"  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=\"%s\";", descChunk.ContentID, descChunk.Description)
+		_, err = db.Query("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=?  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=?;", descChunk.ContentID, descChunk.Description)
 		checkError(err)
 	}
 }
@@ -159,28 +157,31 @@ func fetchPageContent() *PageContent {
 
 	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	rows, _, err := database.Query("select c1.content_id, c1.content_type, c1.filepath, c1.url, c1.description, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
+	rows, err := db.Query("select c1.content_id, c1.content_type, c1.filepath, c1.url, c1.description, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
 
 	checkError(err)
 
-	content := make([]*ContentChunk, len(rows))
+	content := make([]*ContentChunk, 0)
 
-	for i, row := range rows {
-		content[i] = &ContentChunk{
-			row.Str(0),   //content_id
-			row.Str(1),   //content_type
-			row.Str(2),   //filepath
-			row.Str(3),   //url
-			row.Str(4),   //description
-			row.Float(5), //geolat
-			row.Float(6), //geolng
-			row.Float(7), //heading
-			row.Float(8), //target_heading
-			row.Int(9),   //col
-			row.Int(10),  //row
-			row.Int(11),  //size_x
-			row.Int(12),  //size_y
-		}
+	for i := 0; rows.Next(); i++ {
+		chunk := &ContentChunk{}
+
+		rows.Scan(
+			&chunk.ContentID,
+			&chunk.ConentType,
+			&chunk.Filepath,
+			&chunk.URL,
+			&chunk.Description,
+			&chunk.Lat,
+			&chunk.Lng,
+			&chunk.Heading,
+			&chunk.TargetHeading,
+			&chunk.Col,
+			&chunk.Row,
+			&chunk.SizeX,
+			&chunk.SizeY,
+		)
+		content = append(content, chunk)
 	}
 
 	return &PageContent{content}

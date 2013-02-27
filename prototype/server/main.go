@@ -21,6 +21,7 @@ func main() {
 	}
 
 	server.SetupMySQL()
+	defer server.CloseMySQL()
 
 	http.HandleFunc("/multiup", server.MultiUploadHandler)
 	http.HandleFunc("/submit", server.SubmitHandler)

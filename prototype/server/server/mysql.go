@@ -1,35 +1,28 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/ziutek/mymysql/mysql"
-	_ "github.com/ziutek/mymysql/native"
-	_ "github.com/ziutek/mymysql/thrsafe" // Thread safe engine
+	_ "github.com/Go-SQL-Driver/MySQL"
 )
 
-var database mysql.Conn
+var db *sql.DB
 
 func SetupMySQL() {
-	database = mysql.New("tcp", "", "localhost:3306", "root", "", "rter")
+	user := "root"
+	pass := ""
+	prot := "tcp"
+	addr := "localhost:3306"
+	dbname := "rter_v1"
 
-	err := database.Connect()
+	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
+	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8", user, pass, netAddr, dbname)
+	var err error
+	db, err = sql.Open("mysql", dsn)
+
 	checkError(err)
 }
 
-func queryDatabase() {
-	rows, _, err := database.Query("select * from content;")
-	checkError(err)
-
-	for _, row := range rows {
-		for _, col := range row {
-			if col == nil {
-				fmt.Println("NULL")
-			} else {
-				// Type assertion required because []interface{} "type" is entirely unknown
-				val := col.([]byte)
-				fmt.Print(string(val) + "\t|\t")
-			}
-		}
-		fmt.Println()
-	}
+func CloseMySQL() {
+	db.Close()
 }

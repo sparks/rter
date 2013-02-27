@@ -1,34 +1,40 @@
-# MySQL rter v1
-# ===========
-# Run these commands to setup the MySQL databases for the rter v1 project
+-- MySQL rter v1
+-- ===========
+-- Run these commands to setup the MySQL databases for the rter v1 project
 
-CREATE TABLE content (
-	uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+DROP TABLE IF EXISTS content;
+CREATE TABLE IF NOT EXISTS content (
+	uid INT(64) NOT NULL AUTO_INCREMENT,
 	content_id VARCHAR(64) NOT NULL,
 	content_type VARCHAR(64) NOT NULL,
 	timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	filepath VARCHAR(256) NOT NULL,
-	geolat DECIMAL(9,6),
-	geolng DECIMAL(9,6),
-	heading DECIMAL(9, 6),
-	description TEXT,
-	url VARCHAR(256),
+	filepath VARCHAR(256) NOT NULL DEFAULT "",
+	geolat DECIMAL(9,6) NOT NULL DEFAULT 0,
+	geolng DECIMAL(9,6) NOT NULL DEFAULT 0,
+	heading DECIMAL(9, 6) NOT NULL DEFAULT 0,
+	description TEXT NOT NULL DEFAULT "",
+	url VARCHAR(256) NOT NULL DEFAULT "",
+	PRIMARY KEY(uid),
 	KEY (content_id, timestamp)
 );
 
-CREATE TABLE phones (
-	uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+DROP TABLE IF EXISTS phones;
+CREATE TABLE IF NOT EXISTS phones (
+	uid INT(64) NOT NULL AUTO_INCREMENT,
 	phone_id VARCHAR(64) NOT NULL UNIQUE,
-	target_heading DECIMAL(9, 6)
+	target_heading DECIMAL(9, 6) NOT NULL DEFAULT 0,
+	PRIMARY KEY(uid)
 );
 
-CREATE TABLE layout (
-	uid INT(64) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+DROP TABLE IF EXISTS layout;
+CREATE TABLE IF NOT EXISTS layout (
+	uid INT(64) NOT NULL AUTO_INCREMENT,
 	content_id VARCHAR(64) NOT NULL UNIQUE KEY,
 	col INT(32) NOT NULL,
 	row INT(32) NOT NULL,
 	size_x INT(32) NOT NULL DEFAULT 1,
-	size_y INT(32) NOT NULL DEFAULT 1
+	size_y INT(32) NOT NULL DEFAULT 1,
+	PRIMARY KEY(uid)
 );
 
 INSERT INTO phones (phone_id) VALUES
@@ -47,4 +53,4 @@ INSERT INTO phones (phone_id) VALUES
 	("qcb519f53a55d9dea06ef5cc104eda79d305282e")
 ;
 
-# delete from content where uid >= 0;alter table content AUTO_INCREMENT=1;
+-- delete from content where uid >= 0;alter table content AUTO_INCREMENT=1;

@@ -27,9 +27,9 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, _, err := database.Query("SELECT * FROM phones where phone_id = \"%v\";", phoneID)
+	rows, err := db.Query("SELECT * FROM phones where phone_id = ?;", phoneID)
 
-	if len(rows) == 0 {
+	if !rows.Next() {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
 		log.Println("upload failed, phone_id invalid:", phoneID)
 		return
@@ -73,24 +73,22 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	path = path[len(rterDir):]
 
 	if valid_pos && valid_heading {
-		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v, %v);", phoneID, path, lat, lng, heading)
+		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(?, \"mobile\", ?, ?, ?, ?);", phoneID, path, lat, lng, heading)
 	} else if valid_pos {
-		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(\"%s\", \"mobile\", \"%s\", %v, %v);", phoneID, path, lat, lng)
+		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(?, \"mobile\", ?, ?, ?);", phoneID, path, lat, lng)
 	} else {
-		_, _, err = database.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(\"%s\", \"mobile\", \"%s\");", phoneID, path)
+		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(?, \"mobile\",  ?);", phoneID, path)
 	}
 	checkError(err)
 
-	rows, _, err = database.Query("SELECT target_heading from phones where phone_id=\"%s\"", phoneID)
+	rows, err = db.Query("SELECT target_heading from phones where phone_id=?", phoneID)
 	checkError(err)
 
-	if len(rows) > 0 {
-		switch v := rows[0][0].(type) {
-		case []byte:
-			w.Write(v)
-		default:
-			w.Write([]byte("0.0"))
-		}
+	if rows.Next() {
+		var target_heading []byte
+		err := rows.Scan(&target_heading)
+		checkError(err)
+		w.Write(target_heading)
 	}
 
 	log.Println("upload complete, phone_id", phoneID, ", heading", valid_heading, ", position", valid_pos)
