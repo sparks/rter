@@ -8,17 +8,7 @@ import (
 )
 
 func main() {
-
-	logOutputFile := os.Getenv("RTER_LOGFILE")
-
-	if logOutputFile != "" {
-		logFile, err := os.Create(logOutputFile)
-		if err == nil {
-			log.SetOutput(logFile)
-		} else {
-			log.Println(err)
-		}
-	}
+	setupLogger()
 
 	server.SetupMySQL()
 	defer server.CloseMySQL()
@@ -34,4 +24,18 @@ func main() {
 	http.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(server.ResourcePath))))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func setupLogger() {
+	logOutputFile := os.Getenv("RTER_LOGFILE")
+
+	if logOutputFile != "" {
+		logFile, err := os.Create(logOutputFile)
+
+		if err == nil {
+			log.SetOutput(logFile)
+		} else {
+			log.Println(err)
+		}
+	}
 }
