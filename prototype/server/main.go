@@ -23,6 +23,7 @@ func main() {
 	http.Handle("/images/", http.StripPrefix("/images", http.FileServer(http.Dir(server.ImagePath))))
 	http.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(server.ResourcePath))))
 
+	log.Println("Launching rtER Server")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
