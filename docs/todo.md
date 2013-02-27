@@ -1,11 +1,5 @@
 #ToDos
 
-## Mobile
-* Make APK available on website
-* Compatibility
-
-## Server
-
 ## Fixes and Improvements
 * Fix comment system
 * Plan more robust view sync

@@ -1,6 +1,7 @@
-# MySQL rter v2
-# ===========
-# Run these commands to setup the MySQL databases for the rter v2 project
+-- MySQL rter v2
+-- ===========
+-- Run these commands to setup the MySQL databases for the rter v2 project
+
 SET foreign_key_checks = 0;
 
 DROP TABLE IF EXISTS roles;
@@ -14,6 +15,8 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
 	id INT NOT NULL AUTO_INCREMENT,
 	username VARCHAR(64) NOT NULL,
+	password CHAR(128) NOT NULL,
+	salt CHAR(16) NOT NULL,
 	role VARCHAR(64),
 	trust_level INT,
 	create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -82,5 +85,17 @@ CREATE TABLE IF NOT EXISTS taxonomy_rankings (
 	PRIMARY KEY(id),
 	FOREIGN KEY(taxonomy_id) REFERENCES taxonomy (id) ON UPDATE CASCADE
 );
+
+-- DROP TABLE IF EXISTS taxonomy_rankings_archive;
+-- CREATE TABLE IF NOT EXISTS taxonomy_rankings_archive (
+-- 	id INT NOT NULL,
+-- 	taxonomy_ranking_id INT NOT NULL,
+-- 	taxonomy_id INT NOT NULL,
+-- 	update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+-- 	ranking TEXT NOT NULL,
+-- 	PRIMARY KEY(id),
+-- 	FOREIGN KEY(taxonomy_ranking_id) REFERENCES taxonomy_rankings (id) ON UPDATE CASCADE,
+-- 	FOREIGN KEY(taxonomy_id) REFERENCES taxonomy (id) ON UPDATE CASCADE
+-- );
 
 SET foreign_key_checks = 1;

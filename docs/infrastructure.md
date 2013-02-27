@@ -184,6 +184,7 @@ No matter what we do we will have to use a special 'live' video player since bro
 	* Taxonomy ID
 	* Timestamp
 	* Ranking (N item reference list)
+* Groups?
 
 ### Resources
 
@@ -218,4 +219,5 @@ No matter what we do we will have to use a special 'live' video player since bro
 ------
 * /taxonomies/:id/ranking/ GET (json)
 * /taxonomies/:id/ranking/ PUT (json)
-
+------
+* Groups or Roles?
