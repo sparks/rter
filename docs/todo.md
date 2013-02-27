@@ -1,8 +1,6 @@
 #ToDos
 
 ## Fixes and Improvements
-* Fix comment system
-* Plan more robust view sync
 * JS benchmarking/improvements
 * Provide a lock on the mobile user control
 
