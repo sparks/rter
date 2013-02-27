@@ -64,8 +64,8 @@ func multipartUpload(image image.Image, phone_id string, lat, lng float64, headi
 	responseChan := make(chan *http.Response)
 
 	go func() {
-		// response, error := http.Post("http://rter.cim.mcgill.ca:8080/multiup", contentType, pipeReader)
-		response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
+		response, error := http.Post("http://rter.cim.mcgill.ca/multiup", contentType, pipeReader)
+		// response, error := http.Post("http://localhost:8080/multiup", contentType, pipeReader)
 		checkError(error)
 		responseChan <- response
 	}()
