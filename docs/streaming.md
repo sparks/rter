@@ -19,9 +19,9 @@ To use DASH one nees a server-side implementation for generating compliant segme
 
 #### Software
 
-* Segmentation and MPD generation: [GPAC](2) in a recent version from [SVN](3), for more info on DASH support see [here](4) and [here](5)
+* Segmentation and MPD generation: [GPAC][2] in a recent version from [SVN][3], for more info on DASH support see [here][4] and [here][5]
 * Delivery: any HTTP server
-* Playback: Google Chrome with Media Source Extention plus a 3rd party DASH Javascript Engine, e.g. [DASH-JS](6)
+* Playback: Google Chrome with Media Source Extention plus a 3rd party DASH Javascript Engine, e.g. [DASH-JS][6]
 * Firefox with built-in DASH client support (version?)
 * [Decoder Test Sequences](http://dash-mse-test.appspot.com/decoder-test.html)
 * [DASH Test Sequences](http://gpac.wp.mines-telecom.fr/2012/02/23/dash-sequences/)
@@ -52,13 +52,13 @@ __Problem:__ MP4Box sleep interval doubled each time, probably because the file 
 
 ### HLS, HTML Live Streaming
 
-[HLS](1) is a proprietary 'standard' by Apple to feed live video content to iOS devices and Quicktime media player. Like DASH, HLS separates video files into segments for individual download. HLS requires MPEG2-TS and H264/AAC. The description format is an extended version of the MP3 playlist format M3U called M3U8.
+[HLS][1] is a proprietary 'standard' by Apple to feed live video content to iOS devices and Quicktime media player. Like DASH, HLS separates video files into segments for individual download. HLS requires MPEG2-TS and H264/AAC. The description format is an extended version of the MP3 playlist format M3U called M3U8.
 
 
 #### Software
 
 * Segmentation and M3U8 generation: FFmpeg, FFServer
-* Playback: Safari, iOS (see also [HLS support](7))
+* Playback: Safari, iOS (see also [HLS support][7])
 
 #### FFMPEG HLS Examples
 ```
@@ -82,10 +82,10 @@ ffmpeg -i encoded.mp4 -c copy -map 0 -vbsf h264_mp4toannexb -f segment -segment_
 
 
 
-[1](http://developer.apple.com/library/ios/#documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/UsingHTTPLiveStreaming/UsingHTTPLiveStreaming.html)
-[2](http://gpac.wp.mines-telecom.fr/mp4box/dash/)
-[3](http://sourceforge.net/projects/gpac/develop)
-[4](http://gpac.wp.mines-telecom.fr/2011/02/02/mp4box-fragmentation-segmentation-splitting-and-interleaving/)
-[5](http://gpac.wp.mines-telecom.fr/2012/02/01/dash-support/)
-[6](http://www-itec.uni-klu.ac.at/dash/?p=792)
-[7](http://www.longtailvideo.com/html5/hls)
+[1]: http://developer.apple.com/library/ios/#documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/UsingHTTPLiveStreaming/UsingHTTPLiveStreaming.html
+[2]: http://gpac.wp.mines-telecom.fr/mp4box/dash/
+[3]: http://sourceforge.net/projects/gpac/develop
+[4]: http://gpac.wp.mines-telecom.fr/2011/02/02/mp4box-fragmentation-segmentation-splitting-and-interleaving/
+[5]: http://gpac.wp.mines-telecom.fr/2012/02/01/dash-support/
+[6]: http://www-itec.uni-klu.ac.at/dash/?p=792
+[7]: http://www.longtailvideo.com/html5/hls
