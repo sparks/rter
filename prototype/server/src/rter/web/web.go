@@ -1,4 +1,4 @@
-package server
+package web
 
 import (
 	"crypto/md5"
@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/storage"
+	"rter/util"
 	"strings"
 	"sync"
 	"time"
@@ -38,13 +40,13 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(filepath.Join(TemplatePath, "index.html")))
+var templates = template.Must(template.ParseFiles(filepath.Join(util.TemplatePath, "index.html")))
 
 var writeLock sync.Mutex
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
-		http.ServeFile(w, r, filepath.Join(TemplatePath, r.URL.Path))
+		http.ServeFile(w, r, filepath.Join(util.TemplatePath, r.URL.Path))
 	} else {
 		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
 		if err != nil {
@@ -65,14 +67,13 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	if err != nil {
-		path := filepath.Join(UploadPath, "client", "default.png")
-		path = path[len(rterDir):]
-		_, err = db.Exec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
-		checkError(err)
+		path := filepath.Join(util.UploadPath, "client", "default.png")
+		path = path[len(util.RterDir):]
+		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 	} else {
-		os.Mkdir(filepath.Join(UploadPath, "client"), os.ModeDir|0755)
+		os.Mkdir(filepath.Join(util.UploadPath, "client"), os.ModeDir|0755)
 
-		path := filepath.Join(UploadPath, "client")
+		path := filepath.Join(util.UploadPath, "client")
 
 		if strings.HasSuffix(header.Filename, ".png") {
 			path = filepath.Join(path, fmt.Sprintf("%v.png", id))
@@ -81,15 +82,14 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		outputFile, err := os.Create(path)
-		checkError(err)
+		util.Must(err)
 		defer outputFile.Close()
 
 		io.Copy(outputFile, imageFile)
 
-		path = path[len(rterDir):]
+		path = path[len(util.RterDir):]
 
-		_, err = db.Exec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
-		checkError(err)
+		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
@@ -105,22 +105,19 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		var layout []*ContentChunk
 		err := decoder.Decode(&layout)
-		checkError(err)
+		util.Must(err)
 
 		writeLock.Lock()
 		for _, chunk := range layout {
-			if phoneIDValidator.MatchString(chunk.ContentID) {
+			if util.PhoneIDValidator.MatchString(chunk.ContentID) {
 				chunk.SanitizeLayout()
 
-				rows, err := db.Query("SELECT uid FROM layout WHERE content_id=?", chunk.ContentID)
-				checkError(err)
+				rows := storage.MustQuery("SELECT uid FROM layout WHERE content_id=?", chunk.ContentID)
 
 				if rows.Next() {
-					_, err := db.Exec("UPDATE layout SET col=?, row=?, size_x=?, size_y=? WHERE content_id=?;", chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY, chunk.ContentID)
-					checkError(err)
+					storage.MustExec("UPDATE layout SET col=?, row=?, size_x=?, size_y=? WHERE content_id=?;", chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY, chunk.ContentID)
 				} else {
-					_, err = db.Exec("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(?, ?, ?, ?, ?);", chunk.ContentID, chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY)
-					checkError(err)
+					storage.MustExec("INSERT INTO layout (content_id, col, row, size_x, size_y) VALUES(?, ?, ?, ?, ?);", chunk.ContentID, chunk.Col, chunk.Row, chunk.SizeX, chunk.SizeY)
 				}
 			}
 		}
@@ -128,7 +125,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.URL.Path == "/ajax/getlayout" {
 		layoutJSON, err := json.Marshal(fetchPageContent().Content)
-		checkError(err)
+		util.Must(err)
 
 		w.Write(layoutJSON)
 	} else if r.URL.Path == "/ajax/pushheading" {
@@ -136,19 +133,17 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		var headingChunk *ContentChunk
 		err := decoder.Decode(&headingChunk)
-		checkError(err)
+		util.Must(err)
 
-		_, err = db.Query("UPDATE phones SET target_heading=? WHERE phone_id=?;", headingChunk.TargetHeading, headingChunk.ContentID)
-		checkError(err)
+		storage.MustQuery("UPDATE phones SET target_heading=? WHERE phone_id=?;", headingChunk.TargetHeading, headingChunk.ContentID)
 	} else if r.URL.Path == "/ajax/pushdescription" {
 		decoder := json.NewDecoder(r.Body)
 
 		var descChunk *ContentChunk
 		err := decoder.Decode(&descChunk)
-		checkError(err)
+		util.Must(err)
 
-		_, err = db.Query("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=?  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=?;", descChunk.ContentID, descChunk.Description)
-		checkError(err)
+		storage.MustQuery("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=?  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=?;", descChunk.ContentID, descChunk.Description)
 	}
 }
 
@@ -157,9 +152,7 @@ func fetchPageContent() *PageContent {
 
 	// phoneRows, _, err := database.Query("SELECT content.content_id, content.filepath, content.geolat, content.geolng, content.heading FROM content WHERE (SELECT COUNT(*) FROM content AS c WHERE c.content_id = content.content_id AND c.timestamp >= content.timestamp) <= 1;")
 
-	rows, err := db.Query("select c1.content_id, c1.content_type, c1.filepath, c1.url, c1.description, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
-
-	checkError(err)
+	rows := storage.MustQuery("select c1.content_id, c1.content_type, c1.filepath, c1.url, c1.description, c1.geolat, c1.geolng, c1.heading, phones.target_heading, layout.col, layout.row, layout.size_x, layout.size_y from (select content_id, max(timestamp) as maxtimestamp from content group by content_id) as c2 inner join content as c1 on c1.content_id = c2.content_id and c1.timestamp = c2.maxtimestamp LEFT JOIN layout ON layout.content_id = c1.content_id LEFT JOIN phones ON phones.phone_id = c1.content_id;")
 
 	content := make([]*ContentChunk, 0)
 

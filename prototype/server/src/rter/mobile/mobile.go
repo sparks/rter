@@ -1,4 +1,4 @@
-package server
+package mobile
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/storage"
+	"rter/util"
 	"strconv"
 	"strings"
 	"time"
@@ -14,20 +16,19 @@ import (
 
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	imageFile, header, err := r.FormFile("image")
-	// checkError(err)
 	if err != nil {
 		return
 	}
 
 	phoneID := r.FormValue("phone_id")
 
-	if !phoneIDValidator.MatchString(phoneID) {
+	if !util.PhoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
 		log.Println("upload failed, phone_id malformed:", phoneID)
 		return
 	}
 
-	rows, err := db.Query("SELECT * FROM phones where phone_id = ?;", phoneID)
+	rows := storage.MustQuery("SELECT * FROM phones where phone_id = ?;", phoneID)
 
 	if !rows.Next() {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
@@ -35,7 +36,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(filepath.Join(UploadPath, phoneID), os.ModeDir|0755)
+	os.Mkdir(filepath.Join(util.UploadPath, phoneID), os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -56,7 +57,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t := time.Now()
-	path := UploadPath
+	path := util.UploadPath
 
 	if strings.HasSuffix(header.Filename, ".png") {
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano()))
@@ -65,29 +66,27 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	outputFile, err := os.Create(path)
-	checkError(err)
+	util.Must(err)
 	defer outputFile.Close()
 
 	io.Copy(outputFile, imageFile)
 
-	path = path[len(rterDir):]
+	path = path[len(util.RterDir):]
 
 	if valid_pos && valid_heading {
-		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(?, \"mobile\", ?, ?, ?, ?);", phoneID, path, lat, lng, heading)
+		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(?, \"mobile\", ?, ?, ?, ?);", phoneID, path, lat, lng, heading)
 	} else if valid_pos {
-		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(?, \"mobile\", ?, ?, ?);", phoneID, path, lat, lng)
+		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(?, \"mobile\", ?, ?, ?);", phoneID, path, lat, lng)
 	} else {
-		_, err = db.Query("INSERT INTO content (content_id, content_type, filepath) VALUES(?, \"mobile\",  ?);", phoneID, path)
+		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath) VALUES(?, \"mobile\",  ?);", phoneID, path)
 	}
-	checkError(err)
 
-	rows, err = db.Query("SELECT target_heading from phones where phone_id=?", phoneID)
-	checkError(err)
+	rows = storage.MustQuery("SELECT target_heading from phones where phone_id=?", phoneID)
 
 	if rows.Next() {
 		var target_heading []byte
 		err := rows.Scan(&target_heading)
-		checkError(err)
+		util.Must(err)
 		w.Write(target_heading)
 	}
 
