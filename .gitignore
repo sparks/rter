@@ -1,11 +1,10 @@
+# Files
 *.DS_Store
-lib/
-
-#bin files
 *.class
-
-# folders
-**bin/	
-
+*.jar
 *.png
 *.jpg
+
+# Folders
+bin
+pkg
