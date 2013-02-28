@@ -5,7 +5,7 @@ import (
 )
 
 type Item struct {
-	Id       int
+	ID       int
 	Type     string
 	AuthorID int
 

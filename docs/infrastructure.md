@@ -192,32 +192,32 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /users/?query GET subquery (json)
 * /users/:id GET returns user object (json)
 * /users/ POST Create user, return obj (json form/mime))
-* /users/:id PUT Update user, return obj (json form/mime))
+* /users/:id POST Update user, return obj (json form/mime))
 * /users/:id DELETE, return obj (json form/mime))
 * /users/:id/direct/ GET get current direction and lock for user
-* /users/:id/direct/ PUT (try) and set/unset direction and/or lock (atomicity issues)
+* /users/:id/direct/ POST (try) and set/unset direction and/or lock (atomicity issues)
 ------
 * /items/ GET all items (json)
 * /items/?query GET subquery (time, location, type etc) (json)
 * /items/:id GET (json)
 * /items/ POST Create item, return obj + upload URI for image/video/other bins (json form/mime)
-* /items/:id PUT Update item, return obj + upload URI for image/video/other bins (json form/mime)
+* /items/:id POST Update item, return obj + upload URI for image/video/other bins (json form/mime)
 * /items/:id DELETE, return obj (json/mime)
 ------
 * /items/:id/comments/ GET all comments (json)
 * /items/:id/comments/?query GET subquery (json)
 * /items/:id/comments/:id GET comment (json)
 * /items/:id/comments/ POST Create comment, return obj (json form/mime))
-* /items/:id/comments/:id PUT Update comment, return obj (json form/mime))
+* /items/:id/comments/:id POST Update comment, return obj (json form/mime))
 * /items/:id/comments/:id DELETE, return obj (json form/mime)
 ------
 * /taxonomies/ GET (json)
 * /taxonomies/?query GET (json)
 * /taxonomies/:id/ GET (json)
 * /taxonomies/ POST (json)
-* /taxonomies/:id PUT (json)
+* /taxonomies/:id POST (json)
 ------
 * /taxonomies/:id/ranking/ GET (json)
-* /taxonomies/:id/ranking/ PUT (json)
+* /taxonomies/:id/ranking/ POST (json)
 ------
 * Groups or Roles?

@@ -13,8 +13,8 @@ import (
 func main() {
 	setupLogger()
 
-	storage.SetupMySQL()
-	defer storage.CloseMySQL()
+	storage.OpenStorage()
+	defer storage.CloseStorage()
 
 	http.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	http.HandleFunc("/submit", web.SubmitHandler)
