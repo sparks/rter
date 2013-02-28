@@ -7,6 +7,17 @@ import (
 	"rter/server"
 )
 
+var rterDir = os.Getenv("RTER_DIR")
+
+var UploadPath = filepath.Join(rterDir, "uploads")
+var TemplatePath = filepath.Join(rterDir, "templates")
+var ResourcePath = filepath.Join(rterDir, "resources")
+
+var phoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
+
+var filenameValidator = regexp.MustCompile("^[a-zA-Z0-9_]*\\.?[a-zA-Z0-9_]+\\.[a-zA-Z0-9]+$")
+var folderNameValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
+
 func main() {
 	setupLogger()
 
@@ -20,7 +31,7 @@ func main() {
 
 	http.HandleFunc("/", server.ClientHandler)
 
-	http.Handle("/images/", http.StripPrefix("/images", http.FileServer(http.Dir(server.ImagePath))))
+	http.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(server.UploadPath))))
 	http.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(server.ResourcePath))))
 
 	log.Println("Launching rtER Server")
@@ -38,5 +49,11 @@ func setupLogger() {
 		} else {
 			log.Println(err)
 		}
+	}
+}
+
+func checkError(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

@@ -35,7 +35,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(filepath.Join(ImagePath, phoneID), os.ModeDir|0755)
+	os.Mkdir(filepath.Join(UploadPath, phoneID), os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -56,7 +56,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t := time.Now()
-	path := ImagePath
+	path := UploadPath
 
 	if strings.HasSuffix(header.Filename, ".png") {
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano()))

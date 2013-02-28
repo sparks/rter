@@ -65,14 +65,14 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	if err != nil {
-		path := filepath.Join(ImagePath, "client", "default.png")
+		path := filepath.Join(UploadPath, "client", "default.png")
 		path = path[len(rterDir):]
 		_, err = db.Exec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 		checkError(err)
 	} else {
-		os.Mkdir(filepath.Join(ImagePath, "client"), os.ModeDir|0755)
+		os.Mkdir(filepath.Join(UploadPath, "client"), os.ModeDir|0755)
 
-		path := filepath.Join(ImagePath, "client")
+		path := filepath.Join(UploadPath, "client")
 
 		if strings.HasSuffix(header.Filename, ".png") {
 			path = filepath.Join(path, fmt.Sprintf("%v.png", id))
