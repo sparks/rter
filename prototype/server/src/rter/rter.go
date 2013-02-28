@@ -1,10 +1,10 @@
 package main
 
 import (
-	"./server"
 	"log"
 	"net/http"
 	"os"
+	"rter/server"
 )
 
 func main() {
