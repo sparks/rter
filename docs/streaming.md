@@ -23,6 +23,7 @@ To use DASH one nees a server-side implementation for generating compliant segme
 * Delivery: any HTTP server
 * Playback: Google Chrome with Media Source Extention plus a 3rd party DASH Javascript Engine, e.g. [DASH-JS][6]
 * Firefox with built-in DASH client support (version?)
+* [DASH Player Test in Chrome](http://dash-mse-test.appspot.com/dash-player.html)
 * [Decoder Test Sequences](http://dash-mse-test.appspot.com/decoder-test.html)
 * [DASH Test Sequences](http://gpac.wp.mines-telecom.fr/2012/02/23/dash-sequences/)
 
@@ -57,8 +58,16 @@ __Problem:__ MP4Box sleep interval doubled each time, probably because the file 
 
 #### Software
 
-* Segmentation and M3U8 generation: FFmpeg, FFServer
-* Playback: Safari, iOS (see also [HLS support][7])
+* Segmentation and M3U8 generation: [FFmpeg][9], [Erlyvideo][8] (commercial version only!)
+* Streaming Servers
+  * [Erlyvideo][8] (limited formats, HLS, RTSP/RTP, RTMP, MPEG-TS over HTTP/UDP, RTP multicast)
+  * [FFServer][10] (multi-format RTSP/RTP, HTTP, from file/pipe/local capture)
+  * [LiveMedia][11] (multi-format RTSP/RTP, RTP over HTTP, RTP/UDP multicast)
+* Playback: on HTML5/JS web browsers (where no Flash is required)
+  * native on Safari and iOS (see also [HLS support][7])
+  * [Video.js](http://videojs.com/)
+  * [Projekktor](http://www.projekktor.com) with Flash as fallback
+
 
 #### FFMPEG HLS Examples
 ```
@@ -73,9 +82,16 @@ __Problem:__ MP4Box sleep interval doubled each time, probably because the file 
 ffmpeg -i encoded.mp4 -c copy -map 0 -vbsf h264_mp4toannexb -f segment -segment_time 10 -segment_format mpegts stream%d.ts
 ```
 
+HLS Streaming from the iOS perspective
+http://blog.refractalize.org/post/8171724662/implementing-http-live-streaming
+
+Open Source and hacky Live Streamer based on FFMPeg
+http://www.ioncannon.net/projects/http-live-video-stream-segmenter-and-distributor/
+https://github.com/carsonmcdonald/HTTP-Live-Video-Stream-Segmenter-and-Distributor
+
+
 ### FFSERVER as streaming server
 * [FFMpeg Streaming Guide](http://ffmpeg.org/trac/ffmpeg/wiki/StreamingGuide)
-* [FFServer](http://ffmpeg.org/ffserver.html)
 * [FFServer Example](http://ffmpeg.org/trac/ffmpeg/wiki/Streaming%20media%20with%20ffserver)
 * [Live Streaming with FFMpeg](http://sonnati.wordpress.com/2012/07/02/ffmpeg-the-swiss-army-knife-of-internet-streaming-part-v/)
 * [Another live streaming example](http://www.onvos.com/http-live-streaming-howto.html)
@@ -89,3 +105,7 @@ ffmpeg -i encoded.mp4 -c copy -map 0 -vbsf h264_mp4toannexb -f segment -segment_
 [5]: http://gpac.wp.mines-telecom.fr/2012/02/01/dash-support/
 [6]: http://www-itec.uni-klu.ac.at/dash/?p=792
 [7]: http://www.longtailvideo.com/html5/hls
+[8]: http://erlyvideo.org
+[9]: http://www.ffmpeg.org/
+[10]: http://ffmpeg.org/ffserver.html
+[11]: http://www.live555.com/liveMedia/
