@@ -11,6 +11,12 @@ var (
 	role      *data.Role
 	user      *data.User
 	direction *data.UserDirection
+
+	item    *data.Item
+	comment *data.ItemComment
+
+	term    *data.TaxonomyTerm
+	ranking *data.TaxonomyTermRanking
 )
 
 func TestOpenStorage(t *testing.T) {
@@ -29,6 +35,16 @@ func TestInsertRole(t *testing.T) {
 	}
 }
 
+func TestUpdateRole(t *testing.T) {
+	role.Permissions = 5
+
+	err := UpdateRole(role)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestSelectRole(t *testing.T) {
 	selectedRole, err := SelectRole(role.Title)
 
@@ -37,7 +53,7 @@ func TestSelectRole(t *testing.T) {
 	}
 
 	if !structJSONCompare(role, selectedRole) {
-		t.Error("Selected Role didn't match")
+		t.Error("Selected Roles didn't match")
 	}
 }
 
@@ -57,6 +73,17 @@ func TestInsertUser(t *testing.T) {
 	}
 }
 
+func TestUpdateUser(t *testing.T) {
+	user.Username = "OtherTestUser"
+	user.TrustLevel = 5
+
+	err := UpdateUser(user)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestSelectUser(t *testing.T) {
 	selectedUser, err := SelectUser(user.ID)
 
@@ -70,7 +97,7 @@ func TestSelectUser(t *testing.T) {
 	selectedUser.CreateTime = user.CreateTime //Hack because MySQL will eat part of the timestamp and they won't match
 
 	if !structJSONCompare(user, selectedUser) {
-		t.Error("Selected User didn't match")
+		t.Error("Selected Users didn't match")
 	}
 }
 
@@ -90,6 +117,17 @@ func TestInsertUserDirection(t *testing.T) {
 	}
 }
 
+func TestUpdateUserDirection(t *testing.T) {
+	direction.Command = "look"
+	direction.Heading = -50.4
+
+	err := UpdateUserDirection(direction)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestSelectUserDirection(t *testing.T) {
 	selectedDirection, err := SelectUserDirection(user.ID)
 
@@ -103,7 +141,7 @@ func TestSelectUserDirection(t *testing.T) {
 	selectedDirection.UpdateTime = direction.UpdateTime //hack
 
 	if !structJSONCompare(direction, selectedDirection) {
-		t.Error("Selected UserDirection didn't match")
+		t.Error("Selected UserDirections didn't match")
 	}
 }
 
@@ -111,7 +149,172 @@ func TestDeleteUserDirection(t *testing.T) {
 	err := DeleteUserDirection(direction)
 
 	if err != nil {
-		t.Error("Failed to delete direction", err)
+		t.Error(err)
+	}
+}
+
+func TestInsertItem(t *testing.T) {
+	item = new(data.Item)
+	item.Type = "generic"
+	item.AuthorID = user.ID
+	item.ThumbnailURI = "http://fun.com/thumb.jpg"
+	item.ContentURI = "http://fun.com"
+	item.UploadURI = "http://fun.com/upload"
+	item.HasGeo = false
+	item.Heading = -40.3
+	item.Lat = 47.123
+	item.Lng = -123.123
+	item.StartTime = time.Now()
+
+	err := InsertItem(item)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSelectItem(t *testing.T) {
+	selectedItem, err := SelectItem(item.ID)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(item.StartTime.UTC())
+	t.Log(selectedItem.StartTime.UTC())
+
+	t.Log(item.StopTime.UTC())
+	t.Log(selectedItem.StopTime.UTC())
+
+	selectedItem.StartTime = item.StartTime //hack
+	selectedItem.StopTime = item.StopTime   //hack
+
+	if !structJSONCompare(item, selectedItem) {
+		t.Error("Selected Items didn't match")
+	}
+}
+
+func TestInsertItemComment(t *testing.T) {
+	comment = new(data.ItemComment)
+	comment.ItemID = item.ID
+	comment.AuthorID = user.ID
+	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+	comment.CreateTime = time.Now()
+
+	err := InsertItemComment(comment)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSelectItemComment(t *testing.T) {
+	selectedComment, err := SelectItemComment(comment.ID)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(comment.CreateTime.UTC())
+	t.Log(selectedComment.CreateTime.UTC())
+
+	selectedComment.CreateTime = comment.CreateTime
+
+	if !structJSONCompare(comment, selectedComment) {
+		t.Error("Selected ItemComments didn't match")
+	}
+}
+
+func TestInsertTaxonomyTerm(t *testing.T) {
+	term = new(data.TaxonomyTerm)
+	term.Term = "testterm"
+	term.Automated = false
+	term.AuthorID = user.ID
+	term.CreateTime = time.Now()
+
+	err := InsertTaxonomyTerm(term)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSelectTaxonomyTerm(t *testing.T) {
+	selectedTerm, err := SelectTaxonomyTerm(term.ID)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(term.CreateTime.UTC())
+	t.Log(selectedTerm.CreateTime.UTC())
+
+	selectedTerm.CreateTime = term.CreateTime
+
+	if !structJSONCompare(term, selectedTerm) {
+		t.Error("Selected TaxonomyTerms didn't match")
+	}
+}
+
+func TestInsertTaxonomyTermRanking(t *testing.T) {
+	ranking = new(data.TaxonomyTermRanking)
+	ranking.TermID = term.ID
+	ranking.Ranking = "1,2,3,4,5"
+	ranking.UpdateTime = time.Now()
+
+	err := InsertTaxonomyTermRanking(ranking)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSelectTaxonomyTermRanking(t *testing.T) {
+	selectedRanking, err := SelectTaxonomyTermRanking(ranking.TermID)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(ranking.UpdateTime.UTC())
+	t.Log(selectedRanking.UpdateTime.UTC())
+
+	selectedRanking.UpdateTime = ranking.UpdateTime
+
+	if !structJSONCompare(ranking, selectedRanking) {
+		t.Error("Selected TaxonomyTermRankings didn't match")
+	}
+}
+
+func TestDeleteTaxonomyTermRanking(t *testing.T) {
+	err := DeleteTaxonomyTermRanking(ranking)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDeleteTaxonomyTerm(t *testing.T) {
+	err := DeleteTaxonomyTerm(term)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDeleteComment(t *testing.T) {
+	err := DeleteItemComment(comment)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDeleteItem(t *testing.T) {
+	err := DeleteItem(item)
+
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -119,7 +322,7 @@ func TestDeleteUser(t *testing.T) {
 	err := DeleteUser(user)
 
 	if err != nil {
-		t.Error("Failed to delete user", err)
+		t.Error(err)
 	}
 }
 
@@ -127,7 +330,7 @@ func TestDeleteRole(t *testing.T) {
 	err := DeleteRole(role)
 
 	if err != nil {
-		t.Error("Failed to delete role", err)
+		t.Error(err)
 	}
 }
 

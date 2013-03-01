@@ -5,6 +5,14 @@ import (
 	"log"
 )
 
+func Exec(query string, args ...interface{}) (sql.Result, error) {
+	return db.Exec(query, args...)
+}
+
+func Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return db.Query(query, args...)
+}
+
 func MustExec(query string, args ...interface{}) sql.Result {
 	res, err := db.Exec(query, args...)
 	if err != nil {

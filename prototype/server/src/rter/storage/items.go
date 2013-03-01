@@ -3,12 +3,12 @@ package storage
 import (
 	"fmt"
 	"rter/data"
+	"time"
 )
 
 func InsertItem(item *data.Item) error {
-	res, err := db.Exec(
-		"INSERT INTO Items (ID, Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		item.ID,
+	res, err := Exec(
+		"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.Type,
 		item.AuthorID,
 		item.ThumbnailURI,
@@ -18,8 +18,8 @@ func InsertItem(item *data.Item) error {
 		item.Heading,
 		item.Lat,
 		item.Lng,
-		item.StartTime,
-		item.StopTime,
+		item.StartTime.UTC(),
+		item.StopTime.UTC(),
 	)
 
 	if err != nil {
@@ -38,17 +38,19 @@ func InsertItem(item *data.Item) error {
 }
 
 func SelectItem(ID int64) (*data.Item, error) {
-	rows, err := db.Query("SELECT * FROM Items WHERE ID=?", ID)
+	rows, err := Query("SELECT * FROM Items WHERE ID=?", ID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("No Item in storage with ID=%v", ID)
+		return nil, fmt.Errorf("Select Failed, no Item in storage where ID=%v", ID)
 	}
 
 	item := new(data.Item)
+
+	var startTimeString, stopTimeString string
 
 	err = rows.Scan(
 		&item.ID,
@@ -61,80 +63,131 @@ func SelectItem(ID int64) (*data.Item, error) {
 		&item.Heading,
 		&item.Lat,
 		&item.Lng,
-		&item.StartTime,
-		&item.StopTime,
+		&startTimeString,
+		&stopTimeString,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
+	startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString) // this assumes UTC as timezone
+
+	if err != nil {
+		return nil, err
+	}
+
+	item.StartTime = startTime
+
+	stopTime, err := time.Parse("2006-01-02 15:04:05", stopTimeString) // this assumes UTC as timezone
+
+	if err != nil {
+		return nil, err
+	}
+
+	item.StopTime = stopTime
+
 	return item, nil
 }
 
 func DeleteItem(item *data.Item) error {
-	res, err := db.Exec("DELETE FROM Items WHERE ID=?", item.ID)
+	res, err := Exec("DELETE FROM Items WHERE ID=?", item.ID)
 
-	if err == nil {
-		affected, _ := res.RowsAffected()
-		if affected < 1 {
-			return fmt.Errorf("No such Item in storage: %v", item.ID)
-		}
+	if err != nil {
+		return err
 	}
 
-	return err
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return fmt.Errorf("Delete Failed, no Item in storage where ID=%v", item.ID)
+	}
+
+	return nil
 }
 
 func InsertItemComment(comment *data.ItemComment) error {
-	_, err := db.Exec(
-		"INSERT INTO ItemComments (ID, ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?, ?)",
-		comment.ID,
+	res, err := Exec(
+		"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
 		comment.ItemID,
 		comment.AuthorID,
 		comment.Body,
 		comment.CreateTime,
 	)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	ID, err := res.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+
+	comment.ID = ID
+
+	return nil
 }
 
 func SelectItemComment(ID int64) (*data.ItemComment, error) {
-	rows, err := db.Query("SELECT * FROM ItemComments WHERE ID=?", ID)
+	rows, err := Query("SELECT * FROM ItemComments WHERE ID=?", ID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("No ItemComment in storage with ID=%v", ID)
+		return nil, fmt.Errorf("Select Failed, no ItemComment in storage where ID=%v", ID)
 	}
 
 	comment := new(data.ItemComment)
+
+	var createTimeString string
 
 	err = rows.Scan(
 		&comment.ID,
 		&comment.ItemID,
 		&comment.AuthorID,
 		&comment.Body,
-		&comment.CreateTime,
+		&createTimeString,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
+	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
+
+	if err != nil {
+		return nil, err
+	}
+
+	comment.CreateTime = createTime
+
 	return comment, nil
 }
 
 func DeleteItemComment(comment *data.ItemComment) error {
-	res, err := db.Exec("DELETE FROM ItemComments WHERE ID=?", comment.ID)
+	res, err := Exec("DELETE FROM ItemComments WHERE ID=?", comment.ID)
 
-	if err == nil {
-		affected, _ := res.RowsAffected()
-		if affected < 1 {
-			return fmt.Errorf("No such ItemComment in storage: %v", comment.ID)
-		}
+	if err != nil {
+		return err
 	}
 
-	return err
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return fmt.Errorf("Delete Failed, no ItemComment in storage where ID=%v", comment.ID)
+	}
+
+	return nil
 }
