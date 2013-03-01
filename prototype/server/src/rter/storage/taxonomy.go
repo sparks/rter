@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func InsertTaxonomyTerm(term *data.TaxonomyTerm) error {
+func InsertTerm(term *data.Term) error {
 	ID, err := InsertEntry(
-		"INSERT INTO TaxonomyTerms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
+		"INSERT INTO Terms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
 		term.Term,
 		term.Automated,
 		term.AuthorID,
@@ -24,18 +24,18 @@ func InsertTaxonomyTerm(term *data.TaxonomyTerm) error {
 	return nil
 }
 
-func SelectTaxonomyTerm(ID int64) (*data.TaxonomyTerm, error) {
-	rows, err := Query("SELECT * FROM TaxonomyTerms WHERE ID=?", ID)
+func SelectTerm(ID int64) (*data.Term, error) {
+	rows, err := Query("SELECT * FROM Terms WHERE ID=?", ID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no TaxonomyTerm in storage where ID=%v", ID)
+		return nil, fmt.Errorf("Select Failed, no Term in storage where ID=%v", ID)
 	}
 
-	term := new(data.TaxonomyTerm)
+	term := new(data.Term)
 
 	var createTimeString string
 
@@ -58,13 +58,13 @@ func SelectTaxonomyTerm(ID int64) (*data.TaxonomyTerm, error) {
 	return term, nil
 }
 
-func DeleteTaxonomyTerm(term *data.TaxonomyTerm) error {
-	return DeleteEntry("DELETE FROM TaxonomyTerms WHERE ID=?", term.ID)
+func DeleteTerm(term *data.Term) error {
+	return DeleteEntry("DELETE FROM Terms WHERE ID=?", term.ID)
 }
 
-func InsertTaxonomyTermRanking(ranking *data.TaxonomyTermRanking) error {
+func InsertTermRanking(ranking *data.TermRanking) error {
 	_, err := Exec(
-		"INSERT INTO TaxonomyTermRankings (TermID, Ranking, UpdateTime) VALUES (?, ?, ?)",
+		"INSERT INTO TermRankings (TermID, Ranking, UpdateTime) VALUES (?, ?, ?)",
 		ranking.TermID,
 		ranking.Ranking,
 		ranking.UpdateTime.UTC(),
@@ -73,18 +73,18 @@ func InsertTaxonomyTermRanking(ranking *data.TaxonomyTermRanking) error {
 	return err
 }
 
-func SelectTaxonomyTermRanking(TermID int64) (*data.TaxonomyTermRanking, error) {
-	rows, err := Query("SELECT * FROM TaxonomyTermRankings WHERE TermID=?", TermID)
+func SelectTermRanking(TermID int64) (*data.TermRanking, error) {
+	rows, err := Query("SELECT * FROM TermRankings WHERE TermID=?", TermID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no TaxonomyRankingTerm in storage where TermID=%v", TermID)
+		return nil, fmt.Errorf("Select Failed, no RankingTerm in storage where TermID=%v", TermID)
 	}
 
-	ranking := new(data.TaxonomyTermRanking)
+	ranking := new(data.TermRanking)
 
 	var updateTimeString string
 
@@ -105,6 +105,6 @@ func SelectTaxonomyTermRanking(TermID int64) (*data.TaxonomyTermRanking, error) 
 	return ranking, nil
 }
 
-func DeleteTaxonomyTermRanking(ranking *data.TaxonomyTermRanking) error {
-	return DeleteEntry("DELETE FROM TaxonomyTermRankings WHERE TermID=?", ranking.TermID)
+func DeleteTermRanking(ranking *data.TermRanking) error {
+	return DeleteEntry("DELETE FROM TermRankings WHERE TermID=?", ranking.TermID)
 }

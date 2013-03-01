@@ -8,41 +8,41 @@ import (
 func RegisterTaxonomy(r *mux.Router) {
 	taxonomyRouter := r.PathPrefix("/taxonomy").Subrouter()
 
-	taxonomyRouter.HandleFunc("/", QueryTaxonomy).Methods("GET")
-	taxonomyRouter.HandleFunc("/", CreateTaxonomyTerm).Methods("POST")
+	taxonomyRouter.HandleFunc("/", QueryTerm).Methods("GET")
+	taxonomyRouter.HandleFunc("/", CreateTerm).Methods("POST")
 
-	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", GetTaxonomyTerm).Methods("GET")
-	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", UpdateTaxonomyTerm).Methods("POST")
-	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", DeleteTaxonomyTerm).Methods("DELTE")
+	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", GetTerm).Methods("GET")
+	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", UpdateTerm).Methods("POST")
+	taxonomyRouter.HandleFunc("/{id:[0-9]+}/", DeleteTerm).Methods("DELTE")
 
-	taxonomyRouter.HandleFunc("/{id:[0-9]+}/ranking", GetTaxonomyTermRanking).Methods("GET")
-	taxonomyRouter.HandleFunc("/{id:[0-9]+}/ranking", UpdateTaxonomyTermRanking).Methods("POST")
+	taxonomyRouter.HandleFunc("/{id:[0-9]+}/ranking", GetTermRanking).Methods("GET")
+	taxonomyRouter.HandleFunc("/{id:[0-9]+}/ranking", UpdateTermRanking).Methods("POST")
 }
 
-func QueryTaxonomy(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func CreateTaxonomyTerm(w http.ResponseWriter, r *http.Request) {
+func QueryTerm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetTaxonomyTerm(w http.ResponseWriter, r *http.Request) {
+func CreateTerm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func UpdateTaxonomyTerm(w http.ResponseWriter, r *http.Request) {
+func GetTerm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func DeleteTaxonomyTerm(w http.ResponseWriter, r *http.Request) {
+func UpdateTerm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetTaxonomyTermRanking(w http.ResponseWriter, r *http.Request) {
+func DeleteTerm(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func UpdateTaxonomyTermRanking(w http.ResponseWriter, r *http.Request) {
+func GetTermRanking(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func UpdateTermRanking(w http.ResponseWriter, r *http.Request) {
 
 }

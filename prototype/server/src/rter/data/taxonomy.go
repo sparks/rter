@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type TaxonomyTerm struct {
+type Term struct {
 	ID   int64
 	Term string
 
@@ -14,7 +14,7 @@ type TaxonomyTerm struct {
 	CreateTime time.Time
 }
 
-type TaxonomyTermRanking struct {
+type TermRanking struct {
 	TermID  int64
 	Ranking string
 

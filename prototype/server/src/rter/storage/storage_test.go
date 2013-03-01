@@ -15,8 +15,8 @@ var (
 	item    *data.Item
 	comment *data.ItemComment
 
-	term    *data.TaxonomyTerm
-	ranking *data.TaxonomyTermRanking
+	term    *data.Term
+	ranking *data.TermRanking
 )
 
 func TestOpenStorage(t *testing.T) {
@@ -225,22 +225,22 @@ func TestSelectItemComment(t *testing.T) {
 	}
 }
 
-func TestInsertTaxonomyTerm(t *testing.T) {
-	term = new(data.TaxonomyTerm)
+func TestInsertTerm(t *testing.T) {
+	term = new(data.Term)
 	term.Term = "testterm"
 	term.Automated = false
 	term.AuthorID = user.ID
 	term.CreateTime = time.Now()
 
-	err := InsertTaxonomyTerm(term)
+	err := InsertTerm(term)
 
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSelectTaxonomyTerm(t *testing.T) {
-	selectedTerm, err := SelectTaxonomyTerm(term.ID)
+func TestSelectTerm(t *testing.T) {
+	selectedTerm, err := SelectTerm(term.ID)
 
 	if err != nil {
 		t.Error(err)
@@ -252,25 +252,25 @@ func TestSelectTaxonomyTerm(t *testing.T) {
 	selectedTerm.CreateTime = term.CreateTime
 
 	if !structJSONCompare(term, selectedTerm) {
-		t.Error("Selected TaxonomyTerms didn't match")
+		t.Error("Selected Terms didn't match")
 	}
 }
 
-func TestInsertTaxonomyTermRanking(t *testing.T) {
-	ranking = new(data.TaxonomyTermRanking)
+func TestInsertTermRanking(t *testing.T) {
+	ranking = new(data.TermRanking)
 	ranking.TermID = term.ID
 	ranking.Ranking = "1,2,3,4,5"
 	ranking.UpdateTime = time.Now()
 
-	err := InsertTaxonomyTermRanking(ranking)
+	err := InsertTermRanking(ranking)
 
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSelectTaxonomyTermRanking(t *testing.T) {
-	selectedRanking, err := SelectTaxonomyTermRanking(ranking.TermID)
+func TestSelectTermRanking(t *testing.T) {
+	selectedRanking, err := SelectTermRanking(ranking.TermID)
 
 	if err != nil {
 		t.Error(err)
@@ -282,20 +282,20 @@ func TestSelectTaxonomyTermRanking(t *testing.T) {
 	selectedRanking.UpdateTime = ranking.UpdateTime
 
 	if !structJSONCompare(ranking, selectedRanking) {
-		t.Error("Selected TaxonomyTermRankings didn't match")
+		t.Error("Selected TermRankings didn't match")
 	}
 }
 
-func TestDeleteTaxonomyTermRanking(t *testing.T) {
-	err := DeleteTaxonomyTermRanking(ranking)
+func TestDeleteTermRanking(t *testing.T) {
+	err := DeleteTermRanking(ranking)
 
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestDeleteTaxonomyTerm(t *testing.T) {
-	err := DeleteTaxonomyTerm(term)
+func TestDeleteTerm(t *testing.T) {
+	err := DeleteTerm(term)
 
 	if err != nil {
 		t.Error(err)
