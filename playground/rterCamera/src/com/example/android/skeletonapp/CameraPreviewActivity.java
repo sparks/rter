@@ -175,7 +175,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		super.onResume();
-		locationManager.requestLocationUpdates(provider, 400, 1, this);
+		locationManager.requestLocationUpdates(provider, 0, 1, this);
 		// Open the default i.e. the first rear facing camera.
 		mCamera = Camera.open();
 		cameraCurrentlyLocked = defaultCameraId;
