@@ -197,6 +197,9 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		Log.e(TAG, "onPause");
 		locationManager.removeUpdates(this);
 		
+		// stop sensor updates
+		mSensorManager.unregisterListener(overlay);
+		
 		// end photo thread
 		isFPS = false;
 //		if(photoThread.isAlive()) {
@@ -294,6 +297,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		String longi = "" + (location.getLongitude());
 		frameInfo.lat = convertStringToByteArray(lati);
 		frameInfo.lon = convertStringToByteArray(longi);
+		
+		
 
 	}
 
