@@ -66,27 +66,11 @@ func SelectRole(title string) (*data.Role, error) {
 }
 
 func DeleteRole(role *data.Role) error {
-	res, err := Exec("DELETE FROM Roles WHERE Title=?", role.Title)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no Role in storage where Title=%v", role.Title)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM Roles WHERE Title=?", role.Title)
 }
 
 func InsertUser(user *data.User) error {
-	res, err := Exec(
+	ID, err := InsertEntry(
 		"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES (?, ?, ?, ?, ?, ?)",
 		user.Username,
 		user.Password,
@@ -95,12 +79,6 @@ func InsertUser(user *data.User) error {
 		user.TrustLevel,
 		user.CreateTime.UTC(),
 	)
-
-	if err != nil {
-		return err
-	}
-
-	ID, err := res.LastInsertId()
 
 	if err != nil {
 		return err
@@ -180,23 +158,7 @@ func SelectUser(ID int64) (*data.User, error) {
 }
 
 func DeleteUser(user *data.User) error {
-	res, err := Exec("DELETE FROM Users WHERE ID=?", user.ID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no User in storage where ID=%v", user.ID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM Users WHERE ID=?", user.ID)
 }
 
 func InsertUserDirection(direction *data.UserDirection) error {
@@ -280,21 +242,5 @@ func SelectUserDirection(UserID int64) (*data.UserDirection, error) {
 }
 
 func DeleteUserDirection(direction *data.UserDirection) error {
-	res, err := Exec("DELETE FROM UserDirections WHERE UserID=?", direction.UserID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no UserDirection in storage where UserID=%v", direction.UserID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM UserDirections WHERE UserID=?", direction.UserID)
 }

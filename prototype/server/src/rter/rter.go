@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"rter/mobile"
+	"rter/rest"
 	"rter/storage"
 	"rter/util"
 	"rter/web"
@@ -16,15 +18,23 @@ func main() {
 	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter_v2")
 	defer storage.CloseStorage()
 
-	http.HandleFunc("/multiup", mobile.MultiUploadHandler)
-	http.HandleFunc("/submit", web.SubmitHandler)
+	r := mux.NewRouter()
 
-	http.HandleFunc("/ajax/", web.ClientAjax)
+	rest.RegisterUsers(r)
+	rest.RegisterItems(r)
+	rest.RegisterTaxonomy(r)
 
-	http.HandleFunc("/", web.ClientHandler)
+	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
+	r.HandleFunc("/submit", web.SubmitHandler)
 
-	http.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(util.UploadPath))))
-	http.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(util.ResourcePath))))
+	r.HandleFunc("/ajax/", web.ClientAjax)
+
+	r.HandleFunc("/", web.ClientHandler)
+
+	r.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(util.UploadPath))))
+	r.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(util.ResourcePath))))
+
+	http.Handle("/", r)
 
 	log.Println("Launching rtER Server")
 	log.Fatal(http.ListenAndServe(":8080", nil))

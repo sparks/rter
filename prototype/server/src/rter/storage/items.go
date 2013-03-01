@@ -7,7 +7,7 @@ import (
 )
 
 func InsertItem(item *data.Item) error {
-	res, err := Exec(
+	ID, err := InsertEntry(
 		"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.Type,
 		item.AuthorID,
@@ -21,12 +21,6 @@ func InsertItem(item *data.Item) error {
 		item.StartTime.UTC(),
 		item.StopTime.UTC(),
 	)
-
-	if err != nil {
-		return err
-	}
-
-	ID, err := res.LastInsertId()
 
 	if err != nil {
 		return err
@@ -91,39 +85,17 @@ func SelectItem(ID int64) (*data.Item, error) {
 }
 
 func DeleteItem(item *data.Item) error {
-	res, err := Exec("DELETE FROM Items WHERE ID=?", item.ID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no Item in storage where ID=%v", item.ID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM Items WHERE ID=?", item.ID)
 }
 
 func InsertItemComment(comment *data.ItemComment) error {
-	res, err := Exec(
+	ID, err := InsertEntry(
 		"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
 		comment.ItemID,
 		comment.AuthorID,
 		comment.Body,
 		comment.CreateTime,
 	)
-
-	if err != nil {
-		return err
-	}
-
-	ID, err := res.LastInsertId()
 
 	if err != nil {
 		return err
@@ -173,21 +145,5 @@ func SelectItemComment(ID int64) (*data.ItemComment, error) {
 }
 
 func DeleteItemComment(comment *data.ItemComment) error {
-	res, err := Exec("DELETE FROM ItemComments WHERE ID=?", comment.ID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no ItemComment in storage where ID=%v", comment.ID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM ItemComments WHERE ID=?", comment.ID)
 }

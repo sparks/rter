@@ -194,8 +194,8 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /users/ POST Create user, return obj (json form/mime))
 * /users/:id POST Update user, return obj (json form/mime))
 * /users/:id DELETE, return obj (json form/mime))
-* /users/:id/direct/ GET get current direction and lock for user
-* /users/:id/direct/ POST (try) and set/unset direction and/or lock (atomicity issues)
+* /users/:id/direction/ GET get current direction and lock for user
+* /users/:id/direction/ POST (try) and set/unset direction and/or lock (atomicity issues)
 ------
 * /items/ GET all items (json)
 * /items/?query GET subquery (time, location, type etc) (json)
@@ -211,13 +211,13 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /items/:id/comments/:id POST Update comment, return obj (json form/mime))
 * /items/:id/comments/:id DELETE, return obj (json form/mime)
 ------
-* /taxonomies/ GET (json)
-* /taxonomies/?query GET (json)
-* /taxonomies/:id/ GET (json)
-* /taxonomies/ POST (json)
-* /taxonomies/:id POST (json)
+* /taxonomy/ GET (json)
+* /taxonomy/?query GET (json)
+* /taxonomy/:term/ GET (json)
+* /taxonomy/ POST (json)
+* /taxonomy/:term POST (json)
 ------
-* /taxonomies/:id/ranking/ GET (json)
-* /taxonomies/:id/ranking/ POST (json)
+* /taxonomy/:term/ranking/ GET (json)
+* /taxonomy/:term/ranking/ POST (json)
 ------
 * Groups or Roles?

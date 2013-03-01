@@ -7,19 +7,13 @@ import (
 )
 
 func InsertTaxonomyTerm(term *data.TaxonomyTerm) error {
-	res, err := Exec(
+	ID, err := InsertEntry(
 		"INSERT INTO TaxonomyTerms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
 		term.Term,
 		term.Automated,
 		term.AuthorID,
 		term.CreateTime.UTC(),
 	)
-
-	if err != nil {
-		return err
-	}
-
-	ID, err := res.LastInsertId()
 
 	if err != nil {
 		return err
@@ -65,23 +59,7 @@ func SelectTaxonomyTerm(ID int64) (*data.TaxonomyTerm, error) {
 }
 
 func DeleteTaxonomyTerm(term *data.TaxonomyTerm) error {
-	res, err := Exec("DELETE FROM TaxonomyTerms WHERE ID=?", term.ID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no TaxonomyTerm in storage where ID=%v", term.ID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM TaxonomyTerms WHERE ID=?", term.ID)
 }
 
 func InsertTaxonomyTermRanking(ranking *data.TaxonomyTermRanking) error {
@@ -128,21 +106,5 @@ func SelectTaxonomyTermRanking(TermID int64) (*data.TaxonomyTermRanking, error) 
 }
 
 func DeleteTaxonomyTermRanking(ranking *data.TaxonomyTermRanking) error {
-	res, err := Exec("DELETE FROM TaxonomyTermRankings WHERE TermID=?", ranking.TermID)
-
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-
-	if err != nil {
-		return err
-	}
-
-	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no TaxonomyTermRanking in storage where TermID=%v", ranking.TermID)
-	}
-
-	return nil
+	return DeleteEntry("DELETE FROM TaxonomyTermRankings WHERE TermID=?", ranking.TermID)
 }

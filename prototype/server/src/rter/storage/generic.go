@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -27,4 +28,40 @@ func MustQuery(query string, args ...interface{}) *sql.Rows {
 		log.Fatalf("Error on Query %q: %v", query, err)
 	}
 	return rows
+}
+
+func InsertEntry(query string, args ...interface{}) (int64, error) {
+	res, err := Exec(query, args...)
+
+	if err != nil {
+		return 0, err
+	}
+
+	ID, err := res.LastInsertId()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return ID, nil
+}
+
+func DeleteEntry(query string, args ...interface{}) error {
+	res, err := Exec(query, args...)
+
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return fmt.Errorf("Delete Failed, no matching entries found.")
+	}
+
+	return nil
 }
