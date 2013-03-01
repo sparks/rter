@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID       int
+	ID       int64
 	Username string
 	Password string
 	Salt     string
@@ -17,8 +17,8 @@ type User struct {
 }
 
 type UserDirection struct {
-	UserID     int
-	LockUserID int
+	UserID     int64
+	LockUserID int64
 	Command    string
 
 	Heading float64
@@ -29,6 +29,6 @@ type UserDirection struct {
 }
 
 type Role struct {
-	Role        string
+	Title       string
 	Permissions int
 }

@@ -9,14 +9,8 @@ import (
 
 var db *sql.DB
 
-func OpenStorage() {
-	user := "root"
-	pass := ""
-	prot := "tcp"
-	addr := "localhost:3306"
-	dbname := "rter_v1"
-
-	netAddr := fmt.Sprintf("%s(%s)", prot, addr)
+func OpenStorage(user, pass, protocol, addr, dbname string) {
+	netAddr := fmt.Sprintf("%s(%s)", protocol, addr)
 	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8", user, pass, netAddr, dbname)
 	var err error
 	db, err = sql.Open("mysql", dsn)

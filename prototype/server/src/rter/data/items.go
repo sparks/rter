@@ -5,9 +5,9 @@ import (
 )
 
 type Item struct {
-	ID       int
+	ID       int64
 	Type     string
-	AuthorID int
+	AuthorID int64
 
 	ThumbnailURI string
 	ContentURI   string
@@ -23,9 +23,9 @@ type Item struct {
 }
 
 type ItemComment struct {
-	ID       int
-	ItemID   int
-	AuthorID int
+	ID       int64
+	ItemID   int64
+	AuthorID int64
 
 	Body string
 

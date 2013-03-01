@@ -5,20 +5,20 @@ import (
 )
 
 type Taxonomy struct {
-	ID   int
+	ID   int64
 	Term string
 
 	Automated bool
-	AuthorID  int
+	AuthorID  int64
 
 	CreateTime time.Time
 }
 
 type TaxonomyRanking struct {
-	ID         int
+	ID         int64
 	RawRanking string
 
-	TaxonomyID int
+	TaxonomyID int64
 
 	UpdateTime time.Time
 }

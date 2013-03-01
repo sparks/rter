@@ -13,7 +13,7 @@ import (
 func main() {
 	setupLogger()
 
-	storage.OpenStorage()
+	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter_v2")
 	defer storage.CloseStorage()
 
 	http.HandleFunc("/multiup", mobile.MultiUploadHandler)
