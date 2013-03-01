@@ -150,6 +150,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		provider = locationManager.getBestProvider(criteria, false);
 		Log.e(TAG, "Requesting location");
 		locationManager.requestLocationUpdates(provider, 0, 1, this);
+		// register the overlay control for location updates as well, so we get the geomagnetic field
+		locationManager.requestLocationUpdates(provider, 0, 1000, overlay);
 		if (provider != null) {
 			Location location = locationManager.getLastKnownLocation(provider);
 			// Initialize the location fields
@@ -176,6 +178,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	protected void onResume() {
 		super.onResume();
 		locationManager.requestLocationUpdates(provider, 0, 1, this);
+		// register the overlay control for location updates as well, so we get the geomagnetic field
+		locationManager.requestLocationUpdates(provider, 0, 1000, overlay);
 		// Open the default i.e. the first rear facing camera.
 		mCamera = Camera.open();
 		cameraCurrentlyLocked = defaultCameraId;
@@ -196,6 +200,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		super.onPause();
 		Log.e(TAG, "onPause");
 		locationManager.removeUpdates(this);
+		locationManager.removeUpdates(overlay);
 		
 		// stop sensor updates
 		mSensorManager.unregisterListener(overlay);

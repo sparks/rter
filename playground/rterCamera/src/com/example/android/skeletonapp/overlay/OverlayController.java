@@ -6,10 +6,14 @@ import com.example.android.skeletonapp.overlay.CameraGLRenderer.Indicate;
 import com.example.android.skeletonapp.util.*;
 
 import android.content.Context;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
 import android.util.Log;
 
 /**
@@ -21,7 +25,7 @@ import android.util.Log;
  * @author stepan
  *
  */
-public class OverlayController implements SensorEventListener {
+public class OverlayController implements SensorEventListener, LocationListener {
 	protected float desiredOrientation;
 	protected float currentOrientation;
 	protected float deviceOrientation;
@@ -36,6 +40,7 @@ public class OverlayController implements SensorEventListener {
 
 	float[] aValues = new float[3];
 	float[] mValues = new float[3];
+	float declination = 0;	//geo magnetic declinationf from true North
 
 	// max orientation tolerance in degrees
 	public float orientationTolerance = 10.0f;
@@ -145,7 +150,7 @@ public class OverlayController implements SensorEventListener {
 
 		// this angle tells us the orientation
 		this.orientationFilter.pushValue((float) Math.toDegrees(orientationValues[0]));
-		this.currentOrientation = this.orientationFilter.getValue();
+		this.currentOrientation = this.orientationFilter.getValue() +this.declination;
 
 		// this is not used currently, 90 when phone facing the sky, -90 when
 		// facing the ground
@@ -156,7 +161,10 @@ public class OverlayController implements SensorEventListener {
 		// down
 		this.deviceOrientation = (float) Math.toDegrees(orientationValues[2]);
 
-		//Log.e(TAG, "x: " + this.currentOrientation);
+		Log.d("orientation", "x: " + String.format("%.1f", Math.toDegrees(orientationValues[0]))
+				+ ", y: " + String.format("%.1f", Math.toDegrees(orientationValues[1]))
+				+ ", z: " + String.format("%.1f", Math.toDegrees(orientationValues[2])));
+		Log.d("reald orientation", "x: " + String.format("%.1f", this.currentOrientation));
 
 		if (this.freeRoam) {
 			this.mGLRenderer.indicateTurn(Indicate.FREE, 0.0f);
@@ -200,6 +208,32 @@ public class OverlayController implements SensorEventListener {
 			this.mGLRenderer.indicateTurn(Indicate.NONE, 0.0f);
 		}
 
+	}
+
+	@Override
+	public void onLocationChanged(Location loc) {
+		//calculate and store declination for compass offsetting to true north
+        GeomagneticField gmf = new GeomagneticField(
+            (float)loc.getLatitude(), (float)loc.getLongitude(), (float)loc.getAltitude(), System.currentTimeMillis());
+        this.declination = gmf.getDeclination();
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
