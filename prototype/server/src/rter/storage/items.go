@@ -31,18 +31,16 @@ func InsertItem(item *data.Item) error {
 	return nil
 }
 
-func SelectItem(ID int64) (*data.Item, error) {
-	rows, err := Query("SELECT * FROM Items WHERE ID=?", ID)
+func SelectItem(item *data.Item) error {
+	rows, err := Query("SELECT * FROM Items WHERE ID=?", item.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no Item in storage where ID=%v", ID)
+		return fmt.Errorf("Select Failed, no Item in storage where ID=%v", item.ID)
 	}
-
-	item := new(data.Item)
 
 	var startTimeString, stopTimeString string
 
@@ -62,13 +60,13 @@ func SelectItem(ID int64) (*data.Item, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	item.StartTime = startTime
@@ -76,12 +74,12 @@ func SelectItem(ID int64) (*data.Item, error) {
 	stopTime, err := time.Parse("2006-01-02 15:04:05", stopTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	item.StopTime = stopTime
 
-	return item, nil
+	return nil
 }
 
 func DeleteItem(item *data.Item) error {

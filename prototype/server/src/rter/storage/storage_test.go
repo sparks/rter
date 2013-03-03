@@ -174,7 +174,10 @@ func TestInsertItem(t *testing.T) {
 }
 
 func TestSelectItem(t *testing.T) {
-	selectedItem, err := SelectItem(item.ID)
+	selectedItem := new(data.Item)
+	selectedItem.ID = item.ID
+
+	err := SelectItem(selectedItem)
 
 	if err != nil {
 		t.Error(err)

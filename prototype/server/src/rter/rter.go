@@ -15,7 +15,7 @@ import (
 func main() {
 	setupLogger()
 
-	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter_v2")
+	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter_test")
 	defer storage.CloseStorage()
 
 	r := mux.NewRouter()

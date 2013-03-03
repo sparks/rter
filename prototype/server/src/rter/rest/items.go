@@ -1,8 +1,12 @@
 package rest
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
+	"rter/data"
+	"rter/storage"
 )
 
 func RegisterItems(r *mux.Router) {
@@ -28,11 +32,57 @@ func QueryItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateItem(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
 
+	item := new(data.Item)
+	err := decoder.Decode(&item)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed json for Item", http.StatusBadRequest)
+		return
+	}
+
+	err = storage.InsertItem(item)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	encoder := json.NewEncoder(w)
+
+	encoder.Encode(item)
 }
 
 func GetItem(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
 
+	item := new(data.Item)
+	err := decoder.Decode(&item)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed json for Item", http.StatusBadRequest)
+		return
+	}
+
+	err = storage.GetItem(item)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+
+	encoder := json.NewEncoder(w)
+
+	encoder.Encode(item)
 }
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
