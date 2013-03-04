@@ -34,3 +34,4 @@
 ## Even More Features!
 * Auto window tiling mechanism for multi screen. Breakout UI/UX elements accross windows
 * Free roam mode for phone
+* Location detection in browser for starting position
