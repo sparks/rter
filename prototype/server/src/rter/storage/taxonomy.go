@@ -5,18 +5,6 @@ import (
 	"time"
 )
 
-func InsertTerm(term *data.Term) error {
-	_, err := InsertEntry(
-		"INSERT INTO Terms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
-		term.Term,
-		term.Automated,
-		term.AuthorID,
-		term.CreateTime.UTC(),
-	)
-
-	return err
-}
-
 func SelectTerm(term *data.Term) error {
 	rows, err := Query("SELECT * FROM Terms WHERE Term=?", term.Term)
 
@@ -48,21 +36,6 @@ func SelectTerm(term *data.Term) error {
 	return nil
 }
 
-func DeleteTerm(term *data.Term) error {
-	return DeleteEntry("DELETE FROM Terms WHERE Term=?", term.Term)
-}
-
-func InsertTermRanking(ranking *data.TermRanking) error {
-	_, err := Exec(
-		"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
-		ranking.Term,
-		ranking.Ranking,
-		ranking.UpdateTime.UTC(),
-	)
-
-	return err
-}
-
 func SelectTermRanking(ranking *data.TermRanking) error {
 	rows, err := Query("SELECT * FROM TermRankings WHERE Term=?", ranking.Term)
 
@@ -91,8 +64,4 @@ func SelectTermRanking(ranking *data.TermRanking) error {
 	ranking.UpdateTime = updateTime
 
 	return nil
-}
-
-func DeleteTermRanking(ranking *data.TermRanking) error {
-	return DeleteEntry("DELETE FROM TermRankings WHERE Term=?", ranking.Term)
 }

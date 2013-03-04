@@ -59,7 +59,7 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = storage.InsertItem(item)
+	err = storage.Insert(item)
 
 	if err != nil {
 		log.Println(err)
@@ -132,7 +132,7 @@ func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	item := new(data.Item)
 	item.ID = parseID(2, w, r)
 
-	err := storage.DeleteItem(item)
+	err := storage.Delete(item)
 
 	if err == storage.ErrZeroMatches {
 		http.Error(w, "No such Item", http.StatusNoContent)

@@ -6,31 +6,6 @@ import (
 	"time"
 )
 
-func InsertItem(item *data.Item) error {
-	ID, err := InsertEntry(
-		"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		item.Type,
-		item.AuthorID,
-		item.ThumbnailURI,
-		item.ContentURI,
-		item.UploadURI,
-		item.HasGeo,
-		item.Heading,
-		item.Lat,
-		item.Lng,
-		item.StartTime.UTC(),
-		item.StopTime.UTC(),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	item.ID = ID
-
-	return nil
-}
-
 func UpdateItem(item *data.Item) error {
 	res, err := Exec(
 		"UPDATE Items SET Type=?, AuthorID=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
@@ -108,10 +83,6 @@ func SelectItem(item *data.Item) error {
 	return err
 }
 
-func DeleteItem(item *data.Item) error {
-	return DeleteEntry("DELETE FROM Items WHERE ID=?", item.ID)
-}
-
 func scanItem(item *data.Item, rows *sql.Rows) error {
 	var startTimeString, stopTimeString string
 
@@ -153,24 +124,6 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	return nil
 }
 
-func InsertItemComment(comment *data.ItemComment) error {
-	ID, err := InsertEntry(
-		"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
-		comment.ItemID,
-		comment.AuthorID,
-		comment.Body,
-		comment.CreateTime,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	comment.ID = ID
-
-	return nil
-}
-
 func SelectItemComment(comment *data.ItemComment) error {
 	rows, err := Query("SELECT * FROM ItemComments WHERE ID=?", comment.ID)
 
@@ -205,8 +158,4 @@ func SelectItemComment(comment *data.ItemComment) error {
 	comment.CreateTime = createTime
 
 	return nil
-}
-
-func DeleteItemComment(comment *data.ItemComment) error {
-	return DeleteEntry("DELETE FROM ItemComments WHERE ID=?", comment.ID)
 }

@@ -28,7 +28,7 @@ func TestInsertRole(t *testing.T) {
 	role.Title = "TestRole"
 	role.Permissions = 1
 
-	err := InsertRole(role)
+	err := Insert(role)
 
 	if err != nil {
 		t.Error(err)
@@ -68,7 +68,7 @@ func TestInsertUser(t *testing.T) {
 	user.TrustLevel = 1
 	user.CreateTime = time.Now()
 
-	err := InsertUser(user)
+	err := Insert(user)
 
 	if err != nil {
 		t.Error(err)
@@ -114,7 +114,7 @@ func TestInsertUserDirection(t *testing.T) {
 	direction.Lng = -74.234
 	direction.UpdateTime = time.Now()
 
-	err := InsertUserDirection(direction)
+	err := Insert(direction)
 
 	if err != nil {
 		t.Error(err)
@@ -148,14 +148,6 @@ func TestSelectUserDirection(t *testing.T) {
 
 	if !structJSONCompare(direction, selectedDirection) {
 		t.Error("Selected UserDirections didn't match")
-	}
-}
-
-func TestDeleteUserDirection(t *testing.T) {
-	err := DeleteUserDirection(direction)
-
-	if err != nil {
-		t.Error(err)
 	}
 }
 
@@ -209,7 +201,7 @@ func TestInsertItemComment(t *testing.T) {
 	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 	comment.CreateTime = time.Now()
 
-	err := InsertItemComment(comment)
+	err := Insert(comment)
 
 	if err != nil {
 		t.Error(err)
@@ -242,7 +234,7 @@ func TestInsertTerm(t *testing.T) {
 	term.AuthorID = user.ID
 	term.CreateTime = time.Now()
 
-	err := InsertTerm(term)
+	err := Insert(term)
 
 	if err != nil {
 		t.Error(err)
@@ -253,8 +245,6 @@ func TestSelectTerm(t *testing.T) {
 	selectedTerm := new(data.Term)
 	selectedTerm.Term = term.Term
 	err := SelectTerm(selectedTerm)
-	t.Log(selectedTerm)
-	t.Log(term)
 
 	if err != nil {
 		t.Error(err)
@@ -276,7 +266,7 @@ func TestInsertTermRanking(t *testing.T) {
 	ranking.Ranking = "1,2,3,4,5"
 	ranking.UpdateTime = time.Now()
 
-	err := InsertTermRanking(ranking)
+	err := Insert(ranking)
 
 	if err != nil {
 		t.Error(err)
@@ -302,16 +292,8 @@ func TestSelectTermRanking(t *testing.T) {
 	}
 }
 
-func TestDeleteTermRanking(t *testing.T) {
-	err := DeleteTermRanking(ranking)
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func TestDeleteTerm(t *testing.T) {
-	err := DeleteTerm(term)
+	err := Delete(term)
 
 	if err != nil {
 		t.Error(err)
@@ -319,7 +301,7 @@ func TestDeleteTerm(t *testing.T) {
 }
 
 func TestDeleteComment(t *testing.T) {
-	err := DeleteItemComment(comment)
+	err := Delete(comment)
 
 	if err != nil {
 		t.Error(err)
@@ -327,7 +309,7 @@ func TestDeleteComment(t *testing.T) {
 }
 
 func TestDeleteItem(t *testing.T) {
-	err := DeleteItem(item)
+	err := Delete(item)
 
 	if err != nil {
 		t.Error(err)
@@ -335,7 +317,7 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	err := DeleteUser(user)
+	err := Delete(user)
 
 	if err != nil {
 		t.Error(err)
@@ -343,7 +325,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestDeleteRole(t *testing.T) {
-	err := DeleteRole(role)
+	err := Delete(role)
 
 	if err != nil {
 		t.Error(err)

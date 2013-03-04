@@ -5,16 +5,6 @@ import (
 	"time"
 )
 
-func InsertRole(role *data.Role) error {
-	_, err := Exec(
-		"INSERT INTO Roles (Title, Permissions) VALUES (?, ?)",
-		role.Title,
-		role.Permissions,
-	)
-
-	return err
-}
-
 func UpdateRole(role *data.Role) error {
 	res, err := Exec(
 		"UPDATE Roles SET Permissions=? WHERE Title=?",
@@ -58,30 +48,6 @@ func SelectRole(role *data.Role) error {
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func DeleteRole(role *data.Role) error {
-	return DeleteEntry("DELETE FROM Roles WHERE Title=?", role.Title)
-}
-
-func InsertUser(user *data.User) error {
-	ID, err := InsertEntry(
-		"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES (?, ?, ?, ?, ?, ?)",
-		user.Username,
-		user.Password,
-		user.Salt,
-		user.Role,
-		user.TrustLevel,
-		user.CreateTime.UTC(),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	user.ID = ID
 
 	return nil
 }
@@ -152,25 +118,6 @@ func SelectUser(user *data.User) error {
 	return nil
 }
 
-func DeleteUser(user *data.User) error {
-	return DeleteEntry("DELETE FROM Users WHERE ID=?", user.ID)
-}
-
-func InsertUserDirection(direction *data.UserDirection) error {
-	_, err := Exec(
-		"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		direction.UserID,
-		direction.LockUserID,
-		direction.Command,
-		direction.Heading,
-		direction.Lat,
-		direction.Lng,
-		direction.UpdateTime.UTC(),
-	)
-
-	return err
-}
-
 func UpdateUserDirection(direction *data.UserDirection) error {
 	res, err := Exec(
 		"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE UserID=?",
@@ -232,8 +179,4 @@ func SelectUserDirection(direction *data.UserDirection) error {
 	direction.UpdateTime = updateTime
 
 	return nil
-}
-
-func DeleteUserDirection(direction *data.UserDirection) error {
-	return DeleteEntry("DELETE FROM UserDirections WHERE UserID=?", direction.UserID)
 }
