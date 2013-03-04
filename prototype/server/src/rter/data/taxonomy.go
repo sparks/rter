@@ -5,7 +5,6 @@ import (
 )
 
 type Term struct {
-	ID   int64
 	Term string
 
 	Automated bool
@@ -15,7 +14,7 @@ type Term struct {
 }
 
 type TermRanking struct {
-	TermID  int64
+	Term    string
 	Ranking string
 
 	UpdateTime time.Time
