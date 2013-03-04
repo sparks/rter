@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"rter/data"
 	"time"
 )
@@ -34,7 +33,7 @@ func UpdateRole(role *data.Role) error {
 	}
 
 	if affected < 1 {
-		return fmt.Errorf("Update Failed, no Role in storage where Title=%v", role.Title)
+		return ErrZeroMatches
 	}
 
 	return nil
@@ -48,7 +47,7 @@ func SelectRole(role *data.Role) error {
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("Select Failed, no Role in storage where Title=%v", role.Title)
+		return ErrZeroMatches
 	}
 
 	err = rows.Scan(
@@ -109,7 +108,7 @@ func UpdateUser(user *data.User) error {
 	}
 
 	if affected < 1 {
-		return fmt.Errorf("Update Failed, no User in storage where ID=%v", user.ID)
+		return ErrZeroMatches
 	}
 
 	return nil
@@ -123,7 +122,7 @@ func SelectUser(user *data.User) error {
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("Select Failed, no User in storage where ID=%v", user.ID)
+		return ErrZeroMatches
 	}
 
 	var createTimeString string
@@ -195,7 +194,7 @@ func UpdateUserDirection(direction *data.UserDirection) error {
 	}
 
 	if affected < 1 {
-		return fmt.Errorf("Update Failed, no UserDirection in storage where ID=%v", direction.UserID)
+		return ErrZeroMatches
 	}
 
 	return nil
@@ -209,7 +208,7 @@ func SelectUserDirection(direction *data.UserDirection) error {
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("Select Failed, No UserDirection in storage where UserID=%v", direction.UserID)
+		return ErrZeroMatches
 	}
 
 	var updateTimeString string

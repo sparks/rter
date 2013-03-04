@@ -172,7 +172,7 @@ func TestInsertItem(t *testing.T) {
 	item.Lng = -123.123
 	item.StartTime = time.Now()
 
-	err := InsertItem(item)
+	err := Insert(item)
 
 	if err != nil {
 		t.Error(err)
@@ -251,8 +251,10 @@ func TestInsertTerm(t *testing.T) {
 
 func TestSelectTerm(t *testing.T) {
 	selectedTerm := new(data.Term)
-	selectedTerm.ID = term.ID
+	selectedTerm.Term = term.Term
 	err := SelectTerm(selectedTerm)
+	t.Log(selectedTerm)
+	t.Log(term)
 
 	if err != nil {
 		t.Error(err)
@@ -270,7 +272,7 @@ func TestSelectTerm(t *testing.T) {
 
 func TestInsertTermRanking(t *testing.T) {
 	ranking = new(data.TermRanking)
-	ranking.TermID = term.ID
+	ranking.Term = term.Term
 	ranking.Ranking = "1,2,3,4,5"
 	ranking.UpdateTime = time.Now()
 
@@ -283,7 +285,7 @@ func TestInsertTermRanking(t *testing.T) {
 
 func TestSelectTermRanking(t *testing.T) {
 	selectedRanking := new(data.TermRanking)
-	selectedRanking.TermID = ranking.TermID
+	selectedRanking.Term = ranking.Term
 	err := SelectTermRanking(selectedRanking)
 
 	if err != nil {

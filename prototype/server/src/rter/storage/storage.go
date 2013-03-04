@@ -2,8 +2,13 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"log"
+)
+
+var (
+	ErrZeroMatches         = errors.New("Query didn't match anything.")
+	ErrUnsupportedDataType = errors.New("Storage doesn't support the given datatype")
 )
 
 func Exec(query string, args ...interface{}) (sql.Result, error) {
@@ -60,7 +65,7 @@ func DeleteEntry(query string, args ...interface{}) error {
 	}
 
 	if affected < 1 {
-		return fmt.Errorf("Delete Failed, no matching entries found.")
+		return ErrZeroMatches
 	}
 
 	return nil

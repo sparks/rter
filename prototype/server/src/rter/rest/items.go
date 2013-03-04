@@ -22,13 +22,29 @@ func RegisterItems(r *mux.Router) {
 	itemsRouter.HandleFunc("/{id:[0-9]+}/comments", QueryComments).Methods("GET")
 	itemsRouter.HandleFunc("/{id:[0-9]+}/comments", CreateComment).Methods("POST")
 
-	itemsRouter.HandleFunc("/{id:[0-9]+}/comments/{id:[0-9]+}", GetComment).Methods("GET")
+	// itemsRouter.HandleFunc("/{id:[0-9]+}/comments/{id:[0-9]+}", GetComment).Methods("GET")
 	itemsRouter.HandleFunc("/{id:[0-9]+}/comments/{id:[0-9]+}", UpdateComment).Methods("POST")
 	itemsRouter.HandleFunc("/{id:[0-9]+}/comments/{id:[0-9]+}", DeleteComment).Methods("DELETE")
 }
 
 func QueryItems(w http.ResponseWriter, r *http.Request) {
+	items, err := storage.SelectAllItems()
 
+	if err == storage.ErrZeroMatches {
+		http.Error(w, "No Items", http.StatusNoContent)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(items)
+
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func CreateItem(w http.ResponseWriter, r *http.Request) {
@@ -54,11 +70,37 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	encoder := json.NewEncoder(w)
+	err = encoder.Encode(item)
 
-	encoder.Encode(item)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func GetItem(w http.ResponseWriter, r *http.Request) {
+	item := new(data.Item)
+	item.ID = parseID(2, w, r)
+
+	err := storage.SelectItem(item)
+
+	if err == storage.ErrZeroMatches {
+		http.Error(w, "No such Item", http.StatusNoContent)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(item)
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	item := new(data.Item)
@@ -70,27 +112,38 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = storage.GetItem(item)
+	item.ID = parseID(2, w, r)
 
-	if err != nil {
+	err = storage.UpdateItem(item)
+
+	if err == storage.ErrZeroMatches {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	} else if err != nil {
 		log.Println(err)
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-
-	encoder := json.NewEncoder(w)
-
-	encoder.Encode(item)
-}
-
-func UpdateItem(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(http.StatusOK)
 }
 
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
+	item := new(data.Item)
+	item.ID = parseID(2, w, r)
 
+	err := storage.DeleteItem(item)
+
+	if err == storage.ErrZeroMatches {
+		http.Error(w, "No such Item", http.StatusNoContent)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func QueryComments(w http.ResponseWriter, r *http.Request) {
@@ -98,10 +151,6 @@ func QueryComments(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateComment(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func GetComment(w http.ResponseWriter, r *http.Request) {
 
 }
 

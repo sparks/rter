@@ -1,14 +1,14 @@
 package storage
 
 import (
-	"fmt"
+	"database/sql"
 	"rter/data"
 	"time"
 )
 
 func InsertItem(item *data.Item) error {
 	ID, err := InsertEntry(
-		"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		item.Type,
 		item.AuthorID,
 		item.ThumbnailURI,
@@ -31,6 +31,67 @@ func InsertItem(item *data.Item) error {
 	return nil
 }
 
+func UpdateItem(item *data.Item) error {
+	res, err := Exec(
+		"UPDATE Items SET Type=?, AuthorID=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
+		item.Type,
+		item.AuthorID,
+		item.ThumbnailURI,
+		item.ContentURI,
+		item.UploadURI,
+		item.HasGeo,
+		item.Heading,
+		item.Lat,
+		item.Lng,
+		item.StartTime.UTC(),
+		item.StopTime.UTC(),
+		item.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return ErrZeroMatches
+	}
+
+	return nil
+}
+
+func SelectAllItems() ([]*data.Item, error) {
+	rows, err := Query("SELECT * FROM Items")
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*data.Item, 0)
+
+	for rows.Next() {
+		item := new(data.Item)
+		err = scanItem(item, rows)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	if len(items) == 0 {
+		return nil, ErrZeroMatches
+	}
+
+	return items, nil
+}
+
 func SelectItem(item *data.Item) error {
 	rows, err := Query("SELECT * FROM Items WHERE ID=?", item.ID)
 
@@ -39,12 +100,22 @@ func SelectItem(item *data.Item) error {
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("Select Failed, no Item in storage where ID=%v", item.ID)
+		return ErrZeroMatches
 	}
 
+	err = scanItem(item, rows)
+
+	return err
+}
+
+func DeleteItem(item *data.Item) error {
+	return DeleteEntry("DELETE FROM Items WHERE ID=?", item.ID)
+}
+
+func scanItem(item *data.Item, rows *sql.Rows) error {
 	var startTimeString, stopTimeString string
 
-	err = rows.Scan(
+	err := rows.Scan(
 		&item.ID,
 		&item.Type,
 		&item.AuthorID,
@@ -82,10 +153,6 @@ func SelectItem(item *data.Item) error {
 	return nil
 }
 
-func DeleteItem(item *data.Item) error {
-	return DeleteEntry("DELETE FROM Items WHERE ID=?", item.ID)
-}
-
 func InsertItemComment(comment *data.ItemComment) error {
 	ID, err := InsertEntry(
 		"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
@@ -112,7 +179,7 @@ func SelectItemComment(comment *data.ItemComment) error {
 	}
 
 	if !rows.Next() {
-		return fmt.Errorf("Select Failed, no ItemComment in storage where ID=%v", comment.ID)
+		return ErrZeroMatches
 	}
 
 	var createTimeString string
