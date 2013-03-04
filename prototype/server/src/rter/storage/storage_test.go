@@ -46,7 +46,9 @@ func TestUpdateRole(t *testing.T) {
 }
 
 func TestSelectRole(t *testing.T) {
-	selectedRole, err := SelectRole(role.Title)
+	selectedRole := new(data.Role)
+	selectedRole.Title = role.Title
+	err := SelectRole(selectedRole)
 
 	if err != nil {
 		t.Error(err)
@@ -85,7 +87,9 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestSelectUser(t *testing.T) {
-	selectedUser, err := SelectUser(user.ID)
+	selectedUser := new(data.User)
+	selectedUser.ID = user.ID
+	err := SelectUser(selectedUser)
 
 	if err != nil {
 		t.Error(err)
@@ -129,7 +133,9 @@ func TestUpdateUserDirection(t *testing.T) {
 }
 
 func TestSelectUserDirection(t *testing.T) {
-	selectedDirection, err := SelectUserDirection(user.ID)
+	selectedDirection := new(data.UserDirection)
+	selectedDirection.UserID = user.ID
+	err := SelectUserDirection(selectedDirection)
 
 	if err != nil {
 		t.Error(err)
@@ -176,7 +182,6 @@ func TestInsertItem(t *testing.T) {
 func TestSelectItem(t *testing.T) {
 	selectedItem := new(data.Item)
 	selectedItem.ID = item.ID
-
 	err := SelectItem(selectedItem)
 
 	if err != nil {
@@ -212,7 +217,9 @@ func TestInsertItemComment(t *testing.T) {
 }
 
 func TestSelectItemComment(t *testing.T) {
-	selectedComment, err := SelectItemComment(comment.ID)
+	selectedComment := new(data.ItemComment)
+	selectedComment.ID = comment.ID
+	err := SelectItemComment(selectedComment)
 
 	if err != nil {
 		t.Error(err)
@@ -243,7 +250,9 @@ func TestInsertTerm(t *testing.T) {
 }
 
 func TestSelectTerm(t *testing.T) {
-	selectedTerm, err := SelectTerm(term.ID)
+	selectedTerm := new(data.Term)
+	selectedTerm.ID = term.ID
+	err := SelectTerm(selectedTerm)
 
 	if err != nil {
 		t.Error(err)
@@ -273,7 +282,9 @@ func TestInsertTermRanking(t *testing.T) {
 }
 
 func TestSelectTermRanking(t *testing.T) {
-	selectedRanking, err := SelectTermRanking(ranking.TermID)
+	selectedRanking := new(data.TermRanking)
+	selectedRanking.TermID = ranking.TermID
+	err := SelectTermRanking(selectedRanking)
 
 	if err != nil {
 		t.Error(err)

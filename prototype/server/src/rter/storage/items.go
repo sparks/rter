@@ -104,18 +104,16 @@ func InsertItemComment(comment *data.ItemComment) error {
 	return nil
 }
 
-func SelectItemComment(ID int64) (*data.ItemComment, error) {
-	rows, err := Query("SELECT * FROM ItemComments WHERE ID=?", ID)
+func SelectItemComment(comment *data.ItemComment) error {
+	rows, err := Query("SELECT * FROM ItemComments WHERE ID=?", comment.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no ItemComment in storage where ID=%v", ID)
+		return fmt.Errorf("Select Failed, no ItemComment in storage where ID=%v", comment.ID)
 	}
-
-	comment := new(data.ItemComment)
 
 	var createTimeString string
 
@@ -128,18 +126,18 @@ func SelectItemComment(ID int64) (*data.ItemComment, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	comment.CreateTime = createTime
 
-	return comment, nil
+	return nil
 }
 
 func DeleteItemComment(comment *data.ItemComment) error {

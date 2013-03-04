@@ -40,18 +40,16 @@ func UpdateRole(role *data.Role) error {
 	return nil
 }
 
-func SelectRole(title string) (*data.Role, error) {
-	rows, err := Query("SELECT * FROM Roles WHERE Title=?", title)
+func SelectRole(role *data.Role) error {
+	rows, err := Query("SELECT * FROM Roles WHERE Title=?", role.Title)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no Role in storage where Title=%v", title)
+		return fmt.Errorf("Select Failed, no Role in storage where Title=%v", role.Title)
 	}
-
-	role := new(data.Role)
 
 	err = rows.Scan(
 		&role.Title,
@@ -59,10 +57,10 @@ func SelectRole(title string) (*data.Role, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return role, nil
+	return nil
 }
 
 func DeleteRole(role *data.Role) error {
@@ -117,18 +115,16 @@ func UpdateUser(user *data.User) error {
 	return nil
 }
 
-func SelectUser(ID int64) (*data.User, error) {
-	rows, err := Query("SELECT * FROM Users WHERE ID=?", ID)
+func SelectUser(user *data.User) error {
+	rows, err := Query("SELECT * FROM Users WHERE ID=?", user.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no User in storage where ID=%v", ID)
+		return fmt.Errorf("Select Failed, no User in storage where ID=%v", user.ID)
 	}
-
-	user := new(data.User)
 
 	var createTimeString string
 
@@ -143,18 +139,18 @@ func SelectUser(ID int64) (*data.User, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	user.CreateTime = createTime
 
-	return user, nil
+	return nil
 }
 
 func DeleteUser(user *data.User) error {
@@ -205,18 +201,16 @@ func UpdateUserDirection(direction *data.UserDirection) error {
 	return nil
 }
 
-func SelectUserDirection(UserID int64) (*data.UserDirection, error) {
-	rows, err := Query("SELECT * FROM UserDirections WHERE UserID=?", UserID)
+func SelectUserDirection(direction *data.UserDirection) error {
+	rows, err := Query("SELECT * FROM UserDirections WHERE UserID=?", direction.UserID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, No UserDirection in storage where UserID=%v", UserID)
+		return fmt.Errorf("Select Failed, No UserDirection in storage where UserID=%v", direction.UserID)
 	}
-
-	direction := new(data.UserDirection)
 
 	var updateTimeString string
 
@@ -233,12 +227,12 @@ func SelectUserDirection(UserID int64) (*data.UserDirection, error) {
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	direction.UpdateTime = updateTime
 
-	return direction, nil
+	return nil
 }
 
 func DeleteUserDirection(direction *data.UserDirection) error {

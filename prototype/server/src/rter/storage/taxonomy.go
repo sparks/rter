@@ -24,18 +24,16 @@ func InsertTerm(term *data.Term) error {
 	return nil
 }
 
-func SelectTerm(ID int64) (*data.Term, error) {
-	rows, err := Query("SELECT * FROM Terms WHERE ID=?", ID)
+func SelectTerm(term *data.Term) error {
+	rows, err := Query("SELECT * FROM Terms WHERE ID=?", term.ID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no Term in storage where ID=%v", ID)
+		return fmt.Errorf("Select Failed, no Term in storage where ID=%v", term.ID)
 	}
-
-	term := new(data.Term)
 
 	var createTimeString string
 
@@ -50,12 +48,12 @@ func SelectTerm(ID int64) (*data.Term, error) {
 	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	term.CreateTime = createTime
 
-	return term, nil
+	return nil
 }
 
 func DeleteTerm(term *data.Term) error {
@@ -73,18 +71,16 @@ func InsertTermRanking(ranking *data.TermRanking) error {
 	return err
 }
 
-func SelectTermRanking(TermID int64) (*data.TermRanking, error) {
-	rows, err := Query("SELECT * FROM TermRankings WHERE TermID=?", TermID)
+func SelectTermRanking(ranking *data.TermRanking) error {
+	rows, err := Query("SELECT * FROM TermRankings WHERE TermID=?", ranking.TermID)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !rows.Next() {
-		return nil, fmt.Errorf("Select Failed, no RankingTerm in storage where TermID=%v", TermID)
+		return fmt.Errorf("Select Failed, no RankingTerm in storage where TermID=%v", ranking.TermID)
 	}
-
-	ranking := new(data.TermRanking)
 
 	var updateTimeString string
 
@@ -97,12 +93,12 @@ func SelectTermRanking(TermID int64) (*data.TermRanking, error) {
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	ranking.UpdateTime = updateTime
 
-	return ranking, nil
+	return nil
 }
 
 func DeleteTermRanking(ranking *data.TermRanking) error {
