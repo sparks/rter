@@ -81,7 +81,7 @@ func GetItem(w http.ResponseWriter, r *http.Request) {
 	item := new(data.Item)
 	item.ID = parseID(2, w, r)
 
-	err := storage.SelectItem(item)
+	err := storage.Select(item)
 
 	if err == storage.ErrZeroMatches {
 		http.Error(w, "No such Item", http.StatusNoContent)
@@ -114,7 +114,7 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 	item.ID = parseID(2, w, r)
 
-	err = storage.UpdateItem(item)
+	err = storage.Update(item)
 
 	if err == storage.ErrZeroMatches {
 		w.WriteHeader(http.StatusNotModified)

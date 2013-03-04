@@ -38,7 +38,7 @@ func TestInsertRole(t *testing.T) {
 func TestUpdateRole(t *testing.T) {
 	role.Permissions = 5
 
-	err := UpdateRole(role)
+	err := Update(role)
 
 	if err != nil {
 		t.Error(err)
@@ -48,7 +48,7 @@ func TestUpdateRole(t *testing.T) {
 func TestSelectRole(t *testing.T) {
 	selectedRole := new(data.Role)
 	selectedRole.Title = role.Title
-	err := SelectRole(selectedRole)
+	err := Select(selectedRole)
 
 	if err != nil {
 		t.Error(err)
@@ -79,7 +79,7 @@ func TestUpdateUser(t *testing.T) {
 	user.Username = "OtherTestUser"
 	user.TrustLevel = 5
 
-	err := UpdateUser(user)
+	err := Update(user)
 
 	if err != nil {
 		t.Error(err)
@@ -89,7 +89,7 @@ func TestUpdateUser(t *testing.T) {
 func TestSelectUser(t *testing.T) {
 	selectedUser := new(data.User)
 	selectedUser.ID = user.ID
-	err := SelectUser(selectedUser)
+	err := Select(selectedUser)
 
 	if err != nil {
 		t.Error(err)
@@ -125,7 +125,7 @@ func TestUpdateUserDirection(t *testing.T) {
 	direction.Command = "look"
 	direction.Heading = -50.4
 
-	err := UpdateUserDirection(direction)
+	err := Update(direction)
 
 	if err != nil {
 		t.Error(err)
@@ -135,7 +135,7 @@ func TestUpdateUserDirection(t *testing.T) {
 func TestSelectUserDirection(t *testing.T) {
 	selectedDirection := new(data.UserDirection)
 	selectedDirection.UserID = user.ID
-	err := SelectUserDirection(selectedDirection)
+	err := Select(selectedDirection)
 
 	if err != nil {
 		t.Error(err)
@@ -174,7 +174,7 @@ func TestInsertItem(t *testing.T) {
 func TestSelectItem(t *testing.T) {
 	selectedItem := new(data.Item)
 	selectedItem.ID = item.ID
-	err := SelectItem(selectedItem)
+	err := Select(selectedItem)
 
 	if err != nil {
 		t.Error(err)
@@ -211,7 +211,7 @@ func TestInsertItemComment(t *testing.T) {
 func TestSelectItemComment(t *testing.T) {
 	selectedComment := new(data.ItemComment)
 	selectedComment.ID = comment.ID
-	err := SelectItemComment(selectedComment)
+	err := Select(selectedComment)
 
 	if err != nil {
 		t.Error(err)
@@ -244,7 +244,7 @@ func TestInsertTerm(t *testing.T) {
 func TestSelectTerm(t *testing.T) {
 	selectedTerm := new(data.Term)
 	selectedTerm.Term = term.Term
-	err := SelectTerm(selectedTerm)
+	err := Select(selectedTerm)
 
 	if err != nil {
 		t.Error(err)
@@ -276,7 +276,7 @@ func TestInsertTermRanking(t *testing.T) {
 func TestSelectTermRanking(t *testing.T) {
 	selectedRanking := new(data.TermRanking)
 	selectedRanking.Term = ranking.Term
-	err := SelectTermRanking(selectedRanking)
+	err := Select(selectedRanking)
 
 	if err != nil {
 		t.Error(err)
