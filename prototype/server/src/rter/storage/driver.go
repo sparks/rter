@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"rter/data"
+	"time"
 )
 
 func Insert(val interface{}) error {
@@ -10,6 +11,8 @@ func Insert(val interface{}) error {
 		res sql.Result
 		err error
 	)
+
+	now := time.Now().UTC()
 
 	switch v := val.(type) {
 	case *data.Item:
@@ -29,23 +32,26 @@ func Insert(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"INSERT INTO ItemComments (ItemID, AuthorID, Body) VALUES (?, ?, ?)",
+			"INSERT INTO ItemComments (ItemID, AuthorID, Body, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.ItemID,
 			v.AuthorID,
 			v.Body,
+			now,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, AuthorID) VALUES (?, ?, ?)",
+			"INSERT INTO Terms (Term, Automated, AuthorID, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
+			now,
 		)
 	case *data.TermRanking:
 		res, err = Exec(
-			"INSERT INTO TermRankings (Term, Ranking) VALUES (?, ?)",
+			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
 			v.Term,
 			v.Ranking,
+			now,
 		)
 	case *data.Role:
 		res, err = Exec(
@@ -55,22 +61,24 @@ func Insert(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES (?, ?, ?, ?, ?)",
+			"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES (?, ?, ?, ?, ?, ?)",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
+			now,
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
 			v.UserID,
 			v.LockUserID,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
+			now,
 		)
 	default:
 		return ErrUnsupportedDataType
@@ -91,8 +99,16 @@ func Insert(val interface{}) error {
 		v.ID = ID
 	case *data.ItemComment:
 		v.ID = ID
+		v.UpdateTime = now
+	case *data.Term:
+		v.UpdateTime = now
+	case *data.TermRanking:
+		v.UpdateTime = now
 	case *data.User:
 		v.ID = ID
+		v.CreateTime = now
+	case *data.UserDirection:
+		v.UpdateTime = now
 	}
 
 	return nil
@@ -103,6 +119,8 @@ func Update(val interface{}) error {
 		res sql.Result
 		err error
 	)
+
+	now := time.Now().UTC()
 
 	switch v := val.(type) {
 	case *data.Item:
@@ -123,24 +141,27 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=? WHERE ID=?",
+			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
 			v.ItemID,
 			v.AuthorID,
 			v.Body,
+			now,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, AuthorID=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, UpdateTime=? WHERE Term=?",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
+			now,
 			v.Term,
 		)
 	case *data.TermRanking:
 		res, err = Exec(
-			"UPDATE TermRankings SET Ranking=? WHERE Term=?",
+			"UPDATE TermRankings SET Ranking=?, UpdateTime=? WHERE Term=?",
 			v.Ranking,
+			now,
 			v.Term,
 		)
 	case *data.Role:
@@ -162,12 +183,13 @@ func Update(val interface{}) error {
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=? WHERE UserID=?",
+			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE UserID=?",
 			v.LockUserID,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
+			now,
 			v.UserID,
 		)
 	default:
@@ -186,6 +208,17 @@ func Update(val interface{}) error {
 
 	if affected < 1 {
 		return ErrZeroMatches
+	}
+
+	switch v := val.(type) {
+	case *data.ItemComment:
+		v.UpdateTime = now
+	case *data.Term:
+		v.UpdateTime = now
+	case *data.TermRanking:
+		v.UpdateTime = now
+	case *data.UserDirection:
+		v.UpdateTime = now
 	}
 
 	return nil
