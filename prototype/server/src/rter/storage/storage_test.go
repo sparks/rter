@@ -20,7 +20,7 @@ var (
 )
 
 func TestOpenStorage(t *testing.T) {
-	OpenStorage("root", "", "tcp", "localhost:3306", "rter_test")
+	OpenStorage("root", "", "tcp", "localhost:3306", "rter")
 }
 
 func TestInsertRole(t *testing.T) {
@@ -199,7 +199,7 @@ func TestInsertItemComment(t *testing.T) {
 	comment.ItemID = item.ID
 	comment.AuthorID = user.ID
 	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-	comment.CreateTime = time.Now()
+	comment.UpdateTime = time.Now()
 
 	err := Insert(comment)
 
@@ -217,10 +217,10 @@ func TestSelectItemComment(t *testing.T) {
 		t.Error(err)
 	}
 
-	t.Log(comment.CreateTime.UTC())
-	t.Log(selectedComment.CreateTime.UTC())
+	t.Log(comment.UpdateTime.UTC())
+	t.Log(selectedComment.UpdateTime.UTC())
 
-	selectedComment.CreateTime = comment.CreateTime
+	selectedComment.UpdateTime = comment.UpdateTime
 
 	if !structJSONCompare(comment, selectedComment) {
 		t.Error("Selected ItemComments didn't match")
@@ -232,7 +232,7 @@ func TestInsertTerm(t *testing.T) {
 	term.Term = "testterm"
 	term.Automated = false
 	term.AuthorID = user.ID
-	term.CreateTime = time.Now()
+	term.UpdateTime = time.Now()
 
 	err := Insert(term)
 
@@ -250,10 +250,10 @@ func TestSelectTerm(t *testing.T) {
 		t.Error(err)
 	}
 
-	t.Log(term.CreateTime.UTC())
-	t.Log(selectedTerm.CreateTime.UTC())
+	t.Log(term.UpdateTime.UTC())
+	t.Log(selectedTerm.UpdateTime.UTC())
 
-	selectedTerm.CreateTime = term.CreateTime
+	selectedTerm.UpdateTime = term.UpdateTime
 
 	if !structJSONCompare(term, selectedTerm) {
 		t.Error("Selected Terms didn't match")
