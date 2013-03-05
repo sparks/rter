@@ -15,20 +15,18 @@ import (
 var decoder = schema.NewDecoder()
 
 func RegisterCRUD(r *mux.Router) {
-	r.HandleFunc("/{datatype}", ReadAll).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", ReadAll).Methods("GET")
 
-	r.HandleFunc("/{datatype}", Create).Methods("POST")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", Create).Methods("POST")
 
-	r.HandleFunc("/{datatype}/{key}", Read).Methods("GET")
-	r.HandleFunc("/{datatype}/{key}", Update).Methods("PUT")
-	r.HandleFunc("/{datatype}/{key}", Delete).Methods("DELETE")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Delete).Methods("DELETE")
 
-	r.HandleFunc("/{datatype}/{key}/{childtype}", Read).Methods("GET")
-	// r.HandleFunc("/api/{datatype}/{key}/{childtype}", Create).Methods("POST")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments|ranking|direction}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments|ranking|direction}", Create).Methods("POST")
 
-	r.HandleFunc("/{datatype}/{key}/{childtype}", Update).Methods("PUT")
-
-	//TODO: /user/direction  /item/comments  /taxonomy/ranking
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments|ranking|direction}", Update).Methods("PUT")
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -36,9 +34,17 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["datatype"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
+	case "items/comments":
+		val = new(data.ItemComment)
 	case "users":
 		val = new(data.User)
 	case "roles":
@@ -56,6 +62,17 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Malformed json.", http.StatusBadRequest)
+		return
+	}
+
+	switch v := val.(type) {
+	case *data.ItemComment:
+		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+	}
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
 		return
 	}
 
