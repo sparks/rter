@@ -9,24 +9,24 @@ import (
 	"rter/data"
 	"rter/storage"
 	"strconv"
+	"strings"
 )
 
 var decoder = schema.NewDecoder()
 
 func RegisterCRUD(r *mux.Router) {
-	r.HandleFunc("/api/{type}", ReadAll).Methods("GET")
+	r.HandleFunc("/{datatype}", ReadAll).Methods("GET")
 
-	r.HandleFunc("/api/{type}", Create).Methods("POST")
+	r.HandleFunc("/{datatype}", Create).Methods("POST")
 
-	r.HandleFunc("/api/{type}/{key}", Read).Methods("GET")
-	r.HandleFunc("/api/{type}/{key}", Update).Methods("PUT")
-	r.HandleFunc("/api/{type}/{key}", Delete).Methods("DELETE")
+	r.HandleFunc("/{datatype}/{key}", Read).Methods("GET")
+	r.HandleFunc("/{datatype}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype}/{key}", Delete).Methods("DELETE")
 
-	// r.HandleFunc("/{type}/{key}/{childtype}", ReadAllChild).Methods("GET")
-	r.HandleFunc("/api/{type}/{key}/{childtype}", Create).Methods("POST")
+	r.HandleFunc("/{datatype}/{key}/{childtype}", Read).Methods("GET")
+	// r.HandleFunc("/api/{datatype}/{key}/{childtype}", Create).Methods("POST")
 
-	// r.HandleFunc("/{type}/{key}/{childtype}/{keychild}", Read).Methods("GET")
-	// r.HandleFunc("/{type}/{key}/{childtype}/{keychild}", UpdateChild).Methods("PUT")
+	r.HandleFunc("/{datatype}/{key}/{childtype}", Update).Methods("PUT")
 
 	//TODO: /user/direction  /item/comments  /taxonomy/ranking
 }
@@ -36,13 +36,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["type"] {
+	switch vars["datatype"] {
 	case "items":
-		// if len(vars) > 2 && vars["childtype"] == "comment" {
-		// 	val = new(data.ItemComment)
-		// } else {
 		val = new(data.Item)
-		// }
 	case "users":
 		val = new(data.User)
 	case "roles":
@@ -89,7 +85,13 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["type"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
@@ -100,6 +102,11 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = user
+	case "users/direction":
+		direction := new(data.UserDirection)
+		direction.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
+
+		val = direction
 	case "roles":
 		role := new(data.Role)
 		role.Title = vars["key"]
@@ -110,6 +117,11 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		term.Term = vars["key"]
 
 		val = term
+	case "taxonomy/ranking":
+		ranking := new(data.TermRanking)
+		ranking.Term = vars["key"]
+
+		val = ranking
 	default:
 		http.NotFound(w, r)
 		return
@@ -145,7 +157,7 @@ func ReadAll(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["type"] {
+	switch vars["datatype"] {
 	case "items":
 		items := make([]*data.Item, 0)
 		val = &items
@@ -187,15 +199,25 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var val interface{}
 
-	switch vars["type"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
 	case "users":
 		val = new(data.User)
+	case "users/direction":
+		val = new(data.UserDirection)
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":
 		val = new(data.Term)
+	case "taxonomy/ranking":
+		val = new(data.TermRanking)
 	default:
 		http.NotFound(w, r)
 		return
@@ -215,9 +237,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 	case (*data.User):
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+	case (*data.UserDirection):
+		v.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
 	case (*data.Role):
 		v.Title = vars["key"]
 	case (*data.Term):
+		v.Term = vars["key"]
+	case (*data.TermRanking):
 		v.Term = vars["key"]
 	}
 
@@ -254,7 +280,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["type"] {
+	switch vars["datatype"] {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)

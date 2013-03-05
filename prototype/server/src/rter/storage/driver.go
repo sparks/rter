@@ -29,26 +29,23 @@ func Insert(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO ItemComments (ItemID, AuthorID, Body) VALUES (?, ?, ?)",
 			v.ItemID,
 			v.AuthorID,
 			v.Body,
-			v.CreateTime,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO Terms (Term, Automated, AuthorID) VALUES (?, ?, ?)",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
-			v.CreateTime.UTC(),
 		)
 	case *data.TermRanking:
 		res, err = Exec(
-			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
+			"INSERT INTO TermRankings (Term, Ranking) VALUES (?, ?)",
 			v.Term,
 			v.Ranking,
-			v.UpdateTime.UTC(),
 		)
 	case *data.Role:
 		res, err = Exec(
@@ -58,24 +55,22 @@ func Insert(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES (?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES (?, ?, ?, ?, ?)",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.CreateTime.UTC(),
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng) VALUES (?, ?, ?, ?, ?, ?, ?)",
 			v.UserID,
 			v.LockUserID,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
-			v.UpdateTime.UTC(),
 		)
 	default:
 		return ErrUnsupportedDataType
@@ -128,27 +123,24 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=?, CreateTime=? WHERE ID=?",
+			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=? WHERE ID=?",
 			v.ItemID,
 			v.AuthorID,
 			v.Body,
-			v.CreateTime,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, CreateTime=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, AuthorID=? WHERE Term=?",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
-			v.CreateTime.UTC(),
 			v.Term,
 		)
 	case *data.TermRanking:
 		res, err = Exec(
-			"UPDATE TermRankings SET Ranking=?, UpdateTime=? WHERE Term=?",
+			"UPDATE TermRankings SET Ranking=? WHERE Term=?",
 			v.Ranking,
-			v.UpdateTime.UTC(),
 			v.Term,
 		)
 	case *data.Role:
@@ -160,24 +152,22 @@ func Update(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=?, CreateTime=? WHERE ID=?",
+			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE ID=?",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.CreateTime.UTC(),
 			v.ID,
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE UserID=?",
+			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=? WHERE UserID=?",
 			v.LockUserID,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
-			v.UpdateTime.UTC(),
 			v.UserID,
 		)
 	default:
