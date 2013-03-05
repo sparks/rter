@@ -20,9 +20,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	rest.RegisterUsers(r)
-	rest.RegisterItems(r)
-	rest.RegisterTaxonomy(r)
+	rest.RegisterRest(r)
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	r.HandleFunc("/submit", web.SubmitHandler)
