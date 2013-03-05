@@ -108,8 +108,8 @@ The API assumes the client obtained a valid __video source token__ from a backen
   +---------------+  :  | (HTTP) |  :   +------------+  :  |    (HTTP)    |	 :  +---------+
                      :  +--------+  :                   :  +--------------+  :
                      :              :                   :                    :
-            H264 in MPEG2-TS          Loopback         HLS, PNG, M3U8            HTTP
- 				        over HTTP              UDP/RTP              Files
+            H264 in MPEG2-TS     Loopback          HLS, PNG, M3U8           HTTP
+                  over HTTP       UDP/RTP             Files
 ```
 
 
