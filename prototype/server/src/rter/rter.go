@@ -18,23 +18,24 @@ func main() {
 	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter")
 	defer storage.CloseStorage()
 
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 
 	rest.RegisterCRUD(r)
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	r.HandleFunc("/submit", web.SubmitHandler)
 
-	r.HandleFunc("/ajax/", web.ClientAjax)
+	r.HandleFunc("/ajax", web.ClientAjax)
 
 	r.HandleFunc("/", web.ClientHandler)
 
-	r.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
-	r.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
+	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
+	r.PathPrefix("/resources").Handler(http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
 
 	http.Handle("/", r)
 
 	log.Println("Launching rtER Server")
+	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

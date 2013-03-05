@@ -14,14 +14,19 @@ import (
 var decoder = schema.NewDecoder()
 
 func RegisterCRUD(r *mux.Router) {
-	r.HandleFunc("/{datatype}", Create).Methods("POST")
+	r.HandleFunc("/api/{type}", ReadAll).Methods("GET")
 
-	r.HandleFunc("/{datatype}", ReadAll).Methods("GET")
-	r.HandleFunc("/{datatype}/{key}", Read).Methods("GET")
+	r.HandleFunc("/api/{type}", Create).Methods("POST")
 
-	r.HandleFunc("/{datatype}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/api/{type}/{key}", Read).Methods("GET")
+	r.HandleFunc("/api/{type}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/api/{type}/{key}", Delete).Methods("DELETE")
 
-	r.HandleFunc("/{datatype}/{key}", Delete).Methods("DELETE")
+	// r.HandleFunc("/{type}/{key}/{childtype}", ReadAllChild).Methods("GET")
+	r.HandleFunc("/api/{type}/{key}/{childtype}", Create).Methods("POST")
+
+	// r.HandleFunc("/{type}/{key}/{childtype}/{keychild}", Read).Methods("GET")
+	// r.HandleFunc("/{type}/{key}/{childtype}/{keychild}", UpdateChild).Methods("PUT")
 
 	//TODO: /user/direction  /item/comments  /taxonomy/ranking
 }
@@ -31,9 +36,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["datatype"] {
+	switch vars["type"] {
 	case "items":
+		// if len(vars) > 2 && vars["childtype"] == "comment" {
+		// 	val = new(data.ItemComment)
+		// } else {
 		val = new(data.Item)
+		// }
 	case "users":
 		val = new(data.User)
 	case "roles":
@@ -80,7 +89,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["datatype"] {
+	switch vars["type"] {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
@@ -136,7 +145,7 @@ func ReadAll(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["datatype"] {
+	switch vars["type"] {
 	case "items":
 		items := make([]*data.Item, 0)
 		val = &items
@@ -178,7 +187,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var val interface{}
 
-	switch vars["datatype"] {
+	switch vars["type"] {
 	case "items":
 		val = new(data.Item)
 	case "users":
@@ -245,7 +254,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["datatype"] {
+	switch vars["type"] {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
