@@ -40,6 +40,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		val = new(data.Role)
 	case "taxonomy":
 		val = new(data.Term)
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -87,6 +90,10 @@ func ReadAll(w http.ResponseWriter, r *http.Request) {
 	case "taxonomy":
 		terms := make([]*data.Term, 0)
 		val = &terms
+	default:
+		http.NotFound(w, r)
+		return
+
 	}
 
 	err := storage.SelectAll(val)
@@ -137,6 +144,9 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		term.Term = splitPath[2]
 
 		val = term
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	if err != nil {
@@ -177,6 +187,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		val = new(data.Role)
 	case "taxonomy":
 		val = new(data.Term)
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -253,6 +266,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		term.Term = splitPath[2]
 
 		val = term
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	if err != nil {
