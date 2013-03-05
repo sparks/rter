@@ -190,11 +190,17 @@ No matter what we do we will have to use a special 'live' video player since bro
 
 ### Resources
 
+* /roles/?query GET _get all or filtered by query, return found as JSON_
+* /roles/ POST _create role, send JSON return role as JSON_
+* /roles/:title/ GET _get particular user, return user as JSON_
+* /roles/:title/ PUT _update role, send JSON return updated role as JSON_
+* /roles/:title/ DELETE _delete role, return Status No Content 204_
+------
 * /users/?query GET _get all users or filtered by query, return found users as JSON_
 * /users/ POST _create user, send JSON return user as JSON_
 * /users/:id/ GET _get particular user, return user as JSON_
 * /users/:id/ PUT _update user, send JSON return updated user as JSON_
-* /users/:id/ DELETE _delete user, send JSON, return Status No Content 204_
+* /users/:id/ DELETE _delete user, return Status No Content 204_
 ------
 * Created and Deleted along with user
 * /users/:id/direction/ GET _get current user direction and LOCK, return as JSON_
@@ -204,7 +210,7 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /items/ POST _create item, send JSON return item JSON_
 * /items/:id/ GET _get particular item, return item as JSON_
 * /items/:id/ PUT _update item, send JSON return item as JSON_
-* /items/:id/ DELETE _delete item, send JSON, return Status No Content 204_
+* /items/:id/ DELETE _delete item, return Status No Content 204_
 ------
 * /items/:id/comments/ GET _get all comments as JSON_
 * /items/:id/comments/ POST _create comment for item with :id, return comment as JSON_
