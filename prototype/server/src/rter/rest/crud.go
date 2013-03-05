@@ -9,7 +9,6 @@ import (
 	"rter/data"
 	"rter/storage"
 	"strconv"
-	"strings"
 )
 
 var decoder = schema.NewDecoder()
@@ -28,10 +27,11 @@ func RegisterCRUD(r *mux.Router) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	splitPath := strings.Split(r.URL.Path, "/")
+	vars := mux.Vars(r)
+
 	var val interface{}
 
-	switch splitPath[1] {
+	switch vars["datatype"] {
 	case "items":
 		val = new(data.Item)
 	case "users":
@@ -72,12 +72,71 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Read(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var (
+		val interface{}
+		err error
+	)
+
+	switch vars["datatype"] {
+	case "items":
+		item := new(data.Item)
+		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+
+		val = item
+	case "users":
+		user := new(data.User)
+		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+
+		val = user
+	case "roles":
+		role := new(data.Role)
+		role.Title = vars["key"]
+
+		val = role
+	case "taxonomy":
+		term := new(data.Term)
+		term.Term = vars["key"]
+
+		val = term
+	default:
+		http.NotFound(w, r)
+		return
+	}
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
+		return
+	}
+
+	err = storage.Select(val)
+
+	if err == storage.ErrZeroMatches {
+		http.Error(w, "No matches for query", http.StatusNotFound)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request", http.StatusInternalServerError)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(val)
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func ReadAll(w http.ResponseWriter, r *http.Request) {
-	splitPath := strings.Split(r.URL.Path, "/")
+	vars := mux.Vars(r)
 
 	var val interface{}
 
-	switch splitPath[1] {
+	switch vars["datatype"] {
 	case "items":
 		items := make([]*data.Item, 0)
 		val = &items
@@ -99,66 +158,7 @@ func ReadAll(w http.ResponseWriter, r *http.Request) {
 	err := storage.SelectAll(val)
 
 	if err == storage.ErrZeroMatches {
-		http.Error(w, "No matches for query", http.StatusNoContent)
-		return
-	} else if err != nil {
-		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request", http.StatusInternalServerError)
-		return
-	}
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(val)
-
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func Read(w http.ResponseWriter, r *http.Request) {
-	splitPath := strings.Split(r.URL.Path, "/")
-
-	var (
-		val interface{}
-		err error
-	)
-
-	switch splitPath[1] {
-	case "items":
-		item := new(data.Item)
-		item.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
-
-		val = item
-	case "users":
-		user := new(data.User)
-		user.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
-
-		val = user
-	case "roles":
-		role := new(data.Role)
-		role.Title = splitPath[2]
-
-		val = role
-	case "taxonomy":
-		term := new(data.Term)
-		term.Term = splitPath[2]
-
-		val = term
-	default:
-		http.NotFound(w, r)
-		return
-	}
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
-		return
-	}
-
-	err = storage.Select(val)
-
-	if err == storage.ErrZeroMatches {
-		http.Error(w, "No matches for query", http.StatusNoContent)
+		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
 		log.Println(err)
@@ -175,10 +175,10 @@ func Read(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	splitPath := strings.Split(r.URL.Path, "/")
+	vars := mux.Vars(r)
 	var val interface{}
 
-	switch splitPath[1] {
+	switch vars["datatype"] {
 	case "items":
 		val = new(data.Item)
 	case "users":
@@ -203,13 +203,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	switch v := val.(type) {
 	case (*data.Item):
-		v.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
+		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 	case (*data.User):
-		v.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
+		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 	case (*data.Role):
-		v.Title = splitPath[2]
+		v.Title = vars["key"]
 	case (*data.Term):
-		v.Term = splitPath[2]
+		v.Term = vars["key"]
 	}
 
 	if err != nil {
@@ -238,32 +238,32 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
-	splitPath := strings.Split(r.URL.Path, "/")
+	vars := mux.Vars(r)
 
 	var (
 		val interface{}
 		err error
 	)
 
-	switch splitPath[1] {
+	switch vars["datatype"] {
 	case "items":
 		item := new(data.Item)
-		item.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
+		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = item
 	case "users":
 		user := new(data.User)
-		user.ID, err = strconv.ParseInt(splitPath[2], 10, 64)
+		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = user
 	case "roles":
 		role := new(data.Role)
-		role.Title = splitPath[2]
+		role.Title = vars["key"]
 
 		val = role
 	case "taxonomy":
 		term := new(data.Term)
-		term.Term = splitPath[2]
+		term.Term = vars["key"]
 
 		val = term
 	default:
@@ -280,7 +280,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	err = storage.Delete(val)
 
 	if err == storage.ErrZeroMatches {
-		http.Error(w, "No matches for query", http.StatusNoContent)
+		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
 		log.Println(err)
@@ -288,5 +288,5 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
