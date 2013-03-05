@@ -134,90 +134,91 @@ No matter what we do we will have to use a special 'live' video player since bro
 
 ### Collections and Items
 
+* Roles (attributes)
+	* Title
+	* Permissions
 * User (attributes)
-	* UID
-	* Trust Level
+	* ID
+	* Username
+	* Password/Salt
 	* Role
+	* Trust Level
 	* Created Time
 * User Direction (child of User)
 	* User ID 
-	* Controlling User ID
+	* LockUser ID
 	* Command
 	* Heading/Lat/Lng
-	* Update Time
-* Roles (attributes)
-	* UID
-	* Permissions
-* Item (types)
-	* Video
-	* Image
-	* Twitter
-		* Single tweets
-		* Twitter search
-	* News/Web page
-	* Text element
-	* Audio (ISAS)
+	* Update Time	
 * Item (attributes)
-	* UID
+	* ID
 	* Type
-	* Start Time
-	* Stop Time
-	* Lat/Lng/Heading
-	* User/Creator
+		* Video
+		* Image
+		* Twitter
+			* Single tweets
+			* Twitter search
+		* News/Web page
+		* Text element
+		* Audio (ISAS)
+	* Authoer ID
 	* URI (content)
 	* URI (thumbnail)
 	* URI (upload)
+	* Has location
+	* Lat/Lng/Heading
+	* Start Time
+	* Stop Time
 * Comments (child of item) (attributes)
-	* UID
+	* ID
 	* Item UID
 	* Author
-	* Time
 	* Text
+	* Time
 * Taxonomy 
-	* UID
-	* Time Created
-	* Automated
 	* Term
-	* User/Creator
+	* Automated
+	* Author
+	* Time Created
 * Shared Ranking (child of Taxonomy)
-	* UID
-	* Taxonomy ID
+	* Term
 	* Timestamp
 	* Ranking (N item reference list)
-* Groups?
+* Taxonomy Relationship
+	* Term
+	* ItemID
 
 ### Resources
 
-* /users/ GET all users (json)
-* /users/?query GET subquery (json)
-* /users/:id GET returns user object (json)
-* /users/ POST Create user, return obj (json form/mime))
-* /users/:id POST Update user, return obj (json form/mime))
-* /users/:id DELETE, return obj (json form/mime))
-* /users/:id/direction/ GET get current direction and lock for user
-* /users/:id/direction/ POST (try) and set/unset direction and/or lock (atomicity issues)
+* /users/?query GET _get all users or filtered by query, return found users as JSON_
+* /users/ POST _create user, send JSON return user as JSON_
+* /users/:id/ GET _get particular user, return user as JSON_
+* /users/:id/ PUT _update user, send JSON return updated user as JSON_
+* /users/:id/ DELETE _delete user, send JSON, return Status No Content 204_
 ------
-* /items/ GET all items (json)
-* /items/?query GET subquery (time, location, type etc) (json)
-* /items/:id GET (json)
-* /items/ POST Create item, return obj + upload URI for image/video/other bins (json form/mime)
-* /items/:id POST Update item, return obj + upload URI for image/video/other bins (json form/mime)
-* /items/:id DELETE, return obj (json/mime)
+* Created and Deleted along with user
+* /users/:id/direction/ GET _get current user direction and LOCK, return as JSON_
+* /users/:id/direction/ PUT _set direction and lock, return JSON, maybe return error if lock unavailable_
 ------
-* /items/:id/comments/ GET all comments (json)
-* /items/:id/comments/?query GET subquery (json)
-* /items/:id/comments/:id GET comment (json)
-* /items/:id/comments/ POST Create comment, return obj (json form/mime))
-* /items/:id/comments/:id POST Update comment, return obj (json form/mime))
-* /items/:id/comments/:id DELETE, return obj (json form/mime)
+* /items/?query GET _get all items or filtered by query, return found items as JSON_
+* /items/ POST _create item, send JSON return item JSON_
+* /items/:id/ GET _get particular item, return item as JSON_
+* /items/:id/ PUT _update item, send JSON return item as JSON_
+* /items/:id/ DELETE _delete item, send JSON, return Status No Content 204_
 ------
-* /taxonomy/ GET (json)
-* /taxonomy/?query GET (json)
-* /taxonomy/:term/ GET (json)
-* /taxonomy/ POST (json)
-* /taxonomy/:term POST (json)
+* /items/:id/comments/ GET _get all comments as JSON_
+* /items/:id/comments/ POST _create comment for item with :id, return comment as JSON_
+<!-- * /items/:id/comments/:id/ GET _get comment, JSON_ -->
+<!-- * /items/:id/comments/:id/ PUT _update comment, return updated comment as JSON_ -->
+<!-- * /items/:id/comments/:id/ DELETE _delete comment, return Status No Content 204_ -->
 ------
-* /taxonomy/:term/ranking/ GET (json)
-* /taxonomy/:term/ranking/ POST (json)
+* /taxonomy/?query GET _get all terms or filtered by query, return found terms as JSON_
+* /taxonomy/ POST _create term, send JSON return term as JSON_
+* /taxonomy/:term/ GET _get particular term, returned as JSON_
+* /taxonomy/:term/ PUT _update term, send JSON get updated term as JSON_
+* /taxonomy/:term/ DELETE _delete term, return Status No Content 204_
 ------
-* Groups or Roles?
+* Created and Deleted along with taxonomy term
+* /taxonomy/:term/ranking/ GET _get ranking for :term as JSON_
+* /taxonomy/:term/ranking/ PUT _update ranking for :term, send JSON, return updated JSON ranking_
+------
