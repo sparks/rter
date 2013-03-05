@@ -14,7 +14,7 @@ import (
 
 var decoder = schema.NewDecoder()
 
-func RegisterRest(r *mux.Router) {
+func RegisterCRUD(r *mux.Router) {
 	r.HandleFunc("/{datatype}", Create).Methods("POST")
 
 	r.HandleFunc("/{datatype}", ReadAll).Methods("GET")

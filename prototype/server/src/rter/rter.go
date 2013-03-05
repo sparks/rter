@@ -20,7 +20,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	rest.RegisterRest(r)
+	rest.RegisterCRUD(r)
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	r.HandleFunc("/submit", web.SubmitHandler)
