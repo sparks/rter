@@ -10,7 +10,7 @@ type Term struct {
 	Automated bool
 	AuthorID  int64
 
-	CreateTime time.Time
+	UpdateTime time.Time
 }
 
 type TermRanking struct {

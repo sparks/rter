@@ -29,5 +29,5 @@ type ItemComment struct {
 
 	Body string
 
-	CreateTime time.Time
+	UpdateTime time.Time
 }
