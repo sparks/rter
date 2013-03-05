@@ -8,7 +8,7 @@ import (
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
-	"rter/util"
+	"rter/utils"
 	"rter/web"
 )
 
@@ -31,8 +31,8 @@ func main() {
 
 	r.HandleFunc("/", web.ClientHandler)
 
-	r.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(util.UploadPath))))
-	r.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(util.ResourcePath))))
+	r.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
+	r.Handle("/resources/", http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
 
 	http.Handle("/", r)
 

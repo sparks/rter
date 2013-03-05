@@ -28,7 +28,8 @@ func RegisterItems(r *mux.Router) {
 }
 
 func QueryItems(w http.ResponseWriter, r *http.Request) {
-	items, err := storage.SelectAllItems()
+	items := make([]*data.Item, 0)
+	err := storage.SelectAll(&items)
 
 	if err == storage.ErrZeroMatches {
 		http.Error(w, "No Items", http.StatusNoContent)

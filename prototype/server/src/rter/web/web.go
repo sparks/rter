@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"rter/storage"
-	"rter/util"
+	"rter/utils"
 	"strings"
 	"sync"
 	"time"
@@ -40,13 +40,13 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(filepath.Join(util.TemplatePath, "index.html")))
+var templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "index.html")))
 
 var writeLock sync.Mutex
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
-		http.ServeFile(w, r, filepath.Join(util.TemplatePath, r.URL.Path))
+		http.ServeFile(w, r, filepath.Join(utils.TemplatePath, r.URL.Path))
 	} else {
 		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
 		if err != nil {
@@ -67,13 +67,13 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	id := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	if err != nil {
-		path := filepath.Join(util.UploadPath, "client", "default.png")
-		path = path[len(util.RterDir):]
+		path := filepath.Join(utils.UploadPath, "client", "default.png")
+		path = path[len(utils.RterDir):]
 		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 	} else {
-		os.Mkdir(filepath.Join(util.UploadPath, "client"), os.ModeDir|0755)
+		os.Mkdir(filepath.Join(utils.UploadPath, "client"), os.ModeDir|0755)
 
-		path := filepath.Join(util.UploadPath, "client")
+		path := filepath.Join(utils.UploadPath, "client")
 
 		if strings.HasSuffix(header.Filename, ".png") {
 			path = filepath.Join(path, fmt.Sprintf("%v.png", id))
@@ -82,12 +82,12 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		outputFile, err := os.Create(path)
-		util.Must(err)
+		utils.Must(err)
 		defer outputFile.Close()
 
 		io.Copy(outputFile, imageFile)
 
-		path = path[len(util.RterDir):]
+		path = path[len(utils.RterDir):]
 
 		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
 	}
@@ -105,11 +105,11 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		var layout []*ContentChunk
 		err := decoder.Decode(&layout)
-		util.Must(err)
+		utils.Must(err)
 
 		writeLock.Lock()
 		for _, chunk := range layout {
-			if util.PhoneIDValidator.MatchString(chunk.ContentID) {
+			if utils.PhoneIDValidator.MatchString(chunk.ContentID) {
 				chunk.SanitizeLayout()
 
 				rows := storage.MustQuery("SELECT uid FROM layout WHERE content_id=?", chunk.ContentID)
@@ -125,7 +125,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.URL.Path == "/ajax/getlayout" {
 		layoutJSON, err := json.Marshal(fetchPageContent().Content)
-		util.Must(err)
+		utils.Must(err)
 
 		w.Write(layoutJSON)
 	} else if r.URL.Path == "/ajax/pushheading" {
@@ -133,7 +133,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		var headingChunk *ContentChunk
 		err := decoder.Decode(&headingChunk)
-		util.Must(err)
+		utils.Must(err)
 
 		storage.MustQuery("UPDATE phones SET target_heading=? WHERE phone_id=?;", headingChunk.TargetHeading, headingChunk.ContentID)
 	} else if r.URL.Path == "/ajax/pushdescription" {
@@ -141,7 +141,7 @@ func ClientAjax(w http.ResponseWriter, r *http.Request) {
 
 		var descChunk *ContentChunk
 		err := decoder.Decode(&descChunk)
-		util.Must(err)
+		utils.Must(err)
 
 		storage.MustQuery("UPDATE content as c1 INNER JOIN (select c2.uid from content as c2 where c2.content_id=?  ORDER by c2.timestamp DESC LIMIT 1) as x ON x.uid = c1.uid  SET c1.description=?;", descChunk.ContentID, descChunk.Description)
 	}

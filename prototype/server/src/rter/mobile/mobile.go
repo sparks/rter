@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"rter/storage"
-	"rter/util"
+	"rter/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +22,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	phoneID := r.FormValue("phone_id")
 
-	if !util.PhoneIDValidator.MatchString(phoneID) {
+	if !utils.PhoneIDValidator.MatchString(phoneID) {
 		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
 		log.Println("upload failed, phone_id malformed:", phoneID)
 		return
@@ -36,7 +36,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(filepath.Join(util.UploadPath, phoneID), os.ModeDir|0755)
+	os.Mkdir(filepath.Join(utils.UploadPath, phoneID), os.ModeDir|0755)
 
 	valid_pos := true
 	valid_heading := true
@@ -57,7 +57,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t := time.Now()
-	path := util.UploadPath
+	path := utils.UploadPath
 
 	if strings.HasSuffix(header.Filename, ".png") {
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano()))
@@ -66,12 +66,12 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	outputFile, err := os.Create(path)
-	util.Must(err)
+	utils.Must(err)
 	defer outputFile.Close()
 
 	io.Copy(outputFile, imageFile)
 
-	path = path[len(util.RterDir):]
+	path = path[len(utils.RterDir):]
 
 	if valid_pos && valid_heading {
 		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(?, \"mobile\", ?, ?, ?, ?);", phoneID, path, lat, lng, heading)
@@ -86,7 +86,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	if rows.Next() {
 		var target_heading []byte
 		err := rows.Scan(&target_heading)
-		util.Must(err)
+		utils.Must(err)
 		w.Write(target_heading)
 	}
 
