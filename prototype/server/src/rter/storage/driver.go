@@ -263,18 +263,12 @@ func SelectAll(slicePtr interface{}) error {
 	switch slicePtr.(type) {
 	case *[]*data.Item:
 		rows, err = Query("SELECT * FROM Items")
-	case *[]*data.ItemComment:
-		rows, err = Query("SELECT * FROM ItemComments")
 	case *[]*data.Term:
 		rows, err = Query("SELECT * FROM Terms")
-	case *[]*data.TermRanking:
-		rows, err = Query("SELECT * FROM TermRankings")
 	case *[]*data.Role:
 		rows, err = Query("SELECT * FROM Roles")
 	case *[]*data.User:
 		rows, err = Query("SELECT * FROM Users")
-	case *[]*data.UserDirection:
-		rows, err = Query("SELECT * FROM UserDirections")
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -290,15 +284,6 @@ func SelectAll(slicePtr interface{}) error {
 			}
 
 			*s = append(*s, item)
-		case *[]*data.ItemComment:
-			comment := new(data.ItemComment)
-			err = scanItemComment(comment, rows)
-
-			if err != nil {
-				return err
-			}
-
-			*s = append(*s, comment)
 		case *[]*data.Term:
 			term := new(data.Term)
 			err = scanTerm(term, rows)
@@ -308,15 +293,6 @@ func SelectAll(slicePtr interface{}) error {
 			}
 
 			*s = append(*s, term)
-		case *[]*data.TermRanking:
-			ranking := new(data.TermRanking)
-			err = scanTermRanking(ranking, rows)
-
-			if err != nil {
-				return err
-			}
-
-			*s = append(*s, ranking)
 		case *[]*data.Role:
 			role := new(data.Role)
 			err = scanRole(role, rows)
@@ -335,17 +311,6 @@ func SelectAll(slicePtr interface{}) error {
 			}
 
 			*s = append(*s, user)
-		case *[]*data.UserDirection:
-			direction := new(data.UserDirection)
-			err = scanUserDirection(direction, rows)
-
-			if err != nil {
-				return err
-			}
-
-			*s = append(*s, direction)
-		default:
-			return ErrUnsupportedDataType
 		}
 	}
 
@@ -354,17 +319,11 @@ func SelectAll(slicePtr interface{}) error {
 	switch s := slicePtr.(type) {
 	case *[]*data.Item:
 		sliceLen = len(*s)
-	case *[]*data.ItemComment:
-		sliceLen = len(*s)
 	case *[]*data.Term:
-		sliceLen = len(*s)
-	case *[]*data.TermRanking:
 		sliceLen = len(*s)
 	case *[]*data.Role:
 		sliceLen = len(*s)
 	case *[]*data.User:
-		sliceLen = len(*s)
-	case *[]*data.UserDirection:
 		sliceLen = len(*s)
 	}
 
