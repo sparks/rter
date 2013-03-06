@@ -59,6 +59,15 @@ func TestSelectRole(t *testing.T) {
 	}
 }
 
+func TestSelectAllRole(t *testing.T) {
+	roles := make([]*data.Role, 0)
+	SelectAll(&roles)
+
+	if len(roles) == 0 {
+		t.Error("Nothing in Select All")
+	}
+}
+
 func TestInsertUser(t *testing.T) {
 	user = new(data.User)
 	user.Username = "TestUser"
@@ -102,6 +111,15 @@ func TestSelectUser(t *testing.T) {
 
 	if !structJSONCompare(user, selectedUser) {
 		t.Error("Selected Users didn't match")
+	}
+}
+
+func TestSelectAllUser(t *testing.T) {
+	users := make([]*data.User, 0)
+	SelectAll(&users)
+
+	if len(users) == 0 {
+		t.Error("Nothing in Select All")
 	}
 }
 
@@ -194,6 +212,15 @@ func TestSelectItem(t *testing.T) {
 	}
 }
 
+func TestSelectAllItem(t *testing.T) {
+	items := make([]*data.Item, 0)
+	SelectAll(&items)
+
+	if len(items) == 0 {
+		t.Error("Nothing in Select All")
+	}
+}
+
 func TestInsertItemComment(t *testing.T) {
 	comment = new(data.ItemComment)
 	comment.ItemID = item.ID
@@ -257,6 +284,15 @@ func TestSelectTerm(t *testing.T) {
 
 	if !structJSONCompare(term, selectedTerm) {
 		t.Error("Selected Terms didn't match")
+	}
+}
+
+func TestSelectAllTerm(t *testing.T) {
+	terms := make([]*data.Term, 0)
+	SelectAll(&terms)
+
+	if len(terms) == 0 {
+		t.Error("Nothing in Select All")
 	}
 }
 

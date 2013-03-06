@@ -141,8 +141,7 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
-			v.ItemID,
+			"UPDATE ItemComments SET AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
 			v.AuthorID,
 			v.Body,
 			now,
@@ -278,6 +277,10 @@ func Select(val interface{}) error {
 }
 
 func SelectAll(slicePtr interface{}) error {
+	return SelectWhere(slicePtr, "")
+}
+
+func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) error {
 	var (
 		rows *sql.Rows
 		err  error
@@ -285,13 +288,15 @@ func SelectAll(slicePtr interface{}) error {
 
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT * FROM Items")
+		rows, err = Query("SELECT * FROM Items "+whereClause, args...)
+	case *[]*data.ItemComment:
+		rows, err = Query("SELECT * FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT * FROM Terms")
+		rows, err = Query("SELECT * FROM Terms "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT * FROM Roles")
+		rows, err = Query("SELECT * FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT * FROM Users")
+		rows, err = Query("SELECT * FROM Users "+whereClause, args...)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -307,6 +312,15 @@ func SelectAll(slicePtr interface{}) error {
 			}
 
 			*s = append(*s, item)
+		case *[]*data.ItemComment:
+			comment := new(data.ItemComment)
+			err = scanItemComment(comment, rows)
+
+			if err != nil {
+				return err
+			}
+
+			*s = append(*s, comment)
 		case *[]*data.Term:
 			term := new(data.Term)
 			err = scanTerm(term, rows)
@@ -341,6 +355,8 @@ func SelectAll(slicePtr interface{}) error {
 
 	switch s := slicePtr.(type) {
 	case *[]*data.Item:
+		sliceLen = len(*s)
+	case *[]*data.ItemComment:
 		sliceLen = len(*s)
 	case *[]*data.Term:
 		sliceLen = len(*s)
