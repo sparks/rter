@@ -9,21 +9,29 @@ import (
 	"rter/data"
 	"rter/storage"
 	"strconv"
+	"strings"
 )
 
 var decoder = schema.NewDecoder()
 
 func RegisterCRUD(r *mux.Router) {
-	r.HandleFunc("/{datatype}", Create).Methods("POST")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", ReadWhere).Methods("GET")
 
-	r.HandleFunc("/{datatype}", ReadAll).Methods("GET")
-	r.HandleFunc("/{datatype}/{key}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", Create).Methods("POST")
 
-	r.HandleFunc("/{datatype}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Delete).Methods("DELETE")
 
-	r.HandleFunc("/{datatype}/{key}", Delete).Methods("DELETE")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Update).Methods("PUT")
 
-	//TODO: /user/direction  /item/comments  /taxonomy/ranking
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", ReadWhere).Methods("GET")
+
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", Create).Methods("POST")
+
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Read).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +39,17 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	var val interface{}
 
-	switch vars["datatype"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
+	case "items/comments":
+		val = new(data.ItemComment)
 	case "users":
 		val = new(data.User)
 	case "roles":
@@ -51,6 +67,17 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Malformed json.", http.StatusBadRequest)
+		return
+	}
+
+	switch v := val.(type) {
+	case *data.ItemComment:
+		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+	}
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
 		return
 	}
 
@@ -80,17 +107,33 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["datatype"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = item
+	case "items/comments":
+		comment := new(data.ItemComment)
+		comment.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
+
+		val = comment
 	case "users":
 		user := new(data.User)
 		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = user
+	case "users/direction":
+		direction := new(data.UserDirection)
+		direction.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
+
+		val = direction
 	case "roles":
 		role := new(data.Role)
 		role.Title = vars["key"]
@@ -101,6 +144,11 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		term.Term = vars["key"]
 
 		val = term
+	case "taxonomy/ranking":
+		ranking := new(data.TermRanking)
+		ranking.Term = vars["key"]
+
+		val = ranking
 	default:
 		http.NotFound(w, r)
 		return
@@ -131,15 +179,36 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ReadAll(w http.ResponseWriter, r *http.Request) {
+func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	var val interface{}
+	var (
+		val interface{}
+		err error
+	)
 
-	switch vars["datatype"] {
+	whereClause := ""
+	args := make([]interface{}, 0)
+
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		items := make([]*data.Item, 0)
 		val = &items
+	case "items/comments":
+		comments := make([]*data.ItemComment, 0)
+
+		whereClause = "WHERE ItemID=?"
+		var itemID int64
+		itemID, err = strconv.ParseInt(vars["key"], 10, 64)
+		args = append(args, itemID)
+
+		val = &comments
 	case "users":
 		users := make([]*data.User, 0)
 		val = &users
@@ -152,10 +221,15 @@ func ReadAll(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.NotFound(w, r)
 		return
-
 	}
 
-	err := storage.SelectAll(val)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
+		return
+	}
+
+	err = storage.SelectWhere(val, whereClause, args...)
 
 	if err == storage.ErrZeroMatches {
 		http.Error(w, "No matches for query", http.StatusNotFound)
@@ -178,15 +252,27 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var val interface{}
 
-	switch vars["datatype"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
+	case "items/comments":
+		val = new(data.ItemComment)
 	case "users":
 		val = new(data.User)
+	case "users/direction":
+		val = new(data.UserDirection)
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":
 		val = new(data.Term)
+	case "taxonomy/ranking":
+		val = new(data.TermRanking)
 	default:
 		http.NotFound(w, r)
 		return
@@ -204,11 +290,17 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case (*data.Item):
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+	case (*data.ItemComment):
+		v.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
 	case (*data.User):
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+	case (*data.UserDirection):
+		v.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
 	case (*data.Role):
 		v.Title = vars["key"]
 	case (*data.Term):
+		v.Term = vars["key"]
+	case (*data.TermRanking):
 		v.Term = vars["key"]
 	}
 

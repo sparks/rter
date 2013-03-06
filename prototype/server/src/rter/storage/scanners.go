@@ -7,27 +7,27 @@ import (
 )
 
 func scanItemComment(comment *data.ItemComment, rows *sql.Rows) error {
-	var createTimeString string
+	var updateTimeString string
 
 	err := rows.Scan(
 		&comment.ID,
 		&comment.ItemID,
 		&comment.AuthorID,
 		&comment.Body,
-		&createTimeString,
+		&updateTimeString,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
+	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
 		return err
 	}
 
-	comment.CreateTime = createTime
+	comment.UpdateTime = updateTime
 
 	return nil
 }
@@ -74,22 +74,22 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 }
 
 func scanTerm(term *data.Term, rows *sql.Rows) error {
-	var createTimeString string
+	var updateTimeString string
 
 	err := rows.Scan(
 		&term.Term,
 		&term.Automated,
 		&term.AuthorID,
-		&createTimeString,
+		&updateTimeString,
 	)
 
-	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
+	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
 		return err
 	}
 
-	term.CreateTime = createTime
+	term.UpdateTime = updateTime
 
 	return nil
 }

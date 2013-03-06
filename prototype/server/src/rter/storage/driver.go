@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"rter/data"
+	"time"
 )
 
 func Insert(val interface{}) error {
@@ -10,6 +11,8 @@ func Insert(val interface{}) error {
 		res sql.Result
 		err error
 	)
+
+	now := time.Now().UTC()
 
 	switch v := val.(type) {
 	case *data.Item:
@@ -29,26 +32,26 @@ func Insert(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"INSERT INTO ItemComments (ItemID, AuthorID, Body, CreateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO ItemComments (ItemID, AuthorID, Body, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.ItemID,
 			v.AuthorID,
 			v.Body,
-			v.CreateTime,
+			now,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, AuthorID, CreateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO Terms (Term, Automated, AuthorID, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
-			v.CreateTime.UTC(),
+			now,
 		)
 	case *data.TermRanking:
 		res, err = Exec(
 			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
 			v.Term,
 			v.Ranking,
-			v.UpdateTime.UTC(),
+			now,
 		)
 	case *data.Role:
 		res, err = Exec(
@@ -64,7 +67,7 @@ func Insert(val interface{}) error {
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.CreateTime.UTC(),
+			now,
 		)
 	case *data.UserDirection:
 		res, err = Exec(
@@ -75,7 +78,7 @@ func Insert(val interface{}) error {
 			v.Heading,
 			v.Lat,
 			v.Lng,
-			v.UpdateTime.UTC(),
+			now,
 		)
 	default:
 		return ErrUnsupportedDataType
@@ -96,8 +99,16 @@ func Insert(val interface{}) error {
 		v.ID = ID
 	case *data.ItemComment:
 		v.ID = ID
+		v.UpdateTime = now
+	case *data.Term:
+		v.UpdateTime = now
+	case *data.TermRanking:
+		v.UpdateTime = now
 	case *data.User:
 		v.ID = ID
+		v.CreateTime = now
+	case *data.UserDirection:
+		v.UpdateTime = now
 	}
 
 	return nil
@@ -108,6 +119,8 @@ func Update(val interface{}) error {
 		res sql.Result
 		err error
 	)
+
+	now := time.Now().UTC()
 
 	switch v := val.(type) {
 	case *data.Item:
@@ -128,27 +141,26 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET ItemID=?, AuthorID=?, Body=?, CreateTime=? WHERE ID=?",
-			v.ItemID,
+			"UPDATE ItemComments SET AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
 			v.AuthorID,
 			v.Body,
-			v.CreateTime,
+			now,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, CreateTime=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, UpdateTime=? WHERE Term=?",
 			v.Term,
 			v.Automated,
 			v.AuthorID,
-			v.CreateTime.UTC(),
+			now,
 			v.Term,
 		)
 	case *data.TermRanking:
 		res, err = Exec(
 			"UPDATE TermRankings SET Ranking=?, UpdateTime=? WHERE Term=?",
 			v.Ranking,
-			v.UpdateTime.UTC(),
+			now,
 			v.Term,
 		)
 	case *data.Role:
@@ -160,13 +172,12 @@ func Update(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=?, CreateTime=? WHERE ID=?",
+			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE ID=?",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.CreateTime.UTC(),
 			v.ID,
 		)
 	case *data.UserDirection:
@@ -177,7 +188,7 @@ func Update(val interface{}) error {
 			v.Heading,
 			v.Lat,
 			v.Lng,
-			v.UpdateTime.UTC(),
+			now,
 			v.UserID,
 		)
 	default:
@@ -196,6 +207,17 @@ func Update(val interface{}) error {
 
 	if affected < 1 {
 		return ErrZeroMatches
+	}
+
+	switch v := val.(type) {
+	case *data.ItemComment:
+		v.UpdateTime = now
+	case *data.Term:
+		v.UpdateTime = now
+	case *data.TermRanking:
+		v.UpdateTime = now
+	case *data.UserDirection:
+		v.UpdateTime = now
 	}
 
 	return nil
@@ -255,6 +277,10 @@ func Select(val interface{}) error {
 }
 
 func SelectAll(slicePtr interface{}) error {
+	return SelectWhere(slicePtr, "")
+}
+
+func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) error {
 	var (
 		rows *sql.Rows
 		err  error
@@ -262,13 +288,15 @@ func SelectAll(slicePtr interface{}) error {
 
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT * FROM Items")
+		rows, err = Query("SELECT * FROM Items "+whereClause, args...)
+	case *[]*data.ItemComment:
+		rows, err = Query("SELECT * FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT * FROM Terms")
+		rows, err = Query("SELECT * FROM Terms "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT * FROM Roles")
+		rows, err = Query("SELECT * FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT * FROM Users")
+		rows, err = Query("SELECT * FROM Users "+whereClause, args...)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -284,6 +312,15 @@ func SelectAll(slicePtr interface{}) error {
 			}
 
 			*s = append(*s, item)
+		case *[]*data.ItemComment:
+			comment := new(data.ItemComment)
+			err = scanItemComment(comment, rows)
+
+			if err != nil {
+				return err
+			}
+
+			*s = append(*s, comment)
 		case *[]*data.Term:
 			term := new(data.Term)
 			err = scanTerm(term, rows)
@@ -318,6 +355,8 @@ func SelectAll(slicePtr interface{}) error {
 
 	switch s := slicePtr.(type) {
 	case *[]*data.Item:
+		sliceLen = len(*s)
+	case *[]*data.ItemComment:
 		sliceLen = len(*s)
 	case *[]*data.Term:
 		sliceLen = len(*s)

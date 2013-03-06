@@ -83,11 +83,11 @@ On the [browser side](http://wiki.whatwg.org/wiki/Video_type_parameters#Browser_
   +---------------+     +--------+      +------------+     +--------------+     +---------+
   |    Source     | --> | Ingest | -->  | Transcoder | --> | Distribution | --> |   Web   |
   | (Android/iOS) |  :  | Server |  :   |  (FFMpeg)  |  :  |    Server    |  :  | Browser |
-  +---------------+  :  | (HTTP) |  :   +------------+  :  |    (HTTP)    |  :  +---------+
-             :          +--------+  :                   :  +--------------+  :
-             :                      :                   :                    :
-      H264 in MPEG2-TS          Loopback         HLS, PNG, M3U8            HTTP
-         over HTTP              UDP/RTP              Files
+  +---------------+  :  | (HTTP) |  :   +------------+  :  |    (HTTP)    |	 :  +---------+
+                     :  +--------+  :                   :  +--------------+  :
+                     :              :                   :                    :
+            H264 in MPEG2-TS     Loopback          HLS, PNG, M3U8           HTTP
+                  over HTTP       UDP/RTP             Files
 ```
 
 ### Server Endpoints
