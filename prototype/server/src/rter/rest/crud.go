@@ -27,11 +27,11 @@ func RegisterCRUD(r *mux.Router) {
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Update).Methods("PUT")
 
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", ReadWhere).Methods("GET")
-
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", Create).Methods("POST")
 
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Read).Methods("GET")
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE")
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -337,12 +337,23 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	switch vars["datatype"] {
+	types := []string{vars["datatype"]}
+
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
+
+	switch strings.Join(types, "/") {
 	case "items":
 		item := new(data.Item)
 		item.ID, err = strconv.ParseInt(vars["key"], 10, 64)
 
 		val = item
+	case "items/comments":
+		comment := new(data.ItemComment)
+		comment.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
+
+		val = comment
 	case "users":
 		user := new(data.User)
 		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
