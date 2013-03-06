@@ -1,0 +1,37 @@
+{
+	"server": {
+		"addr": "127.0.0.1",
+		"port": 6666,
+		"secure_mode": false,
+		"cert_file": "",
+		"key_file": ""
+	},
+	"limits": {
+		"max_memory_mbytes": 128,
+		"max_ingest_sessions": 10,
+		"max_ingest_bandwidth_kbit": 10000,
+		"rate_limit_enable": false,
+		"rate_limit_ingest_window": 15,
+		"rate_limit_ingest_connections_per_source": 100,
+		"rate_limit_ingest_bytes_per_source": 134217728
+	},
+	"auth": {
+		"signkey": "ccc"
+	},
+	"ingest": {
+		"avc": true,
+		"ts": true,
+		"chunk": false
+	},
+	"paths": {
+		"storage": "./data"
+	},
+	"transcode": {
+		"hls": true,
+		"mp4": false,
+		"ogg": false,
+		"dash": false,
+		"thumb": true,
+		"poster": true
+	}
+}
