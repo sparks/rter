@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreMedia/CoreMedia.h>
+#import <AVFoundation/AVFoundation.h>
 
 @protocol RTERPreviewControllerDelegate <NSObject>
 
@@ -16,11 +18,19 @@
 @end
 
 @interface RTERPreviewController : UIViewController
+{
+    
+}
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;
+
+@property (strong, nonatomic) IBOutlet UIView *previewView;
+
+@property (strong, nonatomic) IBOutlet UIToolbar *toobar;
 
 - (IBAction)clickedStart:(id)sender;
 
 - (IBAction)clickedBack:(id)sender;
+
 
 @end

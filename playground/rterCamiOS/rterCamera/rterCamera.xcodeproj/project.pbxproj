@@ -20,6 +20,8 @@
 		FDE531D716E6B20D0086FA53 /* RTERViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FDE531D516E6B20D0086FA53 /* RTERViewController.xib */; };
 		FDE531E516E7944B0086FA53 /* RTERPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDE531E316E7944B0086FA53 /* RTERPreviewController.m */; };
 		FDE531E616E7944B0086FA53 /* RTERPreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FDE531E416E7944B0086FA53 /* RTERPreviewController.xib */; };
+		FDE7177016E7F63E007B619F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7176F16E7F63E007B619F /* AVFoundation.framework */; };
+		FDE7177216E7F64B007B619F /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7177116E7F64B007B619F /* CoreMedia.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,8 @@
 		FDE531E216E7944B0086FA53 /* RTERPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERPreviewController.h; sourceTree = "<group>"; };
 		FDE531E316E7944B0086FA53 /* RTERPreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERPreviewController.m; sourceTree = "<group>"; };
 		FDE531E416E7944B0086FA53 /* RTERPreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RTERPreviewController.xib; sourceTree = "<group>"; };
+		FDE7176F16E7F63E007B619F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		FDE7177116E7F64B007B619F /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +53,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDE7177216E7F64B007B619F /* CoreMedia.framework in Frameworks */,
+				FDE7177016E7F63E007B619F /* AVFoundation.framework in Frameworks */,
 				FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */,
 				FDE531BD16E6B20D0086FA53 /* Foundation.framework in Frameworks */,
 				FDE531BF16E6B20D0086FA53 /* CoreGraphics.framework in Frameworks */,
@@ -78,6 +84,8 @@
 		FDE531B916E6B20D0086FA53 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FDE7177116E7F64B007B619F /* CoreMedia.framework */,
+				FDE7176F16E7F63E007B619F /* AVFoundation.framework */,
 				FDE531BA16E6B20D0086FA53 /* UIKit.framework */,
 				FDE531BC16E6B20D0086FA53 /* Foundation.framework */,
 				FDE531BE16E6B20D0086FA53 /* CoreGraphics.framework */,
@@ -224,6 +232,7 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -239,6 +248,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -255,6 +265,7 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -263,6 +274,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -271,10 +283,13 @@
 		FDE531DB16E6B20D0086FA53 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				INFOPLIST_FILE = "rterCamera/rterCamera-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -283,10 +298,13 @@
 		FDE531DC16E6B20D0086FA53 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				INFOPLIST_FILE = "rterCamera/rterCamera-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -311,6 +329,7 @@
 				FDE531DC16E6B20D0086FA53 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
