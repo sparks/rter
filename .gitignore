@@ -4,6 +4,7 @@
 *.jar
 *.png
 *.jpg
+*.pem
 
 # Folders
 bin
