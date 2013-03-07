@@ -13,6 +13,8 @@
 {
     AVCaptureSession *captureSession;
     AVCaptureVideoPreviewLayer *previewLayer;
+    BOOL sendingData;
+    
 }
 
 @end
@@ -27,6 +29,12 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // init stuff
+        sendingData = NO;
+        
+        // listen for notifications
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
+        
     }
     return self;
 }
@@ -49,15 +57,15 @@
                 [captureSession addInput:videoIn];
             else {
                 NSLog(@"Couldn't add video input");
-                [[self delegate] back];
+                [self onExit];
             }
         } else {
             NSLog(@"Couldn't create video input");
-            [[self delegate] back];
+            [self onExit];
         }
     } else {
         NSLog(@"Couldn't create video capture device");
-        [[self delegate] back];
+        [self onExit];
     }
     
     // add preview layer to preview view
@@ -102,6 +110,28 @@
     [previewLayer setFrame: [previewView bounds]];
 }
 
+- (void)appWillResignActive {
+    if (captureSession && [captureSession isRunning]) {
+        [captureSession stopRunning];
+    }
+}
+
+- (void)appDidBecomeActive {
+    if (captureSession) {
+        [captureSession startRunning];
+    }
+}
+
+- (void)onExit {
+    // stop listening for notifications
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    if (captureSession && [captureSession isRunning]) {
+        [captureSession stopRunning];
+    }
+    [[self delegate] back];
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -109,12 +139,15 @@
 }
 
 - (IBAction)clickedStart:(id)sender {
+    if(!sendingData) {
+        // start recording
+    } else {
+        // stop recording
+    }
+    
 }
 
 - (IBAction)clickedBack:(id)sender {
-    if(self.delegate){
-        [captureSession stopRunning];
-        [[self delegate] back];
-    }
+    [self onExit];
 }
 @end
