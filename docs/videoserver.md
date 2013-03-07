@@ -35,21 +35,23 @@ This definition implies in particular
   - Progressive Download: HTTP GET with byte range?
   - Download: HTTP GET?
 8. support seeking and replay of archived video
-8. store thumbnail images for access by web browsers
-9. store poster image for access by web browsers
-10. authenticate streaming source and client
-11. connection throttling (connections per IP per time)
-12. bandwidth throttling
-13. upload continuation (byte-range)
-14. auto-compress text file types (such as m3u8, mpd)
-
+9. generate, store and serve thumbnail images of each video stream
+10. generate, store and serve poster image(s) of each video stream
+11. authenticate streaming source and client
+12. connection throttling (connections per IP per time)
+13. bandwidth throttling (bytes per stream per time)
+14. upload continuation (byte-range)
+15. auto-compress text file types (such as m3u8, mpd)
+16. check video format conformance (TS headers, H264 NALU headers, SPS, PPS)
+17. websocket for uploading raw h264 video frames and TS packets (may avoid HTTP POST overhead)
 
 ### Required Video Format Features
 - keyframes should be aligned with later segmentation boundaries to support pseudo-random access (2 sec?)
 - no audio necessary (for now, although the downstream pipeline would support it)
-- MPEG2-TS or raw H264-TS over HTTP(S) as transport
-- container format may be repacked into at server
+- H264/AVC inside MPEG2-TS over HTTP(S) as transport
+- raw H264/AVC-TS (NALU stream) over HTTP(S) as transport
 - avoid re-encoding at server
+- container format may be repacked into at server
 
 ### Ingest Format and Codec
 
