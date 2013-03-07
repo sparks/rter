@@ -1,6 +1,6 @@
 # Video Server Design
 
-### Stream Concept
+## Stream Concept
 
 Here's a try on a concise and practical definition of a stream. It's supposed to help us identifying how to handle and manage many streams originating from different sources over time.
 
@@ -19,22 +19,30 @@ This definition implies in particular
 - timeline manipulations (trim, concat) create new streams
 - mixing of multiple streams creates new streams (such as mixing video with audio)
 
-
+## Requirements
 
 ### Required Server Features
 1. receive, forward and store live video from mobile devices and fixed cameras
 2. support parallel ingest sessions from multiple sources (each with individual start times)
 3. support dynamic sessions (initiated on request by a source)
 4. keep an infinite archive of live streams
-5. distribute video to web browsers (streaming clients)
-6. support stream consumption modes:
-  - live: direct forwarding with low delay
-  - time shifted (switch between live and lag, allow seeking)
-  - on-demand (play from archive)
-7. support seeking and replay of archived video
+5. HTTPS mode
+6. support stream ingest modes
+  - live: HTTP POST individual encoded frames
+  - upload: HTTP POST chunked video files, continuations, byte-range
+7. support stream consumption modes
+  - HLS: index and segment file download
+  - Progressive Download: HTTP GET with byte range?
+  - Download: HTTP GET?
+8. support seeking and replay of archived video
 8. store thumbnail images for access by web browsers
 9. store poster image for access by web browsers
 10. authenticate streaming source and client
+11. connection throttling (connections per IP per time)
+12. bandwidth throttling
+13. upload continuation (byte-range)
+14. auto-compress text file types (such as m3u8, mpd)
+
 
 ### Required Video Format Features
 - keyframes should be aligned with later segmentation boundaries to support pseudo-random access (2 sec?)
@@ -53,7 +61,7 @@ The ingest format should be a H264 profile/level that is supported by mobile enc
   - avc1.58A01E, mp4a.40.2 (H.264 Extended profile (baseline-compatible) level 3.0 and Low-Complexity AAC audio)
   - avc1.64001E, mp4a.40.2 (H.264 'High' profile video (__incompatible__ with main, baseline, or extended profiles) level 3.0 and Low-Complexity AAC)
 - Android support : avc1.42001E (H.264 Baseline Profile Level 3.0)
-- iOS support: ?
+- [iOS support][2]: Baseline, Main 3.0/3.1 (>=iOS 4.0), Baseline 4.1, Main 3.2/4.1 (>= iOS 5.0), High 4.0/4.1 (iOS >= 6.0)
 
 
 ### Distribution Format
@@ -69,36 +77,6 @@ On the [browser side](http://wiki.whatwg.org/wiki/Video_type_parameters#Browser_
 
 
 
-### Server Ingest API
-
-The API assumes the client obtained a valid __video source token__ from a backend app, including
-
-- UID of the to be created video stream
-- optional timestamp to verify freshness
-- cryptographically signed hash for authenticity and integrity verification
-
-#### Authentication
-- use HTTP auth headers for token
-
-
-#### Video Dataflow
-- Initialisation
-  - authenticate source
-  - send HTTP 200 on success to make source start the stream
-  - create HLS/DASH index files
-- Thereafter
-  - receive stream data (frames, etc.) from source
-  - generate and segment video files
-  - generate thumbnails for each segment
-- End of Stream
-  - source can simply close connection (no handshake required)
-  - on connection failure attempt waiting to allow source reconnection, but fail after a timeout
-
-### Server Outbound Distribution
-- segment based streaming, either HLS standard or own
-- use HTTP server/caching infrastructure
-- file based segments must be entirely written before they become accessible by clients (adding a conceptual latency of one segment duration plus time to distribute segments to downstream webservers)
-
 
 ## Video System Architecture
 ```
@@ -112,27 +90,50 @@ The API assumes the client obtained a valid __video source token__ from a backen
                   over HTTP       UDP/RTP             Files
 ```
 
+### Server Endpoints
+```
+POST /v1/ingest/:videoid/avc              # live ingest point for raw H264 AVC bitstreams
+POST /v1/ingest/:videoid/ts               # live ingest point for MPEG2-TS streams
+PUT  /v1/ingest/:videoid/chunk            # chunked file upload ingest point
+GET  /v1/videos/:videoid/mp4              # mp4 (H264, AAC) file download
+GET  /v1/videos/:videoid/ogg              # ogg (Theora, Vorbis) file download
+GET  /v1/videos/:videoid/m3u8             # HLS index file download
+GET  /v1/videos/:videoid/mpd              # DASH index file download
+GET  /v1/videos/:videoid/hls/:segment     # HLS named segment download
+GET  /v1/videos/:videoid/dash/:segment    # DASH named segment download
+GET  /v1/previews/:videoid/:thumbid       # preview thumbnail image download
+GET  /v1/posters/:videoid/:posterid       # video poster image download
+```
 
-An ingest HTTP server accepts incoming video upload requests, checks source credentials, and starts an individual transcoder per incoming stream. The transcoder segments the stream and stores HLS compatible files at a location accessible through the distribution web server.
+### Server Ingest API
+
+The API assumes the client obtained a valid __video source token__ from a backend app, including
+
+- UID of the to be created video stream
+- optional timestamp to verify freshness
+- cryptographically signed hash for authenticity and integrity verification
 
 
-#### Supported formats for incoming live streams:
+The ingest HTTP server accepts incoming video upload requests, checks source credentials, and starts an individual transcoder per incoming stream. The transcoder segments the stream and stores HLS compatible files at a location accessible by the distribution web server.
 
-See [Apple Recommendations][1]  for more details on HLS.
+
+#### Supported formats for incoming live streams
 
 - transport protocol: HTTP(S)
 - packetisation format (signalled via appropriate MIME-TYPE)
   - raw H264/AVC Annex-B NALUs (using nalu start code)
   - H264/AVC packed in MPEG2-TS
 - encoding format: 640x360 H264/AVC baseline profile 3.0, 600kbit - 1200kbit
-
+- no audio
+- see [Apple HLS Recommendations][1] for details
 
 #### Ingest HTTP Server Tasks
 - authenticate source
-- prepare named pipe
+- prepare transcoder pipe
 - configure and start ffmpeg transcoder
-- pipe raw data streamed from client into transcoder
+- pipe raw data streamed from source into transcoder
 - gracefully handle source disconnection and cleanup (shutdown transcoder, remove pipe)
+
 
 #### Transcoder Tasks
 - write HLS/DASH segment index file
@@ -142,10 +143,56 @@ See [Apple Recommendations][1]  for more details on HLS.
 - update index file
 - push files to Distribution HTTP Server
 
+
+#### Authentication
+- ID of the ingest video is part of the URI
+- use HTTP auth headers for token passing
+- report auth error (stale token, invalid token)
+
+
+#### Ingest Video Dataflow
+- Initialisation
+  - authenticate source
+  - create directory for video id
+  - send HTTP 200 on success to make source start the stream
+  - start transcoder
+- On incoming data
+  - receive stream data (frames, etc.) from source on ingest endpoint
+  - acknowledge reception HTTP 200
+  - push raw data to transcoding pipe
+- End of Stream
+  - EOS signalling with empty HTTP PUT body from source
+  - source can simply close connection (no handshake required)
+  - on connection failure wait for source reconnection, and fail after a timeout
+
+
+### Server Distribution API
+
+Segment files must be entirely written before they become accessible by clients. This adds a conceptual latency of one segment duration plus time to distribute segments to downstream webservers. For on-demand video files
+
+- segment based streaming
+- use HTTP server/caching infrastructure
+
 #### Distribution Server Tasks
 - authenticate client
 - deliver stored index and media files
 - set proper mime types and caching headers
+
+
+### Server Rate Limiting
+
+Ingest endpoints are rate limited to avoid uploading too much data. What's limited:
+
+- total number of parallel ingest sessions (10)
+- cummulative ingest bandwidth (10000 kbit)
+- connection limit per source IP (100 each 15 min)
+- upload per source IP (128MB each 15min)
+
+HTTP Response Headers
+- `X-Rate-Limit-Limit`: the rate limit ceiling for that given request
+- `X-Rate-Limit-Remaining`: the number of requests left for the 15 minute window
+- `X-Rate-Limit-Reset`: the remaining window before the rate limit resets in UTC epoch seconds
+
 
 
 ### Examples
@@ -204,3 +251,4 @@ ffmpeg -v error -y -re -i ${pipe_path}/${video.uid}.stream -vsync 1 -r ${rate} -
 - `file-%09d.jpg` filename template
 
 [1]: http://developer.apple.com/library/ios/#documentation/networkinginternet/conceptual/streamingmediaguide/UsingHTTPLiveStreaming/UsingHTTPLiveStreaming.html
+[2]: http://developer.apple.com/library/ios/#documentation/AVFoundation/Reference/AVFoundation_Constants/Reference/reference.html#//apple_ref/c/data/AVVideoCodecKey
