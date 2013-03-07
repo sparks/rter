@@ -22,6 +22,8 @@
 		FDE531E616E7944B0086FA53 /* RTERPreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FDE531E416E7944B0086FA53 /* RTERPreviewController.xib */; };
 		FDE7177016E7F63E007B619F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7176F16E7F63E007B619F /* AVFoundation.framework */; };
 		FDE7177216E7F64B007B619F /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7177116E7F64B007B619F /* CoreMedia.framework */; };
+		FDE7177416E86635007B619F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7177316E86634007B619F /* QuartzCore.framework */; };
+		FDE7177616E86823007B619F /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE7177516E86823007B619F /* CoreVideo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +48,8 @@
 		FDE531E416E7944B0086FA53 /* RTERPreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RTERPreviewController.xib; sourceTree = "<group>"; };
 		FDE7176F16E7F63E007B619F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		FDE7177116E7F64B007B619F /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		FDE7177316E86634007B619F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		FDE7177516E86823007B619F /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDE7177616E86823007B619F /* CoreVideo.framework in Frameworks */,
+				FDE7177416E86635007B619F /* QuartzCore.framework in Frameworks */,
 				FDE7177216E7F64B007B619F /* CoreMedia.framework in Frameworks */,
 				FDE7177016E7F63E007B619F /* AVFoundation.framework in Frameworks */,
 				FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */,
@@ -67,6 +73,7 @@
 		FDE531AE16E6B20D0086FA53 = {
 			isa = PBXGroup;
 			children = (
+				FDE7177516E86823007B619F /* CoreVideo.framework */,
 				FDE531C016E6B20D0086FA53 /* rterCamera */,
 				FDE531B916E6B20D0086FA53 /* Frameworks */,
 				FDE531B816E6B20D0086FA53 /* Products */,
@@ -84,6 +91,7 @@
 		FDE531B916E6B20D0086FA53 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FDE7177316E86634007B619F /* QuartzCore.framework */,
 				FDE7177116E7F64B007B619F /* CoreMedia.framework */,
 				FDE7176F16E7F63E007B619F /* AVFoundation.framework */,
 				FDE531BA16E6B20D0086FA53 /* UIKit.framework */,

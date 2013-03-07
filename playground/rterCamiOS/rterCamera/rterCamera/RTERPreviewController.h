@@ -10,6 +10,8 @@
 #import <CoreMedia/CoreMedia.h>
 #import <AVFoundation/AVFoundation.h>
 
+#import <QuartzCore/QuartzCore.h>
+
 @protocol RTERPreviewControllerDelegate <NSObject>
 
 @required
@@ -17,7 +19,7 @@
 
 @end
 
-@interface RTERPreviewController : UIViewController
+@interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate>
 {
     
 }
@@ -31,6 +33,8 @@
 - (IBAction)clickedStart:(id)sender;
 
 - (IBAction)clickedBack:(id)sender;
+
+- (void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection;
 
 
 @end

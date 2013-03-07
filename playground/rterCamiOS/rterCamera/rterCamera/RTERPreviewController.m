@@ -13,6 +13,8 @@
 {
     AVCaptureSession *captureSession;
     AVCaptureVideoPreviewLayer *previewLayer;
+    AVCaptureVideoDataOutput *outputDevice;
+    
     BOOL sendingData;
     
 }
@@ -67,6 +69,10 @@
         NSLog(@"Couldn't create video capture device");
         [self onExit];
     }
+    
+    //init output
+    outputDevice = [[AVCaptureVideoDataOutput alloc] init];
+    [outputDevice setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
     
     // add preview layer to preview view
     [previewView.layer addSublayer:previewLayer];
@@ -127,6 +133,9 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     if (captureSession && [captureSession isRunning]) {
+        if(sendingData) {
+            [captureSession removeOutput:outputDevice];
+        }
         [captureSession stopRunning];
     }
     [[self delegate] back];
@@ -141,10 +150,35 @@
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
         // start recording
+        sendingData = YES;
+        [self startRecording];
+        
+        [(UIBarButtonItem *) sender setTitle:@"stop"];
     } else {
         // stop recording
+        sendingData = NO;
+        [self stopRecording];
+        
+        [(UIBarButtonItem *) sender setTitle:@"start"];
     }
     
+}
+
+- (void) startRecording {
+    [captureSession addOutput:outputDevice];
+}
+
+- (void) stopRecording {
+    [captureSession removeOutput:outputDevice];
+}
+
+-(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
+    CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
+    // also in the 'mediaSpecific' dict of the sampleBuffer
+    
+    NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
 }
 
 - (IBAction)clickedBack:(id)sender {
