@@ -17,6 +17,12 @@
     
     BOOL sendingData;
     
+    // save default frame rate
+    CMTime defaultMaxFPS;
+    CMTime defaultMinFPS;
+    
+    // desired frame rate
+    CMTime desiredFPS;
 }
 
 @end
@@ -33,6 +39,9 @@
         // init stuff
         sendingData = NO;
         
+        // desired FPS
+        desiredFPS = CMTimeMake(1, 15);
+        
         // listen for notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
@@ -47,6 +56,28 @@
     // Do any additional setup after loading the view from its nib.
     // capture session
     captureSession = [[AVCaptureSession alloc] init];
+    
+    // video session settings
+    
+    /* possible resolution settings:
+     AVCaptureSessionPresetPhoto;
+     AVCaptureSessionPresetHigh;
+     AVCaptureSessionPresetMedium;
+     AVCaptureSessionPresetLow;
+     AVCaptureSessionPreset320x240;
+     AVCaptureSessionPreset352x288;
+     AVCaptureSessionPreset640x480;
+     AVCaptureSessionPreset960x540;
+     AVCaptureSessionPreset1280x720;
+     */
+    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
+        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+        NSLog(@"640x480");
+    }
+    else {
+        // Handle the failure.
+    }
+    
     previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
     
     
@@ -72,6 +103,7 @@
     
     //init output
     outputDevice = [[AVCaptureVideoDataOutput alloc] init];
+        
     [outputDevice setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
     
     // add preview layer to preview view
@@ -87,8 +119,13 @@
     // (otherwise it will take up the whole screen)
     previewView.clipsToBounds = YES;
     
+    // get the default FPS
+    defaultMaxFPS = previewLayer.connection.videoMaxFrameDuration;
+    defaultMinFPS = previewLayer.connection.videoMinFrameDuration;
+    
     // start the capture session so that the preview shows up
     [captureSession startRunning];
+    
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -165,11 +202,47 @@
 }
 
 - (void) startRecording {
+    
     [captureSession addOutput:outputDevice];
+    
+    /* set the frame rate
+     * for some reason have to set both the max and the min for it to work properly */
+        
+    AVCaptureConnection *conn = [previewLayer connection]; //[outputDevice connectionWithMediaType:AVMediaTypeVideo];
+    
+    CMTimeShow(conn.videoMinFrameDuration);
+    CMTimeShow(conn.videoMaxFrameDuration);
+    
+    if (conn.isVideoMinFrameDurationSupported)
+        conn.videoMinFrameDuration = desiredFPS;
+    if (conn.isVideoMaxFrameDurationSupported)
+        conn.videoMaxFrameDuration = desiredFPS;
+    
+    CMTimeShow(conn.videoMinFrameDuration);
+    CMTimeShow(conn.videoMaxFrameDuration);
+    
+//    for (NSString *codec in [outputDevice availableVideoCodecTypes]) {
+//        NSLog(@"%@", codec);
+//    }
 }
 
 - (void) stopRecording {
     [captureSession removeOutput:outputDevice];
+    
+    /* restore to default frame rate when not "recording"
+     * for some reason have to set both the max and the min for it to work properly */
+    AVCaptureConnection *conn = [previewLayer connection]; //[outputDevice connectionWithMediaType:AVMediaTypeVideo];
+    
+    CMTimeShow(conn.videoMinFrameDuration);
+    CMTimeShow(conn.videoMaxFrameDuration);
+    
+    if (conn.isVideoMinFrameDurationSupported)
+        conn.videoMinFrameDuration = defaultMinFPS;
+    if (conn.isVideoMaxFrameDurationSupported)
+        conn.videoMaxFrameDuration = defaultMaxFPS;
+    
+    CMTimeShow(conn.videoMinFrameDuration);
+    CMTimeShow(conn.videoMaxFrameDuration);
 }
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
@@ -179,6 +252,7 @@
     // also in the 'mediaSpecific' dict of the sampleBuffer
     
     NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
+    
 }
 
 - (IBAction)clickedBack:(id)sender {
