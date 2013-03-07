@@ -9,6 +9,8 @@
 #import "RTERPreviewController.h"
 #import <math.h>
 
+#define DESIRED_FPS 15
+
 @interface RTERPreviewController ()
 {
     AVCaptureSession *captureSession;
@@ -18,11 +20,11 @@
     BOOL sendingData;
     
     // save default frame rate
-    CMTime defaultMaxFPS;
-    CMTime defaultMinFPS;
+    CMTime defaultMaxFrameDuration;
+    CMTime defaultMinFrameDuration;
     
     // desired frame rate
-    CMTime desiredFPS;
+    CMTime desiredFrameDuration;
 }
 
 @end
@@ -40,7 +42,7 @@
         sendingData = NO;
         
         // desired FPS
-        desiredFPS = CMTimeMake(1, 15);
+        desiredFrameDuration = CMTimeMake(1, DESIRED_FPS);
         
         // listen for notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
@@ -103,7 +105,11 @@
     
     //init output
     outputDevice = [[AVCaptureVideoDataOutput alloc] init];
-        
+    
+    // set pixel buffer format
+    outputDevice.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange], (id)kCVPixelBufferPixelFormatTypeKey,
+                                 nil];
+    // set self as the delegate for the output for now
     [outputDevice setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
     
     // add preview layer to preview view
@@ -120,8 +126,8 @@
     previewView.clipsToBounds = YES;
     
     // get the default FPS
-    defaultMaxFPS = previewLayer.connection.videoMaxFrameDuration;
-    defaultMinFPS = previewLayer.connection.videoMinFrameDuration;
+    defaultMaxFrameDuration = previewLayer.connection.videoMaxFrameDuration;
+    defaultMinFrameDuration = previewLayer.connection.videoMinFrameDuration;
     
     // start the capture session so that the preview shows up
     [captureSession startRunning];
@@ -214,9 +220,9 @@
     CMTimeShow(conn.videoMaxFrameDuration);
     
     if (conn.isVideoMinFrameDurationSupported)
-        conn.videoMinFrameDuration = desiredFPS;
+        conn.videoMinFrameDuration = desiredFrameDuration;
     if (conn.isVideoMaxFrameDurationSupported)
-        conn.videoMaxFrameDuration = desiredFPS;
+        conn.videoMaxFrameDuration = desiredFrameDuration;
     
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
@@ -237,9 +243,9 @@
     CMTimeShow(conn.videoMaxFrameDuration);
     
     if (conn.isVideoMinFrameDurationSupported)
-        conn.videoMinFrameDuration = defaultMinFPS;
+        conn.videoMinFrameDuration = defaultMinFrameDuration;
     if (conn.isVideoMaxFrameDurationSupported)
-        conn.videoMaxFrameDuration = defaultMaxFPS;
+        conn.videoMaxFrameDuration = defaultMaxFrameDuration;
     
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
