@@ -1,5 +1,13 @@
 #ToDos
 
+##Mobile
+* Show ID/user on tiles
+* More text on the device
+* device UUID
+* Custom URL 
+* Location
+* UUID
+
 ## Fixes and Improvements
 * JS benchmarking/improvements
 * Provide a lock on the mobile user control
