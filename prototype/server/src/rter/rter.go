@@ -31,8 +31,7 @@ func main() {
 
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
 	r.PathPrefix("/resources").Handler(http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
-
-	r.NotFoundHandler = http.HandlerFunc(rootRedirect)
+	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
 
 	http.Handle("/", r)
 
