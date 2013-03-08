@@ -19,6 +19,18 @@ const (
 	TRANSCODE_PARAM_POSTER string = ""
 )
 
+
+func IsMimeTypeValid(t int, m string) bool {
+	// first letter and letter after hyphen uppercase, rest lowercase
+	//contentType := http.CanonicalHeaderKey(m)
+
+	return true
+
+
+}
+
+
+
 // TS input
 // ffmpeg -v quiet -fflags nobuffer -i pipe:0 -vsync 2 -copyts -copytb 1
 //  -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts

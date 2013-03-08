@@ -8,7 +8,6 @@ import (
 //	"io/ioutil"
 	"net/http"
 	"runtime"
-	"errors"
 	"strconv"
 	"log"
 	"os"
@@ -25,6 +24,7 @@ const (
 
 type TranscodeSession struct {
 	UID			uint64		// video UID
+	Type        int         // ingest type id TRANSCODE_TYPE_XX
 	State     	int         // state
 	PID			uint64		// id of transcoder (ffmpeg) process
 	//Pipe  		?  			// IO channel to transcoder
@@ -37,11 +37,6 @@ type TranscodeSession struct {
 	//CPUusage
 	//ExitStatus
 }
-
-// transcode session errors
-var (
-	ErrTranscodeFailed = errors.New("Transcode process failed")
-)
 
 func NewTranscodeSession(id uint64) *TranscodeSession {
 	log.Printf("Session constructor")
@@ -59,10 +54,13 @@ func (s *TranscodeSession) IsOpen() bool {
 	return s.State == TC_RUNNING
 }
 
-func (s *TranscodeSession) Open(params string) *ServerError {
+func (s *TranscodeSession) Open(t int) *ServerError {
 
 	if s.IsOpen() { return nil }
-	log.Printf("Opening session: %s", params)
+
+	s.Type = t
+	s.Command = GetTranscodeParams(t)
+	log.Printf("Opening session: %s", s.Command)
 	// create pipe
 
 	// start transcode process
@@ -88,18 +86,37 @@ func (s *TranscodeSession) Close() *ServerError {
 	return nil
 }
 
-func (s *TranscodeSession) Write(d io.ReadCloser) *ServerError {
+func (s *TranscodeSession) ValidateRequest(r *http.Request) *ServerError {
 
-	if !s.IsOpen() { return NewServerError("Transcoder write on closed pipe", 1, http.StatusForbidden) }
+	// check for proper mime type
+	if !IsMimeTypeValid(s.Type, r.Header.Get("Content-Type")) {
+		return ServerErrorWrongMimetype
+	}
+
+	// check content
+
+	return nil
+}
+
+func (s *TranscodeSession) Write(r *http.Request) *ServerError {
+
+	if !s.IsOpen() { return ServerErrorTranscodeFailed }
 
 	log.Printf("Writing data to session %d", s.UID)
 
-	// push data into pipe
+	// check request compatibility (mime type, content)
+	if err := s.ValidateRequest(r); err != nil { return err }
+
+
+	// TODO: push data into pipe
+
+
+	// old code below (appending to file)
 	idstr := strconv.FormatUint(s.UID, 10)
 	filename := c.Paths.Data_storage_path + "/" + idstr + ".h264"
     f, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-    io.Copy(f, d)
-    d.Close()
+    io.Copy(f, r.Body)
+    r.Body.Close()
     f.Close()
 
 	return nil

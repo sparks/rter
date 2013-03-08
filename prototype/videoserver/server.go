@@ -6,6 +6,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"log"
 )
 
@@ -16,8 +17,48 @@ type ServerState struct {
 	activeSessions map[uint64]*TranscodeSession
 }
 
+// instantiate global state variable
+var server = ServerState {
+	activeSessions: make(map[uint64]*TranscodeSession),
+}
+
+
+type ServerError struct {
+	code   int
+	status int
+	msg    string
+}
+
+func NewServerError(c int, s int, m string) *ServerError {
+	return &ServerError{code: c, status: s, msg: m}
+}
+
+func (e *ServerError) Error() string { return e.msg }
+func (e *ServerError) Code() int { return e.code }
+func (e *ServerError) Status() int { return e.status }
+
+func (e *ServerError) JSONError() string {
+	return  "{\n  \"errors\": [\n    {\n      \"code\": " +
+	        strconv.Itoa(e.code) +
+	        ",\n      \"message\": \"" +
+	        e.msg +
+	        "\"\n    }\n  ]\n}"
+}
+
+
+// new HTTP status codes not defined in net/http
+const (
+	StatusTooManyRequests = 429
+)
+
 // Server Error Reasons
-//var (
+var (
+	ServerErrorBadID           = NewServerError(1, http.StatusForbidden, "malformed id")
+	ServerErrorQuotaExceeded   = NewServerError(2, http.StatusForbidden, "too many active server sessions")
+	ServerErrorWrongMimetype   = NewServerError(3, http.StatusUnsupportedMediaType, "wrong MIME type for enpoint")
+	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "Transcoder write on closed pipe")
+)
+
 //	ErrSessionQuotaExceded = errors.New()
 //)
 //const (
@@ -37,10 +78,6 @@ type ServerState struct {
 // unknown resource id (stream, segment, thumb, poster)
 //
 
-// global server state
-var server = ServerState {
-	activeSessions: make(map[uint64]*TranscodeSession),
-}
 
 // Returns an active transcoding session for the requested video id
 //
@@ -49,10 +86,17 @@ var server = ServerState {
 // - session is unique (later across a cluster of ingest servers)
 // - session has not been closed before (stream is already in EOS state)
 // - session is active and transcoder is running
-func (s *ServerState) FindOrCreateSession(id uint64) (*TranscodeSession, *ServerError) {
+func (s *ServerState) FindOrCreateSession(idstr string) (*TranscodeSession, *ServerError) {
 
 	// todo: lock? are http handlers called concurrently? maybe use channel
 	// what happens if a handler is called while another is running on the same video
+
+ 	id, err := strconv.ParseUint(idstr, 10, 64)
+
+ 	if err != nil {
+ 		log.Printf("Malformed id: expected number, got `%s`", idstr)
+ 		return nil, ServerErrorBadID
+ 	}
 
 	// look up session id in map of active sessions
 	session, found := s.activeSessions[id]
@@ -65,8 +109,7 @@ func (s *ServerState) FindOrCreateSession(id uint64) (*TranscodeSession, *Server
 			s.activeSessions[id] = session
 		} else {
 			log.Printf("Too many active sessions")
-			return nil, NewServerError("Session: too many active server sessions",
-								       2, http.StatusForbidden)
+			return nil, ServerErrorQuotaExceeded
 		}
 	}
 

@@ -10,13 +10,13 @@
 //
 // Todo/Implement: Features
 // - Common Server Management
-//   - ServerError id -> text translation
-//   - request authentication
+//   - request authentication and group-based access to endpoints
 //   - HTTPS cert/key
 //   - rate control: sessions per source (IP) per time
 //   - rate control: bytes per source (IP) per time
 //   - quota headers
 //   - limit memory/bandwidth consumption
+//   - status endpoint
 // - AVC Transcoding Pipeline
 //   - ffmpeg parameter assembly (HLS, Thumb, Poster, MP4, OGG)
 //	 - process management (start/stop/monitor)
@@ -86,7 +86,7 @@ func main() {
 
 	// catch all (redirect non-registered routes to index '/')
 	r.HandleFunc("/", IndexHandler)
-	r.PathPrefix("/").HandlerFunc(RedirectHandler)
+	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
 
 	// attach router to HTTP(s) server
 	http.Handle("/", r)
@@ -113,35 +113,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is an example server.\n"))
 }
-
-
-type ServerError struct {
-	msg    string
-	code   int
-	status int
-}
-
-func NewServerError(m string, c int, s int) *ServerError {
-	return &ServerError{msg: m, code: c, status: s}
-}
-
-func (e *ServerError) Error() string { return e.msg }
-func (e *ServerError) Code() int { return e.code }
-func (e *ServerError) Status() int { return e.status }
-
-func (e *ServerError) JSONError() string {
-	return  "{\"errors\":[{\"code\": " +
-	        strconv.Itoa(e.code) +
-	        "\"message\": \"" +
-	        e.msg +
-	        "\"}]}"
-}
-
-
-// new HTTP status codes not defined in net/http
-const (
-	StatusTooManyRequests = 429
-)
 
 
 //func CheckGlobalRateLimit() {}
@@ -174,6 +145,10 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 // - update statistics (rate quota)
 // - prepare response headers
 
+	// extract the video UID from the request
+	vars := mux.Vars(r)
+	uidstring := vars["id"]
+
  	// authenticate the request
  	err := AuthenticateRequest(r)
 	if err != nil {
@@ -182,13 +157,8 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// extract the video UID from the request
-	vars := mux.Vars(r)
-	uidstring := vars["id"]
- 	uid, _ := strconv.ParseUint(uidstring, 10, 64)
-
  	// get the session object (atomic)
-	session, err := server.FindOrCreateSession(uid)
+	session, err := server.FindOrCreateSession(uidstring)
 
 	if err != nil {
 		// fail return error response in httpcode
@@ -196,14 +166,14 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// open new sessions first
+	// open new sessions with specified type of request endpoint
 	if !session.IsOpen() {
-		session.Open(GetTranscodeParams(TRANSCODE_TYPE_AVC))
+		session.Open(TRANSCODE_TYPE_AVC)
 	}
 
 	// forward data
 	if session.IsOpen() {
-		session.Write(r.Body)
+		session.Write(r)
 	}
 }
 
