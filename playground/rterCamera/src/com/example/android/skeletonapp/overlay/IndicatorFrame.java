@@ -103,13 +103,13 @@ public class IndicatorFrame {
 			// Set the color for each of the faces
 			switch (this.currentColour) {
 			case RED:
-				gl.glColor4f(0.9f, 0.0f, 0.0f, 0.8f);
+				gl.glColor4f(0.9f, 0.0f, 0.0f, 1.0f); //0.8f);
 				break;
 			case GREEN:
-				gl.glColor4f(0.0f, 0.9f, 0.0f, 0.8f);
+				gl.glColor4f(0.0f, 0.9f, 0.0f, 1.0f); //0.8f);
 				break;
 			case BLUE:
-				gl.glColor4f(0.0f, 0.0f, 0.9f, 0.8f);
+				gl.glColor4f(0.0f, 0.0f, 0.9f, 1.0f); //0.8f);
 				break;
 			}
 
