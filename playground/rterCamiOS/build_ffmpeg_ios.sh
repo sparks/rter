@@ -1,10 +1,13 @@
-#ios 6.0 sdk and min version 4.3. No armv6 support. Tested with ffmpeg 0.8.X.
-
 # the purpose of this scrip is to build ffmpeg for iOS and the iOS simulator in Xcode
 #
 # compiles and seems to work with sdk 6.1, Xcode 4.6, iOS 6.0.x, osx 8.2.x
 #
 # comment out parts which are not needed
+#
+# put together using:
+# * a github repo I can't find right now
+# * http://www.tangentsoftworks.com/blog/2012/11/12/how-to-prepare-your-mac-for-ios-development-with-ffmpeg-libraries/
+# * http://blog.fh-kaernten.at/wehr/?p=1764
 
 rm -r ./compiled
  

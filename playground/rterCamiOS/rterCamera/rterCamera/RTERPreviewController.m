@@ -255,6 +255,8 @@
     CMTimeShow(conn.videoMaxFrameDuration);
 }
 
+/* process the frames here */
+
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
