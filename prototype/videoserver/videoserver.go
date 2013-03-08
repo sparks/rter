@@ -1,118 +1,56 @@
-//  rtER Project
+// rtER Project - SRL, McGill University, 2013
 //
-//  Author: echa@cim.mcgill.ca
+// Author: echa@cim.mcgill.ca
 
 // Test binary upload to server with
 // curl -i --data-binary @videoserver.go http://localhost:6666/v1/ingest/10/avc
+//
+// Unsure
+// - is body already complete when handler is called? if not, how to deal with broken TCP connection
+//
+// Todo/Implement: Features
+// - Common Server Management
+//   - request authentication and group-based access to endpoints
+//   - HTTPS cert/key
+//   - rate control: sessions per source (IP) per time
+//   - rate control: bytes per source (IP) per time
+//   - quota headers
+//   - limit memory/bandwidth consumption
+//   - status endpoint
+// - AVC Transcoding Pipeline
+//   - ffmpeg parameter assembly (HLS, Thumb, Poster, MP4, OGG)
+//	 - process management (start/stop/monitor)
+//   - EOS/timeout/close-session handling (and uniqueness assumption)
+//   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
+// - TS Transcoding Pipeline
+// - File Download
+//   - cache headers, mime-types, text file compression
+//   - byte range support
+// - Chunk Upload (reorder, single file multiplexing)
+// - Websocket for AVC/TS frame-wise upload
+
+
+// Limit bandwidth (max_ingest_bandwidth_kbit) and memory (max_memory_mbytes)
+// http://stackoverflow.com/questions/14582471/golang-memory-consumption-management
+// http://lwn.net/Articles/428100/
+// http://evanfarrer.blogspot.ca/2012/05/making-friendly-elastic-applications-in.html
+// https://groups.google.com/forum/?fromgroups=#!topic/golang-nuts/9JxgtOJqqRU
+
 
 package main
 
 import (
 	"github.com/gorilla/mux"
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"strconv"
-	"flag"
 	"log"
 )
-
-// Command Line Options
-var configfile = flag.String("config", "config.json", "server config file")
-
-// Server Configuration
-type ServerConfig struct {
-	// server
-	Server struct {
-		Addr string `json:"addr"`
-		Port uint64 `json:"port"`
-		Secure_mode bool `json:"secure_mode"`
-		Cert_file string `json:"cert_file"`
-		Key_file string `json:"key_file"`
-	}
-	// limits
-	Limits struct {
-		Max_memory_mbytes uint64 `json:"max_memory_mbytes"`
-		Max_ingest_sessions uint64 `json:"max_ingest_sessions"`
-		Max_ingest_bandwidth_kbit uint64 `json:"max_ingest_bandwidth_kbit"`
-		Rate_limit_enable bool `json:"rate_limit_enable"`
-		Rate_limit_ingest_window uint64 `json:"rate_limit_ingest_window"`
-		Rate_limit_ingest_sessions_per_source uint64 `json:"rate_limit_ingest_sessions_per_source"`
-		Rate_limit_ingest_bytes_per_source uint64 `json:"rate_limit_ingest_bytes_per_source"`
-	}
-	Auth struct {
-	// auth
-		Signkey string `json:"signkey"`
-	}
-	// ingest
-	Ingest struct {
-		Enable_avc_ingest bool `json:"avc"`
-		Enable_ts_ingest bool `json:"ts"`
-		Enable_chunk_ingest bool `json:"chunk"`
-	}
-	// paths
-	Paths struct {
-		Data_storage_path string `json:"storage"`
-	}
-	// transcode
-	Transcode struct {
-		Enable_hls_transcode bool `json:"hls"`
-		Enable_mp4_transcode bool `json:"mp4"`
-		Enable_ogg_transcode bool `json:"ogg"`
-		Enable_dash_transcode bool `json:"dash"`
-		Enable_thumb_transcode bool `json:"thumb"`
-		Enable_poster_transcode bool `json:"poster"`
-	}
-}
-
-func ParseConfig(c *ServerConfig) {
-
-	// set default values
-	c.Server.Addr = "127.0.0.1"
-	c.Server.Port = 8080
-	c.Server.Secure_mode = false
-	c.Server.Cert_file = ""
-	c.Server.Key_file = ""
-	c.Limits.Max_memory_mbytes = 128
-	c.Limits.Max_ingest_sessions = 10
-	c.Limits.Max_ingest_bandwidth_kbit = 10000
-	c.Limits.Rate_limit_enable = false
-	c.Limits.Rate_limit_ingest_window = 15
-	c.Limits.Rate_limit_ingest_sessions_per_source = 100
-	c.Limits.Rate_limit_ingest_bytes_per_source = 134217728
-	c.Auth.Signkey = "none"
-	c.Ingest.Enable_avc_ingest = true
-	c.Ingest.Enable_ts_ingest = true
-	c.Ingest.Enable_chunk_ingest = false
-	c.Paths.Data_storage_path = "./data"
-	c.Transcode.Enable_hls_transcode = true
-	c.Transcode.Enable_mp4_transcode = false
-	c.Transcode.Enable_ogg_transcode = false
-	c.Transcode.Enable_dash_transcode = false
-	c.Transcode.Enable_thumb_transcode = true
-	c.Transcode.Enable_poster_transcode = true
-
-	// read config
-    jsonconfig, err := ioutil.ReadFile(*configfile)
-	if err != nil {
-    	log.Fatalf("Error reading config file: %s\n", err)
-    }
-
-    // unpack config from JSON into Go struct (sets only the defined values)
-	err = json.Unmarshal(jsonconfig, &c)
-	if err != nil {
-    	log.Fatalf("Error parsing config file: %s\n", err)
-    }
-
-    log.Printf("ServerConfig: %+v\n", c)
-}
 
 var c ServerConfig
 
 func main() {
 
 	var err error
-	flag.Parse()
 	ParseConfig(&c)
 
 	// set up endpoints
@@ -125,11 +63,11 @@ func main() {
 	}
 
 	if c.Ingest.Enable_ts_ingest {
-		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST", "GET")
+		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST")
 	}
 
 	if c.Ingest.Enable_chunk_ingest {
-		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST", "GET")
+		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
 /*
 	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
@@ -148,7 +86,7 @@ func main() {
 
 	// catch all (redirect non-registered routes to index '/')
 	r.HandleFunc("/", IndexHandler)
-	r.PathPrefix("/").HandlerFunc(RedirectHandler)
+	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
 
 	// attach router to HTTP(s) server
 	http.Handle("/", r)
@@ -177,49 +115,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// Internal Error Reasons
-//const (
-//	SOURCE_TIMEOUT
-//   STREAM_EOS // no error
-//    TRANSCODER_FAILED
-//)
-
-// Signalled errors to client (HTTP response codes)
-
-// rate limit exceded (calls, bytes?)
-// auth failure: token expired, token invalid
-// bitstream invalid
-// stale stream id
-
-type ServerError struct {
-	msg    string
-	code   int
-	status int
-}
-
-func NewServerError(m string, c int, s int) *ServerError {
-	return &ServerError{msg: m, code: c, status: s}
-}
-
-func (e *ServerError) Error() string { return e.msg }
-func (e *ServerError) Code() int { return e.code }
-func (e *ServerError) Status() int { return e.status }
-
-func (e *ServerError) JSONError() string {
-	return  "{\"errors\":[{\"code\": " +
-	        strconv.Itoa(e.code) +
-	        "\"message\": \"" +
-	        e.msg +
-	        "\"}]}"
-}
-
-
-// new HTTP status codes not defined in net/http
-const (
-	StatusTooManyRequests = 429
-)
-
-
 //func CheckGlobalRateLimit() {}
 
 func AuthenticateRequest(r *http.Request) *ServerError {
@@ -228,8 +123,6 @@ func AuthenticateRequest(r *http.Request) *ServerError {
 
 
 func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
-// todo
-// - find a way to limit bandwidth (max_ingest_bandwidth_kbit)
 //
 // Ingest Loop (this function is called once per video frame, also for new sessions)
 // - confirm request validity (signature)
@@ -252,6 +145,10 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 // - update statistics (rate quota)
 // - prepare response headers
 
+	// extract the video UID from the request
+	vars := mux.Vars(r)
+	uidstring := vars["id"]
+
  	// authenticate the request
  	err := AuthenticateRequest(r)
 	if err != nil {
@@ -260,13 +157,8 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// extract the video UID from the request
-	vars := mux.Vars(r)
-	uidstring := vars["id"]
- 	uid, _ := strconv.ParseUint(uidstring, 10, 64)
-
  	// get the session object (atomic)
-	session, err := server.FindOrCreateSession(uid)
+	session, err := server.FindOrCreateSession(uidstring)
 
 	if err != nil {
 		// fail return error response in httpcode
@@ -274,14 +166,14 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// open new sessions first
+	// open new sessions with specified type of request endpoint
 	if !session.IsOpen() {
-		session.Open(GetTranscodeParams(TRANSCODE_TYPE_AVC))
+		session.Open(TRANSCODE_TYPE_AVC)
 	}
 
 	// forward data
 	if session.IsOpen() {
-		session.Write(r.Body)
+		session.Write(r)
 	}
 }
 
