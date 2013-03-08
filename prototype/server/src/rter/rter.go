@@ -15,7 +15,7 @@ import (
 func main() {
 	setupLogger()
 
-	storage.OpenStorage("root", "", "tcp", "localhost:3306", "rter")
+	storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
 	defer storage.CloseStorage()
 
 	r := mux.NewRouter().StrictSlash(true)
@@ -25,7 +25,7 @@ func main() {
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	r.HandleFunc("/submit", web.SubmitHandler)
 
-	r.HandleFunc("/ajax", web.ClientAjax)
+	r.PathPrefix("/ajax").HandlerFunc(web.ClientAjax)
 
 	r.HandleFunc("/", web.ClientHandler)
 
