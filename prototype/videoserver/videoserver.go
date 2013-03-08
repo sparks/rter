@@ -15,8 +15,6 @@ import (
 	"strconv"
 	"flag"
 	"log"
-	"os"
-	"io"
 )
 
 // Command Line Options
@@ -39,7 +37,7 @@ type ServerConfig struct {
 		Max_ingest_bandwidth_kbit uint64 `json:"max_ingest_bandwidth_kbit"`
 		Rate_limit_enable bool `json:"rate_limit_enable"`
 		Rate_limit_ingest_window uint64 `json:"rate_limit_ingest_window"`
-		Rate_limit_ingest_connections_per_source uint64 `json:"rate_limit_ingest_connections_per_source"`
+		Rate_limit_ingest_sessions_per_source uint64 `json:"rate_limit_ingest_sessions_per_source"`
 		Rate_limit_ingest_bytes_per_source uint64 `json:"rate_limit_ingest_bytes_per_source"`
 	}
 	Auth struct {
@@ -80,7 +78,7 @@ func ParseConfig(c *ServerConfig) {
 	c.Limits.Max_ingest_bandwidth_kbit = 10000
 	c.Limits.Rate_limit_enable = false
 	c.Limits.Rate_limit_ingest_window = 15
-	c.Limits.Rate_limit_ingest_connections_per_source = 100
+	c.Limits.Rate_limit_ingest_sessions_per_source = 100
 	c.Limits.Rate_limit_ingest_bytes_per_source = 134217728
 	c.Auth.Signkey = "none"
 	c.Ingest.Enable_avc_ingest = true
@@ -122,15 +120,15 @@ func main() {
 	s := r.PathPrefix("/v1").Subrouter()
 
 
-	if (c.Ingest.Enable_avc_ingest) {
+	if c.Ingest.Enable_avc_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/avc", AVCIngestHandler).Methods("POST")
 	}
 
-	if (c.Ingest.Enable_ts_ingest) {
+	if c.Ingest.Enable_ts_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST", "GET")
 	}
 
-	if (c.Ingest.Enable_chunk_ingest) {
+	if c.Ingest.Enable_chunk_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST", "GET")
 	}
 /*
@@ -157,7 +155,7 @@ func main() {
 
 	// run the server
 	serverAddr := c.Server.Addr + ":" + strconv.FormatUint(c.Server.Port, 10)
-	if (c.Server.Secure_mode) {
+	if c.Server.Secure_mode {
 	    log.Printf("HTTPS Server running at %s\n", serverAddr)
 		err = http.ListenAndServeTLS(serverAddr, c.Server.Cert_file, c.Server.Key_file, nil)
 	} else {
@@ -169,30 +167,130 @@ func main() {
 	}
 }
 
-func RedirectHandler(w http.ResponseWriter, req *http.Request) {
-	http.Redirect(w, req, "/", http.StatusMovedPermanently)
+func RedirectHandler(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is an example server.\n"))
 }
 
-func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
- 	filename := c.Paths.Data_storage_path + "/" + vars["id"] + ".h264"
-    f, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-    io.Copy(f, r.Body)
-    r.Body.Close()
-    f.Close()
+
+// Internal Error Reasons
+//const (
+//	SOURCE_TIMEOUT
+//   STREAM_EOS // no error
+//    TRANSCODER_FAILED
+//)
+
+// Signalled errors to client (HTTP response codes)
+
+// rate limit exceded (calls, bytes?)
+// auth failure: token expired, token invalid
+// bitstream invalid
+// stale stream id
+
+type ServerError struct {
+	msg    string
+	code   int
+	status int
 }
 
-func TSIngestHandler(w http.ResponseWriter, req *http.Request) {
+func NewServerError(m string, c int, s int) *ServerError {
+	return &ServerError{msg: m, code: c, status: s}
+}
+
+func (e *ServerError) Error() string { return e.msg }
+func (e *ServerError) Code() int { return e.code }
+func (e *ServerError) Status() int { return e.status }
+
+func (e *ServerError) JSONError() string {
+	return  "{\"errors\":[{\"code\": " +
+	        strconv.Itoa(e.code) +
+	        "\"message\": \"" +
+	        e.msg +
+	        "\"}]}"
+}
+
+
+// new HTTP status codes not defined in net/http
+const (
+	StatusTooManyRequests = 429
+)
+
+
+//func CheckGlobalRateLimit() {}
+
+func AuthenticateRequest(r *http.Request) *ServerError {
+	return nil
+}
+
+
+func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
+// todo
+// - find a way to limit bandwidth (max_ingest_bandwidth_kbit)
+//
+// Ingest Loop (this function is called once per video frame, also for new sessions)
+// - confirm request validity (signature)
+// - confirm request freshness (time issued)
+// - confirm uniqueness of uid (stream not already at EOS) - keep state only until token expires
+
+
+// - [LOCK] check rate limit (max_ingest_sessions)
+// - if this is the first request for this video uid
+//   - check quota (rate_limit_ingest_sessions_per_source)
+//   - launch transcoder
+//	 - set disconnect timeout
+// - if this is a continuation request
+//   - find transcoder pipe
+//   - update disconnect timeout
+// - check quota (rate_limit_ingest_bytes_per_source)
+// - strip headers from data (check for multipart, ascii, form, etc.)
+// - check bitstream validity
+// - forward binary data
+// - update statistics (rate quota)
+// - prepare response headers
+
+ 	// authenticate the request
+ 	err := AuthenticateRequest(r)
+	if err != nil {
+		// return error response in httpcode
+		http.Error(w, err.JSONError(), err.Status())
+		return
+	}
+
+	// extract the video UID from the request
+	vars := mux.Vars(r)
+	uidstring := vars["id"]
+ 	uid, _ := strconv.ParseUint(uidstring, 10, 64)
+
+ 	// get the session object (atomic)
+	session, err := server.FindOrCreateSession(uid)
+
+	if err != nil {
+		// fail return error response in httpcode
+		http.Error(w, err.JSONError(), err.Status())
+		return
+	}
+
+	// open new sessions first
+	if !session.IsOpen() {
+		session.Open(GetTranscodeParams(TRANSCODE_TYPE_AVC))
+	}
+
+	// forward data
+	if session.IsOpen() {
+		session.Write(r.Body)
+	}
+}
+
+func TSIngestHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is a MPEG2-TS handler.\n"))
 }
 
-func ChunkIngestHandler(w http.ResponseWriter, req *http.Request) {
+func ChunkIngestHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is a chunk handler.\n"))
 }
