@@ -15,26 +15,44 @@ import (
 var decoder = schema.NewDecoder()
 
 func RegisterCRUD(r *mux.Router) {
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", ReadWhere).Methods("GET")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", ReadWhere).Methods("GET", "OPTIONS")
 
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", Create).Methods("POST")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}", Create).Methods("POST", "OPTIONS")
 
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Read).Methods("GET")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Update).Methods("PUT")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Delete).Methods("DELETE")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Read).Methods("GET", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Update).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}", Delete).Methods("DELETE", "OPTIONS")
 
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Read).Methods("GET")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Update).Methods("PUT")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Read).Methods("GET", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}", Update).Methods("PUT", "OPTIONS")
 
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", ReadWhere).Methods("GET")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", Create).Methods("POST")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", ReadWhere).Methods("GET", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}", Create).Methods("POST", "OPTIONS")
 
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Read).Methods("GET")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
-	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Read).Methods("GET", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE", "OPTIONS")
+}
+
+func probe(r *http.Request) {
+	log.Println(r.URL)
+	log.Println(r.Method)
+	e, _ := json.Marshal(r)
+	log.Println(string(e))
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
+	log.Println("Create Request")
+	probe(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+	}
+
 	vars := mux.Vars(r)
 
 	var val interface{}
@@ -100,6 +118,18 @@ func Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func Read(w http.ResponseWriter, r *http.Request) {
+	log.Println("Read Request")
+	probe(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	vars := mux.Vars(r)
 
 	var (
@@ -180,6 +210,18 @@ func Read(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReadWhere(w http.ResponseWriter, r *http.Request) {
+	log.Println("ReadWhere Request")
+	probe(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	vars := mux.Vars(r)
 
 	var (
@@ -249,6 +291,17 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
+	log.Println("Update Request")
+	probe(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+	}
+
 	vars := mux.Vars(r)
 	var val interface{}
 
@@ -330,6 +383,17 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
+	log.Println("Delete Request")
+	probe(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+	}
+
 	vars := mux.Vars(r)
 
 	var (

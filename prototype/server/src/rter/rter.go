@@ -31,14 +31,19 @@ func main() {
 
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
 	r.PathPrefix("/resources").Handler(http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
-
-	r.NotFoundHandler = http.HandlerFunc(rootRedirect)
+	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
 
 	http.Handle("/", r)
+	// http.HandleFunc("/", probe)
 
 	log.Println("Launching rtER Server")
 	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func probe(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	log.Println(r.Method)
 }
 
 func rootRedirect(w http.ResponseWriter, r *http.Request) {
