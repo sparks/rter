@@ -10,6 +10,8 @@
 
 #import "RTERViewController.h"
 
+#include "avformat.h"
+
 @implementation RTERAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -19,6 +21,10 @@
     self.viewController = [[RTERViewController alloc] initWithNibName:@"RTERViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
+    
+    // test ffmpeg lib
+    av_register_all();
+        
     return YES;
 }
 

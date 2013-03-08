@@ -107,7 +107,11 @@
     outputDevice = [[AVCaptureVideoDataOutput alloc] init];
     
     // set pixel buffer format
-    outputDevice.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange], (id)kCVPixelBufferPixelFormatTypeKey,
+    /* possible ones to ues for h.264:
+     * kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
+     * kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+     */
+    outputDevice.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange], (id)kCVPixelBufferPixelFormatTypeKey,
                                  nil];
     // set self as the delegate for the output for now
     [outputDevice setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
