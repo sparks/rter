@@ -129,8 +129,10 @@
 
 		function addAsWidget(content) {
 			var $img = $(document.createElement('img')).attr('src', content.filepath);
-
+			var $span = $(document.createElement('div')).text(content.content_id.substring(0, 5));
+			$span.attr('class', 'idspan');
 			var $a = $(document.createElement('a')).append($img);
+			$a.append($span);
 			$a.click(widgetClickFunction);
 			$a.mouseup(widgetMouseUpFunction);
 			$a.attr('href', '#');
@@ -378,16 +380,22 @@
 		var main_map, closeup_map;
 		var locations = new Array();
 		var montreal = new google.maps.LatLng(45.50745, -73.5793);
+		var quebec = new google.maps.LatLng(46.796534,-71.252518);
+
+		function gotLocation(location) {
+			location = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
+			main_map.setCenter(location);
+		}
 
 		function initialize() {
 			var mainMapOptions = {
-				center: montreal,
+				center: quebec,
 				zoom: 10,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 			};
 
 			var closeupMapOptions = {
-				center: montreal,
+				center: quebec,
 				zoom: 17,
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				disableDefaultUI: true,
@@ -402,6 +410,8 @@
 			google.maps.event.addListener(main_map, 'bounds_changed', function() {
 				checkOnScreen();
 			});
+
+			navigator.geolocation.getCurrentPosition(gotLocation);
 		}
 
 		function checkOnScreen() {

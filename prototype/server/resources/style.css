@@ -1,6 +1,6 @@
 body {
 	background-color: rgb(240, 240, 240);
-	margin: 0px auto 75px auto;
+	margin: 0 auto 75px auto;
 	text-align: center;
 	font-family: Arial;
 }
@@ -9,22 +9,22 @@ body {
 	background-color: rgb(255, 255, 255);
 	border-top: 1px solid rgb(170, 170, 170);
 	border-bottom: 1px solid rgb(170, 170, 170);
-	margin: 0px;
-	padding: 10px 0px 10px 0px;
+	margin: 0;
+	padding: 10px 0 10px 0;
 	min-width: 995px;
 	min-height: 320px;
 }
 
 .container {
 	position: relative;
-	margin: 0px auto 0px auto;
+	margin: 0 auto 0 auto;
 	text-align: left;
 	width: 975px;
 }
 
 .gridster ul {
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 	list-style: none;
 }
 
@@ -43,7 +43,7 @@ body {
 	position: absolute;
 	top: 10px;
 	left: 665px;
-	margin: 0px;
+	margin: 0;
 	height: 300px;
 	width: 300px;
 }
@@ -74,7 +74,7 @@ body {
 #closeuplink {
 	text-align: center;
 	width: 620px;
-	margin: 20px auto auto 0px;
+	margin: 20px auto auto 0;
 	display: none;
 }
 
@@ -110,7 +110,7 @@ body {
 	vertical-align: middle;
 	text-align: center;
 	font-size: 11pt;
-	margin: 0px 0px auto auto;
+	margin: 0 0 auto auto;
 }
 
 #closeuptext a:link, #closeuptext a:visited, #closeuptext a:active {
@@ -126,7 +126,7 @@ body {
 	position: absolute;
 	top: 50px;
 	left: 665px;
-	margin: 0px;
+	margin: 0;
 	height: 300px;
 	width: 300px;
 	z-index: 2;
@@ -137,14 +137,14 @@ body {
 	position: absolute;
 	top: 50px;
 	left: 665px;
-	margin: 0px;
+	margin: 0;
 	height: 300px;
 	width: 300px;
 }
 
 #closeup_close {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	left: 990px;
 	font-size: 10pt;
 }
@@ -160,28 +160,28 @@ body {
 
 #header {
 	text-align: left;
-	margin: 0px auto 40px auto;
+	margin: 0 auto 40px auto;
 }
 
 #titleblock {
-	margin: 10px 0px 0px 80px;
+	margin: 10px 0 0 80px;
 }
 
 #rter {
-	margin: 0px 0px 0px 20px;
+	margin: 0 0 0 20px;
 	float: left;
 }
 
 #titleblock h2 {
-	margin: 0px;
+	margin: 0;
 	padding-top: 7px;
 	font-size: 11pt;
 }
 
 #titleblock p {
 	font-size: 9pt;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 #submit {
@@ -221,13 +221,13 @@ body {
 
 #offline {
 	position: fixed;
-	top: 0px;
-	right: 0px;
+	top: 0;
+	right: 0;
 	background-color: rgb(200, 50, 0);
 	color: rgb(200, 200, 200);
 	font-weight: bold;
 	width: 250px;
-	padding: 10px 0px 10px 0px;
+	padding: 10px 0 10px 0;
 	display: none;
 	z-index: 100;
 }
@@ -239,4 +239,18 @@ body {
 	padding: 10px;
 	background-color: rgb(0, 0, 0);
 	color: rgb(255, 255, 255);
+}
+
+.idspan {
+	font-size: 8pt;
+	display: block;
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: white;
+	height: 17pt;
+	line-height: 17pt;
+	padding-left: 5px;
+	padding-right: 5px;
+	top: 0;
+	z-index: 10;
 }

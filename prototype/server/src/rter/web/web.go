@@ -48,6 +48,7 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
 		http.ServeFile(w, r, filepath.Join(utils.TemplatePath, r.URL.Path))
 	} else {
+		templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "index.html")))
 		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
