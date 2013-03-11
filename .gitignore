@@ -4,6 +4,7 @@
 *.png
 *.jpg
 *.pem
+*.a
 
 # Folders
 bin
