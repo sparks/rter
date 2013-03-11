@@ -15,12 +15,17 @@ import (
 func main() {
 	setupLogger()
 
-	storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+	if err != nil {
+		log.Fatalf("Failed to open connection to database %v", err)
+	}
+
 	defer storage.CloseStorage()
 
 	r := mux.NewRouter().StrictSlash(true)
 
-	rest.RegisterCRUD(r)
+	crud := rest.CRUDRouter()
+	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 	r.HandleFunc("/submit", web.SubmitHandler)
@@ -34,16 +39,10 @@ func main() {
 	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
 
 	http.Handle("/", r)
-	// http.HandleFunc("/", probe)
 
 	log.Println("Launching rtER Server")
 	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func probe(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	log.Println(r.Method)
 }
 
 func rootRedirect(w http.ResponseWriter, r *http.Request) {

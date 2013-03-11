@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"github.com/bmizerany/assert"
 	"rter/data"
 	"testing"
 	"time"
@@ -20,7 +21,11 @@ var (
 )
 
 func TestOpenStorage(t *testing.T) {
-	OpenStorage("root", "", "tcp", "localhost:3306", "rter")
+	err := OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestInsertRole(t *testing.T) {
@@ -54,9 +59,7 @@ func TestSelectRole(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !structJSONCompare(role, selectedRole) {
-		t.Error("Selected Roles didn't match")
-	}
+	assert.Equal(t, role, selectedRole)
 }
 
 func TestSelectAllRole(t *testing.T) {
@@ -109,9 +112,7 @@ func TestSelectUser(t *testing.T) {
 
 	selectedUser.CreateTime = user.CreateTime //Hack because MySQL will eat part of the timestamp and they won't match
 
-	if !structJSONCompare(user, selectedUser) {
-		t.Error("Selected Users didn't match")
-	}
+	assert.Equal(t, user, selectedUser)
 }
 
 func TestSelectAllUser(t *testing.T) {
@@ -164,9 +165,7 @@ func TestSelectUserDirection(t *testing.T) {
 
 	selectedDirection.UpdateTime = direction.UpdateTime //hack
 
-	if !structJSONCompare(direction, selectedDirection) {
-		t.Error("Selected UserDirections didn't match")
-	}
+	assert.Equal(t, direction, selectedDirection)
 }
 
 func TestInsertItem(t *testing.T) {
@@ -207,9 +206,7 @@ func TestSelectItem(t *testing.T) {
 	selectedItem.StartTime = item.StartTime //hack
 	selectedItem.StopTime = item.StopTime   //hack
 
-	if !structJSONCompare(item, selectedItem) {
-		t.Error("Selected Items didn't match")
-	}
+	assert.Equal(t, item, selectedItem)
 }
 
 func TestSelectAllItem(t *testing.T) {
@@ -249,9 +246,7 @@ func TestSelectItemComment(t *testing.T) {
 
 	selectedComment.UpdateTime = comment.UpdateTime
 
-	if !structJSONCompare(comment, selectedComment) {
-		t.Error("Selected ItemComments didn't match")
-	}
+	assert.Equal(t, comment, selectedComment)
 }
 
 func TestInsertTerm(t *testing.T) {
@@ -282,9 +277,7 @@ func TestSelectTerm(t *testing.T) {
 
 	selectedTerm.UpdateTime = term.UpdateTime
 
-	if !structJSONCompare(term, selectedTerm) {
-		t.Error("Selected Terms didn't match")
-	}
+	assert.Equal(t, term, selectedTerm)
 }
 
 func TestSelectAllTerm(t *testing.T) {
@@ -323,9 +316,7 @@ func TestSelectTermRanking(t *testing.T) {
 
 	selectedRanking.UpdateTime = ranking.UpdateTime
 
-	if !structJSONCompare(ranking, selectedRanking) {
-		t.Error("Selected TermRankings didn't match")
-	}
+	assert.Equal(t, ranking, selectedRanking)
 }
 
 func TestDeleteTerm(t *testing.T) {
