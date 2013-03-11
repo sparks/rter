@@ -88,7 +88,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
-		val = new(data.User)
+		user := new(data.User)
+		user.HashAndSalt()
+
+		val = user
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":

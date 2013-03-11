@@ -124,7 +124,7 @@ func TestSelectAllUser(t *testing.T) {
 	}
 }
 
-func TestInsertUserDirection(t *testing.T) {
+func TestUpdateUserDirection(t *testing.T) {
 	direction = new(data.UserDirection)
 	direction.UserID = user.ID
 	direction.Command = "none"
@@ -132,17 +132,6 @@ func TestInsertUserDirection(t *testing.T) {
 	direction.Lat = 123.234
 	direction.Lng = -74.234
 	direction.UpdateTime = time.Now()
-
-	err := Insert(direction)
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestUpdateUserDirection(t *testing.T) {
-	direction.Command = "look"
-	direction.Heading = -50.4
 
 	err := Update(direction)
 
@@ -289,13 +278,13 @@ func TestSelectAllTerm(t *testing.T) {
 	}
 }
 
-func TestInsertTermRanking(t *testing.T) {
+func TestUpdateTermRanking(t *testing.T) {
 	ranking = new(data.TermRanking)
 	ranking.Term = term.Term
 	ranking.Ranking = "1,2,3,4,5"
 	ranking.UpdateTime = time.Now()
 
-	err := Insert(ranking)
+	err := Update(ranking)
 
 	if err != nil {
 		t.Error(err)
