@@ -12,15 +12,15 @@
 // - Common Server Management
 //   - request authentication and group-based access to endpoints
 //   - HTTPS cert/key
-//   - rate control: sessions per source (IP) per time
-//   - rate control: bytes per source (IP) per time
-//   - quota headers
-//   - limit memory/bandwidth consumption
-//   - status endpoint
+//   - rate control: sessions per source (IP) per time -> Redis
+//   - rate control: bytes per source (IP) per time -> Redis
+//   - insert quota headers into replies
+//   - limit bandwidth consumption
+//   - implement server status endpoint
 // - AVC Transcoding Pipeline
 //   - ffmpeg parameter assembly (HLS, Thumb, Poster, MP4, OGG)
 //	 - process management (start/stop/monitor)
-//   - EOS/timeout/close-session handling (and uniqueness assumption)
+//   - EOS/timeout/close-session handling (and uniqueness assumption) -> Redis
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
 // - TS Transcoding Pipeline
 // - File Download
@@ -72,6 +72,7 @@ func main() {
 /*
 	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/ogg", OGGFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/webm", WEBMFileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/m3u8", M3U8FileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/mpd", MPDFileHandler).Methods("GET")
 
@@ -168,7 +169,7 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 
 	// open new sessions with specified type of request endpoint
 	if !session.IsOpen() {
-		session.Open(TRANSCODE_TYPE_AVC)
+		session.Open(TC_INGEST_AVC)
 	}
 
 	// forward data

@@ -59,7 +59,7 @@ func (s *TranscodeSession) Open(t int) *ServerError {
 	if s.IsOpen() { return nil }
 
 	s.Type = t
-	s.Command = GetTranscodeParams(t)
+	s.Command = BuildTranscodeCommand(s)
 	log.Printf("Opening session: %s", s.Command)
 	// create pipe
 
@@ -113,7 +113,7 @@ func (s *TranscodeSession) Write(r *http.Request) *ServerError {
 
 	// old code below (appending to file)
 	idstr := strconv.FormatUint(s.UID, 10)
-	filename := c.Paths.Data_storage_path + "/" + idstr + ".h264"
+	filename := c.Transcode.Mp4.Path + "/" + idstr + ".h264"
     f, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
     io.Copy(f, r.Body)
     r.Body.Close()
