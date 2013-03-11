@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
@@ -28,7 +29,10 @@ func main() {
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
-	r.HandleFunc("/submit", web.SubmitHandler)
+	r.HandleFunc("/submit", web.SubmitHandler).Methods("POST")
+	r.HandleFunc("/submit", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(utils.TemplatePath, "v1", "submit.html"))
+	}).Methods("GET")
 
 	r.PathPrefix("/ajax").HandlerFunc(web.ClientAjax)
 

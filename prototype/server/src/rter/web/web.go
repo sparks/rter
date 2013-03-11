@@ -45,13 +45,9 @@ var templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePa
 var writeLock sync.Mutex
 
 func ClientHandler(w http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Path) > 1 {
-		http.ServeFile(w, r, filepath.Join(utils.TemplatePath, r.URL.Path))
-	} else {
-		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+	err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -69,7 +65,7 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		path := filepath.Join(utils.UploadPath, "client", "default.png")
 		path = path[len(utils.RterDir):]
-		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
+		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, \"web\", ?, ?, ?);", id, path, description, url)
 	} else {
 		os.Mkdir(filepath.Join(utils.UploadPath, "client"), os.ModeDir|0755)
 
@@ -89,7 +85,7 @@ func SubmitHandler(w http.ResponseWriter, r *http.Request) {
 
 		path = path[len(utils.RterDir):]
 
-		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, ?, ?, ?);", id, path, description, url)
+		storage.MustExec("INSERT INTO content (content_id, content_type, filepath, description, url) VALUES(?, \"web\", ?, ?, ?);", id, path, description, url)
 	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
