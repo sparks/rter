@@ -29,31 +29,30 @@ body {
     text-align: center;
 }
 
-#angularsortable {
-	position: absolute;
-	top: 0;
-	left: 400px;
-}
-
-#jquerysortable {
-	position: absolute;
-	top: 0;
-	left: 800px;
-
+.mirror li {
+	background: #AAE;
 }
 
 #angularmirror {
 	position: absolute;
 	top: 0;
 	left: 0;
+	margin: 0;
+	padding: 0;
 }
 
-/*
-body {
-    font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
-    font-size: 62.5%;
+#angularsortable {
+	position: absolute;
+	top: 0;
+	left: 400px;
+	margin: 0;
+	padding: 0;
 }
-#sortable { list-style-type: none; margin: 0; padding: 0; width: 450px; }
-#sortable li { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 100px; height: 90px; font-size: 4em; text-align: center; }
 
-*/
+#jquerysortable {
+	position: absolute;
+	top: 0;
+	left: 800px;
+	margin: 0;
+	padding: 0;
+}
