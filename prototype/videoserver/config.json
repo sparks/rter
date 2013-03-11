@@ -2,6 +2,7 @@
 	"server": {
 		"addr": "127.0.0.1",
 		"port": 6666,
+		"production_mode": false,
 		"secure_mode": false,
 		"cert_file": "",
 		"key_file": ""
@@ -23,15 +24,36 @@
 		"ts": true,
 		"chunk": false
 	},
-	"paths": {
-		"storage": "./data"
-	},
 	"transcode": {
-		"hls": true,
-		"mp4": false,
-		"ogg": false,
-		"dash": false,
-		"thumb": true,
-		"poster": true
+		"hls": {
+			"enabled": true,
+			"segment_length": 2,
+			"path": "./data/hls"
+		},
+		"dash": {
+			"enabled": false,
+			"segment_length": 2,
+			"path": "./data/dash"
+		},
+		"mp4": {
+			"enabled": false,
+			"path": "./data"
+		},
+		"ogg":  {
+			"enabled": false,
+			"path": "./data"
+		},
+		"webm":  {
+			"enabled": false,
+			"path": "./data"
+		},
+		"thumb":  {
+			"enabled": true,
+			"path": "./data"
+		},
+		"poster":  {
+			"enabled": true,
+			"path": "./data"
+		}
 	}
 }

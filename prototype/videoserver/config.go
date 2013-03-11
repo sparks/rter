@@ -20,6 +20,7 @@ type ServerConfig struct {
 	Server struct {
 		Addr string `json:"addr"`
 		Port uint64 `json:"port"`
+		Production_mode bool `json:"production_mode"`
 		Secure_mode bool `json:"secure_mode"`
 		Cert_file string `json:"cert_file"`
 		Key_file string `json:"key_file"`
@@ -44,18 +45,38 @@ type ServerConfig struct {
 		Enable_ts_ingest bool `json:"ts"`
 		Enable_chunk_ingest bool `json:"chunk"`
 	}
-	// paths
-	Paths struct {
-		Data_storage_path string `json:"storage"`
-	}
 	// transcode
 	Transcode struct {
-		Enable_hls_transcode bool `json:"hls"`
-		Enable_mp4_transcode bool `json:"mp4"`
-		Enable_ogg_transcode bool `json:"ogg"`
-		Enable_dash_transcode bool `json:"dash"`
-		Enable_thumb_transcode bool `json:"thumb"`
-		Enable_poster_transcode bool `json:"poster"`
+		Hls struct {
+			Enabled bool `json:"enabled"`
+			Segment_length uint64 `json:"segment_length"`
+			Path string `json:"path"`
+		}
+		Dash struct {
+			Enabled bool `json:"enabled"`
+			Segment_length uint64 `json:"segment_length"`
+			Path string `json:"path"`
+		}
+		Mp4 struct {
+			Enabled bool `json:"enabled"`
+			Path string `json:"path"`
+		}
+		Ogg struct {
+			Enabled bool `json:"enabled"`
+			Path string `json:"path"`
+		}
+		Webm struct {
+			Enabled bool `json:"enabled"`
+			Path string `json:"path"`
+		}
+		Thumb struct {
+			Enabled bool `json:"enabled"`
+			Path string `json:"path"`
+		}
+		Poster struct {
+			Enabled bool `json:"enabled"`
+			Path string `json:"path"`
+		}
 	}
 }
 
@@ -67,6 +88,7 @@ func ParseConfig(c *ServerConfig) {
 	// set default values
 	c.Server.Addr = "127.0.0.1"
 	c.Server.Port = 8080
+	c.Server.Production_mode = false
 	c.Server.Secure_mode = false
 	c.Server.Cert_file = ""
 	c.Server.Key_file = ""
@@ -81,13 +103,22 @@ func ParseConfig(c *ServerConfig) {
 	c.Ingest.Enable_avc_ingest = true
 	c.Ingest.Enable_ts_ingest = true
 	c.Ingest.Enable_chunk_ingest = false
-	c.Paths.Data_storage_path = "./data"
-	c.Transcode.Enable_hls_transcode = true
-	c.Transcode.Enable_mp4_transcode = false
-	c.Transcode.Enable_ogg_transcode = false
-	c.Transcode.Enable_dash_transcode = false
-	c.Transcode.Enable_thumb_transcode = true
-	c.Transcode.Enable_poster_transcode = true
+	c.Transcode.Hls.Enabled = false
+	c.Transcode.Hls.Segment_length = 2
+	c.Transcode.Hls.Path = "./data/hls"
+	c.Transcode.Dash.Enabled = false
+	c.Transcode.Dash.Segment_length = 2
+	c.Transcode.Dash.Path = "./data/dash"
+	c.Transcode.Mp4.Enabled = true
+	c.Transcode.Mp4.Path = "./data"
+	c.Transcode.Ogg.Enabled = false
+	c.Transcode.Ogg.Path = "./data"
+	c.Transcode.Webm.Enabled = false
+	c.Transcode.Webm.Path = "./data"
+	c.Transcode.Thumb.Enabled = false
+	c.Transcode.Thumb.Path = "./data"
+	c.Transcode.Poster.Enabled = false
+	c.Transcode.Poster.Path = "./data"
 
 	// read config
     jsonconfig, err := ioutil.ReadFile(*configfile)
@@ -102,4 +133,8 @@ func ParseConfig(c *ServerConfig) {
     }
 
     log.Printf("ServerConfig: %+v\n", c)
+
+    if c.Server.Production_mode && !c.Server.Secure_mode {
+    	log.Printf("Warning: HTTPS is strongly recommended for production mode!")
+    }
 }

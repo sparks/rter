@@ -59,13 +59,9 @@ var (
 	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "Transcoder write on closed pipe")
 )
 
-//	ErrSessionQuotaExceded = errors.New()
-//)
-//const (
-//	SOURCE_TIMEOUT
-//   STREAM_EOS // no error
-//    TRANSCODER_FAILED
-//)
+//	ErrSessionQuotaExceded
+//	ServerErrorClientTimeout
+//  ServerErrorEos
 
 // AUTH
 // auth failure: token expired, token invalid, no permissions on endpoint
@@ -75,7 +71,7 @@ var (
 // bitstream invalid
 // ingest stream already ended
 // DOWNLOAD
-// unknown resource id (stream, segment, thumb, poster)
+// unknown resource id (stream, segment, thumb, poster) -> 404
 //
 
 
