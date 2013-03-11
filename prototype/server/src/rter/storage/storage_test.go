@@ -78,7 +78,6 @@ func TestInsertUser(t *testing.T) {
 	user.Salt = "serioussalt"
 	user.Role = role.Title
 	user.TrustLevel = 1
-	user.CreateTime = time.Now()
 
 	err := Insert(user)
 
@@ -131,7 +130,6 @@ func TestUpdateUserDirection(t *testing.T) {
 	direction.Heading = 12.123
 	direction.Lat = 123.234
 	direction.Lng = -74.234
-	direction.UpdateTime = time.Now()
 
 	err := Update(direction)
 
@@ -212,7 +210,6 @@ func TestInsertItemComment(t *testing.T) {
 	comment.ItemID = item.ID
 	comment.AuthorID = user.ID
 	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-	comment.UpdateTime = time.Now()
 
 	err := Insert(comment)
 
@@ -243,7 +240,6 @@ func TestInsertTerm(t *testing.T) {
 	term.Term = "testterm"
 	term.Automated = false
 	term.AuthorID = user.ID
-	term.UpdateTime = time.Now()
 
 	err := Insert(term)
 
@@ -282,7 +278,6 @@ func TestUpdateTermRanking(t *testing.T) {
 	ranking = new(data.TermRanking)
 	ranking.Term = term.Term
 	ranking.Ranking = "1,2,3,4,5"
-	ranking.UpdateTime = time.Now()
 
 	err := Update(ranking)
 
