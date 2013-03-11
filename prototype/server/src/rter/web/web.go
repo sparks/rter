@@ -40,7 +40,7 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "index.html")))
+var templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "v1", "index.html")))
 
 var writeLock sync.Mutex
 
@@ -48,7 +48,6 @@ func ClientHandler(w http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Path) > 1 {
 		http.ServeFile(w, r, filepath.Join(utils.TemplatePath, r.URL.Path))
 	} else {
-		templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "index.html")))
 		err := templates.ExecuteTemplate(w, "index.html", fetchPageContent())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
