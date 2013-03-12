@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"bytes"
 	"log"
+	"os"
 )
 
 const (
@@ -34,14 +35,14 @@ type TemplateData struct {
 }
 
 const (
-	TC_ARG_TS2HLS string = " -vsync 2 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}-%09d.ts"
-	TC_ARG_AVC2HLS string = " -vsync 0 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}-%09d.ts"
+	TC_ARG_TS2HLS string = " -vsync 2 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}/hls/%09d.ts"
+	TC_ARG_AVC2HLS string = " -vsync 0 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}/hls/%09d.ts"
 	TC_ARG_DASH string = ""
-	TC_ARG_MP4 string = " -codec copy {{.C.Transcode.Mp4.Path}}/{{.S.UID}}.mp4 "
-	TC_ARG_OGG string = " -codec:v libtheora -b:v 600k -codec:a libvorbis -b:a 128k {{.C.Transcode.Ogg.Path}}/{{.S.UID}}.ogv "
-	TC_ARG_WBEM string = " -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k -f webm {{.C.Transcode.Webm.Path}}/{{.S.UID}}.webm "
-	TC_ARG_THUMB string = " -vsync 1 -r 0.5 -f image2 -s 160x90 {{.C.Transcode.Thumb.Path}}/thumb-{{.S.UID}}-%09d.jpg "
-	TC_ARG_POSTER string = " -vsync 1 -r 0.5 -f image2 {{.C.Transcode.Poster.Path}}/poster-{{.S.UID}}-%09d.jpg "
+	TC_ARG_MP4 string = " -codec copy {{.C.Transcode.Mp4.Path}}/{{.S.UID}}/{{.S.UID}}.mp4 "
+	TC_ARG_OGG string = " -codec:v libtheora -b:v 600k -codec:a libvorbis -b:a 128k {{.C.Transcode.Ogg.Path}}/{{.S.UID}}/{{.S.UID}}.ogv "
+	TC_ARG_WBEM string = " -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k -f webm {{.C.Transcode.Webm.Path}}/{{.S.UID}}/{{.S.UID}}.webm "
+	TC_ARG_THUMB string = " -vsync 1 -r 0.5 -f image2 -s 160x90 {{.C.Transcode.Thumb.Path}}/{{.S.UID}}/thumb/%09d.jpg "
+	TC_ARG_POSTER string = " -vsync 1 -r 0.5 -f image2 {{.C.Transcode.Poster.Path}}/{{.S.UID}}/poster/%09d.jpg "
 )
 // -ss 00:00:10 -vframes 1
 
@@ -60,6 +61,74 @@ func IsMimeTypeValid(t int, m string) bool {
 	return true
 
 
+}
+
+func createOutputDirectories(idstr string) *ServerError {
+
+	// HLS: <hls-data-path>/<id>/hls
+	if c.Transcode.Hls.Enabled {
+		p := c.Transcode.Hls.Path + "/" + idstr + "/hls"
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// DASH: <dash-data-path>/<id>/dash
+	if c.Transcode.Dash.Enabled {
+		p := c.Transcode.Dash.Path + "/" + idstr + "/dash"
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// MP4: <*-data-path>/<id>
+	if c.Transcode.Mp4.Enabled {
+		p := c.Transcode.Mp4.Path + "/" + idstr
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// OGG: <*-data-path>/<id>
+	if c.Transcode.Ogg.Enabled {
+		p := c.Transcode.Ogg.Path + "/" + idstr
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// WEBM: <*-data-path>/<id>
+	if c.Transcode.Webm.Enabled {
+		p := c.Transcode.Webm.Path + "/" + idstr
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// Thumb: <*-data-path>/<id>/thumb
+	if c.Transcode.Thumb.Enabled {
+		p := c.Transcode.Thumb.Path + "/" + idstr + "/thumb"
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	// Poster: <*-data-path>/<id>/poster
+	if c.Transcode.Poster.Enabled {
+		p := c.Transcode.Poster.Path + "/" + idstr + "/poster"
+		if err := os.MkdirAll(p, PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return ServerErrorIO
+		}
+	}
+
+	return nil
 }
 
 

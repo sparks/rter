@@ -28,7 +28,7 @@
 	},
 	"transcode": {
 		"command": "/usr/local/bin/ffmpeg",
-		"log_file_path": "./data",
+		"log_file_path": "./data/log",
 		"hls": {
 			"enabled": true,
 			"segment_length": 2,

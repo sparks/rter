@@ -28,6 +28,7 @@ const (
 type TranscodeSession struct {
 	Server		*ServerState	// link to server used for signalling session state
 	UID			uint64			// video UID
+	idstr		string			// stringyfied UID
 	Type		int				// ingest type id TRANSCODE_TYPE_XX
 	state		int				// our state (not the state of the external process)
 	Args		string			// command line arguments for transcoder
@@ -53,6 +54,9 @@ func NewTranscodeSession(srv *ServerState, id uint64) *TranscodeSession {
 		UID: id,
 		state: TC_INIT,
 	}
+
+	// stringify ID
+	s.idstr = strconv.FormatUint(s.UID, 10)
 
 	// register with server
 	srv.SessionUpdate(id, TC_INIT)
@@ -83,6 +87,11 @@ func (s *TranscodeSession) Open(t int) *ServerError {
 	s.Args = BuildTranscodeCommand(s)
 	log.Printf("Opening transcoder session: %s", s.Args)
 
+	// create output directory structure
+	if err := createOutputDirectories(s.idstr); err != nil {
+		return err
+	}
+
 	// create pipe
 	pr, pw, err := os.Pipe()
 	if err != nil {
@@ -92,8 +101,7 @@ func (s *TranscodeSession) Open(t int) *ServerError {
 	s.Pipe = pw
 
 	// create logfile
-	idstr := strconv.FormatUint(s.UID, 10)
-	logname := c.Transcode.Log_file_path + "/" + idstr + ".log"
+	logname := c.Transcode.Log_file_path + "/" + s.idstr + ".log"
 	s.LogFile, _ = os.OpenFile(logname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 
 	// start transcode process
@@ -150,17 +158,15 @@ func (s *TranscodeSession) Close() *ServerError {
 		// assuming the transcoder process has finished
 	}
 
-	log.Printf("Waiting on process")
+	log.Printf("Waiting for transcoder shutdown")
 	if s.Pstate, err = s.Proc.Wait(); err != nil {
 		log.Printf("Transcoder exited with error: %s and state %s", err, s.Pstate.String())
 		return nil
-	} else {
-		log.Printf("Transcoder exit state: %s", s.Pstate.String())
 	}
 
-	log.Printf("Transcoder exited state %s", s.Pstate.String())
+	log.Printf("Transcoder exit state is %s", s.Pstate.String())
 
-	// get final process statistics
+	// get process statistics
 	s.CpuSystem = s.Pstate.SystemTime()
 	s.CpuUser = s.Pstate.UserTime()
 

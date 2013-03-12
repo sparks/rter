@@ -43,6 +43,7 @@ import (
 	"net/http"
 	"strconv"
 	"log"
+	"os"
 )
 
 var c ServerConfig
@@ -52,10 +53,14 @@ func main() {
 	var err error
 	ParseConfig(&c)
 
-	// set up endpoints
+	// create path for transcoder logfiles
+	if err = os.MkdirAll(c.Transcode.Log_file_path, PERM_DIR); err != nil {
+		log.Fatal("cannot create log directory %s: %s", c.Transcode.Log_file_path, err)
+	}
+
+	// set up HTTP endpoints
 	r := mux.NewRouter()
 	s := r.PathPrefix("/v1").Subrouter()
-
 
 	if c.Ingest.Enable_avc_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/avc", AVCIngestHandler).Methods("POST")
@@ -80,8 +85,8 @@ func main() {
 	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}", DASHSegmentHandler).Methods("GET")
 
 
-	s.HandleFunc("/previews/{id:[0-9]+}/{thumbid:[0-9]+}", ThumbHandler).Methods("GET")
-	s.HandleFunc("/previews/{id:[0-9]+}/{posterid:[0-9]+}", PosterHandler).Methods("GET")
+	s.HandleFunc("/previews/{id:[0-9]+}/thumb/{thumbid:[0-9]+}", ThumbHandler).Methods("GET")
+	s.HandleFunc("/previews/{id:[0-9]+}/poster/{posterid:[0-9]+}", PosterHandler).Methods("GET")
 */
 
 	// catch all (redirect non-registered routes to index '/')

@@ -61,6 +61,7 @@ var (
 	ServerErrorWrongMimetype   = NewServerError(3, http.StatusUnsupportedMediaType, "wrong MIME type for enpoint")
 	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "transcoder write on closed pipe")
 	ServerErrorEOS             = NewServerError(5, http.StatusForbidden, "already at end-of-stream state")
+	ServerErrorIO              = NewServerError(6, http.StatusForbidden, "storage failed")
 )
 
 //	ErrSessionQuotaExceded
@@ -142,7 +143,7 @@ func (s *ServerState) SessionUpdate(id uint64, state int) {
 			// here we only have to deal with session shutdown
 			sess := s.activeSessions[id]
 			log.Printf("Closing session %d: %d calls, %d bytes in, %d bytes out, %s user, %s sys",
-					   id, sess.BytesIn, sess.BytesOut, sess.CallsIn, sess.CpuUser, sess.CpuSystem)
+					   id, sess.CallsIn, sess.BytesIn, sess.BytesOut, sess.CpuUser.String(), sess.CpuSystem.String())
 			// store self-deleting entry
 			s.closedSessions[id] =
 				time.AfterFunc(time.Duration(c.Server.Session_maxage) * time.Second,

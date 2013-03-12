@@ -9,10 +9,17 @@ import (
 	"io/ioutil"
 	"flag"
 	"log"
+	"os"
 )
 
 // Command Line Options
 var configfile = flag.String("config", "config.json", "server config file")
+
+// file permissions
+const (
+	PERM_FILE os.FileMode = 0600
+	PERM_DIR  os.FileMode = 0700
+)
 
 // Server Configuration
 type ServerConfig struct {
@@ -110,7 +117,7 @@ func ParseConfig(c *ServerConfig) {
 	c.Ingest.Enable_ts_ingest = true
 	c.Ingest.Enable_chunk_ingest = false
 	c.Transcode.Command = "ffmpeg"
-	c.Transcode.Log_file_path = "./data"
+	c.Transcode.Log_file_path = "./data/log"
 	c.Transcode.Hls.Enabled = false
 	c.Transcode.Hls.Segment_length = 2
 	c.Transcode.Hls.Path = "./data"
