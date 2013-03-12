@@ -12,17 +12,16 @@
 // - Common Server Management
 //   - request authentication and group-based access to endpoints
 //   - HTTPS cert/key
-//   - rate control: sessions per source (IP) per time -> Redis
-//   - rate control: bytes per source (IP) per time -> Redis
+//   - rate control: enforce sessions per source (IP) per time -> Redis
+//   - rate control: enforce bytes per source (IP) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
 //   - implement server status endpoint
 // - AVC Transcoding Pipeline
-//   - ffmpeg parameter assembly (HLS, Thumb, Poster, MP4, OGG)
-//	 - process management (start/stop/monitor)
-//   - EOS/timeout/close-session handling (and uniqueness assumption) -> Redis
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
+//   - session uniqueness -> Redis
 // - TS Transcoding Pipeline
+//   - ... same as AVC, different ffmpeg parameters maybe?
 // - File Download
 //   - cache headers, mime-types, text file compression
 //   - byte range support
@@ -61,7 +60,7 @@ func main() {
 	if c.Ingest.Enable_avc_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/avc", AVCIngestHandler).Methods("POST")
 	}
-
+/*
 	if c.Ingest.Enable_ts_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST")
 	}
@@ -69,7 +68,7 @@ func main() {
 	if c.Ingest.Enable_chunk_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
-/*
+
 	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/ogg", OGGFileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/webm", WEBMFileHandler).Methods("GET")
@@ -116,9 +115,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-//func CheckGlobalRateLimit() {}
-
 func AuthenticateRequest(r *http.Request) *ServerError {
+
+	// check auth headers
+
 	return nil
 }
 
@@ -129,7 +129,6 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 // - confirm request validity (signature)
 // - confirm request freshness (time issued)
 // - confirm uniqueness of uid (stream not already at EOS) - keep state only until token expires
-
 
 // - [LOCK] check rate limit (max_ingest_sessions)
 // - if this is the first request for this video uid
@@ -151,31 +150,32 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 	uidstring := vars["id"]
 
  	// authenticate the request
- 	err := AuthenticateRequest(r)
-	if err != nil {
+ 	var err *ServerError
+ 	var session *TranscodeSession
+
+ 	// confirm validity and freshness of request
+	if err = AuthenticateRequest(r); err != nil {
 		// return error response in httpcode
 		http.Error(w, err.JSONError(), err.Status())
 		return
 	}
 
- 	// get the session object (atomic)
-	session, err := server.FindOrCreateSession(uidstring)
-
-	if err != nil {
-		// fail return error response in httpcode
+ 	// get or create the session object if quota permits
+	if session, err = server.FindOrCreateSession(uidstring, TC_INGEST_AVC); err != nil {
+		// return error response in httpcode
 		http.Error(w, err.JSONError(), err.Status())
 		return
 	}
 
-	// open new sessions with specified type of request endpoint
-	if !session.IsOpen() {
-		session.Open(TC_INGEST_AVC)
-	}
-
 	// forward data
 	if session.IsOpen() {
-		session.Write(r)
+		if err = session.Write(r); err != nil {
+			// return error response in httpcode
+			http.Error(w, err.JSONError(), err.Status())
+		}
 	}
+
+	// write response headers
 }
 
 func TSIngestHandler(w http.ResponseWriter, r *http.Request) {

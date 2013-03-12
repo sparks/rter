@@ -7,6 +7,7 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 	"log"
 )
 
@@ -15,11 +16,13 @@ import (
 
 type ServerState struct {
 	activeSessions map[uint64]*TranscodeSession
+	closedSessions map[uint64]*time.Timer
 }
 
 // instantiate global state variable
 var server = ServerState {
 	activeSessions: make(map[uint64]*TranscodeSession),
+	closedSessions: make(map[uint64]*time.Timer),
 }
 
 
@@ -56,12 +59,12 @@ var (
 	ServerErrorBadID           = NewServerError(1, http.StatusForbidden, "malformed id")
 	ServerErrorQuotaExceeded   = NewServerError(2, http.StatusForbidden, "too many active server sessions")
 	ServerErrorWrongMimetype   = NewServerError(3, http.StatusUnsupportedMediaType, "wrong MIME type for enpoint")
-	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "Transcoder write on closed pipe")
+	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "transcoder write on closed pipe")
+	ServerErrorEOS             = NewServerError(5, http.StatusForbidden, "already at end-of-stream state")
 )
 
 //	ErrSessionQuotaExceded
 //	ServerErrorClientTimeout
-//  ServerErrorEos
 
 // AUTH
 // auth failure: token expired, token invalid, no permissions on endpoint
@@ -69,7 +72,6 @@ var (
 // too many active server sessions (total and per source)
 // bandwidth rate limit exceded for source
 // bitstream invalid
-// ingest stream already ended
 // DOWNLOAD
 // unknown resource id (stream, segment, thumb, poster) -> 404
 //
@@ -82,7 +84,8 @@ var (
 // - session is unique (later across a cluster of ingest servers)
 // - session has not been closed before (stream is already in EOS state)
 // - session is active and transcoder is running
-func (s *ServerState) FindOrCreateSession(idstr string) (*TranscodeSession, *ServerError) {
+//
+func (s *ServerState) FindOrCreateSession(idstr string, t int) (*TranscodeSession, *ServerError) {
 
 	// todo: lock? are http handlers called concurrently? maybe use channel
 	// what happens if a handler is called while another is running on the same video
@@ -94,6 +97,12 @@ func (s *ServerState) FindOrCreateSession(idstr string) (*TranscodeSession, *Ser
  		return nil, ServerErrorBadID
  	}
 
+ 	// ensure uniqueness (session id is non-closed and non-failed)
+ 	if _, found := s.closedSessions[id]; found {
+			log.Printf("Session %d already at EOS", id)
+			return nil, ServerErrorEOS
+ 	}
+
 	// look up session id in map of active sessions
 	session, found := s.activeSessions[id]
 
@@ -101,7 +110,7 @@ func (s *ServerState) FindOrCreateSession(idstr string) (*TranscodeSession, *Ser
 	if !found {
 		if uint64(len(s.activeSessions)) < c.Limits.Max_ingest_sessions {
 			log.Printf("Creating New Session for id=%d", id)
-			session = NewTranscodeSession(id)
+			session = NewTranscodeSession(s, id)
 			s.activeSessions[id] = session
 		} else {
 			log.Printf("Too many active sessions")
@@ -109,6 +118,36 @@ func (s *ServerState) FindOrCreateSession(idstr string) (*TranscodeSession, *Ser
 		}
 	}
 
+	// open new sessions with specified type of request endpoint
+	if !session.IsOpen() {
+		if err := session.Open(t); err != nil {
+			// return error
+			return nil, err
+		}
+	}
+
 	return session, nil
 }
 
+func (s *ServerState) SessionUpdate(id uint64, state int) {
+
+	switch state {
+		default:
+			// fail on unknonw states
+			log.Fatal("Unhandled Session State %d", state)
+		case TC_INIT, TC_RUNNING:
+			// session create is already handled in FindOrCreateSession()
+			return
+		case TC_FAILED, TC_EOS:
+			// here we only have to deal with session shutdown
+			sess := s.activeSessions[id]
+			log.Printf("Closing session %d: %d calls, %d bytes in, %d bytes out, %s user, %s sys",
+					   id, sess.BytesIn, sess.BytesOut, sess.CallsIn, sess.CpuUser, sess.CpuSystem)
+			// store self-deleting entry
+			s.closedSessions[id] =
+				time.AfterFunc(time.Duration(c.Server.Session_maxage) * time.Second,
+	 						   func() { delete(s.closedSessions, id) })
+			delete(s.activeSessions, id)
+			return
+	}
+}
