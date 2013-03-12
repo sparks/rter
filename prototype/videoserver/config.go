@@ -24,6 +24,8 @@ type ServerConfig struct {
 		Secure_mode bool `json:"secure_mode"`
 		Cert_file string `json:"cert_file"`
 		Key_file string `json:"key_file"`
+		Session_timeout uint64 `json:"session_timeout"`
+		Session_maxage uint64 `json:"session_maxage"`
 	}
 	// limits
 	Limits struct {
@@ -47,6 +49,8 @@ type ServerConfig struct {
 	}
 	// transcode
 	Transcode struct {
+		Command string `json:"command"`
+		Log_file_path string `json:"log_file_path"`
 		Hls struct {
 			Enabled bool `json:"enabled"`
 			Segment_length uint64 `json:"segment_length"`
@@ -92,6 +96,8 @@ func ParseConfig(c *ServerConfig) {
 	c.Server.Secure_mode = false
 	c.Server.Cert_file = ""
 	c.Server.Key_file = ""
+	c.Server.Session_timeout = 10   // close after 10 seconds inactivity
+	c.Server.Session_maxage = 3600  // keep state for at most 1 hour
 	c.Limits.Max_memory_mbytes = 128
 	c.Limits.Max_ingest_sessions = 10
 	c.Limits.Max_ingest_bandwidth_kbit = 10000
@@ -103,12 +109,14 @@ func ParseConfig(c *ServerConfig) {
 	c.Ingest.Enable_avc_ingest = true
 	c.Ingest.Enable_ts_ingest = true
 	c.Ingest.Enable_chunk_ingest = false
+	c.Transcode.Command = "ffmpeg"
+	c.Transcode.Log_file_path = "./data"
 	c.Transcode.Hls.Enabled = false
 	c.Transcode.Hls.Segment_length = 2
-	c.Transcode.Hls.Path = "./data/hls"
+	c.Transcode.Hls.Path = "./data"
 	c.Transcode.Dash.Enabled = false
 	c.Transcode.Dash.Segment_length = 2
-	c.Transcode.Dash.Path = "./data/dash"
+	c.Transcode.Dash.Path = "./data"
 	c.Transcode.Mp4.Enabled = true
 	c.Transcode.Mp4.Path = "./data"
 	c.Transcode.Ogg.Enabled = false
