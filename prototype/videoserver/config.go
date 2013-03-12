@@ -57,36 +57,30 @@ type ServerConfig struct {
 	// transcode
 	Transcode struct {
 		Command string `json:"command"`
-		Log_file_path string `json:"log_file_path"`
+		Log_path string `json:"log_path"`
+		Output_path string `json:"output_path"`
 		Hls struct {
 			Enabled bool `json:"enabled"`
 			Segment_length uint64 `json:"segment_length"`
-			Path string `json:"path"`
 		}
 		Dash struct {
 			Enabled bool `json:"enabled"`
 			Segment_length uint64 `json:"segment_length"`
-			Path string `json:"path"`
 		}
 		Mp4 struct {
 			Enabled bool `json:"enabled"`
-			Path string `json:"path"`
 		}
 		Ogg struct {
 			Enabled bool `json:"enabled"`
-			Path string `json:"path"`
 		}
 		Webm struct {
 			Enabled bool `json:"enabled"`
-			Path string `json:"path"`
 		}
 		Thumb struct {
 			Enabled bool `json:"enabled"`
-			Path string `json:"path"`
 		}
 		Poster struct {
 			Enabled bool `json:"enabled"`
-			Path string `json:"path"`
 		}
 	}
 }
@@ -117,23 +111,17 @@ func ParseConfig(c *ServerConfig) {
 	c.Ingest.Enable_ts_ingest = true
 	c.Ingest.Enable_chunk_ingest = false
 	c.Transcode.Command = "ffmpeg"
-	c.Transcode.Log_file_path = "./data/log"
+	c.Transcode.Log_path = "./data/log"
+	c.Transcode.Output_path = "./data"
 	c.Transcode.Hls.Enabled = false
 	c.Transcode.Hls.Segment_length = 2
-	c.Transcode.Hls.Path = "./data"
 	c.Transcode.Dash.Enabled = false
 	c.Transcode.Dash.Segment_length = 2
-	c.Transcode.Dash.Path = "./data"
 	c.Transcode.Mp4.Enabled = true
-	c.Transcode.Mp4.Path = "./data"
 	c.Transcode.Ogg.Enabled = false
-	c.Transcode.Ogg.Path = "./data"
 	c.Transcode.Webm.Enabled = false
-	c.Transcode.Webm.Path = "./data"
 	c.Transcode.Thumb.Enabled = false
-	c.Transcode.Thumb.Path = "./data"
 	c.Transcode.Poster.Enabled = false
-	c.Transcode.Poster.Path = "./data"
 
 	// read config
     jsonconfig, err := ioutil.ReadFile(*configfile)

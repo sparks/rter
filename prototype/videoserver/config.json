@@ -28,36 +28,30 @@
 	},
 	"transcode": {
 		"command": "/usr/local/bin/ffmpeg",
-		"log_file_path": "./data/log",
+		"log_path": "./data/log",
+		"output_path": "./data",
 		"hls": {
 			"enabled": true,
-			"segment_length": 2,
-			"path": "./data"
+			"segment_length": 2
 		},
 		"dash": {
 			"enabled": false,
-			"segment_length": 2,
-			"path": "./data"
+			"segment_length": 2
 		},
 		"mp4": {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"ogg":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"webm":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"thumb":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"poster":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		}
 	}
 }

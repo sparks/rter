@@ -5,6 +5,10 @@
 // Test binary upload to server with
 // curl -i --data-binary @videoserver.go http://localhost:6666/v1/ingest/10/avc
 //
+// Test Http Stream to server
+// ffmpeg -v debug -y -re -i file.m4v -vsync 1 -map 0 -codec copy \
+//    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
+//
 // Unsure
 // - is body already complete when handler is called? if not, how to deal with broken TCP connection
 //
@@ -54,8 +58,8 @@ func main() {
 	ParseConfig(&c)
 
 	// create path for transcoder logfiles
-	if err = os.MkdirAll(c.Transcode.Log_file_path, PERM_DIR); err != nil {
-		log.Fatal("cannot create log directory %s: %s", c.Transcode.Log_file_path, err)
+	if err = os.MkdirAll(c.Transcode.Log_path, PERM_DIR); err != nil {
+		log.Fatal("cannot create log directory %s: %s", c.Transcode.Log_path, err)
 	}
 
 	// set up HTTP endpoints
@@ -65,11 +69,11 @@ func main() {
 	if c.Ingest.Enable_avc_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/avc", AVCIngestHandler).Methods("POST")
 	}
-/*
+
 	if c.Ingest.Enable_ts_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST")
 	}
-
+/*
 	if c.Ingest.Enable_chunk_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
@@ -89,8 +93,10 @@ func main() {
 	s.HandleFunc("/previews/{id:[0-9]+}/poster/{posterid:[0-9]+}", PosterHandler).Methods("GET")
 */
 
-	// catch all (redirect non-registered routes to index '/')
+	// have a single index handler at server URI root
 	r.HandleFunc("/", IndexHandler)
+
+	// catch all (redirect non-registered routes to index '/')
 	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
 
 	// attach router to HTTP(s) server
@@ -116,7 +122,7 @@ func RedirectHandler(w http.ResponseWriter, r *http.Request) {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("This is an example server.\n"))
+	w.Write([]byte("This is the rtER video server.\n"))
 }
 
 
@@ -129,26 +135,32 @@ func AuthenticateRequest(r *http.Request) *ServerError {
 
 
 func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
-//
-// Ingest Loop (this function is called once per video frame, also for new sessions)
-// - confirm request validity (signature)
-// - confirm request freshness (time issued)
-// - confirm uniqueness of uid (stream not already at EOS) - keep state only until token expires
+	GenericIngestHandler(w, r, TC_INGEST_AVC)
+}
 
-// - [LOCK] check rate limit (max_ingest_sessions)
-// - if this is the first request for this video uid
-//   - check quota (rate_limit_ingest_sessions_per_source)
-//   - launch transcoder
-//	 - set disconnect timeout
-// - if this is a continuation request
-//   - find transcoder pipe
-//   - update disconnect timeout
-// - check quota (rate_limit_ingest_bytes_per_source)
-// - strip headers from data (check for multipart, ascii, form, etc.)
-// - check bitstream validity
-// - forward binary data
-// - update statistics (rate quota)
-// - prepare response headers
+func TSIngestHandler(w http.ResponseWriter, r *http.Request) {
+	GenericIngestHandler(w, r, TC_INGEST_TS)
+}
+
+func ChunkIngestHandler(w http.ResponseWriter, r *http.Request) {
+	GenericIngestHandler(w, r, TC_INGEST_CHUNK)
+}
+
+func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
+
+	//
+	// Generic Ingest Loop
+	//
+	// This function is either called once per video frame (frame-wise HTTP PUSH)
+	// or once per source ingest session (multi-part HTTP PUSH)
+	//
+	// - confirm request validity (signature)
+	// - confirm request freshness (time issued)
+	// - confirm uniqueness of uid (stream not already at EOS) - keep state only until token expires
+	// - enforce server rate limit (max_ingest_sessions)
+	// - manage transcoding sessions (create on demand, lookup on request)
+	// - forward request to session for write handling
+	// - forward response to session for setting response headers
 
 	// extract the video UID from the request
 	vars := mux.Vars(r)
@@ -166,7 +178,7 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
  	// get or create the session object if quota permits
-	if session, err = server.FindOrCreateSession(uidstring, TC_INGEST_AVC); err != nil {
+	if session, err = server.FindOrCreateSession(uidstring, t); err != nil {
 		// return error response in httpcode
 		http.Error(w, err.JSONError(), err.Status())
 		return
@@ -177,18 +189,10 @@ func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 		if err = session.Write(r); err != nil {
 			// return error response in httpcode
 			http.Error(w, err.JSONError(), err.Status())
+			return
 		}
+		// write response headers
+		session.SetResponseHeaders(w)
 	}
 
-	// write response headers
-}
-
-func TSIngestHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("This is a MPEG2-TS handler.\n"))
-}
-
-func ChunkIngestHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("This is a chunk handler.\n"))
 }

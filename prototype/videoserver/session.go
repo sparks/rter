@@ -101,12 +101,12 @@ func (s *TranscodeSession) Open(t int) *ServerError {
 	s.Pipe = pw
 
 	// create logfile
-	logname := c.Transcode.Log_file_path + "/" + s.idstr + ".log"
+	logname := c.Transcode.Log_path + "/" + s.idstr + ".log"
 	s.LogFile, _ = os.OpenFile(logname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 
 	// start transcode process
 	var attr os.ProcAttr
-	attr.Dir = "."
+	attr.Dir = c.Transcode.Output_path + "/" + s.idstr
 	attr.Files = []*os.File{pr, s.LogFile, s.LogFile}
 	s.Proc, err = os.StartProcess(c.Transcode.Command, strings.Fields(s.Args), &attr)
 
@@ -235,3 +235,6 @@ func (s *TranscodeSession) HandleTimeout() {
 	s.Close()
 }
 
+func (s *TranscodeSession) SetResponseHeaders(w http.ResponseWriter) {
+
+}
