@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS TermRankings (
 
 INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("responder", 3), ("editor", 7), ("admin", 15);
 INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymous", "", "", "public", 0), ("admin", "", "", "admin", 0);
+INSERT INTO UserDirections (UserID) VALUES (1), (2);
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (

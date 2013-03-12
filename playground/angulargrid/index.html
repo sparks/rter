@@ -7,7 +7,8 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js"></script>
 
 	<script src="http://code.angularjs.org/1.0.2/angular.min.js"></script>
-	<script src="https://raw.github.com/angular-ui/angular-ui/master/build/angular-ui.min.js"></script>
+	<script src="https://raw.github.com/angular-ui/angular-ui/master/common/module.js"></script>
+	<script src="https://raw.github.com/angular-ui/angular-ui/master/modules/directives/sortable/sortable.js"></script>
 
 	<script src="grid.js"></script>
 
@@ -20,17 +21,17 @@
 </head>
 <body>
 	<div ng-controller="Controller" id="angular">
-	   <ul id="angularsortable" class="sortable" ui-sortable ng-model="list">
+	   <ul id="angularmirror" class="sortable mirror">
 			<li ng-repeat="item in list">{{item}}</li>
 	   </ul>
 
-	   <ul id="angularmirror">
+	   <ul id="angularsortable" class="sortable" ui-sortable ng-model="list">
 			<li ng-repeat="item in list">{{item}}</li>
 	   </ul>
 	</div>
 
-	<div class="sortable" id="jquerysortable">
-		<ul>
+	<div id="jquery">
+		<ul class="sortable" id="jquerysortable">
 			<li>1</li>
 			<li>2</li>
 			<li>3</li>
