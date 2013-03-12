@@ -35,21 +35,21 @@ type TemplateData struct {
 
 const (
 	TC_ARG_TS2HLS string = " -vsync 2 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}-%09d.ts"
-	TC_ARG_AVC2HLS string = " -vsync 2 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}-%09d.ts"
+	TC_ARG_AVC2HLS string = " -vsync 0 -copyts -copytb 1 -codec copy -map 0 -f segment -segment_time 2 -segment_format mpegts -segment_list_flags +live -segment_list {{.C.Transcode.Hls.Path}}/{{.S.UID}}.m3u8  {{.C.Transcode.Hls.Path}}/{{.S.UID}}-%09d.ts"
 	TC_ARG_DASH string = ""
 	TC_ARG_MP4 string = " -codec copy {{.C.Transcode.Mp4.Path}}/{{.S.UID}}.mp4 "
 	TC_ARG_OGG string = " -codec:v libtheora -b:v 600k -codec:a libvorbis -b:a 128k {{.C.Transcode.Ogg.Path}}/{{.S.UID}}.ogv "
 	TC_ARG_WBEM string = " -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k -f webm {{.C.Transcode.Webm.Path}}/{{.S.UID}}.webm "
 	TC_ARG_THUMB string = " -vsync 1 -r 0.5 -f image2 -s 160x90 {{.C.Transcode.Thumb.Path}}/thumb-{{.S.UID}}-%09d.jpg "
-	TC_ARG_POSTER string = " -vsync 1 -r 0.5 -f image2 {{.C.Transcode.Poster.Path}}/poster-{{.S.UID}}.jpg "
+	TC_ARG_POSTER string = " -vsync 1 -r 0.5 -f image2 {{.C.Transcode.Poster.Path}}/poster-{{.S.UID}}-%09d.jpg "
 )
 // -ss 00:00:10 -vframes 1
 
 const (
-	TC_CMD_START_PROD string = "ffmpeg -y -re -v quiet -fflags nobuffer -i pipe:0 "
-	TC_CMD_START_DEV string = "ffmpeg -y -re -v debug -fflags nobuffer -i pipe:0 "
-	TC_CMD_END_PROD string = "> /dev/null 2> /dev/null "
-	TC_CMD_END_DEV string = " > {{.C.Transcode.Mp4.Path}}/{{.S.UID}}.log 2>&1 "
+	TC_CMD_START_PROD string = "-y -re -v quiet -fflags nobuffer -i pipe:0 "
+	TC_CMD_START_DEV string = "-y -re -v debug -fflags nobuffer -i pipe:0 "
+	TC_CMD_END_PROD string = ""
+	TC_CMD_END_DEV string = ""
 )
 
 
@@ -73,7 +73,7 @@ func BuildTranscodeCommand(s *TranscodeSession) string {
 	} else { cmd = TC_CMD_START_DEV }
 
 	// segment file formats
-	if c.Transcode.Hls.Enabled { cmd += TC_ARG_TS2HLS }
+	if c.Transcode.Hls.Enabled { cmd += TC_ARG_AVC2HLS }
 	if c.Transcode.Dash.Enabled { cmd += TC_ARG_DASH }
 
 	// full file formats
