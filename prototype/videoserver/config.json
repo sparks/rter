@@ -5,11 +5,13 @@
 		"production_mode": false,
 		"secure_mode": false,
 		"cert_file": "",
-		"key_file": ""
+		"key_file": "",
+		"session_timeout": 10,
+		"session_maxage": 30
 	},
 	"limits": {
 		"max_memory_mbytes": 128,
-		"max_ingest_sessions": 1,
+		"max_ingest_sessions": 10,
 		"max_ingest_bandwidth_kbit": 10000,
 		"rate_limit_enable": false,
 		"rate_limit_ingest_window": 15,
@@ -25,35 +27,31 @@
 		"chunk": false
 	},
 	"transcode": {
+		"command": "/usr/local/bin/ffmpeg",
+		"log_path": "./data/log",
+		"output_path": "./data",
 		"hls": {
 			"enabled": true,
-			"segment_length": 2,
-			"path": "./data/hls"
+			"segment_length": 2
 		},
 		"dash": {
 			"enabled": false,
-			"segment_length": 2,
-			"path": "./data/dash"
+			"segment_length": 2
 		},
 		"mp4": {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"ogg":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"webm":  {
-			"enabled": false,
-			"path": "./data"
+			"enabled": false
 		},
 		"thumb":  {
-			"enabled": true,
-			"path": "./data"
+			"enabled": false
 		},
 		"poster":  {
-			"enabled": true,
-			"path": "./data"
+			"enabled": false
 		}
 	}
 }
