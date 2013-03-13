@@ -10,6 +10,7 @@
 		"session_maxage": 30
 	},
 	"limits": {
+		"max_cpu": 1,
 		"max_memory_mbytes": 128,
 		"max_ingest_sessions": 10,
 		"max_ingest_bandwidth_kbit": 10000,
@@ -39,19 +40,25 @@
 			"segment_length": 2
 		},
 		"mp4": {
-			"enabled": false
+			"enabled": true
 		},
 		"ogg":  {
-			"enabled": false
+			"enabled": true
 		},
 		"webm":  {
-			"enabled": false
+			"enabled": true
 		},
 		"thumb":  {
-			"enabled": false
+			"enabled": true,
+			"size": "160x90",
+			"step": 2
 		},
 		"poster":  {
-			"enabled": false
+			"enabled": true,
+			"size": "auto",
+			"count": 1,
+			"skip": 10,
+			"step": 0
 		}
 	}
 }

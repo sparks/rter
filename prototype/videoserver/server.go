@@ -141,9 +141,7 @@ func (s *ServerState) SessionUpdate(id uint64, state int) {
 			return
 		case TC_FAILED, TC_EOS:
 			// here we only have to deal with session shutdown
-			sess := s.activeSessions[id]
-			log.Printf("Closing session %d: %d calls, %d bytes in, %d bytes out, %s user, %s sys",
-					   id, sess.CallsIn, sess.BytesIn, sess.BytesOut, sess.CpuUser.String(), sess.CpuSystem.String())
+
 			// store self-deleting entry
 			s.closedSessions[id] =
 				time.AfterFunc(time.Duration(c.Server.Session_maxage) * time.Second,

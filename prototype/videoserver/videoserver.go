@@ -5,31 +5,38 @@
 // Test binary upload to server with
 // curl -i --data-binary @videoserver.go http://localhost:6666/v1/ingest/10/avc
 //
-// Test Http Stream to server
+// Test MPEG2TS stream to server
 // ffmpeg -v debug -y -re -i file.m4v -vsync 1 -map 0 -codec copy \
 //    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
 //
-// Unsure
-// - is body already complete when handler is called? if not, how to deal with broken TCP connection
+// Test Raw H264/AVC stream (also reencodes the file to adhere to our format specs)
+// ffmpeg -v debug -y -re -i file.m4v -f h264 -c:v libx264 -preset ultrafast \
+//    -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 \
+//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:6666/v1/ingest/1/avc
 //
 // Todo/Implement: Features
 // - Common Server Management
-//   - request authentication and group-based access to endpoints
+//   - check transcoder capabilities (transcode.go:CheckTranscoderCapabilities())
+//   - configuration sanity check (config.go:SanityCheck())
+//   - request authentication: API_KEY, REQUEST_TOKEN
 //   - HTTPS cert/key
 //   - rate control: enforce sessions per source (IP) per time -> Redis
 //   - rate control: enforce bytes per source (IP) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
 //   - implement server status endpoint
-// - AVC Transcoding Pipeline
+//   - session uniqueness and EOS -> Redis
+//   - total server statistics (per session this is already accounted for)
+//   - transcoder user/sys time is incorrect
+//   - ingest server redirect when quota limit reached -> Redis
+// - Transcoding Pipelines
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
-//   - session uniqueness -> Redis
-// - TS Transcoding Pipeline
-//   - ... same as AVC, different ffmpeg parameters maybe?
-// - File Download
-//   - cache headers, mime-types, text file compression
+// - File Download (built-in file server for videos, images, segments)
+//   - play endpoint generating HTML <video> in response to a GET request
+//   - cache headers, mime-types, text file compression (m3u8, mpd)
 //   - byte range support
-// - Chunk Upload (reorder, single file multiplexing)
+// - HTTP chunk mode upload endpoint (simple, how to allow continuations?)
+// - Interactive Chunk Upload (like DropBox: reorder-safe, byte-range, file multiplexing)
 // - Websocket for AVC/TS frame-wise upload
 
 
@@ -46,6 +53,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+	"runtime"
 	"log"
 	"os"
 )
@@ -55,7 +63,14 @@ var c ServerConfig
 func main() {
 
 	var err error
-	ParseConfig(&c)
+	c.ParseConfig()
+	c.SanityCheck()
+
+    // print config in dev mode
+    if !c.Server.Production_mode { c.Print() }
+
+	// set resource limits
+	runtime.GOMAXPROCS(c.Limits.Max_cpu)
 
 	// create path for transcoder logfiles
 	if err = os.MkdirAll(c.Transcode.Log_path, PERM_DIR); err != nil {
