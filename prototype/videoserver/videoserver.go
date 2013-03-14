@@ -51,6 +51,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"html/template"
 	"net/http"
 	"strconv"
 	"runtime"
@@ -88,10 +89,17 @@ func main() {
 	if c.Ingest.Enable_ts_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST")
 	}
+
+	// playback handler used for development only
+	if !c.Server.Production_mode {
+		s.HandleFunc("/videos/{id:[0-9]+}/play", PlaybackHandler).Methods("GET")
+	}
+
 /*
 	if c.Ingest.Enable_chunk_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
+
 
 	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
 	s.HandleFunc("/videos/{id:[0-9]+}/ogg", OGGFileHandler).Methods("GET")
@@ -108,11 +116,20 @@ func main() {
 	s.HandleFunc("/previews/{id:[0-9]+}/poster/{posterid:[0-9]+}", PosterHandler).Methods("GET")
 */
 
+
 	// have a single index handler at server URI root
 	r.HandleFunc("/", IndexHandler)
 
+	if !c.Server.Production_mode {
+		//r.HandleFunc("/", http.FileServer(http.Dir(c.Transcode.Output_path)))
+	    s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
+    	    http.FileServer(http.Dir(c.Transcode.Output_path))))
+	}
+
+
 	// catch all (redirect non-registered routes to index '/')
 	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
+	//http.Handle("/v1/videos", http.StripPrefix("/v1/videos", http.FileServer(http.Dir(c.Transcode.Output_path))))
 
 	// attach router to HTTP(s) server
 	http.Handle("/", r)
@@ -188,14 +205,14 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
  	// confirm validity and freshness of request
 	if err = AuthenticateRequest(r); err != nil {
 		// return error response in httpcode
-		http.Error(w, err.JSONError(), err.Status())
+		ServeError(w, err.JSONError(), err.Status())
 		return
 	}
 
  	// get or create the session object if quota permits
 	if session, err = server.FindOrCreateSession(uidstring, t); err != nil {
 		// return error response in httpcode
-		http.Error(w, err.JSONError(), err.Status())
+		ServeError(w, err.JSONError(), err.Status())
 		return
 	}
 
@@ -203,11 +220,41 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 	if session.IsOpen() {
 		if err = session.Write(r); err != nil {
 			// return error response in httpcode
-			http.Error(w, err.JSONError(), err.Status())
+			ServeError(w, err.JSONError(), err.Status())
 			return
 		}
 		// write response headers
 		session.SetResponseHeaders(w)
 	}
 
+}
+
+// generates and returns a simple HTML5 website containing a video element
+const (
+	PLAY_TMPL_BEGIN string = `<!doctype html><html lang=en><head><meta charset=utf-8><title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title></head><body><video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">`
+	PLAY_TMPL_SRC_HLS string = `<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL">`
+	PLAY_TMPL_SRC_MP4 string = `<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">`
+	PLAY_TMPL_SRC_WEBM string = `<source src="/v1/videos/{{.}}/video.webm" type="video/webm; codecs=vp8,vorbis">`
+	PLAY_TMPL_SRC_OGG string = `<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
+	PLAY_TMPL_END string = `</video></body></html>`
+)
+
+func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	uidstring := vars["id"]
+
+	// construct the template
+	tpl := PLAY_TMPL_BEGIN
+	if c.Transcode.Hls.Enabled { tpl += PLAY_TMPL_SRC_HLS }
+	if c.Transcode.Mp4.Enabled { tpl += PLAY_TMPL_SRC_MP4 }
+	if c.Transcode.Webm.Enabled { tpl += PLAY_TMPL_SRC_WEBM }
+	if c.Transcode.Ogg.Enabled { tpl += PLAY_TMPL_SRC_OGG }
+	tpl += PLAY_TMPL_END
+
+	t, err := template.New("player").Parse(tpl)
+	if err != nil { log.Fatalf("Error parsing player template template: %s\n", err) }
+
+	err = t.Execute(w, uidstring)
+	if err != nil { log.Fatalf("Error generating player template string: %s\n", err) }
 }
