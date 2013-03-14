@@ -9,9 +9,10 @@
 	<script src="/vendor/angular-resource.js"></script>
 
 	<script src="/vendor/angular-ui.js"></script>
+	<link href="/vendor/angular-ui.css" rel="stylesheet">
 
-	<script src="/vendor/ui-bootstrap.js"></script>
-	<link href="/css/bootstrap-combined.min.css" rel="stylesheet">
+	<script src="/vendor/ui-bootstrap-tpls.js"></script>
+	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
 
 	<!-- App CSS & JS -->
 
@@ -20,78 +21,33 @@
 	<script type="text/javascript" src="/js/util.js"></script>
 
 	<script type="text/javascript" src="/js/rter.js"></script>
+
+	<script type="text/javascript" src="/js/alerts.js"></script>
 	<script type="text/javascript" src="/js/rterCRUD.js"></script>
 </head>
 <body>
-<!-- 	<div id="offline">Cannot Reach Server: <span></span></div>
-
-	<div id="header">
-		<div id="rter"><a href="/"><img src="asset/rter.png" width="50" /></a></div>
-
-		<div id="titleblock">
-			<h2>Real-Time Emergency Response</h2>
-
-			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
-		</div>
+	<div id="alerter" ng-controller="AlertsCtrl">
+		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 	</div>
 
-	<div id="submit"><a href="/submit">Submit New Content</a></div>
+	<header id="appbadge">
+		<img src="asset/rter.png" width="50" />
+		<hgroup>
+			<h1>Real-Time Emergency Response</h1>
+			<h2>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></h2>
+		</hgroup>
+	</header>
 
-	<div class="stripe" id="closeup">
-		<div class="container">
-			<div id="view">
-				<img src="" />
-			</div>
-			<div id="closeuplink"><a target="_blank" href="http://dev.mysql.com/doc/refman/5.0/en/create-table.html">http://dev.mysql.com/doc/refman/5.0/en/create-table.html</a></div>
+	<div ng-controller="TabsCtrl" id="maintabber">
+		<tabs>
+			<pane heading="Submit" ng-include="'/template/submit.html'"></pane>
+			<pane heading="+" ng-include="'/template/addtermview.html'"></pane>
+			<pane heading="All" active="true"><termview></termview></pane>
 
-			<canvas id="heading_selector" width="300" height="300"></canvas>
-			<div id="closeup_map_canvas"></div>
-
-			<div id="closeuptext">
-				<textarea></textarea>
-				<div><a href="#">Save</a></div>
-			</div>
-
-			<div id="closeup_close"><a href="#">[close]</a></div>
-		</div>
-	</div>
-
-	<div class="stripe">
-		<div class="container gridster">
-			<ul>
-			</ul>
-
-			<div id="main_map_canvas"></div>
-			<div id="nocontent">No Content Available</div>
-		</div>
-	</div> -->
-
-	<div ng-controller="AlertsCtrl">
-	  <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-	  <button class='btn' ng-click="addAlert()">Add Alert</button>
-	</div>
-
-	<div id="header" ng-controller="RterCtrl">
-		<ul>
-			<li ng-repeat="item in items">ID: {{item.ID}}, Type {{item.Type}} <button ng-click="deleteItem(item)">Delete</button> <button ng-click="setUpdateItem(item)">Update</button></li>
-		</ul>
-		<form name="createForm">
-			<input type="text" ng-model="newItem.Type" placeholder="Type" required />
-			<input type="number" min="0" ng-model="newItem.AuthorID" placeholder="0" required />
-			<button ng-click="pushItem()" ng-disabled="createForm.$invalid">Create</button>
-		</form>
-		<form name="updateForm">
-			<input type="number" min="0" ng-model="updateItem.ID" placeholder="0" required />
-			<input type="text" ng-model="updateItem.Type" placeholder="Type" required />
-			<input type="number" min="0" ng-model="updateItem.AuthorID" placeholder="0" required />
-			<button ng-click="putItem()" ng-disabled="updateForm.$invalid">Update</button>
-		</form>
-		<form name="getForm">
-			<input type="number" min="0" ng-model="newItem.ID" placeholder="0" required />
-			<button ng-click="getItem()" ng-disabled="getForm.$invalid">Get</button>
-		</form>
-
-		<div>ID: {{theItem.ID}}, Type {{theItem.Type}}</div>
+			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
+				<termview term="{{termview.term}}"></termview>
+			</pane>
+		</tabs>
 	</div>
 </body>
 </html>

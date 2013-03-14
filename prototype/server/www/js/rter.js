@@ -1,7 +1,22 @@
-var rterApp = angular.module('rter', ['rterCRUD']);
+angular.module('rter', ['rterCRUD', 'alerts'])
 
-function RterCtrl($scope, Item) {
+.controller('TabsCtrl', function($scope) {
+	$scope.termviews = [
+		{ term:"a" },
+		{ term:"b" }
+	];
+})
+
+.controller('RterCtrl', function($scope, Item, Alerter) {
 	$scope.items = Item.query();
+
+	$scope.addAlert = function() {
+		Alerter.error("ahhh", 1000);
+		Alerter.success("ahhh", 2000);
+		Alerter.warn("ahhh", 3000);
+		Alerter.alert({msg: "fucl"}, 4000);
+		Alerter.alert({msg: "fucl"}, 5000);
+	};
 
 	$scope.pushItem = function() {
 		Item.save($scope.newItem,
@@ -74,4 +89,28 @@ function RterCtrl($scope, Item) {
 			}
 		);
 	};
-}
+})
+
+.controller('TermViewCtrl', function($scope, Item) {
+	$scope.bang = function() {
+		alert("Got "+$scope.term);
+	};
+})
+
+.directive('termview', function(Item) {
+	return {
+		restrict: 'E',
+		scope: {
+			term: "@"
+		},
+		templateUrl: 'template/termview.html',
+		controller: 'TermViewCtrl',
+		link: function(scope, element, attrs) {
+			if(attrs.term === undefined) {
+				scope.items = Item.query();
+			} else {
+				scope.nothing = true;
+			}
+		}
+	};
+});

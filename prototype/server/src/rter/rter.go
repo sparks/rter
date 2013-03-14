@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -50,6 +49,7 @@ func main() {
 	r.PathPrefix("/js").Handler(http.StripPrefix("/js", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "js")))))
 	r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "vendor")))))
 	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "asset")))))
+	r.PathPrefix("/template").Handler(http.StripPrefix("/template", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "template")))))
 
 	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
 
