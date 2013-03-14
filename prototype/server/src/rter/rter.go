@@ -20,7 +20,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to open connection to database %v", err)
 	}
-
 	defer storage.CloseStorage()
 
 	r := mux.NewRouter().StrictSlash(true)
@@ -40,6 +39,9 @@ func main() {
 	r.PathPrefix("/ajax").HandlerFunc(web.ClientAjax)
 
 	r.HandleFunc("/", web.ClientHandler)
+	r.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(utils.WWWPath, "new.html"))
+	})
 
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
 

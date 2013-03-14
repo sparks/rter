@@ -1,20 +1,18 @@
-<html ng-app='chat'>
+<html ng-app='rter'>
 <head>
-	<title>SockJS example</title>
+	<title>rtER Client</title>
 
-	<script type="text/javascript" src="sockjs.min.js"></script>
-	<script type="text/javascript" src="jquery.js"></script>
-	<script type="text/javascript" src="angular.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/style_v2.css">
+
+	<script type="text/javascript" src="/js/util.js"></script>
+
+	<script type="text/javascript" src="/vendor/angular.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular-resource.min.js"></script>
 
-	<script type="text/javascript" src="chat.js"></script>
-	<script type="text/javascript" src="sockjsFactory.js"></script>
-	<script type="text/javascript" src="sockchat.js"></script>
-	<script type="text/javascript" src="rterItems.js"></script>
-
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<script type="text/javascript" src="/js/rter.js"></script>
+	<script type="text/javascript" src="/js/items.js"></script>
 <body>
-	<div id="header" ng-controller="FunFunController">
+	<div id="header" ng-controller="RterCtrl">
 		<ul>
 			<li ng-repeat="item in items">ID: {{item.ID}}, Type {{item.Type}} <button ng-click="deleteItem(item)">Delete</button> <button ng-click="setUpdateItem(item)">Update</button></li>
 		</ul>
@@ -35,9 +33,6 @@
 		</form>
 
 		<div>ID: {{theItem.ID}}, Type {{theItem.Type}}</div>
-	</div>
-	<div>
-		<div ng-view></div>
 	</div>
 </body>
 </html>
