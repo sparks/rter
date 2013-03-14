@@ -33,7 +33,7 @@ func main() {
 	r.HandleFunc("/submit", web.SubmitHandler).Methods("POST")
 	r.HandleFunc("/submit",
 		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filepath.Join(utils.TemplatePath, "v1", "submit.html"))
+			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "submit.html"))
 		},
 	).Methods("GET")
 
@@ -42,7 +42,12 @@ func main() {
 	r.HandleFunc("/", web.ClientHandler)
 
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
-	r.PathPrefix("/resources").Handler(http.StripPrefix("/resources", http.FileServer(http.Dir(utils.ResourcePath))))
+
+	r.PathPrefix("/css").Handler(http.StripPrefix("/css", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "css")))))
+	r.PathPrefix("/js").Handler(http.StripPrefix("/js", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "js")))))
+	r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "vendor")))))
+	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "asset")))))
+
 	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
 
 	http.Handle("/", r)
