@@ -1,4 +1,4 @@
-var rterCRUD = angular.module('rterCRUD', ['ngResource']).
+var rterCRUD = angular.module('rterCRUD', ['ngResource', 'ui.bootstrap']);
 
 rterCRUD.factory('Item', function ($resource) {
 	var Item = $resource(
