@@ -1,0 +1,43 @@
+<html ng-app='chat'>
+<head>
+	<title>SockJS example</title>
+
+	<script type="text/javascript" src="sockjs.min.js"></script>
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="angular.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular-resource.min.js"></script>
+
+	<script type="text/javascript" src="chat.js"></script>
+	<script type="text/javascript" src="sockjsFactory.js"></script>
+	<script type="text/javascript" src="sockchat.js"></script>
+	<script type="text/javascript" src="rterItems.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+<body>
+	<div id="header" ng-controller="FunFunController">
+		<ul>
+			<li ng-repeat="item in items">ID: {{item.ID}}, Type {{item.Type}} <button ng-click="deleteItem(item)">Delete</button> <button ng-click="setUpdateItem(item)">Update</button></li>
+		</ul>
+		<form name="createForm">
+			<input type="text" ng-model="newItem.Type" placeholder="Type" required />
+			<input type="number" min="0" ng-model="newItem.AuthorID" placeholder="0" required />
+			<button ng-click="pushItem()" ng-disabled="createForm.$invalid">Create</button>
+		</form>
+		<form name="updateForm">
+			<input type="number" min="0" ng-model="updateItem.ID" placeholder="0" required />
+			<input type="text" ng-model="updateItem.Type" placeholder="Type" required />
+			<input type="number" min="0" ng-model="updateItem.AuthorID" placeholder="0" required />
+			<button ng-click="putItem()" ng-disabled="updateForm.$invalid">Update</button>
+		</form>
+		<form name="getForm">
+			<input type="number" min="0" ng-model="newItem.ID" placeholder="0" required />
+			<button ng-click="getItem()" ng-disabled="getForm.$invalid">Get</button>
+		</form>
+
+		<div>ID: {{theItem.ID}}, Type {{theItem.Type}}</div>
+	</div>
+	<div>
+		<div ng-view></div>
+	</div>
+</body>
+</html>
