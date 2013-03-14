@@ -5,31 +5,37 @@
 // Test binary upload to server with
 // curl -i --data-binary @videoserver.go http://localhost:6666/v1/ingest/10/avc
 //
-// Test Http Stream to server
+// Test MPEG2TS stream to server
 // ffmpeg -v debug -y -re -i file.m4v -vsync 1 -map 0 -codec copy \
 //    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
 //
-// Unsure
-// - is body already complete when handler is called? if not, how to deal with broken TCP connection
+// Test Raw H264/AVC stream (also reencodes the file to adhere to our format specs)
+// ffmpeg -v debug -y -re -i file.m4v -f h264 -c:v libx264 -preset ultrafast \
+//    -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 \
+//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:6666/v1/ingest/1/avc
 //
 // Todo/Implement: Features
 // - Common Server Management
-//   - request authentication and group-based access to endpoints
+//   - check transcoder capabilities (transcode.go:CheckTranscoderCapabilities())
+//   - configuration sanity check (config.go:SanityCheck())
+//   - request authentication: API_KEY, REQUEST_TOKEN
 //   - HTTPS cert/key
 //   - rate control: enforce sessions per source (IP) per time -> Redis
 //   - rate control: enforce bytes per source (IP) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
 //   - implement server status endpoint
-// - AVC Transcoding Pipeline
+//   - session uniqueness and EOS -> Redis
+//   - total server statistics (per session this is already accounted for)
+//   - transcoder user/sys time is incorrect
+//   - ingest server redirect when quota limit reached -> Redis
+// - Transcoding Pipelines
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
-//   - session uniqueness -> Redis
-// - TS Transcoding Pipeline
-//   - ... same as AVC, different ffmpeg parameters maybe?
-// - File Download
-//   - cache headers, mime-types, text file compression
-//   - byte range support
-// - Chunk Upload (reorder, single file multiplexing)
+// - File Download (built-in file server for videos, images, segments)
+//   - check of cache headers are properly set
+//   - enable text file compression (m3u8, mpd)
+// - HTTP chunk mode upload endpoint (simple, how to allow continuations?)
+// - Interactive Chunk Upload (like DropBox: reorder-safe, byte-range, file multiplexing)
 // - Websocket for AVC/TS frame-wise upload
 
 
@@ -44,8 +50,10 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"html/template"
 	"net/http"
 	"strconv"
+	"runtime"
 	"log"
 	"os"
 )
@@ -55,7 +63,14 @@ var c ServerConfig
 func main() {
 
 	var err error
-	ParseConfig(&c)
+	c.ParseConfig()
+	c.SanityCheck()
+
+    // print config in dev mode
+    if !c.Server.Production_mode { c.Print() }
+
+	// set resource limits
+	runtime.GOMAXPROCS(c.Limits.Max_cpu)
 
 	// create path for transcoder logfiles
 	if err = os.MkdirAll(c.Transcode.Log_path, PERM_DIR); err != nil {
@@ -73,28 +88,36 @@ func main() {
 	if c.Ingest.Enable_ts_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/ts", TSIngestHandler).Methods("POST")
 	}
+
+	// playback handler used for development only
+	if !c.Server.Production_mode {
+		s.HandleFunc("/videos/{id:[0-9]+}/play", PlaybackHandler).Methods("GET")
+	}
+
 /*
 	if c.Ingest.Enable_chunk_ingest {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
 
-	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/ogg", OGGFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/webm", WEBMFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/m3u8", M3U8FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/mpd", MPDFileHandler).Methods("GET")
-
-
-	s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}", HLSSegmentHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}", DASHSegmentHandler).Methods("GET")
-
-
-	s.HandleFunc("/previews/{id:[0-9]+}/thumb/{thumbid:[0-9]+}", ThumbHandler).Methods("GET")
-	s.HandleFunc("/previews/{id:[0-9]+}/poster/{posterid:[0-9]+}", PosterHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.mp4", MP4FileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.ogg", OGGFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.webm", WEBMFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/index.m3u8", M3U8FileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/index.mpd", MPDFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}.ts", HLSSegmentHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}.ts", DASHSegmentHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/thumb/{thumbid:[0-9]+}.jpg", ThumbHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/poster/{posterid:[0-9]+}.jpg", PosterHandler).Methods("GET")
 */
+
 
 	// have a single index handler at server URI root
 	r.HandleFunc("/", IndexHandler)
+
+	if !c.Server.Production_mode {
+		s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
+    	    http.FileServer(http.Dir(c.Transcode.Output_path))))
+	}
 
 	// catch all (redirect non-registered routes to index '/')
 	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
@@ -173,14 +196,14 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
  	// confirm validity and freshness of request
 	if err = AuthenticateRequest(r); err != nil {
 		// return error response in httpcode
-		http.Error(w, err.JSONError(), err.Status())
+		ServeError(w, err.JSONError(), err.Status())
 		return
 	}
 
  	// get or create the session object if quota permits
 	if session, err = server.FindOrCreateSession(uidstring, t); err != nil {
 		// return error response in httpcode
-		http.Error(w, err.JSONError(), err.Status())
+		ServeError(w, err.JSONError(), err.Status())
 		return
 	}
 
@@ -188,11 +211,41 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 	if session.IsOpen() {
 		if err = session.Write(r); err != nil {
 			// return error response in httpcode
-			http.Error(w, err.JSONError(), err.Status())
+			ServeError(w, err.JSONError(), err.Status())
 			return
 		}
 		// write response headers
 		session.SetResponseHeaders(w)
 	}
 
+}
+
+// generates and returns a simple HTML5 website containing a video element
+const (
+	PLAY_TMPL_BEGIN string = `<!doctype html><html lang=en><head><meta charset=utf-8><title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title></head><body><video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">`
+	PLAY_TMPL_SRC_HLS string = `<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL">`
+	PLAY_TMPL_SRC_MP4 string = `<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">`
+	PLAY_TMPL_SRC_WEBM string = `<source src="/v1/videos/{{.}}/video.webm" type="video/webm; codecs=vp8,vorbis">`
+	PLAY_TMPL_SRC_OGG string = `<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
+	PLAY_TMPL_END string = `</video></body></html>`
+)
+
+func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	uidstring := vars["id"]
+
+	// construct the template
+	tpl := PLAY_TMPL_BEGIN
+	if c.Transcode.Hls.Enabled { tpl += PLAY_TMPL_SRC_HLS }
+	if c.Transcode.Mp4.Enabled { tpl += PLAY_TMPL_SRC_MP4 }
+	if c.Transcode.Webm.Enabled { tpl += PLAY_TMPL_SRC_WEBM }
+	if c.Transcode.Ogg.Enabled { tpl += PLAY_TMPL_SRC_OGG }
+	tpl += PLAY_TMPL_END
+
+	t, err := template.New("player").Parse(tpl)
+	if err != nil { log.Fatalf("Error parsing player template template: %s\n", err) }
+
+	err = t.Execute(w, uidstring)
+	if err != nil { log.Fatalf("Error generating player template string: %s\n", err) }
 }

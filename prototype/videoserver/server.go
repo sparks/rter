@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 	"log"
 )
 
@@ -48,6 +49,11 @@ func (e *ServerError) JSONError() string {
 	        "\"\n    }\n  ]\n}"
 }
 
+func ServeError(w http.ResponseWriter, error string, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(code)
+	fmt.Fprintln(w, error)
+}
 
 // new HTTP status codes not defined in net/http
 const (
@@ -141,9 +147,7 @@ func (s *ServerState) SessionUpdate(id uint64, state int) {
 			return
 		case TC_FAILED, TC_EOS:
 			// here we only have to deal with session shutdown
-			sess := s.activeSessions[id]
-			log.Printf("Closing session %d: %d calls, %d bytes in, %d bytes out, %s user, %s sys",
-					   id, sess.CallsIn, sess.BytesIn, sess.BytesOut, sess.CpuUser.String(), sess.CpuSystem.String())
+
 			// store self-deleting entry
 			s.closedSessions[id] =
 				time.AfterFunc(time.Duration(c.Server.Session_maxage) * time.Second,

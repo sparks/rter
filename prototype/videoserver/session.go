@@ -5,7 +5,6 @@
 package main
 
 import (
-//	"io/ioutil"
 	"net/http"
 	"syscall"
 	"runtime"
@@ -47,7 +46,6 @@ type TranscodeSession struct {
 }
 
 func NewTranscodeSession(srv *ServerState, id uint64) *TranscodeSession {
-	log.Printf("Session constructor")
 
 	s := TranscodeSession{
 		Server: srv,
@@ -142,7 +140,6 @@ func (s *TranscodeSession) Close() *ServerError {
 	s.Timer.Stop()
 
 	if !s.IsOpen() { return nil }
-	log.Printf("Closing session %d", s.UID)
 
 	// set state
 	s.setState(TC_EOS)
@@ -151,7 +148,6 @@ func (s *TranscodeSession) Close() *ServerError {
 	s.Pipe.Close()
 
 	// gracefully shut down transcode process (SIGINT, 2)
-	log.Printf("Sending signal")
 	var err error
 	if err = s.Proc.Signal(syscall.SIGINT); err != nil {
 		log.Printf("Sending signal to transcoder failed: %s", err)
@@ -159,7 +155,8 @@ func (s *TranscodeSession) Close() *ServerError {
 	}
 
 	log.Printf("Waiting for transcoder shutdown")
-	if s.Pstate, err = s.Proc.Wait(); err != nil {
+	s.Pstate, err = s.Proc.Wait()
+	if err != nil {
 		log.Printf("Transcoder exited with error: %s and state %s", err, s.Pstate.String())
 		return nil
 	}
@@ -169,6 +166,9 @@ func (s *TranscodeSession) Close() *ServerError {
 	// get process statistics
 	s.CpuSystem = s.Pstate.SystemTime()
 	s.CpuUser = s.Pstate.UserTime()
+
+	log.Printf("Session %d closed: %d calls, %d bytes in, %d bytes out, %s user, %s sys",
+			   s.UID, s.CallsIn, s.BytesIn, s.BytesOut, s.CpuUser.String(), s.CpuSystem.String())
 
 	return nil
 }
@@ -184,6 +184,39 @@ func (s *TranscodeSession) ValidateRequest(r *http.Request) *ServerError {
 
 	return nil
 }
+
+// Write Handling
+//
+// This function is called every time the client issues a new POST request. There
+// are two alternative:
+//
+// - Chunked-Transfer: the client sets `Transfer-Encoding: chunked` and keeps
+//     pushing new video data. In this case the function does not return and
+//     handles the client request as a single transaction until the client closes
+//     its transport connection or the connection fails
+// - normal POST: the client sets `Content-Length: xxx` and pushes a single chunk
+//     of video data (usually a frame) per request. In this case the function does
+//     return after each individual POST request has been forwarded. The client
+//     usually sets `Connection: keep-alive` to leave the connection open for
+//     subsequent requests.
+//
+// Signalling End-Of-Stream condition
+//
+// In chunked-mode EOS is signalled by the client by dropping the transport
+// connection. In normal POST mode the client can signal EOS by pushing an empty
+// request (Content-Length: 0).
+//
+// Handling connection or client failure
+//
+// Golang's http framework signals a failed connection by returning EOF from
+// a Reader interface which is not considered an error condition. The code below
+// uses a session timeout to define when a stream is considered broken, thus
+// implicitly reaching its EOS state. Before that timeout a client can try reconnecting
+// and continuing stream upload.
+//
+// Kown Issues
+// Handling timeout in chunked mode is currently not supported by Golang's http
+// framework. We have to rely on cooperative clients who close their connections.
 
 func (s *TranscodeSession) Write(r *http.Request) *ServerError {
 
@@ -231,7 +264,6 @@ func (s *TranscodeSession) Write(r *http.Request) *ServerError {
 }
 
 func (s *TranscodeSession) HandleTimeout() {
-	log.Printf("Session timeout")
 	s.Close()
 }
 

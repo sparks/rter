@@ -10,8 +10,7 @@ import (
 var RterDir = os.Getenv("RTER_DIR")
 
 var UploadPath = filepath.Join(RterDir, "uploads")
-var TemplatePath = filepath.Join(RterDir, "templates")
-var ResourcePath = filepath.Join(RterDir, "resources")
+var WWWPath = filepath.Join(RterDir, "www")
 
 var PhoneIDValidator = regexp.MustCompile("^[a-zA-Z0-9_]+$")
 
