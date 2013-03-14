@@ -51,7 +51,7 @@ func (e *ServerError) JSONError() string {
 
 func ServeError(w http.ResponseWriter, error string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-   	w.WriteHeader(code)
+	w.WriteHeader(code)
 	fmt.Fprintln(w, error)
 }
 

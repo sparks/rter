@@ -32,9 +32,8 @@
 // - Transcoding Pipelines
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
 // - File Download (built-in file server for videos, images, segments)
-//   - play endpoint generating HTML <video> in response to a GET request
-//   - cache headers, mime-types, text file compression (m3u8, mpd)
-//   - byte range support
+//   - check of cache headers are properly set
+//   - enable text file compression (m3u8, mpd)
 // - HTTP chunk mode upload endpoint (simple, how to allow continuations?)
 // - Interactive Chunk Upload (like DropBox: reorder-safe, byte-range, file multiplexing)
 // - Websocket for AVC/TS frame-wise upload
@@ -100,20 +99,15 @@ func main() {
 		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 	}
 
-
-	s.HandleFunc("/videos/{id:[0-9]+}/mp4", MP4FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/ogg", OGGFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/webm", WEBMFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/m3u8", M3U8FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/mpd", MPDFileHandler).Methods("GET")
-
-
-	s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}", HLSSegmentHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}", DASHSegmentHandler).Methods("GET")
-
-
-	s.HandleFunc("/previews/{id:[0-9]+}/thumb/{thumbid:[0-9]+}", ThumbHandler).Methods("GET")
-	s.HandleFunc("/previews/{id:[0-9]+}/poster/{posterid:[0-9]+}", PosterHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.mp4", MP4FileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.ogg", OGGFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/video.webm", WEBMFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/index.m3u8", M3U8FileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/index.mpd", MPDFileHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}.ts", HLSSegmentHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}.ts", DASHSegmentHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/thumb/{thumbid:[0-9]+}.jpg", ThumbHandler).Methods("GET")
+	s.HandleFunc("/videos/{id:[0-9]+}/poster/{posterid:[0-9]+}.jpg", PosterHandler).Methods("GET")
 */
 
 
@@ -121,15 +115,12 @@ func main() {
 	r.HandleFunc("/", IndexHandler)
 
 	if !c.Server.Production_mode {
-		//r.HandleFunc("/", http.FileServer(http.Dir(c.Transcode.Output_path)))
-	    s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
+		s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
     	    http.FileServer(http.Dir(c.Transcode.Output_path))))
 	}
 
-
 	// catch all (redirect non-registered routes to index '/')
 	//r.PathPrefix("/").HandlerFunc(RedirectHandler)
-	//http.Handle("/v1/videos", http.StripPrefix("/v1/videos", http.FileServer(http.Dir(c.Transcode.Output_path))))
 
 	// attach router to HTTP(s) server
 	http.Handle("/", r)
