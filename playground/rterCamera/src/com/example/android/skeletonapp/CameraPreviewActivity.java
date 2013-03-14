@@ -30,7 +30,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.telephony.TelephonyManager;
+
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,6 +41,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 
 // ----------------------------------------------------------------------
 
@@ -85,7 +86,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// Hide the window title.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+		String AndroidId = Settings.Secure.getString(getContentResolver(),
+		         Settings.Secure.ANDROID_ID);
 		frameInfo = new FrameInfo();
 
 		// openGL overlay
@@ -106,18 +108,17 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// openGLview
 		mGLView = overlay.getGLView();
 
-		TelephonyManager tManager = (TelephonyManager) this
-				.getSystemService(Context.TELEPHONY_SERVICE);
-		String sUID = tManager.getDeviceId();
-		Log.e(TAG, "Fileoutput in phone id" + sUID + "and the length being "
-				+ sUID);
+		
+		
+		
+		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
 		// uid = convertStringToByteArray(sUID);
 
-		// passed from other activity right now
-		Intent intent = getIntent();
-		selected_uid = intent.getStringExtra("phoneID");
-		frameInfo.uid = convertStringToByteArray(selected_uid);
-
+		
+		selected_uid = AndroidId;
+		frameInfo.uid = selected_uid.getBytes();
+		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
+		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
 		// add the two views to the frame
 		mFrame.addView(mPreview);
 		mFrame.addView(mGLView);
