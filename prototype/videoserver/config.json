@@ -1,7 +1,7 @@
 {
 	"server": {
 		"addr": "127.0.0.1",
-		"port": 6666,
+		"port": 6660,
 		"production_mode": false,
 		"secure_mode": false,
 		"cert_file": "",

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"fmt"
 	"log"
 )
 
@@ -48,6 +49,11 @@ func (e *ServerError) JSONError() string {
 	        "\"\n    }\n  ]\n}"
 }
 
+func ServeError(w http.ResponseWriter, error string, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(code)
+	fmt.Fprintln(w, error)
+}
 
 // new HTTP status codes not defined in net/http
 const (
