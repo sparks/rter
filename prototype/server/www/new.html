@@ -40,9 +40,9 @@
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>
-			<pane heading="Submit" ng-include="'/template/submit.html'"></pane>
+			<pane heading="Submit" active="true"><submititem></submititem></pane>
 			<pane heading="+" ng-include="'/template/addtermview.html'"></pane>
-			<pane heading="All" active="true"><termview></termview></pane>
+			<pane heading="All"><termview></termview></pane>
 
 			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
 				<termview term="{{termview.term}}"></termview>

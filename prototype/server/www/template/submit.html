@@ -1,24 +1,11 @@
-<div id="header" ng-controller="RterCtrl">
-	<ul>
-		<li ng-repeat="item in items">ID: {{item.ID}}, Type {{item.Type}} <button ng-click="deleteItem(item)">Delete</button> <button ng-click="setUpdateItem(item)">Update</button></li>
-	</ul>
-	<form name="createForm">
-		<input type="text" ng-model="newItem.Type" placeholder="Type" required />
-		<input type="number" min="0" ng-model="newItem.AuthorID" placeholder="0" required />
-		<button ng-click="pushItem()" ng-disabled="createForm.$invalid">Create</button>
-	</form>
-	<form name="updateForm">
-		<input type="number" min="0" ng-model="updateItem.ID" placeholder="0" required />
-		<input type="text" ng-model="updateItem.Type" placeholder="Type" required />
-		<input type="number" min="0" ng-model="updateItem.AuthorID" placeholder="0" required />
-		<button ng-click="putItem()" ng-disabled="updateForm.$invalid">Update</button>
-	</form>
-	<form name="getForm">
-		<input type="number" min="0" ng-model="newItem.ID" placeholder="0" required />
-		<button ng-click="getItem()" ng-disabled="getForm.$invalid">Get</button>
-	</form>
-
-	<button ng-click="addAlert()">Alert</button>
-
-	<div>ID: {{theItem.ID}}, Type {{theItem.Type}}</div>
-</div>
+<form name="createForm">
+	<input type="text" ng-model="newItem.Type" placeholder="Type" required />
+	<input type="number" min="0" ng-model="newItem.AuthorID" placeholder="0" required />
+	<button class="btn" ng-click="pushItem()" ng-disabled="createForm.$invalid">Create</button>
+</form>
+<form name="updateForm">
+	<input type="number" min="0" ng-model="updateItem.ID" placeholder="0" required />
+	<input type="text" ng-model="updateItem.Type" placeholder="Type" required />
+	<input type="number" min="0" ng-model="updateItem.AuthorID" placeholder="0" required />
+	<button class="btn" ng-click="putItem()" ng-disabled="updateForm.$invalid">Update</button>
+</form>

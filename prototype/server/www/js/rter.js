@@ -7,7 +7,28 @@ angular.module('rter', ['rterCRUD', 'alerts'])
 	];
 })
 
-.controller('RterCtrl', function($scope, Item, Alerter) {
+.controller('TermViewCtrl', function($scope, Item) {
+})
+
+.directive('termview', function(Item) {
+	return {
+		restrict: 'E',
+		scope: {
+			term: "@"
+		},
+		templateUrl: 'template/termview.html',
+		controller: 'TermViewCtrl',
+		link: function(scope, element, attrs) {
+			if(attrs.term === undefined) {
+				scope.items = Item.query();
+			} else {
+				scope.nothing = true;
+			}
+		}
+	};
+})
+
+.controller('SubmitItemCtrl', function($scope, Item) {
 	$scope.items = Item.query();
 
 	$scope.addAlert = function() {
@@ -91,25 +112,17 @@ angular.module('rter', ['rterCRUD', 'alerts'])
 	};
 })
 
-.controller('TermViewCtrl', function($scope, Item) {
-	$scope.bang = function() {
-		alert("Got "+$scope.term);
-	};
-})
-
-.directive('termview', function(Item) {
+.directive('submititem', function(Item) {
 	return {
 		restrict: 'E',
 		scope: {
-			term: "@"
+			ItemID: "@"
 		},
-		templateUrl: 'template/termview.html',
-		controller: 'TermViewCtrl',
+		templateUrl: 'template/submit.html',
+		controller: 'SubmitItemCtrl',
 		link: function(scope, element, attrs) {
-			if(attrs.term === undefined) {
-				scope.items = Item.query();
-			} else {
-				scope.nothing = true;
+			if(attrs.ItemID === undefined) {
+				//Load here
 			}
 		}
 	};
