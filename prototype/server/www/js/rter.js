@@ -1,4 +1,4 @@
-var rterApp = angular.module('rter', ['items']);
+var rterApp = angular.module('rter', ['rterCRUD']);
 
 function RterCtrl($scope, Item) {
 	$scope.items = Item.query();
