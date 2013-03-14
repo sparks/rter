@@ -28,6 +28,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 
@@ -37,6 +38,7 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -172,7 +174,14 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// test, set desired orienation to north
 		overlay.letFreeRoam(false);
 		overlay.setDesiredOrientation(0.0f);
+		CharSequence text = "Tap to start..";
+		int duration = Toast.LENGTH_SHORT;
 
+		Toast toast = Toast.makeText(this, text, duration);
+		toast.show();
+		
+		
+		
 	}
 
 	@Override
@@ -239,6 +248,11 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		Log.e(TAG, "onClick changes isFPS : " + isFPS);
 		if (isFPS) {
 			//photoThread.start();
+			CharSequence text = "Starting Photo Stream ..";
+			int duration = Toast.LENGTH_SHORT;
+
+			Toast toast = Toast.makeText(this, text, duration);
+			toast.show();
 			mCamera.takePicture(null, null, photoCallback);
 			Log.d(TAG, "starting picture thread");
 			mPreview.inPreview = false;
@@ -253,6 +267,12 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 			(new Thread(new Runnable() {
 				public void run() {
 					Log.e(TAG, "Inside Picture Callback");
+					runOnUiThread(new Runnable() {
+		                 public void run() {
+
+		                     Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG).show();
+		                }
+		            });
 					Looper.prepare();
 					
 					
@@ -264,6 +284,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 					if (isFPS) {
 						tmpCamera.startPreview();
 						mPreview.inPreview = true;
+
 					}
 
 					long start_time = System.currentTimeMillis();
@@ -272,6 +293,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 					}
 
 					if (isFPS) {
+						
 						Log.d(TAG, "Picture taken");
 						mCamera.takePicture(null, null, photoCallback);
 					}
