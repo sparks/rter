@@ -52,6 +52,9 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
         
+        // init dispatch queues
+        encoderQueue = dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
+        
     }
     return self;
 }
@@ -65,7 +68,7 @@
     
     // encoder
     encoder = [[RTERVideoEncoder alloc] init];
-    
+
     // video session settings
     
     /* possible resolution settings:
@@ -79,16 +82,26 @@
      AVCaptureSessionPreset960x540;
      AVCaptureSessionPreset1280x720;
      */
-    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-        NSLog(@"640x480");
+    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
+        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
+        NSLog(@"352x288");
         
         CMVideoDimensions dimensions;
-        dimensions.width = 640;
-        dimensions.height = 480;
+        dimensions.width = 352;
+        dimensions.height = 288;
                 
         [encoder setupEncoderWithDimesions:dimensions];
     }
+//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
+//        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+//        NSLog(@"640x480");
+//        
+//        CMVideoDimensions dimensions;
+//        dimensions.width = 640;
+//        dimensions.height = 480;
+//        
+//        [encoder setupEncoderWithDimesions:dimensions];
+//    }
     else {
         // Handle the failure.
     }
@@ -276,9 +289,14 @@
     CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
     // also in the 'mediaSpecific' dict of the sampleBuffer
     
-    NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
+    //NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
     
-    
+//    dispatch_async(encoderQueue, ^{
+//            [encoder encodeSampleBuffer:sampleBuffer];
+//            NSLog(@"encoded frame");
+//    });
+    [encoder encodeSampleBuffer:sampleBuffer];
+    NSLog(@"encoded frame");
     
 }
 

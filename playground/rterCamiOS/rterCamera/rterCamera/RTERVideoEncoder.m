@@ -184,19 +184,41 @@
     c->pix_fmt = PIX_FMT_YUV420P;
     //c->time_base= (AVRational){1,15};
     
+    // not sure about these
+    c->refs = 1; //ref = 1
+    c->keyint_min = 15*2;   //keyint=<framerate * segment length>
+    c->level = 30;  // level=30
+    c->bit_rate_tolerance = 1; //ratetol=1.0
     
+    
+    
+    
+//    int64_t crf = -1;
     
     if(codec_id == AV_CODEC_ID_H264) {
-        av_opt_set(c->priv_data, "preset", "ultrafast", 0);
-        av_opt_set(c->priv_data, "tune", "zerolatency", 0);
-        av_opt_set(c->priv_data, "blah", "bleh", 0);
+        av_opt_set(c->priv_data, "preset", "ultrafast", AV_OPT_SEARCH_CHILDREN);
+        av_opt_set(c->priv_data, "tune", "zerolatency", AV_OPT_SEARCH_CHILDREN);
+        
+        // not sure about these
+        //av_opt_set(c->priv_data, "crf", "20", AV_OPT_SEARCH_CHILDREN);
+        av_opt_set_int(c->priv_data, "crf", 20, AV_OPT_SEARCH_CHILDREN);    //crf=20
+        av_opt_set(c->priv_data, "hrd", "crf", AV_OPT_SEARCH_CHILDREN);     //hrd=cbr
+        av_opt_set_int(c->priv_data, "lookahead", 0, AV_OPT_SEARCH_CHILDREN);    //lookahead=0
     }
+    
     
     /* open it */
     if (avcodec_open2(c, codec, NULL) < 0) {
         NSLog(@"Could not open codec");
         exit(1);
     }
+    
+    //av_opt_get_int(c->priv_data, "crf", 1, &crf);
+    char preset[50];
+    uint_fast8_t **preset_ptr = (uint_fast8_t**)&preset;
+    
+    av_opt_get(c->priv_data, "preset", 1, preset_ptr);
+    NSLog(@"preset %s", (char *)*preset_ptr);
     
     frame = avcodec_alloc_frame();
     if (!frame) {
@@ -225,35 +247,35 @@
 }
 
 - (void) finishEncoding {
-    uint8_t endcode[] = { 0, 0, 1, 0xb7 };
-    
-    for (got_output = 1; got_output; frameNumber++) {
-        fflush(stdout);
-        
-        ret = avcodec_encode_video2(c, &pkt, NULL, &got_output);
-        if (ret < 0) {
-            fprintf(stderr, "Error encoding frame\n");
-            exit(1);
-        }
-        
-        if (got_output) {
-            //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
-            fwrite(pkt.data, 1, pkt.size, f);
-            av_free_packet(&pkt);
-        }
-    }
-    
-    /* add sequence end code to have a real mpeg file */
-    fwrite(endcode, 1, sizeof(endcode), f);
-    fclose(f);
+//    uint8_t endcode[] = { 0, 0, 1, 0xb7 };
+//    
+//    for (got_output = 1; got_output; frameNumber++) {
+//        fflush(stdout);
+//        
+//        ret = avcodec_encode_video2(c, &pkt, NULL, &got_output);
+//        if (ret < 0) {
+//            fprintf(stderr, "Error encoding frame\n");
+//            exit(1);
+//        }
+//        
+//        if (got_output) {
+//            //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
+//            fwrite(pkt.data, 1, pkt.size, f);
+//            av_free_packet(&pkt);
+//        }
+//    }
+//    
+//    /* add sequence end code to have a real mpeg file */
+//    fwrite(endcode, 1, sizeof(endcode), f);
+//    fclose(f);
     
     avcodec_close(c);
     av_free(c);
     av_freep(&frame->data[0]);
-    av_freep(&scaledFrame->data[0]);
+//    av_freep(&scaledFrame->data[0]);
     avcodec_free_frame(&frame);
-    avcodec_free_frame(&scaledFrame);
-    sws_freeContext(sws_ctx);
+//    avcodec_free_frame(&scaledFrame);
+//    sws_freeContext(sws_ctx);
     printf("\n");
     //[super finishEncoding];
     CFRelease(formatDescription);
@@ -307,13 +329,13 @@
     }
     
     /* convert to destination format */
-    sws_scale(sws_ctx, (const uint8_t * const*)frame->data,
-              frame->linesize, 0, inputSize.height, scaledFrame->data, scaledFrame->linesize);
+//    sws_scale(sws_ctx, (const uint8_t * const*)frame->data,
+//              frame->linesize, 0, inputSize.height, scaledFrame->data, scaledFrame->linesize);
     
-    scaledFrame->pts = frameNumber;
+    frame->pts = frameNumber;
     
     /* encode the image */
-    ret = avcodec_encode_video2(c, &pkt, scaledFrame, &got_output);
+    ret = avcodec_encode_video2(c, &pkt, frame, &got_output);
     if (ret < 0) {
         fprintf(stderr, "Error encoding frame\n");
         exit(1);
@@ -321,7 +343,7 @@
     
     if (got_output) {
         //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
-        fwrite(pkt.data, 1, pkt.size, f);
+//        fwrite(pkt.data, 1, pkt.size, f);
         av_free_packet(&pkt);
     }
     frameNumber++;
