@@ -8,6 +8,7 @@
 
 #import "RTERPreviewController.h"
 #import <math.h>
+#import "RTERVideoEncoder.h"
 
 #define DESIRED_FPS 15
 
@@ -25,6 +26,9 @@
     
     // desired frame rate
     CMTime desiredFrameDuration;
+    
+    // encoder
+    RTERVideoEncoder *encoder;
 }
 
 @end
@@ -59,6 +63,9 @@
     // capture session
     captureSession = [[AVCaptureSession alloc] init];
     
+    // encoder
+    encoder = [[RTERVideoEncoder alloc] init];
+    
     // video session settings
     
     /* possible resolution settings:
@@ -75,6 +82,12 @@
     if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
         captureSession.sessionPreset = AVCaptureSessionPreset640x480;
         NSLog(@"640x480");
+        
+        CMVideoDimensions dimensions;
+        dimensions.width = 640;
+        dimensions.height = 480;
+                
+        [encoder setupEncoderWithDimesions:dimensions];
     }
     else {
         // Handle the failure.
@@ -264,6 +277,8 @@
     // also in the 'mediaSpecific' dict of the sampleBuffer
     
     NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
+    
+    
     
 }
 
