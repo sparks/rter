@@ -6,20 +6,20 @@ import (
 
 type Item struct {
 	ID       int64
-	Type     string
+	Type     string `json:",omitempty"`
 	AuthorID int64
 
-	ThumbnailURI string
-	ContentURI   string
-	UploadURI    string
+	ThumbnailURI string `json:",omitempty"`
+	ContentURI   string `json:",omitempty"`
+	UploadURI    string `json:",omitempty"`
 
 	HasGeo  bool
 	Heading float64
 	Lat     float64
 	Lng     float64
 
-	StartTime time.Time
-	StopTime  time.Time
+	StartTime time.Time `json:",omitempty"`
+	StopTime  time.Time `json:",omitempty"`
 }
 
 type ItemComment struct {
@@ -27,7 +27,7 @@ type ItemComment struct {
 	ItemID   int64
 	AuthorID int64
 
-	Body string
+	Body string `json:",omitempty"`
 
-	UpdateTime time.Time
+	UpdateTime time.Time `json:",omitempty"`
 }
