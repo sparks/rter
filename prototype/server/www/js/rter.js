@@ -1,4 +1,4 @@
-angular.module('rter', ['rterCRUD', 'alerts'])
+angular.module('rter', ['rterCRUD', 'ui.bootstrap', 'alerts'])
 
 .controller('TabsCtrl', function($scope) {
 	$scope.termviews = [
@@ -16,7 +16,7 @@ angular.module('rter', ['rterCRUD', 'alerts'])
 		scope: {
 			term: "@"
 		},
-		templateUrl: 'template/termview.html',
+		templateUrl: '/template/termview.html',
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			if(attrs.term === undefined) {
@@ -112,18 +112,16 @@ angular.module('rter', ['rterCRUD', 'alerts'])
 	};
 })
 
-.directive('submititem', function(Item) {
+.directive('submitItem', function(Item) {
 	return {
 		restrict: 'E',
 		scope: {
 			ItemID: "@"
 		},
-		templateUrl: 'template/submit.html',
+		templateUrl: '/template/submit-item.html',
 		controller: 'SubmitItemCtrl',
 		link: function(scope, element, attrs) {
-			if(attrs.ItemID === undefined) {
-				//Load here
-			}
+
 		}
 	};
 });

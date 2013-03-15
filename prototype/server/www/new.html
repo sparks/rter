@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html ng-app='rter'>
 <head>
+
 	<title>rtER Client</title>
 
 	<!-- Vendor CSS & JS -->
@@ -24,8 +25,10 @@
 
 	<script type="text/javascript" src="/js/alerts.js"></script>
 	<script type="text/javascript" src="/js/rterCRUD.js"></script>
+
 </head>
 <body>
+
 	<div id="alerter" ng-controller="AlertsCtrl">
 		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 	</div>
@@ -40,14 +43,27 @@
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>
-			<pane heading="Submit" active="true"><submititem></submititem></pane>
-			<pane heading="+" ng-include="'/template/addtermview.html'"></pane>
-			<pane heading="All"><termview></termview></pane>
+			<pane heading="Submit" active="true">
+			 	<submit-item>
+				</submit-item>
+			</pane>
+
+			<pane heading="+">
+<!-- 			<pane-builder>
+				</pane-builder> -->
+ 			</pane>
+
+			<pane heading="All">
+				<termview>
+				</termview>
+			</pane>
 
 			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
-				<termview term="{{termview.term}}"></termview>
+				<termview term="{{termview.term}}">
+				</termview>
 			</pane>
 		</tabs>
 	</div>
+
 </body>
 </html>
