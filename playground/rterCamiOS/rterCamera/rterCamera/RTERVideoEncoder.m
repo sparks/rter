@@ -283,9 +283,11 @@
     readyToEncode = NO;
 }
 
-- (void) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer {
+- (AVPacket) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer {
     CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     CVPixelBufferLockBaseAddress( pixelBuffer, 0 );
+    
+    AVPacket pkt;   // encoder output
     
 	int bufferWidth = 0;
 	int bufferHeight = 0;
@@ -341,13 +343,20 @@
         exit(1);
     }
     
-    if (got_output) {
-        //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
-//        fwrite(pkt.data, 1, pkt.size, f);
-        av_free_packet(&pkt);
-    }
+//    if (got_output) {
+//        //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
+////        fwrite(pkt.data, 1, pkt.size, f);
+//        av_free_packet(&pkt);
+//    }
     frameNumber++;
     CVPixelBufferUnlockBaseAddress( pixelBuffer, 0 );
+    
+    return pkt;
+}
+
+-(void) freePacket:(AVPacket)pkt
+{
+    av_free_packet(&pkt);
 }
 
 

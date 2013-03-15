@@ -25,7 +25,6 @@
     AVCodec *codec;
     AVCodecContext *c;
     AVFrame *frame;
-    AVPacket pkt;
     
     int frameNumber, ret, got_output;
     FILE *f;
@@ -39,7 +38,8 @@
 - (void) setupEncoderWithFormatDescription:(CMFormatDescriptionRef)newFormatDescription desiredOutputSize:(CMVideoDimensions)desiredOutputSize;
 - (void) setupEncoderWithDimesions:(CMVideoDimensions)dimensions;
 - (void) finishEncoding;
-- (void) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer;
+- (AVPacket) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer;
+-(void) freePacket:(AVPacket)pkt;
 
 
 @property (nonatomic) BOOL readyToEncode;
