@@ -38,8 +38,9 @@
 - (void) setupEncoderWithFormatDescription:(CMFormatDescriptionRef)newFormatDescription desiredOutputSize:(CMVideoDimensions)desiredOutputSize;
 - (void) setupEncoderWithDimesions:(CMVideoDimensions)dimensions;
 - (void) finishEncoding;
-- (AVPacket) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer;
--(void) freePacket:(AVPacket)pkt;
+- (int) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer
+                    output:(AVPacket *)pkt;
+-(void) freePacket:(AVPacket *)pkt;
 
 
 @property (nonatomic) BOOL readyToEncode;

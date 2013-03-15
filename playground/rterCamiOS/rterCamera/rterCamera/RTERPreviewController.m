@@ -295,23 +295,26 @@
 //            [encoder encodeSampleBuffer:sampleBuffer];
 //            NSLog(@"encoded frame");
 //    });
-    AVPacket pkt = [encoder encodeSampleBuffer:sampleBuffer];
-//    NSLog(@"encoded frame");
-    
-    dispatch_async(postQueue, ^{
-        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.36:6660/v1/ingest/1/avc"]];
-        [postRequest setHTTPMethod:@"POST"];
-        [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
-        NSHTTPURLResponse *response;
-        NSError *err;
-        NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
-//        if ([response respondsToSelector:@selector(allHeaderFields)]) {
+    AVPacket pkt;   // encoder output
+    if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
+        NSLog(@"encoded frame");
+        
+        dispatch_async(postQueue, ^{
+            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.36:6660/v1/ingest/0/avc"]];
+            [postRequest setHTTPMethod:@"POST"];
+            [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
+            NSHTTPURLResponse *response;
+            NSError *err;
+            NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
+            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
             NSDictionary *dictionary = [response allHeaderFields];
             NSLog([dictionary description]);
-//        }
-        [encoder freePacket:pkt];
-//        NSLog(@"finished sending frame");
-    });
+            //        }
+            [encoder freePacket:&pkt];
+            //        NSLog(@"finished sending frame");
+        });
+    }
+
    
     
 }

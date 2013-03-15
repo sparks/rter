@@ -283,16 +283,16 @@
     readyToEncode = NO;
 }
 
-- (AVPacket) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer {
+- (int) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer
+                         output:(AVPacket *)pkt
+{
     CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     CVPixelBufferLockBaseAddress( pixelBuffer, 0 );
-    
-    AVPacket pkt;   // encoder output
     
 	int bufferWidth = 0;
 	int bufferHeight = 0;
 	uint8_t *pixel = NULL;
-    
+        
     if (CVPixelBufferIsPlanar(pixelBuffer)) {
         //int planeCount = CVPixelBufferGetPlaneCount(pixelBuffer);
         int basePlane = 0;
@@ -305,9 +305,9 @@
         bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
     }
     
-    av_init_packet(&pkt);
-    pkt.data = NULL;    // packet data will be allocated by the encoder
-    pkt.size = 0;
+    av_init_packet(pkt);
+    pkt->data = NULL;    // packet data will be allocated by the encoder
+    pkt->size = 0;
     
     //unsigned char y_pixel = pixel[0];
     
@@ -337,26 +337,27 @@
     frame->pts = frameNumber;
     
     /* encode the image */
-    ret = avcodec_encode_video2(c, &pkt, frame, &got_output);
+    ret = avcodec_encode_video2(c, pkt, frame, &got_output);
     if (ret < 0) {
         fprintf(stderr, "Error encoding frame\n");
         exit(1);
     }
     
 //    if (got_output) {
-//        //printf("Write frame %3d (size=%5d)\n", frameNumber, pkt.size);
-////        fwrite(pkt.data, 1, pkt.size, f);
-//        av_free_packet(&pkt);
+//        NSLog(@"encoded frame");
+//    } else {
+//        NSLog(@"empty output");
 //    }
+    
     frameNumber++;
     CVPixelBufferUnlockBaseAddress( pixelBuffer, 0 );
     
-    return pkt;
+    return got_output;
 }
 
--(void) freePacket:(AVPacket)pkt
+-(void) freePacket:(AVPacket *)pkt
 {
-    av_free_packet(&pkt);
+    av_free_packet(pkt);
 }
 
 
