@@ -9,13 +9,13 @@ angular.module('termview', ['ngResource', 'items'])
 		scope: {
 			term: "@"
 		},
-		templateUrl: '/template/termview.html',
+		templateUrl: '/template/termview/termview.html',
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			if(attrs.term === undefined) {
 				scope.items = Item.query();
 			} else {
-				scope.nothing = true;
+				scope.items = Item.query({term: attrs.term});
 			}
 		}
 	};

@@ -30,6 +30,8 @@ body {
 	right: 0;
 }
 
+/* -- App Badge -- */
+
 #appbadge {
 	text-align: left;
 	margin: 0 auto 40px auto;
@@ -62,6 +64,53 @@ body {
 
 	line-height: 17px;
 }
+
+/* -- Forms -- */
+
+form hr {
+	border-color: rgb(120, 120, 120);
+	border-width: 1px;
+}
+
+form input {
+	min-width: 250px;
+}
+
+form label {
+	font-weight: bold;
+}
+
+.error {
+	color: red;
+}
+
+.error input {
+	border-color: red;
+}
+
+.submit-generic-item {
+	margin: auto;
+	width: 750px;
+}
+
+.submit-generic-item .map {
+	height: 400px;
+	width: 450px;
+}
+
+.submit-generic-item-left {
+	float: left;
+}
+
+.submit-generic-item-right {
+	float: right;
+}
+
+.submit-generic-item-clear {
+	clear: both;
+}
+
+/* -- Alerts -- */
 
 #alerter {
 	position: fixed;

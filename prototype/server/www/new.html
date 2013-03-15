@@ -6,6 +6,11 @@
 
 	<!-- Vendor CSS & JS -->
 
+	<script src="/vendor/jquery.js"></script>
+
+	<script src="/vendor/jquery-ui.js"></script>
+	<link href="/vendor/jquery-ui.css" rel="stylesheet">
+
 	<script src="/vendor/angular.js"></script>
 	<script src="/vendor/angular-resource.js"></script>
 
@@ -15,6 +20,8 @@
 	<script src="/vendor/ui-bootstrap-tpls.js"></script>
 	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
 
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
+
 	<!-- App CSS & JS -->
 
 	<link rel="stylesheet" type="text/css" href="/css/style_v2.css">
@@ -23,9 +30,14 @@
 
 	<script type="text/javascript" src="/js/rter.js"></script>
 
-	<script type="text/javascript" src="/js/alerts.js"></script>
-	<script type="text/javascript" src="/js/items.js"></script>
-	<script type="text/javascript" src="/js/termview.js"></script>
+	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
+
+	<script type="text/javascript" src="/js/items/items.js"></script>
+	<script type="text/javascript" src="/js/items/genericItem.js"></script>
+	<script type="text/javascript" src="/js/items/rawItem.js"></script>
+	<script type="text/javascript" src="/js/items/twitterItem.js"></script>
+
+	<script type="text/javascript" src="/js/termview/termview.js"></script>
 
 </head>
 <body>
@@ -35,7 +47,7 @@
 	</div>
 
 	<header id="appbadge">
-		<img src="asset/rter.png" width="50" />
+		<img src="asset/rter.png" width="50">
 		<hgroup>
 			<h1>Real-Time Emergency Response</h1>
 			<h2>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></h2>
