@@ -13,6 +13,11 @@ type Term struct {
 	UpdateTime time.Time `json:",omitempty"`
 }
 
+type TermRelationship struct {
+	Term   string
+	ItemID int64
+}
+
 type TermRanking struct {
 	Term    string `json:",omitempty"`
 	Ranking string `json:",omitempty"`

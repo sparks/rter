@@ -16,8 +16,9 @@ var (
 	item    *data.Item
 	comment *data.ItemComment
 
-	term    *data.Term
-	ranking *data.TermRanking
+	term         *data.Term
+	relationship *data.TermRelationship
+	ranking      *data.TermRanking
 )
 
 func TestOpenStorage(t *testing.T) {
@@ -300,6 +301,34 @@ func TestSelectTermRanking(t *testing.T) {
 	selectedRanking.UpdateTime = ranking.UpdateTime
 
 	assert.Equal(t, ranking, selectedRanking)
+}
+
+func TestInsertTermRelationship(t *testing.T) {
+	relationship = new(data.TermRelationship)
+	relationship.Term = term.Term
+	relationship.ItemID = item.ID
+
+	err := Insert(relationship)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSelectTermRelationship(t *testing.T) {
+	err := Select(relationship)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDeleteTermRelationship(t *testing.T) {
+	err := Delete(relationship)
+
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDeleteTerm(t *testing.T) {

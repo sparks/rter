@@ -46,6 +46,12 @@ func Insert(val interface{}) error {
 			v.Author,
 			now,
 		)
+	case *data.TermRelationship:
+		res, err = Exec(
+			"INSERT INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
+			v.Term,
+			v.ItemID,
+		)
 	case *data.TermRanking:
 		res, err = Exec(
 			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
@@ -245,6 +251,8 @@ func Select(val interface{}) error {
 		rows, err = Query("SELECT * FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
 		rows, err = Query("SELECT * FROM Terms WHERE Term=?", v.Term)
+	case *data.TermRelationship:
+		rows, err = Query("SELECT * FROM TermRelationships WHERE Term=? and ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
 		rows, err = Query("SELECT * FROM TermRankings WHERE Term=?", v.Term)
 	case *data.Role:
@@ -272,6 +280,8 @@ func Select(val interface{}) error {
 		err = scanItemComment(v, rows)
 	case *data.Term:
 		err = scanTerm(v, rows)
+	case *data.TermRelationship:
+		err = scanTermRelationship(v, rows)
 	case *data.TermRanking:
 		err = scanTermRanking(v, rows)
 	case *data.Role:
@@ -302,6 +312,8 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 		rows, err = Query("SELECT * FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
 		rows, err = Query("SELECT * FROM Terms "+whereClause, args...)
+	case *[]*data.TermRelationship:
+		rows, err = Query("SELECT * FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
 		rows, err = Query("SELECT * FROM Roles "+whereClause, args...)
 	case *[]*data.User:
@@ -339,6 +351,15 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 			}
 
 			*s = append(*s, term)
+		case *[]*data.TermRelationship:
+			relationship := new(data.TermRelationship)
+			err = scanTermRelationship(relationship, rows)
+
+			if err != nil {
+				return err
+			}
+
+			*s = append(*s, relationship)
 		case *[]*data.Role:
 			role := new(data.Role)
 			err = scanRole(role, rows)
@@ -369,6 +390,8 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 		sliceLen = len(*s)
 	case *[]*data.Term:
 		sliceLen = len(*s)
+	case *[]*data.TermRelationship:
+		sliceLen = len(*s)
 	case *[]*data.Role:
 		sliceLen = len(*s)
 	case *[]*data.User:
@@ -395,6 +418,8 @@ func Delete(val interface{}) error {
 		res, err = Exec("DELETE FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
 		res, err = Exec("DELETE FROM Terms WHERE Term=?", v.Term)
+	case *data.TermRelationship:
+		res, err = Exec("DELETE FROM TermRelationships WHERE Term=? AND ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
 		// res, err = Exec("DELETE FROM TermRankings WHERE Term=?", v.Term)
 		return ErrCannotDelete //DB will autodelete

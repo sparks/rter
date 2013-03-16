@@ -94,6 +94,15 @@ func scanTerm(term *data.Term, rows *sql.Rows) error {
 	return nil
 }
 
+func scanTermRelationship(relationship *data.TermRelationship, rows *sql.Rows) error {
+	err := rows.Scan(
+		&relationship.Term,
+		&relationship.ItemID,
+	)
+
+	return err
+}
+
 func scanTermRanking(ranking *data.TermRanking, rows *sql.Rows) error {
 	var updateTimeString string
 
