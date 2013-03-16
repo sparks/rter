@@ -20,6 +20,8 @@ type Item struct {
 
 	StartTime time.Time `json:",omitempty"`
 	StopTime  time.Time `json:",omitempty"`
+
+	// Terms []*Term
 }
 
 type ItemComment struct {

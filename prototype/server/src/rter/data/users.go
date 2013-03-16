@@ -8,8 +8,8 @@ import (
 
 type User struct {
 	Username string `json:",omitempty"`
-	Password string `json:",omitempty"`
-	Salt     string `json:",omitempty"`
+	Password string `json:"-"`
+	Salt     string `json:"-"`
 
 	Role       string `json:",omitempty"`
 	TrustLevel int

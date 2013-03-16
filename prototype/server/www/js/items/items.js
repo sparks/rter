@@ -13,7 +13,7 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 })
 
 .controller('SubmitItemCtrl', function($scope, $rootScope, Alerter, Item) {
-	var defaultType = "raw";
+	var defaultType = "twitter";
 	$scope.item = {
 		Type: defaultType
 	};
