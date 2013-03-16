@@ -7,7 +7,6 @@ import (
 )
 
 type User struct {
-	ID       int64
 	Username string `json:",omitempty"`
 	Password string `json:",omitempty"`
 	Salt     string `json:",omitempty"`
@@ -19,9 +18,9 @@ type User struct {
 }
 
 type UserDirection struct {
-	UserID     int64
-	LockUserID int64
-	Command    string `json:",omitempty"`
+	Username     string
+	LockUsername string
+	Command      string `json:",omitempty"`
 
 	Heading float64
 	Lat     float64

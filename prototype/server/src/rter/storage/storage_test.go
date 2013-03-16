@@ -87,7 +87,6 @@ func TestInsertUser(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	user.Username = "OtherTestUser"
 	user.TrustLevel = 5
 
 	err := Update(user)
@@ -99,7 +98,7 @@ func TestUpdateUser(t *testing.T) {
 
 func TestSelectUser(t *testing.T) {
 	selectedUser := new(data.User)
-	selectedUser.ID = user.ID
+	selectedUser.Username = user.Username
 	err := Select(selectedUser)
 
 	if err != nil {
@@ -125,7 +124,7 @@ func TestSelectAllUser(t *testing.T) {
 
 func TestUpdateUserDirection(t *testing.T) {
 	direction = new(data.UserDirection)
-	direction.UserID = user.ID
+	direction.Username = user.Username
 	direction.Command = "none"
 	direction.Heading = 12.123
 	direction.Lat = 123.234
@@ -140,7 +139,7 @@ func TestUpdateUserDirection(t *testing.T) {
 
 func TestSelectUserDirection(t *testing.T) {
 	selectedDirection := new(data.UserDirection)
-	selectedDirection.UserID = user.ID
+	selectedDirection.Username = user.Username
 	err := Select(selectedDirection)
 
 	if err != nil {
@@ -158,7 +157,7 @@ func TestSelectUserDirection(t *testing.T) {
 func TestInsertItem(t *testing.T) {
 	item = new(data.Item)
 	item.Type = "generic"
-	item.AuthorID = user.ID
+	item.Author = user.Username
 	item.ThumbnailURI = "http://fun.com/thumb.jpg"
 	item.ContentURI = "http://fun.com"
 	item.UploadURI = "http://fun.com/upload"
@@ -208,7 +207,7 @@ func TestSelectAllItem(t *testing.T) {
 func TestInsertItemComment(t *testing.T) {
 	comment = new(data.ItemComment)
 	comment.ItemID = item.ID
-	comment.AuthorID = user.ID
+	comment.Author = user.Username
 	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 	err := Insert(comment)
@@ -239,7 +238,7 @@ func TestInsertTerm(t *testing.T) {
 	term = new(data.Term)
 	term.Term = "testterm"
 	term.Automated = false
-	term.AuthorID = user.ID
+	term.Author = user.Username
 
 	err := Insert(term)
 

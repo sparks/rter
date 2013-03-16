@@ -8,7 +8,7 @@ type Term struct {
 	Term string `json:",omitempty"`
 
 	Automated bool
-	AuthorID  int64
+	Author    string
 
 	UpdateTime time.Time `json:",omitempty"`
 }

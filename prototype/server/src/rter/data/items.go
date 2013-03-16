@@ -5,9 +5,9 @@ import (
 )
 
 type Item struct {
-	ID       int64
-	Type     string `json:",omitempty"`
-	AuthorID int64
+	ID     int64
+	Type   string `json:",omitempty"`
+	Author string
 
 	ThumbnailURI string `json:",omitempty"`
 	ContentURI   string `json:",omitempty"`
@@ -23,9 +23,9 @@ type Item struct {
 }
 
 type ItemComment struct {
-	ID       int64
-	ItemID   int64
-	AuthorID int64
+	ID     int64
+	ItemID int64
+	Author string
 
 	Body string `json:",omitempty"`
 

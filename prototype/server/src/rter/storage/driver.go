@@ -17,9 +17,9 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
-			v.AuthorID,
+			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
@@ -32,18 +32,18 @@ func Insert(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"INSERT INTO ItemComments (ItemID, AuthorID, Body, UpdateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO ItemComments (ItemID, Author, Body, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.ItemID,
-			v.AuthorID,
+			v.Author,
 			v.Body,
 			now,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, AuthorID, UpdateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
 			v.Automated,
-			v.AuthorID,
+			v.Author,
 			now,
 		)
 	case *data.TermRanking:
@@ -71,9 +71,9 @@ func Insert(val interface{}) error {
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
-			v.UserID,
-			v.LockUserID,
+			"INSERT INTO UserDirections (Username, LockUsername, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			v.Username,
+			v.LockUsername,
 			v.Command,
 			v.Heading,
 			v.Lat,
@@ -110,11 +110,10 @@ func Insert(val interface{}) error {
 	case *data.TermRanking:
 		v.UpdateTime = now
 	case *data.User:
-		v.ID = ID
 		v.CreateTime = now
 
 		direction := new(data.UserDirection)
-		direction.UserID = ID
+		direction.Username = v.Username
 
 		err = Insert(direction)
 	case *data.UserDirection:
@@ -135,9 +134,9 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, AuthorID=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, Author=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
-			v.AuthorID,
+			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
@@ -151,18 +150,18 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
-			v.AuthorID,
+			"UPDATE ItemComments SET Author=?, Body=?, UpdateTime=? WHERE ID=?",
+			v.Author,
 			v.Body,
 			now,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, UpdateTime=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, Author=?, UpdateTime=? WHERE Term=?",
 			v.Term,
 			v.Automated,
-			v.AuthorID,
+			v.Author,
 			now,
 			v.Term,
 		)
@@ -182,24 +181,24 @@ func Update(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE ID=?",
+			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE Username=?",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.ID,
+			v.Username,
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE UserID=?",
-			v.LockUserID,
+			"UPDATE UserDirections SET LockUsername=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE Username=?",
+			v.LockUsername,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
 			now,
-			v.UserID,
+			v.Username,
 		)
 	default:
 		return ErrUnsupportedDataType
@@ -251,9 +250,9 @@ func Select(val interface{}) error {
 	case *data.Role:
 		rows, err = Query("SELECT * FROM Roles WHERE Title=?", v.Title)
 	case *data.User:
-		rows, err = Query("SELECT * FROM Users WHERE ID=?", v.ID)
+		rows, err = Query("SELECT * FROM Users WHERE Username=?", v.Username)
 	case *data.UserDirection:
-		rows, err = Query("SELECT * FROM UserDirections WHERE UserID=?", v.UserID)
+		rows, err = Query("SELECT * FROM UserDirections WHERE Username=?", v.Username)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -402,9 +401,9 @@ func Delete(val interface{}) error {
 	case *data.Role:
 		res, err = Exec("DELETE FROM Roles WHERE Title=?", v.Title)
 	case *data.User:
-		res, err = Exec("DELETE FROM Users WHERE ID=?", v.ID)
+		res, err = Exec("DELETE FROM Users WHERE Username=?", v.Username)
 	case *data.UserDirection:
-		// res, err = Exec("DELETE FROM UserDirections WHERE UserID=?", v.UserID)
+		// res, err = Exec("DELETE FROM UserDirections WHERE Username=?", v.Username)
 		return ErrCannotDelete //DB will autodelete
 	default:
 		return ErrUnsupportedDataType
