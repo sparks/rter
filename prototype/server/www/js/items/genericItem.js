@@ -1,7 +1,45 @@
-angular.module('genericItem', [])
+angular.module('genericItem', ['ng', 'taxonomy'])
 
-.controller('SubmitGenericItemCtrl', function($scope) {
-	$scope.item.AuthorID = 1; //TODO: Replace with login
+.controller('SubmitGenericItemCtrl', function($scope, Taxonomy) {
+	if($scope.item.Author === undefined) {
+		$scope.item.Author = "anonymous"; //TODO: Replace with login
+	}
+
+	//This is kinda terrible
+	if($scope.item.Terms !== undefined) {
+		var concat = "";
+		for(var i = 0;i < $scope.item.Terms.length;i++) {
+			concat += $scope.item.Terms[i].Term+",";
+		}
+		$scope.item.Terms = concat.substring(0, concat.length-1);
+	}
+
+	$scope.tagConfig = {
+		data: Taxonomy.query(),
+		multiple: true,
+		id: function(item) {
+			return item.Term;
+		},
+		formatResult: function(item) {
+            return item.Term;
+        },
+        formatSelection: function(item) {
+			return item.Term;
+        },
+        createSearchChoice: function(term) {
+			return {Term: term};
+        },
+        matcher: function(term, text, option) {
+			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
+        },
+        initSelection: function (element, callback) {
+			var data = [];
+			$(element.val().split(",")).each(function () {
+				data.push({Term: this});
+			});
+			callback(data);
+		}
+	};
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
@@ -30,22 +68,17 @@ angular.module('genericItem', [])
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
 	};
-
-	$scope.bang = function() {
-		console.log($scope.item);
-		console.log($scope.form);
-	};
 })
 
-.directive('submitGenericItem', function() {
+.directive('submitGenericItem', function(Taxonomy) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		controller: 'SubmitGenericItemCtrl',
 		templateUrl: '/template/items/submit-generic-item.html',
+		controller: 'SubmitGenericItemCtrl',
 		link: function(scope, element, attr) {
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}

@@ -6,12 +6,16 @@
 		</div>
 
 		<label for="ThumbnailURI">Thumbnail</label>
-		<input type="url" name="ThumbnailURI" ng-model="item.ThumbnailURI" required>
+		<input type="url" name="ThumbnailURI" ng-model="item.ThumbnailURI">
 
 		<label for="Lat">Latitude</label>
 		<input type="number" step="any" name="Lat" ng-model="item.Lat">
 		<label for="Lng">Longitude</label>
 		<input type="number" step="any" name="Lng" ng-model="item.Lng">
+
+		<label for="Tags">Tags</label>
+		<div name="Tags" multiple ui-select2="tagConfig" ng-model="item.Terms">
+		</div>
 	</div>
 
 	<div class="submit-generic-item-right">
@@ -22,5 +26,3 @@
 	<div class="submit-generic-item-clear">
 	</div>
 </div>
-
-

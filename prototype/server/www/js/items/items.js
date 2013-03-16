@@ -2,10 +2,10 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 
 .factory('Item', function ($resource) {
 	var Item = $resource(
-		'/1.0/items/:ID',
+		'/1.0/items/:Username',
 		{},
 		{
-			update: { method: 'PUT', params:{ ID: '@ID' } }
+			update: { method: 'PUT', params:{ Username: '@Username' } }
 		}
 	);
 
@@ -13,27 +13,37 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 })
 
 .controller('SubmitItemCtrl', function($scope, $rootScope, Alerter, Item) {
+	var defaultType = "raw";
 	$scope.item = {
-		Type: "generic"
+		Type: defaultType
+	};
+
+	$scope.logModel = function() {
+		console.log($scope.item);
+		// console.log($scope.createItemForm);
+		console.log(JSON.stringify($scope.item));
 	};
 
 	$scope.pushItem = function() {
+		if($scope.item.StartTime !== undefined) {
+			$scope.item.StartTime = new Date($scope.item.StartTime);
+		}
+		if($scope.item.StopTime !== undefined) {
+			$scope.item.StopTime = new Date($scope.item.StopTime);
+		}
 		Item.save($scope.item,
 			function() {
 				Alerter.success("Item Created", 2000);
+
+				$scope.item = {
+					Type: defaultType
+				};
 			},
 			function(e) {
 				Alerter.error("There was a problem creating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
 				console.log(e);
 			}
 		);
-
-		$scope.newItem = {Type:"", AuthorID:null};
-	};
-
-	$scope.bang = function() {
-		console.log("Hi");
-		console.log($scope.createItemForm);
 	};
 })
 

@@ -1,4 +1,4 @@
-<form name="createItemForm" class="submit-item" ng-submit="createItem()">
+<form name="createItemForm" class="submit-item">
 
 	<label for="type">Content Type</label>
 	<select name="type" ng-model="item.Type">
@@ -24,4 +24,6 @@
 	<hr>
 
 	<button class="btn" ng-click="pushItem()" ng-disabled="createItemForm.$invalid">Create</button>
+	<div class="btn" ng-click="logModel()">Log Item Model</div>
+
 </form>

@@ -1,6 +1,6 @@
-<div ng-class="{error: form.AuthorID.$invalid}">
-	<label for="AuthorID">AuthorID</label>
-	<input type="number" name="AuthorID" min="1" ng-model="item.AuthorID" placeholder="1" required>
+<div ng-class="{error: form.Author.$invalid}">
+	<label for="Author">Author</label>
+	<input type="text" name="Author" ng-model="item.Author" placeholder="username" required>
 </div>
 
 <label for="ThumbnailURI">ThumbnailURI</label>
@@ -21,7 +21,11 @@
 <input type="number" step="any" name="Lng" ng-model="item.Lng">
 
 <label for="StartTime">StartTime</label>
-<input type="datetime" name="StartTime" ui-date ng-mode="item.StartTime">
+<input type="datetime-local" name="StartTime" ng-model="item.StartTime">
 
 <label for="StopTime">StopTime</label>
-<input type="datetime" name="StopTime" ui-date ng-mode="item.StopTime">
+<input type="datetime-local" name="StopTime" ng-model="item.StopTime">
+
+<label for="Tags">Tags</label>
+<div name="Tags" multiple ui-select2="tagConfig" ng-model="item.Terms">
+</div>

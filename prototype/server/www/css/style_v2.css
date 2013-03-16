@@ -76,6 +76,14 @@ form input {
 	min-width: 250px;
 }
 
+.select2-container {
+	min-width: 250px;
+}
+
+.select2-container .select2-search-field {
+	width: 20px;
+}
+
 form label {
 	font-weight: bold;
 }
