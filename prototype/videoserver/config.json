@@ -17,10 +17,12 @@
 		"rate_limit_enable": false,
 		"rate_limit_ingest_window": 15,
 		"rate_limit_ingest_sessions_per_source": 100,
+		"rate_limit_ingest_requests_per_session": 30000,
 		"rate_limit_ingest_bytes_per_source": 134217728
 	},
 	"auth": {
-		"signkey": "ccc"
+		"enabled": false,
+		"token_secret": ""
 	},
 	"ingest": {
 		"avc": true,

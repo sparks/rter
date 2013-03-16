@@ -62,16 +62,24 @@ const (
 
 // Server Error Reasons
 var (
-	ServerErrorBadID           = NewServerError(1, http.StatusForbidden, "malformed id")
-	ServerErrorQuotaExceeded   = NewServerError(2, http.StatusForbidden, "too many active server sessions")
-	ServerErrorWrongMimetype   = NewServerError(3, http.StatusUnsupportedMediaType, "wrong MIME type for enpoint")
-	ServerErrorTranscodeFailed = NewServerError(4, http.StatusForbidden, "transcoder write on closed pipe")
-	ServerErrorEOS             = NewServerError(5, http.StatusForbidden, "already at end-of-stream state")
-	ServerErrorIO              = NewServerError(6, http.StatusForbidden, "storage failed")
+	ServerErrorBadID             = NewServerError(1, http.StatusForbidden, "malformed id")
+	ServerErrorQuotaExceeded     = NewServerError(2, http.StatusForbidden, "too many active server sessions")
+	ServerErrorWrongMimetype     = NewServerError(3, http.StatusUnsupportedMediaType, "wrong MIME type for enpoint")
+	ServerErrorTranscodeFailed   = NewServerError(4, http.StatusForbidden, "transcoder write on closed pipe")
+	ServerErrorEOS               = NewServerError(5, http.StatusForbidden, "already at end-of-stream state")
+	ServerErrorIO                = NewServerError(6, http.StatusForbidden, "storage failed")
+	ServerErrorWrongEndpointType = NewServerError(7, http.StatusUnsupportedMediaType, "type mismatch between open session and ingest endpoint")
+
+	ServerErrorAuthTokenRequired = NewServerError(8, http.StatusUnauthorized, "authorization token required for this endpoint")
+	ServerErrorAuthTokenExpired  = NewServerError(9, http.StatusUnauthorized, "authorization token expired")
+	ServerErrorAuthTokenInvalid  = NewServerError(10, http.StatusUnauthorized, "authorization token invalid")
+	ServerErrorAuthNoPermission  = NewServerError(11, http.StatusForbidden, "no permission on this endpoint")
+	ServerErrorAuthUrlMismatch   = NewServerError(12, http.StatusForbidden, "request and token URL mismatch")
+	ServerErrorAuthBadSignature  = NewServerError(13, http.StatusForbidden, "bad signature in authorization token")
+
 )
 
 //	ErrSessionQuotaExceded
-//	ServerErrorClientTimeout
 
 // AUTH
 // auth failure: token expired, token invalid, no permissions on endpoint

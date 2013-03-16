@@ -173,12 +173,15 @@ func (s *TranscodeSession) Close() *ServerError {
 	return nil
 }
 
-func (s *TranscodeSession) ValidateRequest(r *http.Request) *ServerError {
+func (s *TranscodeSession) ValidateRequest(r *http.Request, t int) *ServerError {
 
 	// check for proper mime type
 	if !IsMimeTypeValid(s.Type, r.Header.Get("Content-Type")) {
 		return ServerErrorWrongMimetype
 	}
+
+	// cannot mix endpoints / stream types once session is open
+	if t != s.Type { return ServerErrorWrongEndpointType }
 
 	// check content
 
@@ -218,17 +221,18 @@ func (s *TranscodeSession) ValidateRequest(r *http.Request) *ServerError {
 // Handling timeout in chunked mode is currently not supported by Golang's http
 // framework. We have to rely on cooperative clients who close their connections.
 
-func (s *TranscodeSession) Write(r *http.Request) *ServerError {
+func (s *TranscodeSession) Write(r *http.Request, t int) *ServerError {
 
+	// session must be active to perform write
 	if !s.IsOpen() { return ServerErrorTranscodeFailed }
 
-	// reset session close timeout (race condition)
+	// reset session close timeout (potential race condition with timeout handler)
 	s.Timer.Stop()
 
 	log.Printf("Writing data to session %d", s.UID)
 
 	// check request compatibility (mime type, content)
-	if err := s.ValidateRequest(r); err != nil { return err }
+	if err := s.ValidateRequest(r, t); err != nil { return err }
 
 	// push data into pipe until body us empty or EOF (broken pipe)
 	written, err := io.Copy(s.Pipe, r.Body)
@@ -268,5 +272,10 @@ func (s *TranscodeSession) HandleTimeout() {
 }
 
 func (s *TranscodeSession) SetResponseHeaders(w http.ResponseWriter) {
+
+	// quota/rate headers
+	// - available session requests
+	// - available bytes for all sessions
+	// - time to rate reset
 
 }
