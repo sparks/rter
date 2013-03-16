@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreMedia/CoreMedia.h>
 #import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -21,7 +22,8 @@
 
 @interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate>
 {
-    
+    // dispatch queue for encoding
+    dispatch_queue_t postQueue;
 }
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;
