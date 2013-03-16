@@ -182,7 +182,7 @@
     //c->bit_rate = c->width * c->height * 4;
     c->max_b_frames=0;
     c->pix_fmt = PIX_FMT_YUV420P;
-    //c->time_base= (AVRational){1,15};
+    c->time_base= (AVRational){1,15};
     
     // not sure about these
     c->refs = 1; //ref = 1
