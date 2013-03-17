@@ -1,6 +1,6 @@
-var alertsModule = angular.module('alerts', ['ui.bootstrap', 'ng']);
+angular.module('alerts', ['ui.bootstrap', 'ng'])
 
-alertsModule.factory('Alerter', function ($timeout) {
+.factory('Alerter', function ($timeout) {
 	function Alerter() {
 		this.alerts = [];
 		var self = this;
@@ -47,13 +47,11 @@ alertsModule.factory('Alerter', function ($timeout) {
 	}
 
 	return new Alerter();
-});
+})
 
-
-
-function AlertsCtrl($scope, Alerter) {
+.controller('AlertsCtrl', function($scope, Alerter) {
 	$scope.alerts = Alerter.alerts;
 	$scope.closeAlert = function(index) {
 		$scope.alerts.splice(index, 1);
 	};
-}
+});

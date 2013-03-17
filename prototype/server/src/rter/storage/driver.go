@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// SELECT * FROM Terms , TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=1
+// Select Items.*, GROUP_CONCAT(TermRelationships.Term) Terms FROM Items, TermRelationships where Items.ID=1 AND TermRelationships.ItemID=1
+// Select Items.*, GROUP_CONCAT(TermRelationships.Term) FROM Items, TermRelationships WHERE Items.ID=TermRelationships.ItemID GROUP BY Items.ID
+
 func Insert(val interface{}) error {
 	var (
 		res sql.Result
@@ -17,9 +21,9 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, AuthorID, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
-			v.AuthorID,
+			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
@@ -32,23 +36,34 @@ func Insert(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"INSERT INTO ItemComments (ItemID, AuthorID, Body, UpdateTime) VALUES (?, ?, ?, ?)",
+			"INSERT INTO ItemComments (ItemID, Author, Body, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.ItemID,
-			v.AuthorID,
+			v.Author,
 			v.Body,
 			now,
 		)
 	case *data.Term:
+		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		//accidental remake of a term
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, AuthorID, UpdateTime) VALUES (?, ?, ?, ?)",
+			"INSERT IGNORE INTO Terms (Term, Automated, Author, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
 			v.Automated,
-			v.AuthorID,
+			v.Author,
 			now,
 		)
-	case *data.TermRanking:
+	case *data.TermRelationship:
+		//Nothing can go wrong with INSERT IGNORE since the key is whole entry
 		res, err = Exec(
-			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
+			"INSERT IGNORE INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
+			v.Term,
+			v.ItemID,
+		)
+	case *data.TermRanking:
+		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		//accidental remake of a term
+		res, err = Exec(
+			"INSERT IGNORE INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
 			v.Term,
 			v.Ranking,
 			now,
@@ -71,9 +86,9 @@ func Insert(val interface{}) error {
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"INSERT INTO UserDirections (UserID, LockUserID, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
-			v.UserID,
-			v.LockUserID,
+			"INSERT INTO UserDirections (Username, LockUsername, Command, Heading, Lat, Lng, UpdateTime) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			v.Username,
+			v.LockUsername,
 			v.Command,
 			v.Heading,
 			v.Lat,
@@ -97,6 +112,8 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		v.ID = ID
+
+		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID
 		v.UpdateTime = now
@@ -110,11 +127,10 @@ func Insert(val interface{}) error {
 	case *data.TermRanking:
 		v.UpdateTime = now
 	case *data.User:
-		v.ID = ID
 		v.CreateTime = now
 
 		direction := new(data.UserDirection)
-		direction.UserID = ID
+		direction.Username = v.Username
 
 		err = Insert(direction)
 	case *data.UserDirection:
@@ -135,9 +151,9 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, AuthorID=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, Author=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
-			v.AuthorID,
+			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
@@ -151,18 +167,18 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET AuthorID=?, Body=?, UpdateTime=? WHERE ID=?",
-			v.AuthorID,
+			"UPDATE ItemComments SET Author=?, Body=?, UpdateTime=? WHERE ID=?",
+			v.Author,
 			v.Body,
 			now,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, AuthorID=?, UpdateTime=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, Author=?, UpdateTime=? WHERE Term=?",
 			v.Term,
 			v.Automated,
-			v.AuthorID,
+			v.Author,
 			now,
 			v.Term,
 		)
@@ -182,24 +198,24 @@ func Update(val interface{}) error {
 		)
 	case *data.User:
 		res, err = Exec(
-			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE ID=?",
+			"UPDATE Users SET Username=?, Password=?, Salt=?, Role=?, TrustLevel=? WHERE Username=?",
 			v.Username,
 			v.Password,
 			v.Salt,
 			v.Role,
 			v.TrustLevel,
-			v.ID,
+			v.Username,
 		)
 	case *data.UserDirection:
 		res, err = Exec(
-			"UPDATE UserDirections SET LockUserID=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE UserID=?",
-			v.LockUserID,
+			"UPDATE UserDirections SET LockUsername=?, Command=?, Heading=?, Lat=?, Lng=?, UpdateTime=? WHERE Username=?",
+			v.LockUsername,
 			v.Command,
 			v.Heading,
 			v.Lat,
 			v.Lng,
 			now,
-			v.UserID,
+			v.Username,
 		)
 	default:
 		return ErrUnsupportedDataType
@@ -220,6 +236,8 @@ func Update(val interface{}) error {
 	}
 
 	switch v := val.(type) {
+	case *data.Item:
+		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.UpdateTime = now
 	case *data.Term:
@@ -230,7 +248,7 @@ func Update(val interface{}) error {
 		v.UpdateTime = now
 	}
 
-	return nil
+	return err
 }
 
 func Select(val interface{}) error {
@@ -246,14 +264,16 @@ func Select(val interface{}) error {
 		rows, err = Query("SELECT * FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
 		rows, err = Query("SELECT * FROM Terms WHERE Term=?", v.Term)
+	case *data.TermRelationship:
+		rows, err = Query("SELECT * FROM TermRelationships WHERE Term=? and ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
 		rows, err = Query("SELECT * FROM TermRankings WHERE Term=?", v.Term)
 	case *data.Role:
 		rows, err = Query("SELECT * FROM Roles WHERE Title=?", v.Title)
 	case *data.User:
-		rows, err = Query("SELECT * FROM Users WHERE ID=?", v.ID)
+		rows, err = Query("SELECT * FROM Users WHERE Username=?", v.Username)
 	case *data.UserDirection:
-		rows, err = Query("SELECT * FROM UserDirections WHERE UserID=?", v.UserID)
+		rows, err = Query("SELECT * FROM UserDirections WHERE Username=?", v.Username)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -269,10 +289,18 @@ func Select(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		err = scanItem(v, rows)
+
+		if err != nil {
+			return err
+		}
+
+		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", v.ID)
 	case *data.ItemComment:
 		err = scanItemComment(v, rows)
 	case *data.Term:
 		err = scanTerm(v, rows)
+	case *data.TermRelationship:
+		err = scanTermRelationship(v, rows)
 	case *data.TermRanking:
 		err = scanTermRanking(v, rows)
 	case *data.Role:
@@ -298,15 +326,17 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT * FROM Items "+whereClause, args...)
+		rows, err = Query("SELECT Items.* FROM Items "+whereClause, args...)
 	case *[]*data.ItemComment:
-		rows, err = Query("SELECT * FROM ItemComments "+whereClause, args...)
+		rows, err = Query("SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT * FROM Terms "+whereClause, args...)
+		rows, err = Query("SELECT Terms.* FROM Terms "+whereClause, args...)
+	case *[]*data.TermRelationship:
+		rows, err = Query("SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT * FROM Roles "+whereClause, args...)
+		rows, err = Query("SELECT Roles.* FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT * FROM Users "+whereClause, args...)
+		rows, err = Query("SELECT Users.* FROM Users "+whereClause, args...)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -318,6 +348,12 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 			err = scanItem(item, rows)
 
 			if err != nil {
+				return err
+			}
+
+			err = SelectWhere(&item.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", item.ID)
+
+			if err != ErrZeroMatches && err != nil {
 				return err
 			}
 
@@ -340,6 +376,15 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 			}
 
 			*s = append(*s, term)
+		case *[]*data.TermRelationship:
+			relationship := new(data.TermRelationship)
+			err = scanTermRelationship(relationship, rows)
+
+			if err != nil {
+				return err
+			}
+
+			*s = append(*s, relationship)
 		case *[]*data.Role:
 			role := new(data.Role)
 			err = scanRole(role, rows)
@@ -370,6 +415,8 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 		sliceLen = len(*s)
 	case *[]*data.Term:
 		sliceLen = len(*s)
+	case *[]*data.TermRelationship:
+		sliceLen = len(*s)
 	case *[]*data.Role:
 		sliceLen = len(*s)
 	case *[]*data.User:
@@ -396,15 +443,17 @@ func Delete(val interface{}) error {
 		res, err = Exec("DELETE FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
 		res, err = Exec("DELETE FROM Terms WHERE Term=?", v.Term)
+	case *data.TermRelationship:
+		res, err = Exec("DELETE FROM TermRelationships WHERE Term=? AND ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
 		// res, err = Exec("DELETE FROM TermRankings WHERE Term=?", v.Term)
 		return ErrCannotDelete //DB will autodelete
 	case *data.Role:
 		res, err = Exec("DELETE FROM Roles WHERE Title=?", v.Title)
 	case *data.User:
-		res, err = Exec("DELETE FROM Users WHERE ID=?", v.ID)
+		res, err = Exec("DELETE FROM Users WHERE Username=?", v.Username)
 	case *data.UserDirection:
-		// res, err = Exec("DELETE FROM UserDirections WHERE UserID=?", v.UserID)
+		// res, err = Exec("DELETE FROM UserDirections WHERE Username=?", v.Username)
 		return ErrCannotDelete //DB will autodelete
 	default:
 		return ErrUnsupportedDataType

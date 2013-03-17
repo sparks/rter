@@ -2,7 +2,6 @@ body {
 	background-color: rgb(240, 240, 240);
 	padding: 0 0 50px 0;
 	margin: 0;
-	text-align: center;
 	font-family: Arial;
 }
 
@@ -29,6 +28,8 @@ body {
 	position: relative;
 	right: 0;
 }
+
+/* -- App Badge -- */
 
 #appbadge {
 	text-align: left;
@@ -62,6 +63,72 @@ body {
 
 	line-height: 17px;
 }
+
+/* -- Forms -- */
+
+form hr {
+	border-color: rgb(120, 120, 120);
+	border-width: 1px;
+}
+
+form input {
+	min-width: 250px;
+}
+
+.select2-container {
+	min-width: 265px;
+}
+
+.select2-container .select2-search-field {
+	width: 20px;
+}
+
+form label {
+	font-weight: bold;
+}
+
+.error {
+	color: red;
+}
+
+.error input {
+	border-color: red;
+}
+
+.submit-generic-item {
+	margin: auto;
+	width: 750px;
+}
+
+.submit-generic-item .map {
+	height: 400px;
+	width: 450px;
+}
+
+.submit-generic-item-left {
+	float: left;
+}
+
+.submit-generic-item-right {
+	float: right;
+}
+
+.submit-generic-item-clear {
+	clear: both;
+}
+
+/* -- Modal -- */
+
+.modal {
+	overflow: scroll;
+	max-height: 80%;
+	left: 50%;
+	width: 1000px;
+	margin-left: -500px;
+	padding: 12px;
+}
+
+/* -- Alerts -- */
 
 #alerter {
 	position: fixed;

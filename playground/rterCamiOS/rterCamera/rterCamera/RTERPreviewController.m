@@ -52,6 +52,9 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
         
+        // init dispatch queues
+        postQueue = dispatch_queue_create("com.rterCamera.postQueue", DISPATCH_QUEUE_SERIAL);
+        
     }
     return self;
 }
@@ -65,7 +68,7 @@
     
     // encoder
     encoder = [[RTERVideoEncoder alloc] init];
-    
+
     // video session settings
     
     /* possible resolution settings:
@@ -79,16 +82,26 @@
      AVCaptureSessionPreset960x540;
      AVCaptureSessionPreset1280x720;
      */
-    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-        NSLog(@"640x480");
+    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
+        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
+        NSLog(@"352x288");
         
         CMVideoDimensions dimensions;
-        dimensions.width = 640;
-        dimensions.height = 480;
+        dimensions.width = 352;
+        dimensions.height = 288;
                 
         [encoder setupEncoderWithDimesions:dimensions];
     }
+//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
+//        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+//        NSLog(@"640x480");
+//        
+//        CMVideoDimensions dimensions;
+//        dimensions.width = 640;
+//        dimensions.height = 480;
+//        
+//        [encoder setupEncoderWithDimesions:dimensions];
+//    }
     else {
         // Handle the failure.
     }
@@ -276,9 +289,33 @@
     CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
     // also in the 'mediaSpecific' dict of the sampleBuffer
     
-    NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
+    //NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
     
-    
+//    dispatch_async(encoderQueue, ^{
+//            [encoder encodeSampleBuffer:sampleBuffer];
+//            NSLog(@"encoded frame");
+//    });
+    AVPacket pkt;   // encoder output
+    if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
+        NSLog(@"encoded frame");
+        
+        dispatch_async(postQueue, ^{
+            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.36:6660/v1/ingest/0/avc"]];
+            [postRequest setHTTPMethod:@"POST"];
+            [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
+            NSHTTPURLResponse *response;
+            NSError *err;
+            NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
+            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
+            NSDictionary *dictionary = [response allHeaderFields];
+            NSLog([dictionary description]);
+            //        }
+            [encoder freePacket:&pkt];
+            //        NSLog(@"finished sending frame");
+        });
+    }
+
+   
     
 }
 

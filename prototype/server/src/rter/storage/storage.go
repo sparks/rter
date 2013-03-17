@@ -12,6 +12,10 @@ var (
 	ErrCannotDelete        = errors.New("Storage doesn't allow deleting that.")
 )
 
+func Begin() (*sql.Tx, error) {
+	return db.Begin()
+}
+
 func Exec(query string, args ...interface{}) (sql.Result, error) {
 	return db.Exec(query, args...)
 }

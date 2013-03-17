@@ -12,7 +12,7 @@ func scanItemComment(comment *data.ItemComment, rows *sql.Rows) error {
 	err := rows.Scan(
 		&comment.ID,
 		&comment.ItemID,
-		&comment.AuthorID,
+		&comment.Author,
 		&comment.Body,
 		&updateTimeString,
 	)
@@ -38,7 +38,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	err := rows.Scan(
 		&item.ID,
 		&item.Type,
-		&item.AuthorID,
+		&item.Author,
 		&item.ThumbnailURI,
 		&item.ContentURI,
 		&item.UploadURI,
@@ -79,7 +79,7 @@ func scanTerm(term *data.Term, rows *sql.Rows) error {
 	err := rows.Scan(
 		&term.Term,
 		&term.Automated,
-		&term.AuthorID,
+		&term.Author,
 		&updateTimeString,
 	)
 
@@ -92,6 +92,15 @@ func scanTerm(term *data.Term, rows *sql.Rows) error {
 	term.UpdateTime = updateTime
 
 	return nil
+}
+
+func scanTermRelationship(relationship *data.TermRelationship, rows *sql.Rows) error {
+	err := rows.Scan(
+		&relationship.Term,
+		&relationship.ItemID,
+	)
+
+	return err
 }
 
 func scanTermRanking(ranking *data.TermRanking, rows *sql.Rows) error {
@@ -127,7 +136,6 @@ func scanUser(user *data.User, rows *sql.Rows) error {
 	var createTimeString string
 
 	err := rows.Scan(
-		&user.ID,
 		&user.Username,
 		&user.Password,
 		&user.Salt,
@@ -155,8 +163,8 @@ func scanUserDirection(direction *data.UserDirection, rows *sql.Rows) error {
 	var updateTimeString string
 
 	err := rows.Scan(
-		&direction.UserID,
-		&direction.LockUserID,
+		&direction.Username,
+		&direction.LockUsername,
 		&direction.Command,
 		&direction.Heading,
 		&direction.Lat,

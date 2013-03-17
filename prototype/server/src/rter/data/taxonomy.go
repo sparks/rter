@@ -5,17 +5,22 @@ import (
 )
 
 type Term struct {
-	Term string `json:",omitempty"`
+	Term string
 
-	Automated bool
-	AuthorID  int64
+	Automated bool   `json:",omitempty"`
+	Author    string `json:"-"`
 
 	UpdateTime time.Time `json:",omitempty"`
 }
 
+type TermRelationship struct {
+	Term   string
+	ItemID int64
+}
+
 type TermRanking struct {
-	Term    string `json:",omitempty"`
-	Ranking string `json:",omitempty"`
+	Term    string
+	Ranking string
 
 	UpdateTime time.Time `json:",omitempty"`
 }
