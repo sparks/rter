@@ -5,11 +5,11 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
-	"fmt"
-	"log"
 )
 
 // --------------------------------------------------------------------------
@@ -21,11 +21,10 @@ type ServerState struct {
 }
 
 // instantiate global state variable
-var server = ServerState {
+var server = ServerState{
 	activeSessions: make(map[uint64]*TranscodeSession),
 	closedSessions: make(map[uint64]*time.Timer),
 }
-
 
 type ServerError struct {
 	code   int
@@ -38,15 +37,15 @@ func NewServerError(c int, s int, m string) *ServerError {
 }
 
 func (e *ServerError) Error() string { return e.msg }
-func (e *ServerError) Code() int { return e.code }
-func (e *ServerError) Status() int { return e.status }
+func (e *ServerError) Code() int     { return e.code }
+func (e *ServerError) Status() int   { return e.status }
 
 func (e *ServerError) JSONError() string {
-	return  "{\n  \"errors\": [\n    {\n      \"code\": " +
-	        strconv.Itoa(e.code) +
-	        ",\n      \"message\": \"" +
-	        e.msg +
-	        "\"\n    }\n  ]\n}"
+	return "{\n  \"errors\": [\n    {\n      \"code\": " +
+		strconv.Itoa(e.code) +
+		",\n      \"message\": \"" +
+		e.msg +
+		"\"\n    }\n  ]\n}"
 }
 
 func ServeError(w http.ResponseWriter, error string, code int) {
@@ -69,14 +68,15 @@ var (
 	ServerErrorEOS               = NewServerError(5, http.StatusForbidden, "already at end-of-stream state")
 	ServerErrorIO                = NewServerError(6, http.StatusForbidden, "storage failed")
 	ServerErrorWrongEndpointType = NewServerError(7, http.StatusUnsupportedMediaType, "type mismatch between open session and ingest endpoint")
+	ServerErrorRequestInProgress = NewServerError(7, http.StatusForbidden, "a request for this session is already in progress")
+	ServerErrorInvalidClient     = NewServerError(7, http.StatusForbidden, "endpoint is already locked to another consumer")
 
-	ServerErrorAuthTokenRequired = NewServerError(8, http.StatusUnauthorized, "authorization token required for this endpoint")
-	ServerErrorAuthTokenExpired  = NewServerError(9, http.StatusUnauthorized, "authorization token expired")
-	ServerErrorAuthTokenInvalid  = NewServerError(10, http.StatusUnauthorized, "authorization token invalid")
-	ServerErrorAuthNoPermission  = NewServerError(11, http.StatusForbidden, "no permission on this endpoint")
-	ServerErrorAuthUrlMismatch   = NewServerError(12, http.StatusForbidden, "request and token URL mismatch")
-	ServerErrorAuthBadSignature  = NewServerError(13, http.StatusForbidden, "bad signature in authorization token")
-
+	ServerErrorAuthTokenRequired = NewServerError(100, http.StatusUnauthorized, "authorization token required for this endpoint")
+	ServerErrorAuthTokenExpired  = NewServerError(101, http.StatusUnauthorized, "authorization token expired")
+	ServerErrorAuthTokenInvalid  = NewServerError(102, http.StatusUnauthorized, "authorization token invalid")
+	ServerErrorAuthNoPermission  = NewServerError(103, http.StatusForbidden, "no permission on this endpoint")
+	ServerErrorAuthUrlMismatch   = NewServerError(104, http.StatusForbidden, "request and token URL mismatch")
+	ServerErrorAuthBadSignature  = NewServerError(105, http.StatusForbidden, "bad signature in authorization token")
 )
 
 //	ErrSessionQuotaExceded
@@ -91,7 +91,6 @@ var (
 // unknown resource id (stream, segment, thumb, poster) -> 404
 //
 
-
 // Returns an active transcoding session for the requested video id
 //
 // ensures
@@ -105,18 +104,18 @@ func (s *ServerState) FindOrCreateSession(idstr string, t int) (*TranscodeSessio
 	// todo: lock? are http handlers called concurrently? maybe use channel
 	// what happens if a handler is called while another is running on the same video
 
- 	id, err := strconv.ParseUint(idstr, 10, 64)
+	id, err := strconv.ParseUint(idstr, 10, 64)
 
- 	if err != nil {
- 		log.Printf("Malformed id: expected number, got `%s`", idstr)
- 		return nil, ServerErrorBadID
- 	}
+	if err != nil {
+		log.Printf("Malformed id: expected number, got `%s`", idstr)
+		return nil, ServerErrorBadID
+	}
 
- 	// ensure uniqueness (session id is non-closed and non-failed)
- 	if _, found := s.closedSessions[id]; found {
-			log.Printf("Session %d already at EOS", id)
-			return nil, ServerErrorEOS
- 	}
+	// ensure uniqueness (session id is non-closed and non-failed)
+	if _, found := s.closedSessions[id]; found {
+		log.Printf("Session %d already at EOS", id)
+		return nil, ServerErrorEOS
+	}
 
 	// look up session id in map of active sessions
 	session, found := s.activeSessions[id]
@@ -147,20 +146,20 @@ func (s *ServerState) FindOrCreateSession(idstr string, t int) (*TranscodeSessio
 func (s *ServerState) SessionUpdate(id uint64, state int) {
 
 	switch state {
-		default:
-			// fail on unknonw states
-			log.Fatal("Unhandled Session State %d", state)
-		case TC_INIT, TC_RUNNING:
-			// session create is already handled in FindOrCreateSession()
-			return
-		case TC_FAILED, TC_EOS:
-			// here we only have to deal with session shutdown
+	default:
+		// fail on unknonw states
+		log.Fatal("Unhandled Session State %d", state)
+	case TC_INIT, TC_RUNNING:
+		// session create is already handled in FindOrCreateSession()
+		return
+	case TC_FAILED, TC_EOS:
+		// here we only have to deal with session shutdown
 
-			// store self-deleting entry
-			s.closedSessions[id] =
-				time.AfterFunc(time.Duration(c.Server.Session_maxage) * time.Second,
-	 						   func() { delete(s.closedSessions, id) })
-			delete(s.activeSessions, id)
-			return
+		// store self-deleting entry
+		s.closedSessions[id] =
+			time.AfterFunc(time.Duration(c.Server.Session_maxage)*time.Second,
+				func() { delete(s.closedSessions, id) })
+		delete(s.activeSessions, id)
+		return
 	}
 }

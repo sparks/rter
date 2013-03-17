@@ -18,16 +18,15 @@
 // - Common Server Management
 //   - check transcoder capabilities (transcode.go:CheckTranscoderCapabilities())
 //   - configuration sanity check (config.go:SanityCheck())
-//   - request authentication: API_KEY, REQUEST_TOKEN
 //   - HTTPS cert/key
 //   - rate control: enforce sessions per source (IP? or user?) per time -> Redis
 //   - rate control: enforce bytes per source (IP? or user?) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
 //   - implement server status endpoint (Package expvar)
-//   - session uniqueness and EOS -> Redis
 //   - total server statistics (per session this is already accounted for)
 //   - transcoder user/sys time is incorrect
+//   - session uniqueness and EOS -> Redis
 //   - ingest server redirect when quota limit reached -> Redis
 // - Transcoding Pipelines
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
@@ -40,6 +39,9 @@
 
 // API key generation
 // http://stackoverflow.com/questions/1448455/php-api-key-generator
+
+// OAuth 1.0a
+// http://oauth.net/core/1.0a
 
 // Limit bandwidth (max_ingest_bandwidth_kbit) and memory (max_memory_mbytes)
 // http://stackoverflow.com/questions/14582471/golang-memory-consumption-management

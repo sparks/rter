@@ -36,9 +36,10 @@
 //   A signature over all token fields (except the signature itself) is generated
 //   using the following procedure:
 //
-//   1. Create `name=value` strings for each token parameter. The parameter
-//      name MUST be separated from the corresponding value by an '=' character
-//      (ASCII code 61), even if the value is empty.
+//   1. Create `name=value` strings for each token parameter (consumer, resource,
+//      and validity period) . The parameter name MUST be separated from the
+//      corresponding value by an '=' character (ASCII code 61), even if the
+//      value is empty.
 //
 //   2. Sort the parameter strings using lexicographical byte value ordering.
 //      If two parameter names are equal, the sort order will be determined by
@@ -105,7 +106,8 @@ type AuthToken struct {
 	Signature   string `json:"rter_signature"`
 
 	// internal variables, will not be exported
-	lifetime int64 `json:"-"`
+	lifetime int64  `json:"-"`
+	consumer string `json:"-"`
 }
 
 func NewAuthToken() *AuthToken {
@@ -114,14 +116,14 @@ func NewAuthToken() *AuthToken {
 }
 
 func (t *AuthToken) Sign(key string) error {
-	sig_base := "rter_resource=" + t.Resource + "&rter_valid_until=" + t.Valid_until
+	sig_base := "rter_consumer=" + t.consumer + "&rter_resource=" + t.Resource + "&rter_valid_until=" + t.Valid_until
 	hmac := hmac.New(sha256.New, bytes.NewBufferString(key).Bytes())
 	t.Signature = url.QueryEscape(base64.StdEncoding.EncodeToString(hmac.Sum(bytes.NewBufferString(url.QueryEscape(sig_base)).Bytes())))
 	return nil
 }
 
 func (t *AuthToken) VerifySignature(key string) error {
-	sig_base := "rter_resource=" + t.Resource + "&rter_valid_until=" + t.Valid_until
+	sig_base := "rter_consumer=" + t.consumer + "&rter_resource=" + t.Resource + "&rter_valid_until=" + t.Valid_until
 	hmac := hmac.New(sha256.New, bytes.NewBufferString(key).Bytes())
 	checksig := url.QueryEscape(base64.StdEncoding.EncodeToString(hmac.Sum(bytes.NewBufferString(url.QueryEscape(sig_base)).Bytes())))
 
@@ -204,6 +206,10 @@ func NewFromHttpRequest(r *http.Request) (*AuthToken, error) {
 	if t.Signature == "" {
 		return t, errors.New("Auth: signature field missing")
 	}
+
+	// add resource consumer (sender of the request)
+	t.consumer = strings.Split(r.RemoteAddr, ":")[0]
+
 	return t, nil
 }
 
@@ -249,12 +255,36 @@ func AuthenticateRequest(r *http.Request, key string) *ServerError {
 	return nil
 }
 
-func GenerateAuthToken(uri string, valid time.Duration, key string) (*AuthToken, error) {
+func GenerateAuthToken(uri, consumer string, valid time.Duration, key string) (*AuthToken, error) {
+
+	// check preconditions
+	if uri == "" {
+		return nil, errors.New("Auth: empty URI not allowed")
+	}
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return nil, errors.New("Auth: resource parse error")
+	}
+	if url.Scheme != "http" && url.Scheme != "https" {
+		return nil, errors.New("Auth: resource scheme invalid")
+	}
+
+	if consumer == "" {
+		return nil, errors.New("Auth: empty consumer not allowed")
+	}
+	if key == "" {
+		return nil, errors.New("Auth: empty key not allowed")
+	}
+	if valid <= 0 {
+		return nil, errors.New("Auth: invalid lifetime")
+	}
 
 	t := NewAuthToken()
 
 	// use the passed URI as resource id
 	t.Resource = uri
+	t.consumer = consumer
 
 	// generate valid_until timestamp
 	t.lifetime = time.Now().UTC().Add(valid).Unix()

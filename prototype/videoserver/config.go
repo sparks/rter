@@ -207,8 +207,6 @@ func (*ServerConfig) SanityCheck() {
 		c.Limits.Max_cpu = available_cpu
 	}
 
-	// non-empty token signing key
-
 	// meaningful rate limits for given reset interval
 	// - requests per session assuming frame-wise upload at 30fps
 	// - bytes per source sufficient for at least one 600kbit/sec stream
