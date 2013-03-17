@@ -2,28 +2,33 @@
 
 	<label for="type">Content Type</label>
 	<select name="type" ng-model="item.Type">
+		<option value="" disabled selected>Select Type</option>
 		<option value="generic">Generic</option>
 		<option value="raw">Raw</option>
 		<option value="twitter">Twitter</option>
 	</select>
-
-	<hr>
 	
-	<fieldset ng-switch on="item.Type" >
-	  <div ng-switch-when="twitter">
-	  	<submit-twitter-item item="item" form="createItemForm"></submit-twitter-item>
-	  </div>
-	  <div ng-switch-when="raw">
-	  	<submit-raw-item item="item" form="createItemForm"></submit-raw-item>
-	  </div>
-	  <div ng-switch-default>
-	  	<submit-generic-item item="item" form="createItemForm"></submit-generic-item>
-	  </div>
-	</fieldset>
+	<div ng-hide="!item.Type">
+		<hr>
+		
+		<fieldset ng-switch on="item.Type"> 
+		<div ng-switch-when="">
+		</div>
+		  <div ng-switch-when="twitter">
+		  	<submit-twitter-item item="item" form="createItemForm"></submit-twitter-item>
+		  </div>
+		  <div ng-switch-when="raw">
+		  	<submit-raw-item item="item" form="createItemForm"></submit-raw-item>
+		  </div>
+		  <div ng-switch-default>
+		  	<submit-generic-item item="item" form="createItemForm"></submit-generic-item>
+		  </div>
+		</fieldset>
+		
+		<hr>
 
-	<hr>
-
-	<button class="btn" ng-click="pushItem()" ng-disabled="createItemForm.$invalid">Create</button>
-	<div class="btn" ng-click="logModel()">Log Item Model</div>
+		<button class="btn" ng-click="pushItem()" ng-disabled="createItemForm.$invalid">Create</button>
+		<div class="btn" ng-click="logModel()">Log Item Model</div>
+	</div>
 
 </form>
