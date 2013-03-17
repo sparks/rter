@@ -400,7 +400,7 @@ func TestAuthTokenVerification(t *testing.T) {
 	r.Header.Add("Authorization", tok.String())
 	r.RemoteAddr = TEST_TOKEN_CONSUMER
 	if err := AuthenticateRequest(r, TEST_TOKEN_SECRET); err == nil {
-		t.Error(fmt.Sprintf("invalid request url for auth token: %s", err.Error()))
+		t.Error("invalid request url accepted")
 	}
 
 	// wrong consumer IP
@@ -408,7 +408,7 @@ func TestAuthTokenVerification(t *testing.T) {
 	r.Header.Add("Authorization", tok.String())
 	r.RemoteAddr = "192.168.0.1"
 	if err := AuthenticateRequest(r, TEST_TOKEN_SECRET); err == nil {
-		t.Error(fmt.Sprintf("invalid request url for auth token: %s", err.Error()))
+		t.Error("invalid consumer accepted")
 	}
 
 }

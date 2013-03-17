@@ -184,12 +184,15 @@ func (s *TranscodeSession) Close() *ServerError {
 
 func (s *TranscodeSession) ValidateRequest(r *http.Request, t int) *ServerError {
 
-	// check if this is the same consumer
-	if s.Consumer != r.RemoteAddr {
+	// on the first call store caller IP
+	if s.Consumer == "" {
+		s.Consumer = r.RemoteAddr
+	} else if s.Consumer != r.RemoteAddr {
+		// check if this is the same consumer
 		return ServerErrorInvalidClient
 	}
 
-	// check if this is the only request
+	// check if this is the only active request for this resource
 	if s.live {
 		return ServerErrorRequestInProgress
 	}
@@ -254,18 +257,16 @@ func (s *TranscodeSession) Write(r *http.Request, t int) *ServerError {
 
 	log.Printf("Writing data to session %d", s.UID)
 
-	// on the first write call store caller IP
-	if s.Consumer == "" {
-		s.Consumer = r.RemoteAddr
+	// check request compatibility (mime type, content)
+	if err := s.ValidateRequest(r, t); err != nil {
+		return err
 	}
 
 	// go live
 	s.live = true
 
-	// check request compatibility (mime type, content)
-	if err := s.ValidateRequest(r, t); err != nil {
-		return err
-	}
+	// leave live state on exit
+	defer func() { s.live = false }()
 
 	// push data into pipe until body us empty or EOF (broken pipe)
 	written, err := io.Copy(s.Pipe, r.Body)
@@ -297,8 +298,6 @@ func (s *TranscodeSession) Write(r *http.Request, t int) *ServerError {
 	s.Timer = time.AfterFunc(time.Duration(c.Server.Session_timeout)*time.Second,
 		func() { s.HandleTimeout() })
 
-	// leave live state
-	s.live = false
 	return nil
 }
 

@@ -11,8 +11,9 @@
 //
 // An access token allows a resource server to independently (without querying the
 // issuing application server):
-//   - verify the resource the token was issued for
-//   - confirm token freshness
+//   - verify the token was issued for the requested resource
+//   - verify the token was issued to the requesting consumer (same IP address)
+//   - confirm token freshness (lifetime)
 //   - confirm token validity
 //
 
