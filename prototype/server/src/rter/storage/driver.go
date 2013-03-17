@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// SELECT * FROM Terms , TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=1
+// Select Items.*, GROUP_CONCAT(TermRelationships.Term) Terms FROM Items, TermRelationships where Items.ID=1 AND TermRelationships.ItemID=1
+// Select Items.*, GROUP_CONCAT(TermRelationships.Term) FROM Items, TermRelationships WHERE Items.ID=TermRelationships.ItemID GROUP BY Items.ID
+
 func Insert(val interface{}) error {
 	var (
 		res sql.Result
@@ -39,22 +43,27 @@ func Insert(val interface{}) error {
 			now,
 		)
 	case *data.Term:
+		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		//accidental remake of a term
 		res, err = Exec(
-			"INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES (?, ?, ?, ?)",
+			"INSERT IGNORE INTO Terms (Term, Automated, Author, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
 			v.Automated,
 			v.Author,
 			now,
 		)
 	case *data.TermRelationship:
+		//Nothing can go wrong with INSERT IGNORE since the key is whole entry
 		res, err = Exec(
-			"INSERT INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
+			"INSERT IGNORE INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
 			v.Term,
 			v.ItemID,
 		)
 	case *data.TermRanking:
+		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		//accidental remake of a term
 		res, err = Exec(
-			"INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
+			"INSERT IGNORE INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
 			v.Term,
 			v.Ranking,
 			now,
@@ -103,6 +112,8 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		v.ID = ID
+
+		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID
 		v.UpdateTime = now
@@ -225,6 +236,8 @@ func Update(val interface{}) error {
 	}
 
 	switch v := val.(type) {
+	case *data.Item:
+		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.UpdateTime = now
 	case *data.Term:
@@ -235,7 +248,7 @@ func Update(val interface{}) error {
 		v.UpdateTime = now
 	}
 
-	return nil
+	return err
 }
 
 func Select(val interface{}) error {
@@ -276,6 +289,12 @@ func Select(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		err = scanItem(v, rows)
+
+		if err != nil {
+			return err
+		}
+
+		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", v.ID)
 	case *data.ItemComment:
 		err = scanItemComment(v, rows)
 	case *data.Term:
@@ -307,17 +326,17 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT * FROM Items "+whereClause, args...)
+		rows, err = Query("SELECT Items.* FROM Items "+whereClause, args...)
 	case *[]*data.ItemComment:
-		rows, err = Query("SELECT * FROM ItemComments "+whereClause, args...)
+		rows, err = Query("SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT * FROM Terms "+whereClause, args...)
+		rows, err = Query("SELECT Terms.* FROM Terms "+whereClause, args...)
 	case *[]*data.TermRelationship:
-		rows, err = Query("SELECT * FROM TermRelationships "+whereClause, args...)
+		rows, err = Query("SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT * FROM Roles "+whereClause, args...)
+		rows, err = Query("SELECT Roles.* FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT * FROM Users "+whereClause, args...)
+		rows, err = Query("SELECT Users.* FROM Users "+whereClause, args...)
 	default:
 		return ErrUnsupportedDataType
 	}
@@ -329,6 +348,12 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 			err = scanItem(item, rows)
 
 			if err != nil {
+				return err
+			}
+
+			err = SelectWhere(&item.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", item.ID)
+
+			if err != ErrZeroMatches && err != nil {
 				return err
 			}
 
