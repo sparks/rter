@@ -1,6 +1,20 @@
-angular.module('termview', ['ngResource', 'items'])
+angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.controller('TermViewCtrl', function($scope, Item) {
+.controller('TermViewCtrl', function($scope, $dialog, Item) {
+	$scope.updateItemDialog = function(item){
+		var d = $dialog.dialog(
+			{
+				modalFade: false,
+				backdrop: true,
+				keyboard: true,
+				backdropClick: true,
+				resolve: {item: function() { return item; }},
+				templateUrl: '/template/items/submit-item.html',
+				controller: 'UpdateItemCtrl'
+			}
+		);
+		d.open();
+	};
 })
 
 .directive('termview', function(Item) {

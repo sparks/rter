@@ -81,6 +81,13 @@ angular.module('genericItem', ['ng', 'taxonomy'])
 		controller: 'SubmitGenericItemCtrl',
 		link: function(scope, element, attr) {
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
+
+			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+				scope.marker = new google.maps.Marker({
+					map: scope.myMap,
+					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
+				});
+			}
 		}
 	};
 });
