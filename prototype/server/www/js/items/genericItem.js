@@ -1,6 +1,6 @@
-angular.module('genericItem', ['ng', 'taxonomy'])
+angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 
-.controller('SubmitGenericItemCtrl', function($scope, Taxonomy) {
+.controller('FormGenericItemCtrl', function($scope, Taxonomy) {
 	if($scope.item.Author === undefined) {
 		$scope.item.Author = "anonymous"; //TODO: Replace with login
 	}
@@ -70,15 +70,15 @@ angular.module('genericItem', ['ng', 'taxonomy'])
 	};
 })
 
-.directive('submitGenericItem', function(Taxonomy) {
+.directive('formGenericItem', function(Taxonomy) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/submit-generic-item.html',
-		controller: 'SubmitGenericItemCtrl',
+		templateUrl: '/template/items/form-generic-item.html',
+		controller: 'FormGenericItemCtrl',
 		link: function(scope, element, attr) {
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 

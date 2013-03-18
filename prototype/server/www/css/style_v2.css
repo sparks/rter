@@ -24,11 +24,6 @@ body {
 	border: none;
 }
 
-#submitcontent {
-	position: relative;
-	right: 0;
-}
-
 /* -- App Badge -- */
 
 #appbadge {
@@ -95,25 +90,25 @@ form label {
 	border-color: red;
 }
 
-.submit-generic-item {
+.form-generic-item {
 	margin: auto;
 	width: 750px;
 }
 
-.submit-generic-item .map {
+.form-generic-item .map {
 	height: 400px;
 	width: 450px;
 }
 
-.submit-generic-item-left {
+.form-generic-item-left {
 	float: left;
 }
 
-.submit-generic-item-right {
+.form-generic-item-right {
 	float: right;
 }
 
-.submit-generic-item-clear {
+.form-generic-item-clear {
 	clear: both;
 }
 
@@ -126,6 +121,10 @@ form label {
 	width: 1000px;
 	margin-left: -500px;
 	padding: 12px;
+}
+
+.modal-open {
+	overflow: hidden;
 }
 
 /* -- Alerts -- */

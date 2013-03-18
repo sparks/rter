@@ -1,6 +1,6 @@
 angular.module('rawItem', ['ui.directives', 'taxonomy'])
 
-.controller('SubmitRawItemCtrl', function($scope, Taxonomy) {
+.controller('FormRawItemCtrl', function($scope, Taxonomy) {
 	//This is kinda terrible
 	if($scope.item.Terms !== undefined) {
 		var concat = "";
@@ -38,15 +38,15 @@ angular.module('rawItem', ['ui.directives', 'taxonomy'])
 	};
 })
 
-.directive('submitRawItem', function() {
+.directive('formRawItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/submit-raw-item.html',
-		controller: 'SubmitRawItemCtrl',
+		templateUrl: '/template/items/form-raw-item.html',
+		controller: 'FormRawItemCtrl',
 		link: function(scope, element, attr) {
 
 		}

@@ -1,18 +1,18 @@
 angular.module('twitterItem', [])
 
-.controller('SubmitTwitterItemCtrl', function($scope) {
+.controller('FormTwitterItemCtrl', function($scope) {
 
 })
 
-.directive('submitTwitterItem', function(Item) {
+.directive('formTwitterItem', function(Item) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/submit-twitter-item.html',
-		controller: 'SubmitTwitterItemCtrl',
+		templateUrl: '/template/items/form-twitter-item.html',
+		controller: 'FormTwitterItemCtrl',
 		link: function(scope, element, attr) {
 
 		}

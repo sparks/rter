@@ -9,8 +9,8 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 				keyboard: true,
 				backdropClick: true,
 				resolve: {item: function() { return item; }},
-				templateUrl: '/template/items/submit-item.html',
-				controller: 'UpdateItemCtrl'
+				templateUrl: '/template/items/update-item-dialog.html',
+				controller: 'UpdateItemDialogCtrl'
 			}
 		);
 		d.open();

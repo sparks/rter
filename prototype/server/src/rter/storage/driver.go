@@ -103,6 +103,16 @@ func Insert(val interface{}) error {
 		return err
 	}
 
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return ErrZeroAffected
+	}
+
 	ID, err := res.LastInsertId()
 
 	if err != nil {
@@ -113,7 +123,7 @@ func Insert(val interface{}) error {
 	case *data.Item:
 		v.ID = ID
 
-		err = ReconcileTerms(v, &v.Terms)
+		_, err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID
 		v.UpdateTime = now
@@ -225,19 +235,29 @@ func Update(val interface{}) error {
 		return err
 	}
 
+	isAffected := false
+
+	switch v := val.(type) {
+	case *data.Item:
+		isAffected, err = ReconcileTerms(v, &v.Terms)
+	}
+
+	if err != nil {
+		return err
+	}
+
 	affected, err := res.RowsAffected()
 
 	if err != nil {
 		return err
 	}
 
-	if affected < 1 {
-		return ErrZeroMatches
+	if affected < 1 && !isAffected { //Check here for the issue of updating tags
+		return ErrZeroAffected
 	}
 
 	switch v := val.(type) {
 	case *data.Item:
-		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.UpdateTime = now
 	case *data.Term:
@@ -283,7 +303,7 @@ func Select(val interface{}) error {
 	}
 
 	if !rows.Next() {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
 
 	switch v := val.(type) {
@@ -353,7 +373,7 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 
 			err = SelectWhere(&item.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", item.ID)
 
-			if err != ErrZeroMatches && err != nil {
+			if err != ErrZeroAffected && err != nil {
 				return err
 			}
 
@@ -424,7 +444,7 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 	}
 
 	if sliceLen == 0 {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
 
 	return nil
@@ -470,7 +490,7 @@ func Delete(val interface{}) error {
 	}
 
 	if affected < 1 {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
 
 	return nil

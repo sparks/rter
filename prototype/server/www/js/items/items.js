@@ -12,36 +12,22 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 	return Item;
 })
 
-.controller('SubmitItemCtrl', function($scope, $rootScope, Alerter, Item) {
-	var defaultType = "";
-	$scope.item = {
-		Type: defaultType
-	};
+.controller('CreateItemCtrl', function($scope, Alerter, Item) {
+	$scope.item = {Type: ""};
 
-	$scope.logModel = function() {
+	$scope.debug = function() {
 		console.log($scope.item);
-		// console.log($scope.createItemForm);
-		console.log(JSON.stringify($scope.item));
 	};
 
-	$scope.pushItem = function() {
-		if($scope.item.StartTime !== undefined) {
-			$scope.item.StartTime = new Date($scope.item.StartTime);
-		}
-		if($scope.item.StopTime !== undefined) {
-			$scope.item.StopTime = new Date($scope.item.StopTime);
-		}
-		Item.save($scope.item,
+	$scope.createItem = function() {
+		if($scope.item.StartTime !== undefined) $scope.item.StartTime = new Date($scope.item.StartTime);
+		if($scope.item.StopTime !== undefined) $scope.item.StopTime = new Date($scope.item.StopTime);
+
+		Item.save(
+			$scope.item,
 			function() {
 				Alerter.success("Item Created", 2000);
-
-				$scope.item = {
-					Type: $scope.item.Type
-				};
-
-				if($scope.item.Type == "generic") {
-					$scope.item.Author = "anonymous";
-				}
+				$scope.item = {Type: ""};
 			},
 			function(e) {
 				Alerter.error("There was a problem creating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
@@ -51,44 +37,63 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 	};
 })
 
-.controller('UpdateItemCtrl', function($scope, $rootScope, Alerter, Item, item, dialog) {
-	$scope.item = item;
-	$scope.logModel = function() {
-		console.log($scope.item);
-		// console.log($scope.createItemForm);
-		console.log(JSON.stringify($scope.item));
-	};
-
-	$scope.pushItem = function() {
-		if($scope.item.StartTime !== undefined) {
-			$scope.item.StartTime = new Date($scope.item.StartTime);
-		}
-		if($scope.item.StopTime !== undefined) {
-			$scope.item.StopTime = new Date($scope.item.StopTime);
-		}
-		Item.update($scope.item,
-			function() {
-				Alerter.success("Item Updated", 2000);
-
-				dialog.close();
-			},
-			function(e) {
-				Alerter.error("There was a problem creating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
-				console.log(e);
-				dialog.close();
-			}
-		);
-	};
-})
-
-.directive('submitItem', function(Item) {
+.directive('createItem', function(Item) {
 	return {
 		restrict: 'E',
 		scope: {},
-		templateUrl: '/template/items/submit-item.html',
-		controller: 'SubmitItemCtrl',
+		templateUrl: '/template/items/create-item.html',
+		controller: 'CreateItemCtrl',
 		link: function(scope, element, attrs) {
-			// $compile(templ)(scope)
+
+		}
+	};
+})
+
+.controller('UpdateItemDialogCtrl', function($scope, item, dialog) {
+	$scope.dialog = dialog;
+	$scope.item = item;
+})
+
+.controller('UpdateItemCtrl', function($scope, Alerter, Item) {
+	$scope.debug = function() {
+		console.log($scope.item);
+	};
+
+	$scope.updateItem = function() {
+		if($scope.item.StartTime !== undefined) $scope.item.StartTime = new Date($scope.item.StartTime);
+		if($scope.item.StopTime !== undefined) $scope.item.StopTime = new Date($scope.item.StopTime);
+
+		Item.update(
+			$scope.item,
+			function() {
+				Alerter.success("Item Updated", 2000);
+				if($scope.dialog !== undefined) $scope.dialog.close();
+			},
+			function(e) {
+				Alerter.error("There was a problem updating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
+				console.log(e);
+			}
+		);
+	};
+
+	$scope.cancel = function() {
+		if($scope.dialog !== undefined) {
+			$scope.dialog.close();
+		}
+	};
+})
+
+.directive('updateItem', function(Item) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "=",
+			dialog: "="
+		},
+		templateUrl: '/template/items/update-item.html',
+		controller: 'UpdateItemCtrl',
+		link: function(scope, element, attrs) {
+
 		}
 	};
 });
