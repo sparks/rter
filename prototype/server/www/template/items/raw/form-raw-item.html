@@ -1,0 +1,39 @@
+<div class="form-raw-item row-fluid">
+
+	<div class="span6">
+		<div ng-class="{error: form.Author.$invalid}">
+			<label for="Author">Author</label>
+			<input type="text" name="Author" ng-model="item.Author" placeholder="username" required>
+		</div>
+
+		<label for="ThumbnailURI">ThumbnailURI</label>
+		<input type="url" name="ThumbnailURI" ng-model="item.ThumbnailURI">
+		<label for="ContentURI">ContentURI</label>
+		<input type="url" name="ContentURI" ng-model="item.ContentURI">
+		<label for="UploadURI">UploadURI</label>
+		<input type="url" name="UploadURI" ng-model="item.UploadURI">
+
+		<label for="StartTime">StartTime</label>
+		<input type="datetime-local" name="StartTime" ng-model="item.StartTime">
+
+		<label for="StopTime">StopTime</label>
+		<input type="datetime-local" name="StopTime" ng-model="item.StopTime">
+	</div>
+
+	<div class="span6">
+		<label for="HasGeo">HasGeo</label>
+		<input type="number" name="HasGeo" min="0" max="1" placeholder="0" ng-model="item.HasGeo">
+
+		<label for="Heading">Heading</label>
+		<input type="number" step="any" name="Heading" ng-model="item.Heading">
+		<label for="Lat">Lat</label>
+		<input type="number" step="any" name="Lat" ng-model="item.Lat">
+		<label for="Lng">Lng</label>
+		<input type="number" step="any" name="Lng" ng-model="item.Lng">
+
+		<label for="Tags">Tags</label>
+		<div name="Tags" multiple ui-select2="tagConfig" ng-model="item.Terms">
+		</div>
+	</div>
+
+</div>

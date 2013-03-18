@@ -1,5 +1,5 @@
-<!DOCTYPE HTML>
-<html ng-app='rter'>
+<!DOCTYPE html>
+<html lang='en' ng-app='rter'>
 <head>
 
 	<title>rtER Client</title>
@@ -21,7 +21,7 @@
 	<link href="/vendor/angular-ui.css" rel="stylesheet">
 
 	<script src="/vendor/ui-bootstrap-tpls.js"></script>
-	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
+	<link href="/vendor/bootstrap.css" rel="stylesheet">
 
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
 
@@ -61,7 +61,7 @@
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>
-			<pane heading="Create" active="true">
+			<pane heading="Create">
 			 	<create-item>
 				</create-item>
 			</pane>
@@ -71,7 +71,7 @@
 				</pane-builder>
  			</pane>
 
-			<pane heading="All">
+			<pane heading="All" active="true">
 				<termview>
 				</termview>
 			</pane>

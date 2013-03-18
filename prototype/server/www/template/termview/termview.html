@@ -1,6 +1,13 @@
-<div id="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-<ul>
-	<li ng-repeat="item in items"><a target"_blank" href="{{item.ContentURI}}">{{item.ID}}-{{item.Type}}<img ng-src="{{item.ThumbnailURI}}"></a><button ng-click="updateItemDialog(item)" class="btn">Update</button></li>
-</ul>
+<div class="term-view row-fluid">
+	<div  class="left span8">
+		<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
-<div id="main_map_canvas"></div>
+		<ul class="grid" ui-sortable ng-model="items">		
+			<li ng-repeat="item in items"><a href="#" ng-click="updateItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+		</ul>
+	</div>
+
+	<div class="right span4">
+		<div id="map_canvas" class="map" ui-event="" ui-map="map" ui-options="mapOptions"></div>
+	</div>
+</div>

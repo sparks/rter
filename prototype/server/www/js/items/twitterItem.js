@@ -11,8 +11,26 @@ angular.module('twitterItem', [])
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/form-twitter-item.html',
+		templateUrl: '/template/items/twitter/form-twitter-item.html',
 		controller: 'FormTwitterItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
+})
+
+.controller('TileTwitterItemCtrl', function($scope) {
+
+})
+
+.directive('tileTwitterItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/twitter/tile-twitter-item.html',
+		controller: 'TileTwitterItemCtrl',
 		link: function(scope, element, attr) {
 
 		}

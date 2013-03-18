@@ -1,4 +1,4 @@
-angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem', 'twitterItem'])
+angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericItem', 'rawItem', 'twitterItem'])
 
 .factory('Item', function ($resource) {
 	var Item = $resource(
@@ -49,11 +49,6 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 	};
 })
 
-.controller('UpdateItemDialogCtrl', function($scope, item, dialog) {
-	$scope.dialog = dialog;
-	$scope.item = item;
-})
-
 .controller('UpdateItemCtrl', function($scope, Alerter, Item) {
 	$scope.debug = function() {
 		console.log($scope.item);
@@ -67,10 +62,15 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 			$scope.item,
 			function() {
 				Alerter.success("Item Updated", 2000);
-				if($scope.dialog !== undefined) $scope.dialog.close();
+				$scope.cancel();
 			},
 			function(e) {
-				Alerter.error("There was a problem updating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
+				if(e.status == 304) {
+					Alerter.warn("Nothing was changed.", 2000);
+					$scope.cancel();
+				} else {
+					Alerter.error("There was a problem updating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
+				}
 				console.log(e);
 			}
 		);
@@ -92,6 +92,47 @@ angular.module('items', ['ngResource', 'ui', 'alerts', 'genericItem', 'rawItem',
 		},
 		templateUrl: '/template/items/update-item.html',
 		controller: 'UpdateItemCtrl',
+		link: function(scope, element, attrs) {
+
+		}
+	};
+})
+
+.controller('UpdateItemDialogCtrl', function($scope, item, dialog) {
+	$scope.dialog = dialog;
+	$scope.item = item;
+})
+
+.factory('updateItemDialog', function ($dialog) {
+	return {
+		open: function(item) {
+			var d = $dialog.dialog({
+				modalFade: false,
+				backdrop: false,
+				keyboard: true,
+				backdropClick: false,
+				resolve: {item: function() { return item; }},
+				templateUrl: '/template/items/update-item-dialog.html',
+				controller: 'UpdateItemDialogCtrl'
+			});
+
+			d.open();
+		}
+	};
+})
+
+.controller('TileItemCtrl', function($scope) {
+
+})
+
+.directive('tileItem', function(Item) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/tile-item.html',
+		controller: 'TileItemCtrl',
 		link: function(scope, element, attrs) {
 
 		}

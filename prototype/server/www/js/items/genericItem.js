@@ -51,14 +51,14 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 
 	$scope.centerAt = function(location) {
 		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
-		$scope.myMap.setCenter(latlng);
+		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
 	};
 
 	$scope.setMarker = function($event) {
 		if($scope.marker === undefined) {
 			$scope.marker = new google.maps.Marker({
-				map: $scope.myMap,
+				map: $scope.map,
 				position: $event.latLng
 			});
 		} else {
@@ -77,17 +77,35 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/form-generic-item.html',
+		templateUrl: '/template/items/generic/form-generic-item.html',
 		controller: 'FormGenericItemCtrl',
 		link: function(scope, element, attr) {
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 
 			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
 				scope.marker = new google.maps.Marker({
-					map: scope.myMap,
+					map: scope.map,
 					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
 				});
 			}
+		}
+	};
+})
+
+.controller('TileGenericItemCtrl', function($scope) {
+
+})
+
+.directive('tileGenericItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/generic/tile-generic-item.html',
+		controller: 'TileGenericItemCtrl',
+		link: function(scope, element, attr) {
+
 		}
 	};
 });

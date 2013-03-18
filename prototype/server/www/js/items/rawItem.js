@@ -45,7 +45,7 @@ angular.module('rawItem', ['ui.directives', 'taxonomy'])
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/form-raw-item.html',
+		templateUrl: '/template/items/raw/form-raw-item.html',
 		controller: 'FormRawItemCtrl',
 		link: function(scope, element, attr) {
 

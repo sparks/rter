@@ -1,0 +1,8 @@
+<div class="tile-item" ng-switch on="item.Type">
+	<div ng-switch-when="twitter">
+		<tile-twitter-item item="item"></tile-twitter-item>
+	</div>
+	<div ng-switch-default>
+		<tile-generic-item item="item"></tile-generic-item>
+	</div>
+</div>
