@@ -32,13 +32,13 @@ Start the video server with the command `./videoserver` and once a stream is rec
 #### Stream an MPEG2 Transport Stream from a file source
 
 ```
-ffmpeg -v debug -y -re -i ../../../trimmmr/ingest/data/video/aow-docu-2011.m4v -vsync 1 -map 0 -codec copy -bsf h264_mp4toannexb -f mpegts -copytb 0 http://localhost:6666/v1/ingest/2/avc
+ffmpeg -v debug -y -re -i video.mp4 -vsync 1 -map 0 -codec copy -bsf h264_mp4toannexb -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
 ```
 
 #### Live transcode a file and send it as MPEG2 Transport Stream
 
 ```
-ffmpeg -v debug -y -re -i ../../../trimmmr/ingest/data/video/aow-docu-2011.m4v -f mpegts -c:v libx264 -preset ultrafast -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1 -profile baseline -maxrate 1200k -bufsize 1200k  -c:a copy http://localhost:6666/v1/ingest/17/ts
+ffmpeg -v debug -y -re -i video.mp4 -f mpegts -c:v libx264 -preset ultrafast -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1 -profile baseline -maxrate 1200k -bufsize 1200k  -c:a copy http://localhost:6666/v1/ingest/1/ts
 ```
 
 #### Capture and encode live video with VLC, send as MPEG2 Transport Stream, and bridge through FFMPEG
@@ -46,13 +46,13 @@ ffmpeg -v debug -y -re -i ../../../trimmmr/ingest/data/video/aow-docu-2011.m4v -
 ```
 /Applications/VLC.app/Contents/MacOS/VLC qtcapture:// -vvvv --no-drop-late-frames --no-skip-frames --sout='#transcode{vcodec=h264,fps=15,venc=x264{preset=ultrafast,tune=zerolatency,keyint=30,bframes=0,ref=1,level=30,profile=baseline,hrd=cbr,crf=20,ratetol=1.0,vbv-maxrate=1200,vbv-bufsize=1200,lookahead=0}}:standard{access=http{mime="video/MP2T"},mux=ts,dst=127.0.0.1:5555}' --qtcapture-width=640 --qtcapture-height=480 --live-caching=200 --intf=macosx
 
-ffmpeg -v debug -y -i http://127.0.0.1:5555 -vsync 1 -map 0 -codec copy -r 15 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/18/ts
+ffmpeg -v debug -y -i http://127.0.0.1:5555 -vsync 1 -map 0 -codec copy -r 15 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
 ```
 
 #### Live transcode a file and send it as raw H264/AVC stream
 
 ```
-ffmpeg -v debug -y -re -i ../../../trimmmr/ingest/data/video/aow-docu-2011.m4v -f h264 -c:v libx264 -preset ultrafast -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 -profile baseline -maxrate 1200k -bufsize 1200k  -an http://localhost:6666/v1/ingest/30/avc
+ffmpeg -v debug -y -re -i video.mp4 -f h264 -c:v libx264 -preset ultrafast -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 -profile baseline -maxrate 1200k -bufsize 1200k  -an http://localhost:6666/v1/ingest/1/avc
 ```
 
 
@@ -218,7 +218,7 @@ ffmpeg -v debug -fflags nobuffer -i pipe:0 -vsync 0 -copyts -copytb 1 -codec cop
 
 Status: __OK__
 ```
-/Applications/VLC.app/Contents/MacOS/VLC ../video/aow-docu-2011.m4v -vvvv --intf=rc --sout '#duplicate{dst=display,dst="transcode{vcodec=h264,vb=2000,fps=25,scale=1,width=640,height=480,acodec=mp4a,ab=128,channels=2,samplerate=44100,venc=x264{keyint=50,ref=1,ratetol=1.0}}:standard{access=udp,mux=ts,dst=127.0.0.1:5555}"'
+/Applications/VLC.app/Contents/MacOS/VLC video.mp4 -vvvv --intf=rc --sout '#duplicate{dst=display,dst="transcode{vcodec=h264,vb=2000,fps=25,scale=1,width=640,height=480,acodec=mp4a,ab=128,channels=2,samplerate=44100,venc=x264{keyint=50,ref=1,ratetol=1.0}}:standard{access=udp,mux=ts,dst=127.0.0.1:5555}"'
 ```
 
 #### Sending VLC Output to stdout
@@ -229,5 +229,5 @@ duplicate{dst=file{mux=ts,dst='-'},dst=display}
 
 #### Stream to local and pipe to media stream segmenter, which creates index file and can be streamed to iOS
 vlc --ttl 12 qtcapture:// -vvv input_stream --sout="#transcode{venc=x264{keyint=60,idrint=2},vcodec=h264,vb=300,acodec=mp4a,ab=32,channels=2, samplerate=22050}:\
-duplicate{dst=file{mux=ts,dst='-'},dst=display}" | mediastreamsegmenter -s 10 -D -f /Users/fernyb/hls/live
+duplicate{dst=file{mux=ts,dst='-'},dst=display}" | mediastreamsegmenter -s 10 -D -f ./hls/live
 
