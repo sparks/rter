@@ -1,6 +1,6 @@
 {
 	"server": {
-		"addr": "0.0.0.0",
+		"addr": "127.0.0.1",
 		"port": 8080,
 		"production_mode": false,
 		"secure_mode": false,
@@ -14,7 +14,7 @@
 		"max_memory_mbytes": 128,
 		"max_ingest_sessions": 10,
 		"max_ingest_bandwidth_kbit": 10000,
-		"rate_limit_enable": false,
+		"rate_limit_enable": true,
 		"rate_limit_ingest_window": 15,
 		"rate_limit_ingest_sessions_per_source": 100,
 		"rate_limit_ingest_requests_per_session": 30000,

@@ -272,7 +272,7 @@ func (s *TranscodeSession) Write(r *http.Request, t int) *ServerError {
 	written, err := io.Copy(s.Pipe, r.Body)
 	log.Printf("Written %d bytes to session %d", written, s.UID)
 
-	// statitsics
+	// collect session statistics
 	s.CallsIn++
 	s.BytesIn += written
 	s.BytesOut += written

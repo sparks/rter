@@ -23,6 +23,7 @@
 //   - rate control: enforce bytes per source (IP? or user?) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
+//   - enforce token lifetime when session is estabished
 //   - implement server status endpoint (Package expvar)
 //   - total server statistics (per session this is already accounted for)
 //   - transcoder user/sys time is incorrect
@@ -67,12 +68,10 @@ func main() {
 
 	var err error
 	c.ParseConfig()
-	c.SanityCheck()
-
-	// print config in dev mode
 	if !c.Server.Production_mode {
 		c.Print()
 	}
+	c.SanityCheck()
 
 	// set resource limits
 	runtime.GOMAXPROCS(c.Limits.Max_cpu)

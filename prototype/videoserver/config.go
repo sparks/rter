@@ -171,8 +171,19 @@ func (*ServerConfig) SanityCheck() {
 
 	// server IP and port
 	// - warn when localhost is set in production
+	if c.Server.Production_mode && c.Server.Addr == "127.0.0.1" {
+		log.Printf("Warning: server is reachable via localhost only!")
+	}
+
 	// - warn when 0.0.0.0 is set in production and dev
+	if c.Server.Addr == "0.0.0.0" {
+		log.Printf("Warning: server is reachable on all interfaces (0.0.0.0)!")
+	}
+
 	// - warn when port is blocked by Safari/iOS (6666, 6667, 6000)
+	if c.Server.Port == 6666 || c.Server.Port == 6667 || c.Server.Port == 6000 {
+		log.Printf("Warning: server port may be blocked by Apple Webkit browsers!")
+	}
 
 	// secure mode warning
 	if c.Server.Production_mode && !c.Server.Secure_mode {
@@ -208,12 +219,29 @@ func (*ServerConfig) SanityCheck() {
 	}
 
 	// meaningful rate limits for given reset interval
-	// - requests per session assuming frame-wise upload at 30fps
-	// - bytes per source sufficient for at least one 600kbit/sec stream
+	if c.Limits.Rate_limit_enable {
+		// - requests per session assuming frame-wise upload at 30fps
+		if c.Limits.Rate_limit_ingest_requests_per_session < c.Limits.Rate_limit_ingest_window*60*30 {
+			log.Printf("Warning: request rate limit may not be sufficient for frame-wise POST")
+		}
 
-	// test directory permissions
+		// - bytes per source sufficient for at least one 600kbit/sec stream (=75000 bytes/sec)
+		if c.Limits.Rate_limit_ingest_bytes_per_source < c.Limits.Rate_limit_ingest_window*60*75000 {
+			log.Printf("Warning: volume rate limit may not be sufficient for 600kbit streams")
+		}
+	}
 
-	// test transcoder executable exist
+	// test output directory permissions (?wx??????) 0300
+	info, err := os.Stat(c.Transcode.Output_path)
+	if err != nil || !info.IsDir() || info.Mode().Perm()&os.FileMode(0300) != 0300 {
+		log.Fatal("Error: output path is no writable directory!")
+	}
+
+	// test transcoder executable exist (r?xr?xr?x) 555 0x16D
+	info, err = os.Stat(c.Transcode.Command)
+	if err != nil || info.Mode().Perm()&os.FileMode(0500) != 0500 {
+		log.Fatal("Error: transcoder command not executable!")
+	}
 
 	// test for codec support in transcoder
 	CheckTranscoderCapabilities()
