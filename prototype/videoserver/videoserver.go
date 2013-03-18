@@ -30,6 +30,8 @@
 //   - session uniqueness and EOS -> Redis
 //   - ingest server redirect when quota limit reached -> Redis
 // - Transcoding Pipelines
+//   - select best x264 options for chosen level (3.0)
+//   - check whether x264 options are correct for chosen level (3.0)
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
 // - File Download (built-in file server for videos, images, segments)
 //   - check if cache headers are properly set
@@ -37,6 +39,7 @@
 // - HTTP chunk mode upload endpoint for files (simple, how to allow continuations?)
 // - Interactive Chunk Upload (like DropBox: reorder-safe, byte-range, file multiplexing)
 // - Websocket for AVC/TS upload
+// - server bandwidth testing (ab or httperf): ab -c 500 -n 500 http://localhost:1234/
 
 // API key generation
 // http://stackoverflow.com/questions/1448455/php-api-key-generator

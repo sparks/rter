@@ -24,7 +24,7 @@
 //   and path to the resource. Scheme and authority MUST be lowercase. Port number
 //   MUST NOT be included if standard port 80 (http) or 443 (HTTPS) are used.
 //
-//   Example:  https2://rter.cim.mcgill.ca:6660/v1/ingest/1
+//   Example:  https://rter.cim.mcgill.ca:6660/v1/ingest/1
 //
 // valid_until: string (required)
 //   The token validity timestamp is an absolute time expressed as number of
@@ -38,7 +38,7 @@
 //   using the following procedure:
 //
 //   1. Create `name=value` strings for each token parameter (consumer, resource,
-//      and validity period) . The parameter name MUST be separated from the
+//      and validity period). The parameter name MUST be separated from the
 //      corresponding value by an '=' character (ASCII code 61), even if the
 //      value is empty.
 //
