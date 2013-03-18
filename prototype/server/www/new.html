@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html ng-app='rter'>
+<head>
+
+	<title>rtER Client</title>
+
+	<!-- Vendor CSS & JS -->
+
+	<script src="/vendor/jquery.js"></script>
+
+	<script src="/vendor/jquery-ui.js"></script>
+	<link href="/vendor/jquery-ui.css" rel="stylesheet">
+
+	<script src="/vendor/select2.js"></script>
+	<link href="/vendor/select2.css" rel="stylesheet">
+
+	<script src="/vendor/angular.js"></script>
+	<script src="/vendor/angular-resource.js"></script>
+
+	<script src="/vendor/angular-ui.js"></script>
+	<link href="/vendor/angular-ui.css" rel="stylesheet">
+
+	<script src="/vendor/ui-bootstrap-tpls.js"></script>
+	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
+
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
+
+	<!-- App CSS & JS -->
+
+	<link rel="stylesheet" type="text/css" href="/css/style_v2.css">
+
+	<script type="text/javascript" src="/js/util.js"></script>
+
+	<script type="text/javascript" src="/js/rter.js"></script>
+
+	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
+
+	<script type="text/javascript" src="/js/items/items.js"></script>
+	<script type="text/javascript" src="/js/items/genericItem.js"></script>
+	<script type="text/javascript" src="/js/items/rawItem.js"></script>
+	<script type="text/javascript" src="/js/items/twitterItem.js"></script>
+
+	<script type="text/javascript" src="/js/taxonomy/taxonomy.js"></script>
+
+	<script type="text/javascript" src="/js/termview/termview.js"></script>
+
+</head>
+<body>
+
+	<div id="alerter" ng-controller="AlertsCtrl">
+		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+	</div>
+
+	<header id="appbadge">
+		<img src="asset/rter.png" width="50">
+		<hgroup>
+			<h1>Real-Time Emergency Response</h1>
+			<h2>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></h2>
+		</hgroup>
+	</header>
+
+	<div ng-controller="TabsCtrl" id="maintabber">
+		<tabs>
+			<pane heading="Create" active="true">
+			 	<create-item>
+				</create-item>
+			</pane>
+
+			<pane heading="+">
+				<pane-builder>
+				</pane-builder>
+ 			</pane>
+
+			<pane heading="All">
+				<termview>
+				</termview>
+			</pane>
+
+			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
+				<termview term="{{termview.term}}">
+				</termview>
+			</pane>
+		</tabs>
+	</div>
+
+</body>
+</html>

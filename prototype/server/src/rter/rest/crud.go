@@ -171,12 +171,12 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		val = comment
 	case "users":
 		user := new(data.User)
-		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+		user.Username = vars["key"]
 
 		val = user
 	case "users/direction":
 		direction := new(data.UserDirection)
-		direction.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
+		direction.Username = vars["key"]
 
 		val = direction
 	case "roles":
@@ -207,7 +207,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Select(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -281,7 +281,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.SelectWhere(val, whereClause, args...)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -348,9 +348,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	case (*data.ItemComment):
 		v.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
 	case (*data.User):
-		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+		v.Username = vars["key"]
 	case (*data.UserDirection):
-		v.UserID, err = strconv.ParseInt(vars["key"], 10, 64)
+		v.Username = vars["key"]
 	case (*data.Role):
 		v.Title = vars["key"]
 	case (*data.Term):
@@ -367,7 +367,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Update(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	} else if err != nil {
@@ -416,7 +416,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		val = comment
 	case "users":
 		user := new(data.User)
-		user.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+		user.Username = vars["key"]
 
 		val = user
 	case "roles":
@@ -442,7 +442,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Delete(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {

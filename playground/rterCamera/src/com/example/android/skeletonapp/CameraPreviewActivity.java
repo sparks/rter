@@ -28,19 +28,22 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.telephony.TelephonyManager;
+
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 
 // ----------------------------------------------------------------------
 
@@ -85,7 +88,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// Hide the window title.
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+		String AndroidId = Settings.Secure.getString(getContentResolver(),
+		         Settings.Secure.ANDROID_ID);
 		frameInfo = new FrameInfo();
 
 		// openGL overlay
@@ -106,18 +110,17 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// openGLview
 		mGLView = overlay.getGLView();
 
-		TelephonyManager tManager = (TelephonyManager) this
-				.getSystemService(Context.TELEPHONY_SERVICE);
-		String sUID = tManager.getDeviceId();
-		Log.e(TAG, "Fileoutput in phone id" + sUID + "and the length being "
-				+ sUID);
+		
+		
+		
+		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
 		// uid = convertStringToByteArray(sUID);
 
-		// passed from other activity right now
-		Intent intent = getIntent();
-		selected_uid = intent.getStringExtra("phoneID");
-		frameInfo.uid = convertStringToByteArray(selected_uid);
-
+		
+		selected_uid = AndroidId;
+		frameInfo.uid = selected_uid.getBytes();
+		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
+		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
 		// add the two views to the frame
 		mFrame.addView(mPreview);
 		mFrame.addView(mGLView);
@@ -171,7 +174,14 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		// test, set desired orienation to north
 		overlay.letFreeRoam(false);
 		overlay.setDesiredOrientation(0.0f);
+		CharSequence text = "Tap to start..";
+		int duration = Toast.LENGTH_SHORT;
 
+		Toast toast = Toast.makeText(this, text, duration);
+		toast.show();
+		
+		
+		
 	}
 
 	@Override
@@ -238,6 +248,11 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		Log.e(TAG, "onClick changes isFPS : " + isFPS);
 		if (isFPS) {
 			//photoThread.start();
+			CharSequence text = "Starting Photo Stream ..";
+			int duration = Toast.LENGTH_SHORT;
+
+			Toast toast = Toast.makeText(this, text, duration);
+			toast.show();
 			mCamera.takePicture(null, null, photoCallback);
 			Log.d(TAG, "starting picture thread");
 			mPreview.inPreview = false;
@@ -252,6 +267,12 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 			(new Thread(new Runnable() {
 				public void run() {
 					Log.e(TAG, "Inside Picture Callback");
+					runOnUiThread(new Runnable() {
+		                 public void run() {
+
+		                     Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG).show();
+		                }
+		            });
 					Looper.prepare();
 					
 					
@@ -263,6 +284,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 					if (isFPS) {
 						tmpCamera.startPreview();
 						mPreview.inPreview = true;
+
 					}
 
 					long start_time = System.currentTimeMillis();
@@ -271,6 +293,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 					}
 
 					if (isFPS) {
+						
 						Log.d(TAG, "Picture taken");
 						mCamera.takePicture(null, null, photoCallback);
 					}

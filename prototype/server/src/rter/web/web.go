@@ -40,7 +40,7 @@ type ContentChunk struct {
 	SizeY int `json:"size_y"`
 }
 
-var templates = template.Must(template.ParseFiles(filepath.Join(utils.TemplatePath, "v1", "index.html")))
+var templates = template.Must(template.ParseFiles(filepath.Join(utils.WWWPath, "index.html")))
 
 var writeLock sync.Mutex
 

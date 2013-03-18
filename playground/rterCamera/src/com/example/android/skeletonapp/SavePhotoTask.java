@@ -24,7 +24,9 @@ import com.example.android.skeletonapp.overlay.OverlayController;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
+import android.provider.Settings;
 
 class SavePhotoTask extends AsyncTask<byte[], String, String> {
 
@@ -51,9 +53,8 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 	@SuppressLint("ParserError")
 	@Override
 	protected String doInBackground(byte[]... a) {
-		
 		String lat ="", lon = "";
-		
+		Log.e("SavePhotoTask", "uid" + new String(a[1]));
 		String uid = new String(a[1]);
 		if(a[2] != null && a[3] != null){
 		lat = new String(a[2]);

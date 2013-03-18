@@ -1,0 +1,6 @@
+<div id="nocontent" ng-show="!items.length">No Content for {{term}}</div>
+<ul>
+	<li ng-repeat="item in items"><a target"_blank" href="{{item.ContentURI}}">{{item.ID}}-{{item.Type}}<img ng-src="{{item.ThumbnailURI}}"></a><button ng-click="updateItemDialog(item)" class="btn">Update</button></li>
+</ul>
+
+<div id="main_map_canvas"></div>

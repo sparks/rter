@@ -79,19 +79,17 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	user.Username = "OtherTestUser"
 	user.TrustLevel = 5
 
-	testUpdate(t, "/users/"+strconv.FormatInt(user.ID, 10), user)
+	testUpdate(t, "/users/"+user.Username, user)
 
-	assert.Equal(t, user.Username, "OtherTestUser")
 	assert.Equal(t, user.TrustLevel, 5)
 }
 
 func TestReadUser(t *testing.T) {
 	readUser := new(data.User)
 
-	testRead(t, "/users/"+strconv.FormatInt(user.ID, 10), readUser)
+	testRead(t, "/users/"+user.Username, readUser)
 
 	readUser.CreateTime = user.CreateTime
 
@@ -110,20 +108,20 @@ func TestReadAllUser(t *testing.T) {
 
 func TestUpdateUserDirection(t *testing.T) {
 	direction = new(data.UserDirection)
-	direction.UserID = user.ID
+	direction.Username = user.Username
 	direction.Command = "none"
 	direction.Heading = 12.123
 	direction.Lat = 123.234
 	direction.Lng = -74.234
 	direction.UpdateTime = time.Now()
 
-	testUpdate(t, "/users/"+strconv.FormatInt(user.ID, 10)+"/direction", direction)
+	testUpdate(t, "/users/"+user.Username+"/direction", direction)
 }
 
 func TestReadUserDirection(t *testing.T) {
 	readDirection := new(data.UserDirection)
 
-	testRead(t, "/users/"+strconv.FormatInt(user.ID, 10)+"/direction", readDirection)
+	testRead(t, "/users/"+user.Username+"/direction", readDirection)
 
 	readDirection.UpdateTime = direction.UpdateTime //hack
 
@@ -133,7 +131,7 @@ func TestReadUserDirection(t *testing.T) {
 func TestCreateItem(t *testing.T) {
 	item = new(data.Item)
 	item.Type = "generic"
-	item.AuthorID = user.ID
+	item.Author = user.Username
 	item.ThumbnailURI = "http://fun.com/thumb.jpg"
 	item.ContentURI = "http://fun.com"
 	item.UploadURI = "http://fun.com/upload"
@@ -189,7 +187,7 @@ func TestReadAllItems(t *testing.T) {
 func TestCreateItemComment(t *testing.T) {
 	comment = new(data.ItemComment)
 	comment.ItemID = item.ID
-	comment.AuthorID = user.ID
+	comment.Author = user.Username
 	comment.Body = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 	comment.UpdateTime = time.Now()
 
@@ -228,7 +226,7 @@ func TestCreateTerm(t *testing.T) {
 	term = new(data.Term)
 	term.Term = "testterm"
 	term.Automated = false
-	term.AuthorID = user.ID
+	term.Author = user.Username
 	term.UpdateTime = time.Now()
 
 	testCreate(t, "/taxonomy", term)
@@ -285,7 +283,7 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	testDelete(t, "/users/"+strconv.FormatInt(user.ID, 10))
+	testDelete(t, "/users/"+user.Username)
 }
 
 func TestDeleteRole(t *testing.T) {

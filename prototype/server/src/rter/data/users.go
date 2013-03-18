@@ -7,27 +7,26 @@ import (
 )
 
 type User struct {
-	ID       int64
 	Username string
-	Password string
-	Salt     string
+	Password string `json:"-"`
+	Salt     string `json:"-"`
 
 	Role       string
 	TrustLevel int
 
-	CreateTime time.Time
+	CreateTime time.Time `json:",omitempty"`
 }
 
 type UserDirection struct {
-	UserID     int64
-	LockUserID int64
-	Command    string
+	Username     string
+	LockUsername string `json:",omitempty"`
+	Command      string `json:",omitempty"`
 
 	Heading float64
 	Lat     float64
 	Lng     float64
 
-	UpdateTime time.Time
+	UpdateTime time.Time `json:",omitempty"`
 }
 
 type Role struct {
