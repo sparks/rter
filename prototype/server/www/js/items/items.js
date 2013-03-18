@@ -116,7 +116,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 				controller: 'UpdateItemDialogCtrl'
 			});
 
-			d.open();
+			return d.open();
 		}
 	};
 })

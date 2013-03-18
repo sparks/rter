@@ -8,6 +8,9 @@
 	</div>
 
 	<div class="right span4">
-		<div id="map_canvas" class="map" ui-event="" ui-map="map" ui-options="mapOptions"></div>
+		<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
+		  ui-event="{}">
+		</div>
+		<div id="map_canvas" class="map" ui-event="{}" ui-map="map" ui-options="mapOptions"></div>
 	</div>
 </div>
