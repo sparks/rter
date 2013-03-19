@@ -76,6 +76,21 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 		);
 	};
 
+	$scope.deleteItem = function() {
+
+		Item.remove(
+			$scope.item,
+			function() {
+				Alerter.success("Item Deleted", 2000);
+				$scope.cancel();
+			},
+			function(e) {
+				Alerter.error("There was a problem deleting the item. "+"Status:"+e.status+". Reply Body:"+e.data);
+				console.log(e);
+			}
+		);
+	};
+
 	$scope.cancel = function() {
 		if($scope.dialog !== undefined) {
 			$scope.dialog.close();

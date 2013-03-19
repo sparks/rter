@@ -1,9 +1,11 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.controller('TermViewCtrl', function($scope, updateItemDialog) {
+.controller('TermViewCtrl', function($scope, updateItemDialog, Item) {
 	$scope.updateItemDialog = function(item){
 		updateItemDialog.open(item).then(function() {
-			$scope.updateMarkers();
+			$scope.items = Item.query(function() { //FIXME: This causes the page to snap up as everything is rebuilt
+				$scope.updateMarkers();
+			});
 		});
 	};
 

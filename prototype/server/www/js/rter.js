@@ -4,4 +4,12 @@ angular.module('rter', ['ui.bootstrap', 'items', 'termview', 'alerts'])
 	$scope.termviews = [
 		// {term: 'a'}
 	];
+})
+
+.directive('eatClick', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            event.preventDefault();
+        });
+    };
 });
