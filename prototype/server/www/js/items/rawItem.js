@@ -51,4 +51,22 @@ angular.module('rawItem', ['ui.directives', 'taxonomy'])
 
 		}
 	};
+})
+
+.controller('CloseupRawItemCtrl', function($scope) {
+
+})
+
+.directive('closeupRawItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/raw/closeup-raw-item.html',
+		controller: 'CloseupRawItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
 });

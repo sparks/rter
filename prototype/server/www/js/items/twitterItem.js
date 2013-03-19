@@ -35,4 +35,22 @@ angular.module('twitterItem', [])
 
 		}
 	};
+})
+
+.controller('CloseupTwitterItemCtrl', function($scope) {
+
+})
+
+.directive('closeupTwitterItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/twitter/closeup-twitter-item.html',
+		controller: 'CloseupTwitterItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
 });

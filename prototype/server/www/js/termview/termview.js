@@ -1,12 +1,16 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.controller('TermViewCtrl', function($scope, updateItemDialog, Item) {
+.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, Item) {
 	$scope.updateItemDialog = function(item){
 		updateItemDialog.open(item).then(function() {
 			$scope.items = Item.query(function() { //FIXME: This causes the page to snap up as everything is rebuilt
 				$scope.updateMarkers();
 			});
 		});
+	};
+
+	$scope.closeupItemDialog = function(item){
+		closeupItemDialog.open(item);
 	};
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);

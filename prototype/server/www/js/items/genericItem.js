@@ -108,4 +108,37 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 
 		}
 	};
+})
+
+.controller('CloseupGenericItemCtrl', function($scope) {
+	if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined) {
+		$scope.mapCenter = new google.maps.LatLng($scope.item.Lat, $scope.item.Lng);
+	} else {
+		$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
+	}
+
+	$scope.mapOptions = {
+		center: $scope.mapCenter,
+		zoom: 10,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+})
+
+.directive('closeupGenericItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/generic/closeup-generic-item.html',
+		controller: 'CloseupGenericItemCtrl',
+		link: function(scope, element, attr) {
+			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+				scope.marker = new google.maps.Marker({
+					map: scope.map,
+					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
+				});
+			}
+		}
+	};
 });

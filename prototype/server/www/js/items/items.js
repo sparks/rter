@@ -77,7 +77,6 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	};
 
 	$scope.deleteItem = function() {
-
 		Item.remove(
 			$scope.item,
 			function() {
@@ -150,6 +149,52 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 		controller: 'TileItemCtrl',
 		link: function(scope, element, attrs) {
 
+		}
+	};
+})
+
+.controller('CloseupItemCtrl', function($scope) {
+	$scope.cancel = function() {
+		if($scope.dialog !== undefined) {
+			$scope.dialog.close();
+		}
+	};
+})
+
+.directive('closeupItem', function(Item) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "=",
+			dialog: "="
+		},
+		templateUrl: '/template/items/closeup-item.html',
+		controller: 'CloseupItemCtrl',
+		link: function(scope, element, attrs) {
+
+		}
+	};
+})
+
+.controller('CloseupItemDialogCtrl', function($scope, item, dialog) {
+	$scope.dialog = dialog;
+	$scope.item = item;
+})
+
+.factory('closeupItemDialog', function ($dialog) {
+	return {
+		open: function(item) {
+			var d = $dialog.dialog({
+				modalFade: false,
+				backdrop: false,
+				keyboard: true,
+				backdropClick: false,
+				resolve: {item: function() { return item; }},
+				templateUrl: '/template/items/closeup-item-dialog.html',
+				controller: 'CloseupItemDialogCtrl'
+			});
+
+			return d.open();
 		}
 	};
 });
