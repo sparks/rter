@@ -70,7 +70,7 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 	};
 })
 
-.directive('formGenericItem', function(Taxonomy) {
+.directive('formGenericItem', function(Taxonomy, $timeout) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -80,14 +80,24 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 		templateUrl: '/template/items/generic/form-generic-item.html',
 		controller: 'FormGenericItemCtrl',
 		link: function(scope, element, attr) {
-			navigator.geolocation.getCurrentPosition(scope.centerAt);
-
 			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
 				scope.marker = new google.maps.Marker({
 					map: scope.map,
-					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
+					position: latLng
 				});
+				scope.mapCenter = latLng;
+			} else {
+				navigator.geolocation.getCurrentPosition(scope.centerAt);
 			}
+
+			$timeout(
+				function() {
+					google.maps.event.trigger(scope.map, "resize");
+					scope.map.setCenter(scope.mapCenter);
+				},
+				5
+			);
 		}
 	};
 })
@@ -138,7 +148,7 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 					map: scope.map,
 					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
 				});
-			}
+			}			
 		}
 	};
 });

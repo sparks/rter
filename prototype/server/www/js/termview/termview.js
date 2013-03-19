@@ -1,6 +1,16 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
 .controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, Item) {
+	$scope.mapResized = false;
+
+	$scope.resizeMap = function() {
+		if(!$scope.mapResized) {
+				google.maps.event.trigger($scope.map, "resize");
+				$scope.mapResized = true;
+				$scope.map.setCenter($scope.mapCenter);
+		}
+	};
+
 	$scope.updateItemDialog = function(item){
 		updateItemDialog.open(item).then(function() {
 			$scope.items = Item.query(function() { //FIXME: This causes the page to snap up as everything is rebuilt

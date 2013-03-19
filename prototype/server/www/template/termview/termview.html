@@ -3,7 +3,7 @@
 		<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
 		<ul class="grid" ui-sortable ng-model="items">		
-			<li ng-repeat="item in items"><a href="#" ng-click="closeupItemDialog(item)" eat-click><tile-item item="item"></tile-item></a></li>
+			<li ng-repeat="item in items"><a href="#" ng-click="updateItemDialog(item)" eat-click><tile-item item="item"></tile-item></a></li>
 		</ul>
 	</div>
 
@@ -11,6 +11,6 @@
 		<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
 		  ui-event="{}">
 		</div>
-		<div id="map_canvas" class="map" ui-event="{}" ui-map="map" ui-options="mapOptions"></div>
+		<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
 	</div>
 </div>

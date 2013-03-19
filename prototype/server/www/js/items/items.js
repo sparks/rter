@@ -13,7 +13,8 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 })
 
 .controller('CreateItemCtrl', function($scope, Alerter, Item) {
-	$scope.item = {Type: ""};
+	var defaultType = "";
+	$scope.item = {Type: defaultType};
 
 	$scope.debug = function() {
 		console.log($scope.item);
@@ -27,7 +28,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 			$scope.item,
 			function() {
 				Alerter.success("Item Created", 2000);
-				$scope.item = {Type: ""};
+				$scope.item = {Type: defaultType};
 			},
 			function(e) {
 				Alerter.error("There was a problem creating the item. "+"Status:"+e.status+". Reply Body:"+e.data);

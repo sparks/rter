@@ -2,7 +2,7 @@
 	<div class="span5">
 		<div ng-class="{error: form.ContentURI.$invalid}">
 			<label for="ContentURI">Content URL</label>
-			<input type="url" name="ContentURI" ng-model="item.ContentURI">
+			<input type="url" name="ContentURI" ng-model="item.ContentURI" required>
 		</div>
 
 		<label for="ThumbnailURI">Thumbnail</label>
@@ -20,5 +20,6 @@
 
 	<div class="span7">
 		<div id="map_canvas" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-map="map" ui-options="mapOptions"></div>
+		<div class="btn" ng-click="resizeMap()">Map Resize</div>
 	</div>
 </div>
