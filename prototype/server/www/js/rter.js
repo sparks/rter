@@ -2,7 +2,9 @@ angular.module('rter', ['ui.bootstrap', 'items', 'termview', 'alerts'])
 
 .controller('TabsCtrl', function($scope) {
 	$scope.termviews = [
-		// {term: 'a'}
+		{term: 'fire'},
+		{term: 'all'},
+		{term: 'test'}
 	];
 })
 

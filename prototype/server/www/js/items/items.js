@@ -160,6 +160,10 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 			$scope.dialog.close();
 		}
 	};
+
+	$scope.debug = function() {
+		console.log($scope.item);
+	};
 })
 
 .directive('closeupItem', function(Item) {

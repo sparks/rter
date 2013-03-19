@@ -1,5 +1,20 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
+.filter('filterByTerm', function() {
+	return function(input, term) {
+		if(term === "" || term === undefined) return input;
+		var out = [];
+		for(var i = 0;i < input.length;i++) {
+			if(input[i].Terms !== undefined) {
+				for(var j = 0;j < input[i].Terms.length;j++) {
+					if(input[i].Terms[j].Term == term) out.push(input[i]);
+				}
+			}
+		}
+		return out;
+	};
+})
+
 .controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, Item) {
 	$scope.mapResized = false;
 

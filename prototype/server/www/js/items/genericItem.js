@@ -148,7 +148,7 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 					map: scope.map,
 					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
 				});
-			}			
+			}
 		}
 	};
 });
