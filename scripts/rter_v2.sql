@@ -119,7 +119,7 @@ INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("
 INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymous", "", "", "public", 0), ("admin", "", "", "admin", 0);
 INSERT INTO UserDirections (Username) VALUES ("anonymous"), ("admin");
 
-INSERT INTO Terms (Term, Automated, Author) VALUES ("all", 1, "admin"), ("test", 0, "anonymous");
+INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES ("all", 1, "admin", "2013-03-19 00:00:00"), ("test", 0, "anonymous", "2013-03-19 00:00:00");
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (
