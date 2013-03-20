@@ -91,7 +91,7 @@ angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
 				navigator.geolocation.getCurrentPosition(scope.centerAt);
 			}
 
-			$timeout(
+			$timeout( //FIXME: Another map hack to render hidden maps
 				function() {
 					google.maps.event.trigger(scope.map, "resize");
 					scope.map.setCenter(scope.mapCenter);

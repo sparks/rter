@@ -1,16 +1,16 @@
 <form name="updateItemForm" class="update-item form-item">
 
-	<fieldset ng-switch on="item.Type"> 
+	<fieldset ng-switch on="itemCopy.Type"> 
 		<div ng-switch-when="">
 		</div>
 		<div ng-switch-when="twitter">
-			<form-twitter-item item="item" form="updateItemForm"></form-twitter-item>
+			<form-twitter-item item="itemCopy" form="updateItemForm"></form-twitter-item>
 		</div>
 		<div ng-switch-when="raw">
-			<form-raw-item item="item" form="updateItemForm"></form-raw-item>
+			<form-raw-item item="itemCopy" form="updateItemForm"></form-raw-item>
 		</div>
 		<div ng-switch-default>
-			<form-generic-item item="item" form="updateItemForm"></form-generic-item>
+			<form-generic-item item="itemCopy" form="updateItemForm"></form-generic-item>
 		</div>
 	</fieldset>
 	
