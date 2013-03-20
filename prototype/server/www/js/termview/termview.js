@@ -1,20 +1,5 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.filter('filterByTerm', function() {
-	return function(input, term) {
-		if(term === "" || term === undefined) return input;
-		var out = [];
-		for(var i = 0;i < input.length;i++) {
-			if(input[i].Terms !== undefined) {
-				for(var j = 0;j < input[i].Terms.length;j++) {
-					if(input[i].Terms[j].Term == term) out.push(input[i]);
-				}
-			}
-		}
-		return out;
-	};
-})
-
 .controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, Item) {
 	$scope.mapResized = false;
 
@@ -78,18 +63,14 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 	return {
 		restrict: 'E',
 		scope: {
-			term: "@"
+			term: "="
 		},
 		templateUrl: '/template/termview/termview.html',
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
-			if(attrs.term === undefined) {
-				scope.items = Item.query(function() {
-					scope.updateMarkers();
-				});
-			} else {
-				scope.items = Item.query({term: attrs.term});
-			}
+			scope.items = Item.query(function() {
+				scope.updateMarkers();
+			});
 
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}

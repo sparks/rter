@@ -67,17 +67,18 @@
 			</pane>
 
 			<pane heading="+">
-				<pane-builder>
-				</pane-builder>
+				<ul>
+					<li ng-repeat="term in terms"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
+				</ul>
  			</pane>
 
 			<pane heading="all" active="true">
-				<termview>
+				<termview term="">
 				</termview>
 			</pane>
 
-			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
-				<termview term="{{termview.term}}">
+			<pane ng-repeat="view in termViews" heading="{{view.term.Term}}" active="view.active">
+				<termview term="view.term">
 				</termview>
 			</pane>
 		</tabs>
