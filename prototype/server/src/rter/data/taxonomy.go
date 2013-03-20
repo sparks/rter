@@ -7,6 +7,8 @@ import (
 type Term struct {
 	Term string
 
+	Count int
+
 	Automated bool   `json:",omitempty"`
 	Author    string `json:"-"`
 

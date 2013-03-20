@@ -81,6 +81,7 @@ func scanTerm(term *data.Term, rows *sql.Rows) error {
 		&term.Automated,
 		&term.Author,
 		&updateTimeString,
+		&term.Count,
 	)
 
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone

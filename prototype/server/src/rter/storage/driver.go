@@ -283,7 +283,7 @@ func Select(val interface{}) error {
 	case *data.ItemComment:
 		rows, err = Query("SELECT * FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
-		rows, err = Query("SELECT * FROM Terms WHERE Term=?", v.Term)
+		rows, err = Query("SELECT t.*, count(r.Term) FROM Terms AS t LEFT JOIN TermRelationships AS r ON r.Term = t.Term WHERE t.Term=?", v.Term)
 	case *data.TermRelationship:
 		rows, err = Query("SELECT * FROM TermRelationships WHERE Term=? and ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
@@ -314,7 +314,11 @@ func Select(val interface{}) error {
 			return err
 		}
 
-		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", v.ID)
+		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term = TermRelationships.Term AND TermRelationships.ItemID = Items.ID AND Items.ID=?", v.ID)
+
+		if err == ErrZeroAffected {
+			err = nil
+		}
 	case *data.ItemComment:
 		err = scanItemComment(v, rows)
 	case *data.Term:
@@ -335,31 +339,46 @@ func Select(val interface{}) error {
 }
 
 func SelectAll(slicePtr interface{}) error {
+	switch slicePtr.(type) {
+	case *[]*data.Term:
+		return SelectRaw(slicePtr, "SELECT t.*, count(r.Term) FROM Terms AS t, TermRelationships AS r WHERE t.Term = r.Term GROUP BY t.Term")
+	}
+
 	return SelectWhere(slicePtr, "")
 }
 
 func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) error {
-	var (
-		rows *sql.Rows
-		err  error
-	)
-
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT Items.* FROM Items "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT Items.* FROM Items "+whereClause, args...)
 	case *[]*data.ItemComment:
-		rows, err = Query("SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT Terms.* FROM Terms "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT Terms.* FROM Terms "+whereClause, args...)
 	case *[]*data.TermRelationship:
-		rows, err = Query("SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT Roles.* FROM Roles "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT Roles.* FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT Users.* FROM Users "+whereClause, args...)
+		return SelectRaw(slicePtr, "SELECT Users.* FROM Users "+whereClause, args...)
+	}
+
+	return ErrUnsupportedDataType
+}
+
+func SelectRaw(slicePtr interface{}, query string, args ...interface{}) error {
+	switch slicePtr.(type) {
+	case *[]*data.Item:
+	case *[]*data.ItemComment:
+	case *[]*data.Term:
+	case *[]*data.TermRelationship:
+	case *[]*data.Role:
+	case *[]*data.User:
 	default:
 		return ErrUnsupportedDataType
 	}
+
+	rows, err := Query(query, args...)
 
 	for rows.Next() {
 		switch s := slicePtr.(type) {

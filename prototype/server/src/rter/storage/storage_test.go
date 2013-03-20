@@ -65,7 +65,11 @@ func TestSelectRole(t *testing.T) {
 
 func TestSelectAllRole(t *testing.T) {
 	roles := make([]*data.Role, 0)
-	SelectAll(&roles)
+	err := SelectAll(&roles)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(roles) == 0 {
 		t.Error("Nothing in Select All")
@@ -116,7 +120,11 @@ func TestSelectUser(t *testing.T) {
 
 func TestSelectAllUser(t *testing.T) {
 	users := make([]*data.User, 0)
-	SelectAll(&users)
+	err := SelectAll(&users)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(users) == 0 {
 		t.Error("Nothing in Select All")
@@ -173,6 +181,8 @@ func TestInsertItem(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	t.Log("Item ID is", item.ID)
 }
 
 func TestSelectItem(t *testing.T) {
@@ -198,7 +208,11 @@ func TestSelectItem(t *testing.T) {
 
 func TestSelectAllItem(t *testing.T) {
 	items := make([]*data.Item, 0)
-	SelectAll(&items)
+	err := SelectAll(&items)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(items) == 0 {
 		t.Error("Nothing in Select All")
@@ -251,6 +265,7 @@ func TestInsertTerm(t *testing.T) {
 func TestSelectTerm(t *testing.T) {
 	selectedTerm := new(data.Term)
 	selectedTerm.Term = term.Term
+	t.Log(selectedTerm.Term)
 	err := Select(selectedTerm)
 
 	if err != nil {
@@ -265,12 +280,16 @@ func TestSelectTerm(t *testing.T) {
 	assert.Equal(t, term, selectedTerm)
 }
 
-func TestSelectAllTerm(t *testing.T) {
+func TestFailSelectAllTerm(t *testing.T) {
 	terms := make([]*data.Term, 0)
-	SelectAll(&terms)
+	err := SelectAll(&terms)
 
-	if len(terms) == 0 {
-		t.Error("Nothing in Select All")
+	if err != nil && err != ErrZeroAffected {
+		t.Error(err)
+	}
+
+	if len(terms) != 0 {
+		t.Error("Shouldn't have gotten anything in Select All")
 	}
 }
 
@@ -320,6 +339,19 @@ func TestSelectTermRelationship(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestSelectAllTerm(t *testing.T) { //By default only return those with relationships
+	terms := make([]*data.Term, 0)
+	err := SelectAll(&terms)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(terms) == 0 {
+		t.Error("Nothing in Select All")
 	}
 }
 
