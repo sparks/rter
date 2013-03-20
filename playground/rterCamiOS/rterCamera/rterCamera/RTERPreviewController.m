@@ -141,7 +141,7 @@
     outputDevice.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange], (id)kCVPixelBufferPixelFormatTypeKey,
                                  nil];
     // set self as the delegate for the output for now
-    [outputDevice setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+    [outputDevice setSampleBufferDelegate:self queue:encoderQueue];
     
     // add preview layer to preview view
     [previewView.layer addSublayer:previewLayer];
@@ -287,19 +287,16 @@
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
-    CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
-    // also in the 'mediaSpecific' dict of the sampleBuffer
-    
+    CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );    
     //NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
     
-//    dispatch_async(encoderQueue, ^{
-//            [encoder encodeSampleBuffer:sampleBuffer];
-//            NSLog(@"encoded frame");
-//    });
+    //CVPixelBufferLockBaseAddress(imageBuffer,0); // lock buffe
+        
+        
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
         NSLog(@"encoded frame");
-        
+    
         dispatch_async(postQueue, ^{
             NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
             [postRequest setHTTPMethod:@"POST"];
@@ -315,9 +312,6 @@
             //        NSLog(@"finished sending frame");
         });
     }
-
-   
-    
 }
 
 - (IBAction)clickedBack:(id)sender {
