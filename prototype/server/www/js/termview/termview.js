@@ -1,21 +1,19 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, Item) {
+.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, ItemCache) {
 	$scope.mapResized = false;
 
 	$scope.resizeMap = function() {
 		if(!$scope.mapResized) {
-				google.maps.event.trigger($scope.map, "resize");
-				$scope.mapResized = true;
-				$scope.map.setCenter($scope.mapCenter);
+			$scope.mapResized = true;
+			google.maps.event.trigger($scope.map, "resize");
+			$scope.map.setCenter($scope.mapCenter);
 		}
 	};
 
 	$scope.updateItemDialog = function(item){
 		updateItemDialog.open(item).then(function() {
-			$scope.items = Item.query(function() { //FIXME: This causes the page to snap up as everything is rebuilt
-				$scope.updateMarkers();
-			});
+			$scope.updateMarkers();
 		});
 	};
 
@@ -57,9 +55,13 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
 	};
+
+	$scope.$watch('items', function(v) {
+		$scope.updateMarkers();
+	});
 })
 
-.directive('termview', function(Item) {
+.directive('termview', function(ItemCache) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -68,9 +70,7 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		templateUrl: '/template/termview/termview.html',
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
-			scope.items = Item.query(function() {
-				scope.updateMarkers();
-			});
+			scope.items = ItemCache.items;
 
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}

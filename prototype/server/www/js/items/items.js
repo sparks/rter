@@ -12,6 +12,29 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	return Item;
 })
 
+.factory('ItemCache', function ($rootScope, $timeout, Item) {
+	function ItemCache() {
+		var self = this;
+
+		this.items = [];
+
+		this.refresh = function() {
+			Item.query(function(i) {
+				self.items.length = 0;
+				angular.forEach(i, function(val) {
+					self.items.push(val);
+				});
+				$timeout(self.refresh, 500);
+			});
+		};
+
+		this.refresh();
+
+	}
+
+	return new ItemCache();
+})
+
 .filter('filterByTerm', function() {
 	return function(input, term) {
 		if(term === "" || term === undefined) return input;

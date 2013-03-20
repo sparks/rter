@@ -22,14 +22,4 @@ angular.module('rter', ['ui.bootstrap', 'items', 'termview', 'alerts', 'taxonomy
             event.preventDefault();
         });
     };
-})
-
-.directive('mapResize', function() {
-	return function(scope, element, attrs) {
-		$scope.$watch("mapVisible", function (v) {
-			if (v) {
-				google.maps.event.trigger($scope.map, "resize");
-			}
-		});
-	};
 });
