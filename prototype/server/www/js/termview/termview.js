@@ -3,7 +3,7 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 .controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, ItemCache) {
 	$scope.mapResized = false;
 
-	$scope.resizeMap = function() {
+	$scope.resizeMap = function() { //FIXME: Another map hack to render hidden maps
 		if(!$scope.mapResized) {
 			$scope.mapResized = true;
 			google.maps.event.trigger($scope.map, "resize");
@@ -56,9 +56,9 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		$scope.mapCenter = latlng;
 	};
 
-	$scope.$watch('items', function(v) {
+	$scope.$watch('items', function(a, b) {
 		$scope.updateMarkers();
-	});
+	}, true);
 })
 
 .directive('termview', function(ItemCache) {
@@ -71,7 +71,6 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			scope.items = ItemCache.items;
-
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}
 	};
