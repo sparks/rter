@@ -1,0 +1,14 @@
+<div class="tile-generic-item">
+	<div ng-switch on="item.ThumbnailURI">
+		<div ng-switch-when="undefined">
+			<img ng-src="/asset/default-thumb.png" alt="Default Thumbnail">
+		</div>
+		<div ng-switch-when="">
+			<img ng-src="/asset/default-thumb.png" alt="Default Thumbnail">
+		</div>
+		<div ng-switch-default>
+			<img ng-src="{{item.ThumbnailURI}}" alt="Item {{Item.ID}} Thumbnail">
+		</div>
+	</div>
+	<div class="author-badge">{{item.Author}}</div>
+</div>

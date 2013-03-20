@@ -1,5 +1,5 @@
-<!DOCTYPE HTML>
-<html ng-app='rter'>
+<!DOCTYPE html>
+<html lang='en' ng-app='rter'>
 <head>
 
 	<title>rtER Client</title>
@@ -21,7 +21,7 @@
 	<link href="/vendor/angular-ui.css" rel="stylesheet">
 
 	<script src="/vendor/ui-bootstrap-tpls.js"></script>
-	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
+	<link href="/vendor/bootstrap.css" rel="stylesheet">
 
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
 
@@ -61,23 +61,24 @@
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>
-			<pane heading="Submit" active="true">
-			 	<submit-item>
-				</submit-item>
+			<pane heading="Create">
+			 	<create-item>
+				</create-item>
 			</pane>
 
 			<pane heading="+">
-				<pane-builder>
-				</pane-builder>
+				<ul>
+					<li ng-repeat="term in terms"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
+				</ul>
  			</pane>
 
-			<pane heading="All">
-				<termview>
+			<pane heading="all" active="true">
+				<termview term="">
 				</termview>
 			</pane>
 
-			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
-				<termview term="{{termview.term}}">
+			<pane ng-repeat="view in termViews" heading="{{view.term.Term}}" active="view.active">
+				<termview term="view.term">
 				</termview>
 			</pane>
 		</tabs>

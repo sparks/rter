@@ -1,0 +1,30 @@
+<form name="updateItemForm" class="update-item form-item">
+
+	<fieldset ng-switch on="item.Type"> 
+		<div ng-switch-when="">
+		</div>
+		<div ng-switch-when="twitter">
+			<form-twitter-item item="item" form="updateItemForm"></form-twitter-item>
+		</div>
+		<div ng-switch-when="raw">
+			<form-raw-item item="item" form="updateItemForm"></form-raw-item>
+		</div>
+		<div ng-switch-default>
+			<form-generic-item item="item" form="updateItemForm"></form-generic-item>
+		</div>
+	</fieldset>
+	
+	<hr>
+	
+	<div class="row-fluid">
+		<div class="span6">
+			<button class="btn btn-primary" ng-click="updateItem()" ng-disabled="updateItemForm.$invalid">Update</button>
+			<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Cancel</button>
+			<button class="btn btn-warning" ng-click="debug()">Debug</button>
+		</div>
+		<div class="span6" style="text-align:right">
+			<button class="btn btn-danger" ng-click="deleteItem()">Delete</button>
+		</div>
+	</div>
+
+</form>

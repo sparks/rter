@@ -1,5 +1,5 @@
-<div class="submit-generic-item">
-	<div class="submit-generic-item-left">
+<div class="form-generic-item row-fluid">
+	<div class="span5">
 		<div ng-class="{error: form.ContentURI.$invalid}">
 			<label for="ContentURI">Content URL</label>
 			<input type="url" name="ContentURI" ng-model="item.ContentURI" required>
@@ -18,11 +18,8 @@
 		</div>
 	</div>
 
-	<div class="submit-generic-item-right">
-
-		<div id="map_canvas" ui-map="myMap" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-options="mapOptions"></div>
-	</div>
-
-	<div class="submit-generic-item-clear">
+	<div class="span7">
+		<div id="map_canvas" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-map="map" ui-options="mapOptions"></div>
+		<div class="btn" ng-click="resizeMap()">Map Resize</div>
 	</div>
 </div>

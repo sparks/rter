@@ -1,0 +1,16 @@
+<div class="closeup-item" ng-switch on="item.Type">
+	<div ng-switch-when="twitter">
+		<closeup-twitter-item item="item" dialog="dialog"></closeup-twitter-item>
+	</div>
+	<div ng-switch-when="raw">
+		<closeup-raw-item item="item" dialog="dialog"></closeup-raw-item>
+	</div>
+	<div ng-switch-default>
+		<closeup-generic-item item="item" dialog="dialog"></closeup-generic-item>
+	</div>
+</div>
+
+<hr>
+
+<button class="btn btn-warning" ng-click="debug()">Debug</button>
+<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Cancel</button>

@@ -1,18 +1,54 @@
 angular.module('twitterItem', [])
 
-.controller('SubmitTwitterItemCtrl', function($scope) {
+.controller('FormTwitterItemCtrl', function($scope) {
 
 })
 
-.directive('submitTwitterItem', function(Item) {
+.directive('formTwitterItem', function(Item) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/submit-twitter-item.html',
-		controller: 'SubmitTwitterItemCtrl',
+		templateUrl: '/template/items/twitter/form-twitter-item.html',
+		controller: 'FormTwitterItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
+})
+
+.controller('TileTwitterItemCtrl', function($scope) {
+
+})
+
+.directive('tileTwitterItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/twitter/tile-twitter-item.html',
+		controller: 'TileTwitterItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
+})
+
+.controller('CloseupTwitterItemCtrl', function($scope) {
+
+})
+
+.directive('closeupTwitterItem', function(Taxonomy) {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/twitter/closeup-twitter-item.html',
+		controller: 'CloseupTwitterItemCtrl',
 		link: function(scope, element, attr) {
 
 		}

@@ -29,3 +29,18 @@
 	* phone
 	* radio
 * Predominantly iphones
+
+## QC Notes
+
+* Orientation, rotate in the wrong direction
+* Jumping locations
+
+## Mobile
+
+* Small start stop button (slide to)
+* No red square when not streaming
+
+## Web
+
+* Client in colum view
+* Able to see who viewed something

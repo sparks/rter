@@ -26,12 +26,12 @@
 
 @interface RTERPreviewController : UIViewController <AVCaptureAudioDataOutputSampleBufferDelegate>
 {
-    // dispatch queue for encoding
-    dispatch_queue_t postQueue;
+    // dispatch queue for encoding and POSTing
+    dispatch_queue_t postQueue;    
+    dispatch_queue_t encoderQueue;
     
     GLKView* _glkView;
     RTERGLKViewController* _glkVC;
-
 }
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;

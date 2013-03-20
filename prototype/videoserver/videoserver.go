@@ -7,37 +7,45 @@
 //
 // Test MPEG2TS stream to server
 // ffmpeg -v debug -y -re -i file.m4v -vsync 1 -map 0 -codec copy \
-//    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6666/v1/ingest/1/ts
+//    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6660/v1/ingest/1/ts
 //
 // Test Raw H264/AVC stream (also reencodes the file to adhere to our format specs)
 // ffmpeg -v debug -y -re -i file.m4v -f h264 -c:v libx264 -preset ultrafast \
 //    -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 \
-//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:6666/v1/ingest/1/avc
+//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:6660/v1/ingest/1/avc
 //
 // Todo/Implement: Features
 // - Common Server Management
 //   - check transcoder capabilities (transcode.go:CheckTranscoderCapabilities())
 //   - configuration sanity check (config.go:SanityCheck())
-//   - request authentication: API_KEY, REQUEST_TOKEN
 //   - HTTPS cert/key
-//   - rate control: enforce sessions per source (IP) per time -> Redis
-//   - rate control: enforce bytes per source (IP) per time -> Redis
+//   - rate control: enforce sessions per source (IP? or user?) per time -> Redis
+//   - rate control: enforce bytes per source (IP? or user?) per time -> Redis
 //   - insert quota headers into replies
 //   - limit bandwidth consumption
-//   - implement server status endpoint
-//   - session uniqueness and EOS -> Redis
+//   - enforce token lifetime when session is estabished
+//   - implement server status endpoint (Package expvar)
 //   - total server statistics (per session this is already accounted for)
 //   - transcoder user/sys time is incorrect
+//   - session uniqueness and EOS -> Redis
 //   - ingest server redirect when quota limit reached -> Redis
 // - Transcoding Pipelines
+//   - select best x264 options for chosen level (3.0)
+//   - check whether x264 options are correct for chosen level (3.0)
 //   - check format compliance (H264 NALU headers, profile/level, SPS/PPS existence)
 // - File Download (built-in file server for videos, images, segments)
-//   - check of cache headers are properly set
+//   - check if cache headers are properly set
 //   - enable text file compression (m3u8, mpd)
-// - HTTP chunk mode upload endpoint (simple, how to allow continuations?)
+// - HTTP chunk mode upload endpoint for files (simple, how to allow continuations?)
 // - Interactive Chunk Upload (like DropBox: reorder-safe, byte-range, file multiplexing)
-// - Websocket for AVC/TS frame-wise upload
+// - Websocket for AVC/TS upload
+// - server bandwidth testing (ab or httperf): ab -c 500 -n 500 http://localhost:1234/
 
+// API key generation
+// http://stackoverflow.com/questions/1448455/php-api-key-generator
+
+// OAuth 1.0a
+// http://oauth.net/core/1.0a
 
 // Limit bandwidth (max_ingest_bandwidth_kbit) and memory (max_memory_mbytes)
 // http://stackoverflow.com/questions/14582471/golang-memory-consumption-management
@@ -45,17 +53,16 @@
 // http://evanfarrer.blogspot.ca/2012/05/making-friendly-elastic-applications-in.html
 // https://groups.google.com/forum/?fromgroups=#!topic/golang-nuts/9JxgtOJqqRU
 
-
 package main
 
 import (
 	"github.com/gorilla/mux"
 	"html/template"
-	"net/http"
-	"strconv"
-	"runtime"
 	"log"
+	"net/http"
 	"os"
+	"runtime"
+	"strconv"
 )
 
 var c ServerConfig
@@ -64,10 +71,10 @@ func main() {
 
 	var err error
 	c.ParseConfig()
+	if !c.Server.Production_mode {
+		c.Print()
+	}
 	c.SanityCheck()
-
-    // print config in dev mode
-    if !c.Server.Production_mode { c.Print() }
 
 	// set resource limits
 	runtime.GOMAXPROCS(c.Limits.Max_cpu)
@@ -94,29 +101,28 @@ func main() {
 		s.HandleFunc("/videos/{id:[0-9]+}/play", PlaybackHandler).Methods("GET")
 	}
 
-/*
-	if c.Ingest.Enable_chunk_ingest {
-		s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
-	}
+	/*
+		if c.Ingest.Enable_chunk_ingest {
+			s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
+		}
 
-	s.HandleFunc("/videos/{id:[0-9]+}/video.mp4", MP4FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/video.ogg", OGGFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/video.webm", WEBMFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/index.m3u8", M3U8FileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/index.mpd", MPDFileHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}.ts", HLSSegmentHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}.ts", DASHSegmentHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/thumb/{thumbid:[0-9]+}.jpg", ThumbHandler).Methods("GET")
-	s.HandleFunc("/videos/{id:[0-9]+}/poster/{posterid:[0-9]+}.jpg", PosterHandler).Methods("GET")
-*/
-
+		s.HandleFunc("/videos/{id:[0-9]+}/video.mp4", MP4FileHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/video.ogg", OGGFileHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/video.webm", WEBMFileHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/index.m3u8", M3U8FileHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/index.mpd", MPDFileHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}.ts", HLSSegmentHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}.ts", DASHSegmentHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/thumb/{thumbid:[0-9]+}.jpg", ThumbHandler).Methods("GET")
+		s.HandleFunc("/videos/{id:[0-9]+}/poster/{posterid:[0-9]+}.jpg", PosterHandler).Methods("GET")
+	*/
 
 	// have a single index handler at server URI root
 	r.HandleFunc("/", IndexHandler)
 
 	if !c.Server.Production_mode {
 		s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
-    	    http.FileServer(http.Dir(c.Transcode.Output_path))))
+			http.FileServer(http.Dir(c.Transcode.Output_path))))
 	}
 
 	// catch all (redirect non-registered routes to index '/')
@@ -128,7 +134,7 @@ func main() {
 	// run the server
 	serverAddr := c.Server.Addr + ":" + strconv.FormatUint(c.Server.Port, 10)
 	if c.Server.Secure_mode {
-	    log.Printf("HTTPS Server running at %s\n", serverAddr)
+		log.Printf("HTTPS Server running at %s\n", serverAddr)
 		err = http.ListenAndServeTLS(serverAddr, c.Server.Cert_file, c.Server.Key_file, nil)
 	} else {
 		log.Printf("HTTP Server running at %s\n", serverAddr)
@@ -147,15 +153,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is the rtER video server.\n"))
 }
-
-
-func AuthenticateRequest(r *http.Request) *ServerError {
-
-	// check auth headers
-
-	return nil
-}
-
 
 func AVCIngestHandler(w http.ResponseWriter, r *http.Request) {
 	GenericIngestHandler(w, r, TC_INGEST_AVC)
@@ -189,18 +186,20 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 	vars := mux.Vars(r)
 	uidstring := vars["id"]
 
- 	// authenticate the request
- 	var err *ServerError
- 	var session *TranscodeSession
+	// authenticate the request
+	var err *ServerError
+	var session *TranscodeSession
 
- 	// confirm validity and freshness of request
-	if err = AuthenticateRequest(r); err != nil {
-		// return error response in httpcode
-		ServeError(w, err.JSONError(), err.Status())
-		return
+	if c.Auth.Enabled {
+		// confirm validity and freshness of request
+		if err = AuthenticateRequest(r, c.Auth.Token_secret); err != nil {
+			// return error response in httpcode
+			ServeError(w, err.JSONError(), err.Status())
+			return
+		}
 	}
 
- 	// get or create the session object if quota permits
+	// get or create the session object if quota permits
 	if session, err = server.FindOrCreateSession(uidstring, t); err != nil {
 		// return error response in httpcode
 		ServeError(w, err.JSONError(), err.Status())
@@ -209,7 +208,7 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 
 	// forward data
 	if session.IsOpen() {
-		if err = session.Write(r); err != nil {
+		if err = session.Write(r, t); err != nil {
 			// return error response in httpcode
 			ServeError(w, err.JSONError(), err.Status())
 			return
@@ -222,12 +221,12 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 
 // generates and returns a simple HTML5 website containing a video element
 const (
-	PLAY_TMPL_BEGIN string = `<!doctype html><html lang=en><head><meta charset=utf-8><title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title></head><body><video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">`
-	PLAY_TMPL_SRC_HLS string = `<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL">`
-	PLAY_TMPL_SRC_MP4 string = `<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">`
+	PLAY_TMPL_BEGIN    string = `<!doctype html><html lang=en><head><meta charset=utf-8><title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title></head><body><video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">`
+	PLAY_TMPL_SRC_HLS  string = `<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL">`
+	PLAY_TMPL_SRC_MP4  string = `<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">`
 	PLAY_TMPL_SRC_WEBM string = `<source src="/v1/videos/{{.}}/video.webm" type="video/webm; codecs=vp8,vorbis">`
-	PLAY_TMPL_SRC_OGG string = `<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
-	PLAY_TMPL_END string = `</video></body></html>`
+	PLAY_TMPL_SRC_OGG  string = `<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
+	PLAY_TMPL_END      string = `</video></body></html>`
 )
 
 func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
@@ -237,15 +236,27 @@ func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// construct the template
 	tpl := PLAY_TMPL_BEGIN
-	if c.Transcode.Hls.Enabled { tpl += PLAY_TMPL_SRC_HLS }
-	if c.Transcode.Mp4.Enabled { tpl += PLAY_TMPL_SRC_MP4 }
-	if c.Transcode.Webm.Enabled { tpl += PLAY_TMPL_SRC_WEBM }
-	if c.Transcode.Ogg.Enabled { tpl += PLAY_TMPL_SRC_OGG }
+	if c.Transcode.Hls.Enabled {
+		tpl += PLAY_TMPL_SRC_HLS
+	}
+	if c.Transcode.Mp4.Enabled {
+		tpl += PLAY_TMPL_SRC_MP4
+	}
+	if c.Transcode.Webm.Enabled {
+		tpl += PLAY_TMPL_SRC_WEBM
+	}
+	if c.Transcode.Ogg.Enabled {
+		tpl += PLAY_TMPL_SRC_OGG
+	}
 	tpl += PLAY_TMPL_END
 
 	t, err := template.New("player").Parse(tpl)
-	if err != nil { log.Fatalf("Error parsing player template template: %s\n", err) }
+	if err != nil {
+		log.Fatalf("Error parsing player template template: %s\n", err)
+	}
 
 	err = t.Execute(w, uidstring)
-	if err != nil { log.Fatalf("Error generating player template string: %s\n", err) }
+	if err != nil {
+		log.Fatalf("Error generating player template string: %s\n", err)
+	}
 }

@@ -207,7 +207,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Select(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -281,7 +281,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.SelectWhere(val, whereClause, args...)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -367,7 +367,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Update(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	} else if err != nil {
@@ -442,7 +442,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Delete(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
