@@ -7,16 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E06B14E16F90A3B007E1897 /* RTERIndicatorFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E06B14D16F90A3B007E1897 /* RTERIndicatorFrame.m */; };
+		7E0DB2A116F7D3DB0071956D /* RTERArrow.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0DB2A016F7D3DB0071956D /* RTERArrow.m */; };
+		7E0DB2A516F80C8F0071956D /* RTERGLKViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0DB2A416F80C8F0071956D /* RTERGLKViewController.m */; };
+		7E18747016F7A55E00642373 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E18746F16F7A55E00642373 /* GLKit.framework */; };
+		7E2F737616F4B22F0037C17B /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F736D16F4B22F0037C17B /* libavcodec.a */; };
+		7E2F737716F4B22F0037C17B /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F736E16F4B22F0037C17B /* libavdevice.a */; };
+		7E2F737816F4B22F0037C17B /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F736F16F4B22F0037C17B /* libavfilter.a */; };
+		7E2F737916F4B22F0037C17B /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737016F4B22F0037C17B /* libavformat.a */; };
+		7E2F737A16F4B22F0037C17B /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737116F4B22F0037C17B /* libavutil.a */; };
+		7E2F737B16F4B22F0037C17B /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737216F4B22F0037C17B /* libpostproc.a */; };
+		7E2F737C16F4B22F0037C17B /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737316F4B22F0037C17B /* libswresample.a */; };
+		7E2F737D16F4B22F0037C17B /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737416F4B22F0037C17B /* libswscale.a */; };
+		7E2F737E16F4B22F0037C17B /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F737516F4B22F0037C17B /* libx264.a */; };
+		7E2F738116F4B4780037C17B /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2F738016F4B4780037C17B /* OpenGLES.framework */; };
 		FD51069B16EFED9B009E30B7 /* RTERVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */; };
-		FD51076816F2A847009E30B7 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076016F2A847009E30B7 /* libavcodec.a */; };
-		FD51076916F2A847009E30B7 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076116F2A847009E30B7 /* libavdevice.a */; };
-		FD51076A16F2A847009E30B7 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076216F2A847009E30B7 /* libavfilter.a */; };
-		FD51076B16F2A847009E30B7 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076316F2A847009E30B7 /* libavformat.a */; };
-		FD51076C16F2A847009E30B7 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076416F2A847009E30B7 /* libavutil.a */; };
-		FD51076D16F2A847009E30B7 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076516F2A847009E30B7 /* libpostproc.a */; };
-		FD51076E16F2A847009E30B7 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076616F2A847009E30B7 /* libswresample.a */; };
-		FD51076F16F2A847009E30B7 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD51076716F2A847009E30B7 /* libswscale.a */; };
-		FD5107C616F2A927009E30B7 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD5107C316F2A927009E30B7 /* libx264.a */; };
 		FDC9A02716EA611100632CBE /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02616EA611100632CBE /* libbz2.dylib */; };
 		FDC9A02916EA611C00632CBE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02816EA611C00632CBE /* libz.dylib */; };
 		FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE531BA16E6B20D0086FA53 /* UIKit.framework */; };
@@ -39,16 +44,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7E06B14C16F90A3B007E1897 /* RTERIndicatorFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERIndicatorFrame.h; sourceTree = "<group>"; };
+		7E06B14D16F90A3B007E1897 /* RTERIndicatorFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERIndicatorFrame.m; sourceTree = "<group>"; };
+		7E06B15016F919AB007E1897 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		7E0DB29F16F7D3DB0071956D /* RTERArrow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERArrow.h; sourceTree = "<group>"; };
+		7E0DB2A016F7D3DB0071956D /* RTERArrow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERArrow.m; sourceTree = "<group>"; };
+		7E0DB2A316F80C8F0071956D /* RTERGLKViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERGLKViewController.h; sourceTree = "<group>"; };
+		7E0DB2A416F80C8F0071956D /* RTERGLKViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERGLKViewController.m; sourceTree = "<group>"; };
+		7E18746F16F7A55E00642373 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		7E2F736D16F4B22F0037C17B /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
+		7E2F736E16F4B22F0037C17B /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavdevice.a; sourceTree = "<group>"; };
+		7E2F736F16F4B22F0037C17B /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavfilter.a; sourceTree = "<group>"; };
+		7E2F737016F4B22F0037C17B /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
+		7E2F737116F4B22F0037C17B /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
+		7E2F737216F4B22F0037C17B /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
+		7E2F737316F4B22F0037C17B /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
+		7E2F737416F4B22F0037C17B /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		7E2F737516F4B22F0037C17B /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		7E2F738016F4B4780037C17B /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		FD51069916EFED9B009E30B7 /* RTERVideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERVideoEncoder.h; sourceTree = "<group>"; };
 		FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERVideoEncoder.m; sourceTree = "<group>"; };
-		FD51076016F2A847009E30B7 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
-		FD51076116F2A847009E30B7 /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavdevice.a; sourceTree = "<group>"; };
-		FD51076216F2A847009E30B7 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavfilter.a; sourceTree = "<group>"; };
-		FD51076316F2A847009E30B7 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
-		FD51076416F2A847009E30B7 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
-		FD51076516F2A847009E30B7 /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
-		FD51076616F2A847009E30B7 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
-		FD51076716F2A847009E30B7 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
 		FD51077116F2A859009E30B7 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
 		FD51077216F2A859009E30B7 /* avfft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avfft.h; sourceTree = "<group>"; };
 		FD51077316F2A859009E30B7 /* dxva2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dxva2.h; sourceTree = "<group>"; };
@@ -123,7 +138,6 @@
 		FD5107BE16F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		FD5107C016F2A859009E30B7 /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		FD5107C116F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
-		FD5107C316F2A927009E30B7 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
 		FDC9A02616EA611100632CBE /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		FDC9A02816EA611C00632CBE /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		FDE531B716E6B20D0086FA53 /* rterCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rterCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -156,6 +170,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E18747016F7A55E00642373 /* GLKit.framework in Frameworks */,
+				7E2F738116F4B4780037C17B /* OpenGLES.framework in Frameworks */,
 				FDC9A02916EA611C00632CBE /* libz.dylib in Frameworks */,
 				FDC9A02716EA611100632CBE /* libbz2.dylib in Frameworks */,
 				FDE7177616E86823007B619F /* CoreVideo.framework in Frameworks */,
@@ -165,15 +181,15 @@
 				FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */,
 				FDE531BD16E6B20D0086FA53 /* Foundation.framework in Frameworks */,
 				FDE531BF16E6B20D0086FA53 /* CoreGraphics.framework in Frameworks */,
-				FD51076816F2A847009E30B7 /* libavcodec.a in Frameworks */,
-				FD51076916F2A847009E30B7 /* libavdevice.a in Frameworks */,
-				FD51076A16F2A847009E30B7 /* libavfilter.a in Frameworks */,
-				FD51076B16F2A847009E30B7 /* libavformat.a in Frameworks */,
-				FD51076C16F2A847009E30B7 /* libavutil.a in Frameworks */,
-				FD51076D16F2A847009E30B7 /* libpostproc.a in Frameworks */,
-				FD51076E16F2A847009E30B7 /* libswresample.a in Frameworks */,
-				FD51076F16F2A847009E30B7 /* libswscale.a in Frameworks */,
-				FD5107C616F2A927009E30B7 /* libx264.a in Frameworks */,
+				7E2F737616F4B22F0037C17B /* libavcodec.a in Frameworks */,
+				7E2F737716F4B22F0037C17B /* libavdevice.a in Frameworks */,
+				7E2F737816F4B22F0037C17B /* libavfilter.a in Frameworks */,
+				7E2F737916F4B22F0037C17B /* libavformat.a in Frameworks */,
+				7E2F737A16F4B22F0037C17B /* libavutil.a in Frameworks */,
+				7E2F737B16F4B22F0037C17B /* libpostproc.a in Frameworks */,
+				7E2F737C16F4B22F0037C17B /* libswresample.a in Frameworks */,
+				7E2F737D16F4B22F0037C17B /* libswscale.a in Frameworks */,
+				7E2F737E16F4B22F0037C17B /* libx264.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +329,8 @@
 		FDE531AE16E6B20D0086FA53 = {
 			isa = PBXGroup;
 			children = (
+				7E18746F16F7A55E00642373 /* GLKit.framework */,
+				7E2F738016F4B4780037C17B /* OpenGLES.framework */,
 				FDE7177516E86823007B619F /* CoreVideo.framework */,
 				FDE531C016E6B20D0086FA53 /* rterCamera */,
 				FDE531B916E6B20D0086FA53 /* Frameworks */,
@@ -331,15 +349,6 @@
 		FDE531B916E6B20D0086FA53 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FD5107C316F2A927009E30B7 /* libx264.a */,
-				FD51076016F2A847009E30B7 /* libavcodec.a */,
-				FD51076116F2A847009E30B7 /* libavdevice.a */,
-				FD51076216F2A847009E30B7 /* libavfilter.a */,
-				FD51076316F2A847009E30B7 /* libavformat.a */,
-				FD51076416F2A847009E30B7 /* libavutil.a */,
-				FD51076516F2A847009E30B7 /* libpostproc.a */,
-				FD51076616F2A847009E30B7 /* libswresample.a */,
-				FD51076716F2A847009E30B7 /* libswscale.a */,
 				FDC9A02816EA611C00632CBE /* libz.dylib */,
 				FDC9A02616EA611100632CBE /* libbz2.dylib */,
 				FDE7177316E86634007B619F /* QuartzCore.framework */,
@@ -356,6 +365,7 @@
 			isa = PBXGroup;
 			children = (
 				FDE531C916E6B20D0086FA53 /* RTERAppDelegate.h */,
+				7E06B15016F919AB007E1897 /* Config.h */,
 				FDE531CA16E6B20D0086FA53 /* RTERAppDelegate.m */,
 				FDE531D216E6B20D0086FA53 /* RTERViewController.h */,
 				FDE531D316E6B20D0086FA53 /* RTERViewController.m */,
@@ -363,6 +373,12 @@
 				FDE531E216E7944B0086FA53 /* RTERPreviewController.h */,
 				FDE531E316E7944B0086FA53 /* RTERPreviewController.m */,
 				FDE531E416E7944B0086FA53 /* RTERPreviewController.xib */,
+				7E0DB2A316F80C8F0071956D /* RTERGLKViewController.h */,
+				7E0DB2A416F80C8F0071956D /* RTERGLKViewController.m */,
+				7E0DB29F16F7D3DB0071956D /* RTERArrow.h */,
+				7E0DB2A016F7D3DB0071956D /* RTERArrow.m */,
+				7E06B14C16F90A3B007E1897 /* RTERIndicatorFrame.h */,
+				7E06B14D16F90A3B007E1897 /* RTERIndicatorFrame.m */,
 				FDE531C116E6B20D0086FA53 /* Supporting Files */,
 				FD51069916EFED9B009E30B7 /* RTERVideoEncoder.h */,
 				FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */,
@@ -381,6 +397,15 @@
 		FDE531C116E6B20D0086FA53 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				7E2F736D16F4B22F0037C17B /* libavcodec.a */,
+				7E2F736E16F4B22F0037C17B /* libavdevice.a */,
+				7E2F736F16F4B22F0037C17B /* libavfilter.a */,
+				7E2F737016F4B22F0037C17B /* libavformat.a */,
+				7E2F737116F4B22F0037C17B /* libavutil.a */,
+				7E2F737216F4B22F0037C17B /* libpostproc.a */,
+				7E2F737316F4B22F0037C17B /* libswresample.a */,
+				7E2F737416F4B22F0037C17B /* libswscale.a */,
+				7E2F737516F4B22F0037C17B /* libx264.a */,
 				FDE531C216E6B20D0086FA53 /* rterCamera-Info.plist */,
 				FDE531C316E6B20D0086FA53 /* InfoPlist.strings */,
 				FDE531C616E6B20D0086FA53 /* main.m */,
@@ -465,6 +490,9 @@
 				FDE531D416E6B20D0086FA53 /* RTERViewController.m in Sources */,
 				FDE531E516E7944B0086FA53 /* RTERPreviewController.m in Sources */,
 				FD51069B16EFED9B009E30B7 /* RTERVideoEncoder.m in Sources */,
+				7E0DB2A116F7D3DB0071956D /* RTERArrow.m in Sources */,
+				7E0DB2A516F80C8F0071956D /* RTERGLKViewController.m in Sources */,
+				7E06B14E16F90A3B007E1897 /* RTERIndicatorFrame.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,7 +584,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -565,9 +593,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
+				PROVISIONING_PROFILE = "6FDD6DE0-683D-4F31-97D4-E39248C6EA1A";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -577,7 +606,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -586,9 +615,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
+				PROVISIONING_PROFILE = "07106921-F6E1-4F1F-9E82-A29AD87AA1D8";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};

@@ -12,6 +12,10 @@
 #import <dispatch/dispatch.h>
 
 #import <QuartzCore/QuartzCore.h>
+#import <GLKit/GLKit.h>
+
+#import "RTERGLKViewController.h"
+
 
 @protocol RTERPreviewControllerDelegate <NSObject>
 
@@ -20,10 +24,14 @@
 
 @end
 
-@interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate>
+@interface RTERPreviewController : UIViewController <AVCaptureAudioDataOutputSampleBufferDelegate>
 {
     // dispatch queue for encoding
     dispatch_queue_t postQueue;
+    
+    GLKView* _glkView;
+    RTERGLKViewController* _glkVC;
+
 }
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;
@@ -31,6 +39,8 @@
 @property (strong, nonatomic) IBOutlet UIView *previewView;
 
 @property (strong, nonatomic) IBOutlet UIToolbar *toobar;
+
+@property (nonatomic,retain) IBOutlet GLKView *glkView;
 
 - (IBAction)clickedStart:(id)sender;
 

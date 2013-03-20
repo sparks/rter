@@ -10,5 +10,10 @@
 #define rterCamera_Config_h
 
 
+typedef NS_ENUM(NSInteger,Colour) {
+    RED,
+    GREEN,
+    BLUE
+};
 
 #endif

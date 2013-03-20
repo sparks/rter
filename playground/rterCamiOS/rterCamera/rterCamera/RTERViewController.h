@@ -9,7 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "RTERPreviewController.h"
 
-@interface RTERViewController : UIViewController<RTERPreviewControllerDelegate>
+
+@interface RTERViewController : UIViewController<RTERPreviewControllerDelegate> {
+
+}
 
 - (IBAction)startCamera:(id)sender;
 

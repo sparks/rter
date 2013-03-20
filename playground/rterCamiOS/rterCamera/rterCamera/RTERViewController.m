@@ -8,8 +8,7 @@
 
 #import "RTERViewController.h"
 
-@interface RTERViewController ()
-
+@interface RTERViewController ()  
 @end
 
 @implementation RTERViewController

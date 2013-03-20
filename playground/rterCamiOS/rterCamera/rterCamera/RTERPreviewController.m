@@ -9,6 +9,9 @@
 #import "RTERPreviewController.h"
 #import <math.h>
 #import "RTERVideoEncoder.h"
+#import "RTERGLKViewController.h"
+
+#import "RTERArrow.h"
 
 #define DESIRED_FPS 15
 
@@ -29,6 +32,8 @@
     
     // encoder
     RTERVideoEncoder *encoder;
+    
+    int x;
 }
 
 @end
@@ -37,6 +42,7 @@
 
 @synthesize toobar;
 @synthesize previewView;
+@synthesize glkView = _glkView;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -162,7 +168,74 @@
     // start the capture session so that the preview shows up
     [captureSession startRunning];
     
+    
+
+
+    EAGLContext *context = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES1];
+    //_glkView = [[GLKView alloc]initWithFrame:screenBounds context:context];
+    _glkView.context = context;
+    //_glkView.delegate = _glkVC;
+    [self.glkView setNeedsDisplay];
+
+       
+   
+    
+    _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView];
+
+
+    NSTimer *nst_Timer = [NSTimer scheduledTimerWithTimeInterval:4 target:self selector:@selector(showTime) userInfo:nil repeats:YES];
+    [nst_Timer fire];
+    x = 1;
+        
+
+    
 }
+
+-(void)showTime {
+    if (x == 0) {
+        x = 1;
+        [_glkVC indicateTurnToDirection:RIGHT withPercentage:1];
+        
+    }else if(x==1){
+        x = 2;
+        [_glkVC indicateTurnToDirection:NONE withPercentage:1];
+    }else if(x==2){
+        x = 3;
+        [_glkVC indicateTurnToDirection:LEFT withPercentage:1];
+    }else{
+        x = 0;
+        [_glkVC indicateTurnToDirection:FREE withPercentage:1];
+    }
+}
+
+#pragma mark - GLKViewDelegate
+
+/*- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
+    
+    glClearColor(_curRed, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+}
+*/
+#pragma mark - GLKViewControllerDelegate
+/*
+- (void)glkViewControllerUpdate:(GLKViewController *)controller {
+    if (_increasing) {
+        _curRed += 1.0 * controller.timeSinceLastUpdate;
+    } else {
+        _curRed -= 1.0 * controller.timeSinceLastUpdate;
+    }
+    if (_curRed >= 1.0) {
+        _curRed = 1.0;
+        _increasing = NO;
+    }
+    if (_curRed <= 0.0) {
+        _curRed = 0.0;
+        _increasing = YES;
+    }
+    
+    //[_glkView display];
+}*/
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
@@ -187,6 +260,7 @@
 
     // the bounds have changed
     [previewLayer setFrame: [previewView bounds]];
+  
 }
 
 - (void)appWillResignActive {
@@ -317,6 +391,10 @@
 
    
     
+}
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+
+    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
 }
 
 - (IBAction)clickedBack:(id)sender {

@@ -7,7 +7,34 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <GLKit/GLKit.h>
 
-@interface RTERArrow : NSObject
+
+typedef struct {
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
+} Vertex3D;
+
+typedef struct {
+    Vertex3D v1;
+    Vertex3D v2;
+    Vertex3D v3;
+} Triangle3D;
+
+@interface RTERArrow : NSObject {
+    //const GLfloat triangleVertices[];
+    Triangle3D _triangle;
+    
+}
+
+
+
+
+
+
+
+-(id)initArrow;
+-(void)drawInView:(GLKView *)view;
 
 @end

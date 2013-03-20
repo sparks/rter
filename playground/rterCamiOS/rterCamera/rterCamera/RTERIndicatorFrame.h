@@ -7,7 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <GLKit/GLKit.h>
+#import "Config.h"
 
-@interface RTERIndicatorFrame : NSObject
+
+
+@interface RTERIndicatorFrame : NSObject {
+
+    
+    
+}
+
+
+-(void)drawInView:(GLKView *)view;
+-(id)initIndicatorFrame;
+-(void)setColour:(NSInteger)colour;
 
 @end
