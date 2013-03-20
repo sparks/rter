@@ -184,7 +184,9 @@
     c->rc_max_rate = c->bit_rate;
     c->rc_min_rate = 0; //not necessary
     
-    c->thread_count = 1;  // no multi-threading
+    c->thread_count = 2;  // 2 threads
+    
+    c->trellis = 0; // try 1 later
     
     if(codec_id == AV_CODEC_ID_H264) {
         av_dict_set(&opts, "preset", "ultrafast", 0);
