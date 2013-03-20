@@ -22,8 +22,9 @@
 
 @interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate>
 {
-    // dispatch queue for encoding
+    // dispatch queue for encoding and POSTing
     dispatch_queue_t postQueue;
+    dispatch_queue_t encoderQueue;
 }
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;

@@ -149,8 +149,7 @@
     c = avcodec_alloc_context3(0); //NULL;
     frameNumber = 0;
     int codec_id = AV_CODEC_ID_H264; //  CODEC_ID_H264;
-    
-    
+    AVDictionary *opts = NULL;
     
     /* register all the codecs */
     avcodec_register_all();
@@ -164,22 +163,10 @@
     }
     
     c = avcodec_alloc_context3(codec);
-    
-//    /* put sample parameters */
-//    c->bit_rate = 400000;
-//    /* resolution must be a multiple of two */
-//    c->width = 352;
-//    c->height = 288;
-//    /* frames per second */
-//    c->time_base= (AVRational){1,25};
-//    c->gop_size = 10; /* emit one intra frame every ten frames */
-//    c->max_b_frames=1;
-//    c->pix_fmt = AV_PIX_FMT_YUV420P;
-    
-    
+
+    c->profile = FF_PROFILE_H264_BASELINE; // not constrained baseline to conform to Apple standards
     c->width = outputSize.width;
     c->height = outputSize.height;
-    //c->bit_rate = c->width * c->height * 4;
     c->max_b_frames=0;
     c->pix_fmt = PIX_FMT_YUV420P;
     c->time_base= (AVRational){1,15};
@@ -187,28 +174,38 @@
     // not sure about these
     c->refs = 1; //ref = 1
     c->keyint_min = 15*2;   //keyint=<framerate * segment length>
+    c->gop_size = 30; /* should be 2 seconds, so 30 at 15 fps */
     c->level = 30;  // level=30
-    c->bit_rate_tolerance = 1; //ratetol=1.0
     
+    c->bit_rate = 600000; // max 1200000
+    c->bit_rate_tolerance = 0; // number of bits bit rate can diverge
     
+    c->rc_buffer_size = c->bit_rate; // assumes the buffer size of the HW
+    c->rc_max_rate = c->bit_rate;
+    c->rc_min_rate = 0; //not necessary
     
+    c->thread_count = 2;  // 2 threads
     
-//    int64_t crf = -1;
+    c->trellis = 0; // try 1 later
     
     if(codec_id == AV_CODEC_ID_H264) {
-        av_opt_set(c->priv_data, "preset", "ultrafast", AV_OPT_SEARCH_CHILDREN);
-        av_opt_set(c->priv_data, "tune", "zerolatency", AV_OPT_SEARCH_CHILDREN);
+        av_dict_set(&opts, "preset", "ultrafast", 0);
+        av_dict_set(&opts, "tune", "zerolatency", 0);
+        av_dict_set(&opts, "vprofile", "baseline", 0);
         
-        // not sure about these
-        //av_opt_set(c->priv_data, "crf", "20", AV_OPT_SEARCH_CHILDREN);
-        av_opt_set_int(c->priv_data, "crf", 20, AV_OPT_SEARCH_CHILDREN);    //crf=20
-        av_opt_set(c->priv_data, "hrd", "crf", AV_OPT_SEARCH_CHILDREN);     //hrd=cbr
-        av_opt_set_int(c->priv_data, "lookahead", 0, AV_OPT_SEARCH_CHILDREN);    //lookahead=0
+        av_dict_set(&opts, "crf", "20", 0);
+        av_dict_set(&opts, "hrd", "crf", 0);
+        av_dict_set(&opts, "lookahead", "0", 0);
+        av_dict_set(&opts, "ratetol", "1.0", 0);
+        av_dict_set(&opts, "keyint", "30", 0);
+        av_dict_set(&opts, "bframes", "0", 0);
+        av_dict_set(&opts, "ref", "1", 0);
+        av_dict_set(&opts, "hrd", "cbr", 0);
     }
     
     
     /* open it */
-    if (avcodec_open2(c, codec, NULL) < 0) {
+    if (avcodec_open2(c, codec, &opts) < 0) {
         NSLog(@"Could not open codec");
         exit(1);
     }
