@@ -56,6 +56,8 @@
         encoderQueue = dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
         postQueue = dispatch_queue_create("com.rterCamera.postQueue", DISPATCH_QUEUE_SERIAL);
         
+        postOpQueue = [[NSOperationQueue alloc] init];
+        
     }
     return self;
 }
@@ -286,31 +288,43 @@
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
-    CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );    
+    //CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
+    //CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
     //NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
-    
-    //CVPixelBufferLockBaseAddress(imageBuffer,0); // lock buffe
-        
         
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
         NSLog(@"encoded frame");
+        
+        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
+        [postRequest setHTTPMethod:@"POST"];
+        [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
+        [NSURLConnection sendAsynchronousRequest:postRequest
+                                           queue:postOpQueue
+                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
+        {
+            
+            NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
+            NSLog(@"%@", [dictionary description]);
+        }];
+        
+        [encoder freePacket:&pkt];
     
-        dispatch_async(postQueue, ^{
-            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
-            [postRequest setHTTPMethod:@"POST"];
-            [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
-            NSHTTPURLResponse *response;
-            NSError *err;
-            NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
-            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
-            NSDictionary *dictionary = [response allHeaderFields];
-            NSLog([dictionary description]);
-            //        }
-            [encoder freePacket:&pkt];
-            //        NSLog(@"finished sending frame");
-        });
+//        dispatch_async(postQueue, ^{
+//            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
+//            [postRequest setHTTPMethod:@"POST"];
+//            [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
+//            
+//            NSHTTPURLResponse *response;
+//            NSError *err;
+//
+//            sendSynchronousRequest:postRequest returningResponse:&response error:&err];
+//            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
+//            NSDictionary *dictionary = [response allHeaderFields];
+//            NSLog([dictionary description]);
+//            //        }
+//            [encoder freePacket:&pkt];
+//        });
     }
 }
 
