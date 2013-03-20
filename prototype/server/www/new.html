@@ -70,16 +70,12 @@
 
 			<pane heading="+">
 				<ul>
+					<li><a href="#" ng-click="addTermView({Term: ''})"><i>all</i></a></li>
 					<li ng-repeat="term in terms"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
 				</ul>
  			</pane>
 
-			<pane heading="all" active="true">
-				<termview term="">
-				</termview>
-			</pane>
-
-			<pane ng-repeat="view in termViews" heading="{{view.term.Term}}" active="view.active">
+			<pane ng-repeat="view in termViews" heading="{{view.heading}}" active="view.active">
 				<termview term="view.term">
 				</termview>
 			</pane>

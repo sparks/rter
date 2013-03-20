@@ -1,16 +1,30 @@
-<div class="term-view row-fluid">
-	<div  class="left span8">
-		<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-
-		<ul class="grid" ui-sortable ng-model="items">		
-			<li ng-repeat="item in items | filterByTerm:term.Term"><a href="#" ng-click="updateItemDialog(item)" eat-click><tile-item item="item"></tile-item></a></li>
-		</ul>
+<div class="term-view">
+	<div class="control-bar row-fluid">
+		<div class="span6">
+			<b>View Mode:</b>
+			<button class="btn">Grid</button>
+			<button class="btn">List</button>
+			<button class="btn">Map</button>
+		</div>
+		<div class="span6 right-align">
+			<button class="btn" ng-click="close()">Close View</button>
+		</div>
 	</div>
 
-	<div class="right span4">
-		<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
-		  ui-event="{}">
+	<div class="row-fluid">
+		<div class="left span8">
+			<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
+
+			<ul class="grid" ui-sortable ng-model="items">		
+				<li ng-repeat="item in items | filterByTerm:term.Term"><a href="#" ng-click="updateItemDialog(item)" eat-click><tile-item item="item"></tile-item></a></li>
+			</ul>
 		</div>
-		<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
+
+		<div class="right span4">
+			<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
+			  ui-event="{}">
+			</div>
+			<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
+		</div>
 	</div>
 </div>

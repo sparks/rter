@@ -5,6 +5,10 @@ body {
 	font-family: Arial;
 }
 
+.right-align {
+	text-align: right;
+}
+
 .stripe, #maintabber .tabbable .tab-content {
 	background-color: rgb(255, 255, 255);
 	border-top: 1px solid rgb(208, 208, 208);
@@ -60,6 +64,17 @@ body {
 }
 
 /* -- Term View -- */
+
+.term-view .control-bar {
+	border-bottom: 1px solid rgb(208, 208, 208);
+	padding-bottom: 5px;
+	font-size: 10pt;
+}
+
+.term-view .control-bar .btn {
+	line-height: 8pt;
+	font-size: 10pt;
+}
 
 .term-view .grid {
 	list-style: none;

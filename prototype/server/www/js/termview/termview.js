@@ -1,7 +1,45 @@
 angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 
-.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, ItemCache) {
+.factory('TermViewRemote', function () {
+	function TermViewRemote() {
+		this.termViews = [];
+
+		this.addTermView = function(term) {
+			for(var i = 0;i < this.termViews.length;i++) {
+				if(this.termViews[i].term.Term == term.Term) {
+					this.termViews[i].active = true;
+					return;
+				}
+			}
+
+			if(term.Term !== "") {
+				this.termViews.push({term: term, heading: term.Term, active: true});
+			} else {
+				this.termViews.push({term: term, heading: "all", active: true});
+			}
+		};
+
+		this.removeTermView = function(term) {
+			for(var i = 0;i < this.termViews.length;i++) {
+				if(this.termViews[i].term.Term == term.Term) {
+					this.termViews.remove(i);
+					return true;
+				}
+			}
+
+			return false;
+		};
+	}
+
+	return new TermViewRemote();
+})
+
+.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, ItemCache, TermViewRemote) {
 	$scope.mapResized = false;
+
+	$scope.close = function() {
+		TermViewRemote.removeTermView($scope.term);
+	};
 
 	$scope.resizeMap = function() { //FIXME: Another map hack to render hidden maps
 		if(!$scope.mapResized) {
@@ -29,6 +67,10 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
+	$scope.$watch('items', function(a, b) {
+		$scope.updateMarkers();
+	}, true);
+
 	$scope.markers = [];
 
 	$scope.updateMarkers = function() {
@@ -55,10 +97,6 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
 	};
-
-	$scope.$watch('items', function(a, b) {
-		$scope.updateMarkers();
-	}, true);
 })
 
 .directive('termview', function(ItemCache) {
