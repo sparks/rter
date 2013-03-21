@@ -26,11 +26,11 @@
 				<form-generic-item item="item" form="createItemForm"></form-generic-item>
 			</div>
 		</fieldset>
+	
+		<hr>
+
+		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Create</button>
+		<button class="btn btn-warning" ng-click="debug()">Debug</button>
 	</div>
-
-	<hr>
-
-	<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Create</button>
-	<button class="btn btn-warning" ng-click="debug()">Debug</button>
 
 </form>

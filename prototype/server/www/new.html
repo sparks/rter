@@ -69,9 +69,9 @@
 			</pane>
 
 			<pane heading="+">
-				<ul>
+				<ul class="tag-cloud">
 					<li><a href="#" ng-click="addTermView({Term: ''})"><i>all</i></a></li>
-					<li ng-repeat="term in terms"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
+					<li ng-repeat="term in terms" style="font-size: {{termFontSize(term)}}pt;"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
 				</ul>
  			</pane>
 

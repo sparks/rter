@@ -279,7 +279,12 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = storage.SelectWhere(val, whereClause, args...)
+	switch val.(type) {
+	case *[]*data.Term:
+		err = storage.SelectQuery(val, "SELECT t.*, count(r.Term) FROM Terms AS t, TermRelationships AS r WHERE t.Term = r.Term GROUP BY t.Term")
+	default:
+		err = storage.SelectWhere(val, whereClause, args...)
+	}
 
 	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)

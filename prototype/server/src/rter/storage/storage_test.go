@@ -2,7 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"github.com/bmizerany/assert"
 	"rter/data"
 	"testing"
 	"time"
@@ -28,6 +27,16 @@ func TestOpenStorage(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// func CleanupStorage(t *testing.T) {
+// 	//Delete incase it crashed before
+// 	Delete(relationship)
+// 	Delete(term)
+// 	Delete(comment)
+// 	Delete(item)
+// 	Delete(user)
+// 	Delete(role)
+// }
 
 func TestInsertRole(t *testing.T) {
 	role = new(data.Role)
@@ -60,7 +69,7 @@ func TestSelectRole(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, role, selectedRole)
+	structJSONCompare(t, role, selectedRole)
 }
 
 func TestSelectAllRole(t *testing.T) {
@@ -115,7 +124,7 @@ func TestSelectUser(t *testing.T) {
 
 	selectedUser.CreateTime = user.CreateTime //Hack because MySQL will eat part of the timestamp and they won't match
 
-	assert.Equal(t, user, selectedUser)
+	structJSONCompare(t, user, selectedUser)
 }
 
 func TestSelectAllUser(t *testing.T) {
@@ -160,7 +169,7 @@ func TestSelectUserDirection(t *testing.T) {
 
 	selectedDirection.UpdateTime = direction.UpdateTime //hack
 
-	assert.Equal(t, direction, selectedDirection)
+	structJSONCompare(t, direction, selectedDirection)
 }
 
 func TestInsertItem(t *testing.T) {
@@ -203,7 +212,7 @@ func TestSelectItem(t *testing.T) {
 	selectedItem.StartTime = item.StartTime //hack
 	selectedItem.StopTime = item.StopTime   //hack
 
-	assert.Equal(t, item, selectedItem)
+	structJSONCompare(t, item, selectedItem)
 }
 
 func TestSelectAllItem(t *testing.T) {
@@ -246,7 +255,7 @@ func TestSelectItemComment(t *testing.T) {
 
 	selectedComment.UpdateTime = comment.UpdateTime
 
-	assert.Equal(t, comment, selectedComment)
+	structJSONCompare(t, comment, selectedComment)
 }
 
 func TestInsertTerm(t *testing.T) {
@@ -277,7 +286,7 @@ func TestSelectTerm(t *testing.T) {
 
 	selectedTerm.UpdateTime = term.UpdateTime
 
-	assert.Equal(t, term, selectedTerm)
+	structJSONCompare(t, term, selectedTerm)
 }
 
 func TestFailSelectAllTerm(t *testing.T) {
@@ -319,7 +328,7 @@ func TestSelectTermRanking(t *testing.T) {
 
 	selectedRanking.UpdateTime = ranking.UpdateTime
 
-	assert.Equal(t, ranking, selectedRanking)
+	structJSONCompare(t, ranking, selectedRanking)
 }
 
 func TestInsertTermRelationship(t *testing.T) {
@@ -407,13 +416,13 @@ func TestCloseStorage(t *testing.T) {
 	CloseStorage()
 }
 
-func structJSONCompare(a interface{}, b interface{}) bool {
+func structJSONCompare(t *testing.T, a interface{}, b interface{}) {
 	j1, _ := json.Marshal(a)
 	j2, _ := json.Marshal(b)
 
 	if string(j1) != string(j2) {
-		return false
+		t.Error("Objects are not equal:")
+		t.Error(string(j1))
+		t.Error(string(j2))
 	}
-
-	return true
 }

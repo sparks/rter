@@ -9,8 +9,8 @@ type Term struct {
 
 	Count int
 
-	Automated bool   `json:",omitempty"`
-	Author    string `json:"-"`
+	Automated bool `json:",omitempty"`
+	Author    string
 
 	UpdateTime time.Time `json:",omitempty"`
 }

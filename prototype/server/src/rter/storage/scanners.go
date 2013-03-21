@@ -76,13 +76,28 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 func scanTerm(term *data.Term, rows *sql.Rows) error {
 	var updateTimeString string
 
-	err := rows.Scan(
-		&term.Term,
-		&term.Automated,
-		&term.Author,
-		&updateTimeString,
-		&term.Count,
-	)
+	cols, err := rows.Columns()
+
+	if err != nil {
+		return err
+	}
+
+	if len(cols) < 5 {
+		err = rows.Scan(
+			&term.Term,
+			&term.Automated,
+			&term.Author,
+			&updateTimeString,
+		)
+	} else {
+		err = rows.Scan(
+			&term.Term,
+			&term.Automated,
+			&term.Author,
+			&updateTimeString,
+			&term.Count,
+		)
+	}
 
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 

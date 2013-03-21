@@ -339,34 +339,29 @@ func Select(val interface{}) error {
 }
 
 func SelectAll(slicePtr interface{}) error {
-	switch slicePtr.(type) {
-	case *[]*data.Term:
-		return SelectRaw(slicePtr, "SELECT t.*, count(r.Term) FROM Terms AS t, TermRelationships AS r WHERE t.Term = r.Term GROUP BY t.Term")
-	}
-
 	return SelectWhere(slicePtr, "")
 }
 
 func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) error {
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		return SelectRaw(slicePtr, "SELECT Items.* FROM Items "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Items.* FROM Items "+whereClause, args...)
 	case *[]*data.ItemComment:
-		return SelectRaw(slicePtr, "SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		return SelectRaw(slicePtr, "SELECT Terms.* FROM Terms "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Terms.* FROM Terms "+whereClause, args...)
 	case *[]*data.TermRelationship:
-		return SelectRaw(slicePtr, "SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
-		return SelectRaw(slicePtr, "SELECT Roles.* FROM Roles "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Roles.* FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		return SelectRaw(slicePtr, "SELECT Users.* FROM Users "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Users.* FROM Users "+whereClause, args...)
 	}
 
 	return ErrUnsupportedDataType
 }
 
-func SelectRaw(slicePtr interface{}, query string, args ...interface{}) error {
+func SelectQuery(slicePtr interface{}, query string, args ...interface{}) error {
 	switch slicePtr.(type) {
 	case *[]*data.Item:
 	case *[]*data.ItemComment:
@@ -379,6 +374,10 @@ func SelectRaw(slicePtr interface{}, query string, args ...interface{}) error {
 	}
 
 	rows, err := Query(query, args...)
+
+	if err != nil {
+		return err
+	}
 
 	for rows.Next() {
 		switch s := slicePtr.(type) {

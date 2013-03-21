@@ -63,6 +63,19 @@ body {
 	line-height: 17px;
 }
 
+/* -- Tag Cloud -- */
+
+.tag-cloud {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.tag-cloud li {
+	display: inline;
+	padding: 3px 10px 3px 10px;
+}
+
 /* -- Term View -- */
 
 .term-view .control-bar {
