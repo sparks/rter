@@ -1,4 +1,8 @@
-angular.module('twitterItem', [])
+angular.module('twitterItem',  [
+	'ui',           //Map
+	'ui.bootstrap', //select2
+	'taxonomy'      //Tag list
+])
 
 .controller('FormTwitterItemCtrl', function($scope) {
 
@@ -32,7 +36,18 @@ angular.module('twitterItem', [])
 		templateUrl: '/template/items/twitter/tile-twitter-item.html',
 		controller: 'TileTwitterItemCtrl',
 		link: function(scope, element, attr) {
+			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
+				scope.marker = new google.maps.Marker({
+					map: scope.map,
+					position: latLng
+				});
+				scope.mapCenter = latLng;
+			} else {
+				navigator.geolocation.getCurrentPosition(scope.centerAt);
+			}
 
+			
 		}
 	};
 })
