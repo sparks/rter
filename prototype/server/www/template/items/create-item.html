@@ -29,6 +29,12 @@
 	
 		<hr>
 
+		<label for="Tags">Tags</label>
+		<div name="Tags" multiple ui-select2="tagConfig" ng-model="item.Terms">
+		</div>
+		
+		<hr>
+		
 		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Create</button>
 		<button class="btn btn-warning" ng-click="debug()">Debug</button>
 	</div>

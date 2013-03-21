@@ -27,6 +27,8 @@ func main() {
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
 
+	// sockjs.Install("/1.0/streaming", SockJSHandler, sockjs.DefaultConfig)
+
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 
 	r.HandleFunc("/submit", web.SubmitHandler).Methods("POST")

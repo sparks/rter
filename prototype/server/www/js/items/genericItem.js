@@ -1,50 +1,13 @@
 angular.module('genericItem', [
 	'ng',           //$timeout
 	'ui',           //Map
-	'ui.bootstrap', //select2
-	'taxonomy'      //Tag list
+	'ui.bootstrap' //select2
 ])
 
-.controller('FormGenericItemCtrl', function($scope, Taxonomy) {
+.controller('FormGenericItemCtrl', function($scope) {
 	if($scope.item.Author === undefined) {
 		$scope.item.Author = "anonymous"; //TODO: Replace with login
 	}
-
-	//This is kinda terrible
-	if($scope.item.Terms !== undefined) {
-		var concat = "";
-		for(var i = 0;i < $scope.item.Terms.length;i++) {
-			concat += $scope.item.Terms[i].Term+",";
-		}
-		$scope.item.Terms = concat.substring(0, concat.length-1);
-	}
-
-	$scope.tagConfig = {
-		data: Taxonomy.query(),
-		multiple: true,
-		id: function(item) {
-			return item.Term;
-		},
-		formatResult: function(item) {
-            return item.Term;
-        },
-        formatSelection: function(item) {
-			return item.Term;
-        },
-        createSearchChoice: function(term) {
-			return {Term: term};
-        },
-        matcher: function(term, text, option) {
-			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
-        },
-        initSelection: function (element, callback) {
-			var data = [];
-			$(element.val().split(",")).each(function () {
-				data.push({Term: this});
-			});
-			callback(data);
-		}
-	};
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
@@ -75,7 +38,7 @@ angular.module('genericItem', [
 	};
 })
 
-.directive('formGenericItem', function(Taxonomy, $timeout) {
+.directive('formGenericItem', function($timeout) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -111,7 +74,7 @@ angular.module('genericItem', [
 
 })
 
-.directive('tileGenericItem', function(Taxonomy) {
+.directive('tileGenericItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -139,7 +102,7 @@ angular.module('genericItem', [
 	};
 })
 
-.directive('closeupGenericItem', function(Taxonomy) {
+.directive('closeupGenericItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

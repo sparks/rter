@@ -5,10 +5,6 @@ import (
 )
 
 func ReconcileTerms(item *data.Item, terms *[]*data.Term) (bool, error) {
-	if len(*terms) == 0 {
-		return false, nil
-	}
-
 	isAffected := false
 
 	for _, term := range *terms {
@@ -33,19 +29,23 @@ func ReconcileTerms(item *data.Item, terms *[]*data.Term) (bool, error) {
 		return isAffected, err
 	}
 
-	query := "DELETE FROM TermRelationships WHERE ItemID=? AND Term NOT IN ("
-	queryArgs := make([]interface{}, len(*terms)+1)
+	query := "DELETE FROM TermRelationships WHERE ItemID=?"
 
+	queryArgs := make([]interface{}, len(*terms)+1)
 	queryArgs[0] = item.ID
 
-	for i, term := range *terms {
-		queryArgs[i+1] = term.Term
-		query += "?, "
+	if len(*terms) > 0 {
+		query += " AND Term NOT IN ("
+
+		for i, term := range *terms {
+			queryArgs[i+1] = term.Term
+			query += "?, "
+		}
+
+		query = query[0 : len(query)-2]
+
+		query += ")"
 	}
-
-	query = query[0 : len(query)-2]
-
-	query += ")"
 
 	res, err := tx.Exec(query,
 		queryArgs...,

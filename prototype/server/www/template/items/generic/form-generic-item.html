@@ -12,14 +12,9 @@
 		<input type="number" step="any" name="Lat" ng-model="item.Lat">
 		<label for="Lng">Longitude</label>
 		<input type="number" step="any" name="Lng" ng-model="item.Lng">
-
-		<label for="Tags">Tags</label>
-		<div name="Tags" multiple ui-select2="tagConfig" ng-model="item.Terms">
-		</div>
 	</div>
 
 	<div class="span7">
 		<div id="map_canvas" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-map="map" ui-options="mapOptions"></div>
-		<div class="btn" ng-click="resizeMap()">Map Resize</div>
 	</div>
 </div>

@@ -3,6 +3,7 @@ angular.module('items', [
 	'ngResource',   //$resource for Item
 	'sockjs',       //sock for ItemCache
 	'alerts',       //Alerts for item actions
+	'taxonomy',     //For tag form
 	'genericItem',  //generic item implementation
 	'rawItem',      //raw item implementation
 	'twitterItem'   //twitter item implementation
@@ -186,7 +187,7 @@ angular.module('items', [
 	};
 })
 
-.controller('CreateItemCtrl', function($scope, Alerter, ItemCache) {
+.controller('CreateItemCtrl', function($scope, Alerter, ItemCache, Taxonomy) {
 	var defaultType = "";
 	$scope.item = {Type: defaultType};
 
@@ -205,6 +206,42 @@ angular.module('items', [
 			}
 		);
 	};
+
+	//This is kinda terrible
+	if($scope.item.Terms !== undefined) {
+		var concat = "";
+		for(var i = 0;i < $scope.item.Terms.length;i++) {
+			concat += $scope.item.Terms[i].Term+",";
+		}
+		$scope.item.Terms = concat.substring(0, concat.length-1);
+	}
+
+	$scope.tagConfig = {
+		data: Taxonomy.query(),
+		multiple: true,
+		id: function(item) {
+			return item.Term;
+		},
+		formatResult: function(item) {
+            return item.Term;
+        },
+        formatSelection: function(item) {
+			return item.Term;
+        },
+        createSearchChoice: function(term) {
+			return {Term: term};
+        },
+        matcher: function(term, text, option) {
+			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
+        },
+        initSelection: function (element, callback) {
+			var data = [];
+			$(element.val().split(",")).each(function () {
+				data.push({Term: this});
+			});
+			callback(data);
+		}
+	};
 })
 
 .directive('createItem', function() {
@@ -219,10 +256,10 @@ angular.module('items', [
 	};
 })
 
-.controller('UpdateItemCtrl', function($scope, Alerter, ItemCache) {
+.controller('UpdateItemCtrl', function($scope, Alerter, ItemCache, Taxonomy) {
 	$scope.debug = function() {
 		console.log("original item", $scope.item);
-		console.log("copy item", $scope.item);
+		console.log("copy item", $scope.itemCopy);
 	};
 
 	$scope.updateItem = function() {
@@ -244,7 +281,7 @@ angular.module('items', [
 
 	$scope.deleteItem = function() {
 		ItemCache.remove(
-			item,
+			$scope.item,
 			function() {
 				$scope.cancel();
 			}
@@ -254,6 +291,44 @@ angular.module('items', [
 	$scope.cancel = function() {
 		if($scope.dialog !== undefined) {
 			$scope.dialog.close();
+		}
+	};
+
+	//This is kinda terrible
+	$scope.itemCopy = angular.copy($scope.item);
+
+	if($scope.itemCopy.Terms !== undefined) {
+		var concat = "";
+		for(var i = 0;i < $scope.itemCopy.Terms.length;i++) {
+			concat += $scope.itemCopy.Terms[i].Term+",";
+		}
+		$scope.itemCopy.Terms = concat.substring(0, concat.length-1);
+	}
+
+	$scope.tagConfig = {
+		data: Taxonomy.query(),
+		multiple: true,
+		id: function(item) {
+			return item.Term;
+		},
+		formatResult: function(item) {
+			return item.Term;
+		},
+		formatSelection: function(item) {
+			return item.Term;
+		},
+		createSearchChoice: function(term) {
+			return {Term: term};
+		},
+		matcher: function(term, text, option) {
+			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
+		},
+		initSelection: function (element, callback) {
+			var data = [];
+			$(element.val().split(",")).each(function () {
+				data.push({Term: this});
+			});
+			callback(data);
 		}
 	};
 })
@@ -268,7 +343,6 @@ angular.module('items', [
 		templateUrl: '/template/items/update-item.html',
 		controller: 'UpdateItemCtrl',
 		link: function(scope, element, attrs) {
-			scope.itemCopy = angular.copy(scope.item);
 		}
 	};
 })
