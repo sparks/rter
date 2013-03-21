@@ -1,4 +1,8 @@
-angular.module('rawItem', ['ui.directives', 'taxonomy'])
+angular.module('rawItem', [
+	'ui',           //Map
+	'ui.bootstrap', //select2
+	'taxonomy'      //Tag list
+])
 
 .controller('FormRawItemCtrl', function($scope, Taxonomy) {
 	//This is kinda terrible

@@ -4,7 +4,7 @@ angular.module('twitterItem', [])
 
 })
 
-.directive('formTwitterItem', function(Item) {
+.directive('formTwitterItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

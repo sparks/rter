@@ -1,4 +1,9 @@
-angular.module('genericItem', ['ng', 'ui', 'taxonomy'])
+angular.module('genericItem', [
+	'ng',           //$timeout
+	'ui',           //Map
+	'ui.bootstrap', //select2
+	'taxonomy'      //Tag list
+])
 
 .controller('FormGenericItemCtrl', function($scope, Taxonomy) {
 	if($scope.item.Author === undefined) {

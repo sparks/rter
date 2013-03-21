@@ -1,4 +1,7 @@
-angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
+angular.module('termview', [
+	'ui',          //ui-sortable and map
+	'items'        //ItemCache to load items into termview, various itemDialog services
+])
 
 .factory('TermViewRemote', function () {
 	function TermViewRemote() {
@@ -34,7 +37,7 @@ angular.module('termview', ['ngResource', 'items', 'ui.bootstrap.dialog'])
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, updateItemDialog, closeupItemDialog, ItemCache, TermViewRemote) {
+.controller('TermViewCtrl', function($scope, UpdateItemDialog, CloseupItemDialog, TermViewRemote) {
 	$scope.mapResized = false;
 
 	$scope.close = function() {

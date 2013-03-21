@@ -1,7 +1,15 @@
-angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericItem', 'rawItem', 'twitterItem'])
+angular.module('items', [
+	'ui.bootstrap', //dialog
+	'ngResource',   //$resource for Item
+	'sockjs',       //sock for ItemCache
+	'alerts',       //Alerts for item actions
+	'genericItem',  //generic item implementation
+	'rawItem',      //raw item implementation
+	'twitterItem'   //twitter item implementation
+])
 
-.factory('Item', function ($resource) {
-	var Item = $resource(
+.factory('ItemResource', function ($resource) {
+	var ItemResource = $resource(
 		'/1.0/items/:ID',
 		{},
 		{
@@ -9,17 +17,47 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 		}
 	);
 
-	return Item;
+	return ItemResource;
 })
 
-.factory('ItemCache', function ($rootScope, $timeout, Item, Alerter) {
+.factory('ItemStream', function(SockJS) {
+	return new SockJS('/1.0/streaming/items');
+})
+
+.factory('ItemCache', function ($rootScope, $timeout, ItemResource, ItemStream, Alerter) {
 	function ItemCache() {
 		var self = this;
+
+		this.stream = ItemStream;
+
+		this.stream.onopen = function() {
+			console.log('SockJS Item Stream Open');
+		};
+
+		this.stream.onmessage = function(e) {
+			var bundle = e.data;
+			if(bundle.action == "create") {
+
+			} else if(bundle.action == "update") {
+
+			} else if(bundle.action == "delete") {
+
+			} else {
+				console.log("Malformed message in Item Stream");
+				console.log(e);
+			}
+			// self.messages.push({text:bundle.Message, ID:bundle.ID});
+			// $rootScope.$digest();
+		};
+
+		this.stream.onclose = function() {
+			console.log('SockJS Item Stream Closed');
+		};
 
 		this.items = [];
 
 		this.refresh = function() {
-			Item.query(function(newItems) { //NOTE : Clearing everything causes ui-sortable to freakout
+			ItemResource.query(function(newItems) { //NOTE : Clearing everything causes ui-sortable to freakout
 				for(var i = 0;i < newItems.length;i++) {
 					var found = false;
 					for(var j = 0;i < self.items.length;j++) {
@@ -32,12 +70,14 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 						self.items.push(newItems[i]);
 					}
 				}
-				$timeout(self.refresh, 500);
+				// $timeout(self.refresh, 500);
 			});
 		};
 
+		this.refresh();
+
 		this.create = function(item, sucess, failure) {
-			Item.save(
+			ItemResource.save(
 				item,
 				function() {
 					Alerter.success("Item Created", 2000);
@@ -74,7 +114,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 				}
 			}
 
-			Item.update(
+			ItemResource.update(
 				item,
 				function() {
 					Alerter.success("Item Updated", 2000);
@@ -102,7 +142,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 		};
 
 		this.remove = function(item, sucess, failure) {
-			Item.remove(
+			ItemResource.remove(
 				item,
 				function() {
 					Alerter.success("Item Deleted", 2000);
@@ -126,9 +166,6 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 				}
 			);
 		};
-
-		this.refresh();
-
 	}
 
 	return new ItemCache();
@@ -170,7 +207,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	};
 })
 
-.directive('createItem', function(Item) {
+.directive('createItem', function() {
 	return {
 		restrict: 'E',
 		scope: {},
@@ -221,7 +258,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	};
 })
 
-.directive('updateItem', function(Item) {
+.directive('updateItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -241,7 +278,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	$scope.item = item;
 })
 
-.factory('updateItemDialog', function ($dialog) {
+.factory('UpdateItemDialog', function ($dialog) {
 	return {
 		open: function(item) {
 			var d = $dialog.dialog({
@@ -263,7 +300,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 
 })
 
-.directive('tileItem', function(Item) {
+.directive('tileItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -289,7 +326,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	};
 })
 
-.directive('closeupItem', function(Item) {
+.directive('closeupItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -309,7 +346,7 @@ angular.module('items', ['ngResource', 'ui', 'ui.bootstrap', 'alerts', 'genericI
 	$scope.item = item;
 })
 
-.factory('closeupItemDialog', function ($dialog) {
+.factory('CloseupItemDialog', function ($dialog) {
 	return {
 		open: function(item) {
 			var d = $dialog.dialog({
