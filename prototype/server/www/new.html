@@ -69,10 +69,7 @@
 			</pane>
 
 			<pane heading="+">
-				<ul class="tag-cloud">
-					<li><a href="#" ng-click="addTermView({Term: ''})"><i>all</i></a></li>
-					<li ng-repeat="term in terms" style="font-size: {{termFontSize(term)}}pt;"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
-				</ul>
+				<tag-cloud></tag-cloud>
  			</pane>
 
 			<pane ng-repeat="view in termViews" heading="{{view.heading}}" active="view.active">

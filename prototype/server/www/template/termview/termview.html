@@ -16,7 +16,7 @@
 			<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
 			<ul class="grid" ui-sortable ng-model="items">		
-				<li ng-repeat="item in items | filterByTerm:term.Term"><a href="#" ng-click="updateItemDialog(item)" eat-click><tile-item item="item"></tile-item></a></li>
+				<li ng-repeat="item in items | filterByTerm:term.Term"><a href="#" ng-click="updateItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 			</ul>
 		</div>
 
