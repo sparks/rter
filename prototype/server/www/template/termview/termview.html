@@ -21,8 +21,8 @@
 		</div>
 
 		<div class="right span4">
-			<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
-			  ui-event="{}">
+			<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
+			  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
 			</div>
 			<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
 		</div>

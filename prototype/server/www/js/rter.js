@@ -29,7 +29,7 @@ angular.module('rter', [
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);
-	}
+	};
 
 	$scope.termFontSize = function(term) {
 		return term.Count/$scope.countMax*30;

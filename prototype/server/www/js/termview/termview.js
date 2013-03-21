@@ -1,6 +1,7 @@
 angular.module('termview', [
-	'ui',          //ui-sortable and map
-	'items'        //ItemCache to load items into termview, various itemDialog services
+	'ng',   //filers
+	'ui',   //ui-sortable and map
+	'items' //ItemCache to load items into termview, various itemDialog services
 ])
 
 .factory('TermViewRemote', function () {
@@ -37,7 +38,7 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, UpdateItemDialog, CloseupItemDialog, TermViewRemote) {
+.controller('TermViewCtrl', function($scope, $filter, UpdateItemDialog, CloseupItemDialog, TermViewRemote) {
 	$scope.mapResized = false;
 
 	$scope.close = function() {
@@ -74,16 +75,18 @@ angular.module('termview', [
 		$scope.updateMarkers();
 	}, true);
 
-	$scope.markers = [];
+	$scope.markerBundles = [];
 
 	$scope.updateMarkers = function() {
-		angular.forEach($scope.markers, function(v) {
-			v.setMap(null);
+		var filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
+
+		angular.forEach($scope.markerBundles, function(v) {
+			v.marker.setMap(null);
 		});
 
-		$scope.markers = [];
+		$scope.markerBundles = [];
 
-		angular.forEach($scope.items, function(v) {
+		angular.forEach(filteredItems, function(v) {
 			if(v.Lat === undefined || v.Lng === undefined || (v.Lat === 0 && v.Lng === 0)) return;
 
 			var m = new google.maps.Marker({
@@ -91,8 +94,16 @@ angular.module('termview', [
 				position: new google.maps.LatLng(v.Lat, v.Lng)
 			});
 
-			$scope.markers.push(m);
+			if(v.ThumbnailURI !== undefined && v.ThumbnailURI !== "") {
+				m.setIcon(new google.maps.MarkerImage(v.ThumbnailURI, null, null, null, new google.maps.Size(40, 40)));
+			}
+
+			$scope.markerBundles.push({marker: m, item: v});
 		});
+	};
+
+	$scope.openMarkerInfo = function(m) {
+		console.log(m);
 	};
 
 	$scope.centerAt = function(location) {
