@@ -53,13 +53,13 @@ angular.module('termview', [
 	};
 
 	$scope.updateItemDialog = function(item){
-		updateItemDialog.open(item).then(function() {
+		UpdateItemDialog.open(item).then(function() {
 			$scope.updateMarkers();
 		});
 	};
 
 	$scope.closeupItemDialog = function(item){
-		closeupItemDialog.open(item);
+		CloseupItemDialog.open(item);
 	};
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
