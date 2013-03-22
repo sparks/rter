@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrZeroAffected         = errors.New("Query didn't match anything.")
+	ErrZeroAffected        = errors.New("Query didn't match anything.")
 	ErrUnsupportedDataType = errors.New("Storage doesn't support the given datatype.")
 	ErrCannotDelete        = errors.New("Storage doesn't allow deleting that.")
 )

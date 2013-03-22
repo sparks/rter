@@ -147,6 +147,8 @@ func Insert(val interface{}) error {
 		v.UpdateTime = now
 	}
 
+	listeners.NotifyInsert(val)
+
 	return err
 }
 
@@ -267,6 +269,8 @@ func Update(val interface{}) error {
 	case *data.UserDirection:
 		v.UpdateTime = now
 	}
+
+	listeners.NotifyUpdate(val)
 
 	return err
 }
@@ -510,6 +514,8 @@ func Delete(val interface{}) error {
 	if affected < 1 {
 		return ErrZeroAffected
 	}
+
+	listeners.NotifyDelete(val)
 
 	return nil
 }

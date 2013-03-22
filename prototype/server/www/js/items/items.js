@@ -29,7 +29,31 @@ angular.module('items', [
 	function ItemCache() {
 		var self = this;
 
+		this.items = [];
 		this.stream = ItemStream;
+
+		function addUpdateItem(item) {
+			var found = false;
+
+			for(var i = 0;i < self.items.length;i++) {
+				if(self.items[i].ID == item.ID) {
+					self.items[i] = item;
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) self.items.push(item);
+		}
+
+		function removeItem(item) {
+			for(var i = 0;i < self.items.length;i++) {
+				if(self.items[i].ID == item.ID) {
+					self.items.remove(i);
+					break;
+				}
+			}
+		}
 
 		this.stream.onopen = function() {
 			console.log('SockJS Item Stream Open');
@@ -37,52 +61,42 @@ angular.module('items', [
 
 		this.stream.onmessage = function(e) {
 			var bundle = e.data;
-			if(bundle.action == "create") {
 
-			} else if(bundle.action == "update") {
-
-			} else if(bundle.action == "delete") {
-
+			if(bundle.Action == "create" || bundle.Action == "update") {
+				//Often if the user created the item, it will already be in place so treat as an update
+				addUpdateItem(bundle.Item);
+			} else if(bundle.Action == "delete") {
+				removeItem(bundle.Item);
 			} else {
 				console.log("Malformed message in Item Stream");
 				console.log(e);
 			}
-			// self.messages.push({text:bundle.Message, ID:bundle.ID});
-			// $rootScope.$digest();
+
+			$rootScope.$digest();
 		};
 
 		this.stream.onclose = function() {
 			console.log('SockJS Item Stream Closed');
 		};
 
-		this.items = [];
-
-		this.refresh = function() {
-			ItemResource.query(function(newItems) { //NOTE : Clearing everything causes ui-sortable to freakout
+		this.init = function() {
+			ItemResource.query(function(newItems) {
+				self.items.length = 0;
 				for(var i = 0;i < newItems.length;i++) {
-					var found = false;
-					for(var j = 0;i < self.items.length;j++) {
-						if(self.items[j].ID == newItems[i].ID) {
-							found = true;
-							break;
-						}
-					}
-					if(!found) {
-						self.items.push(newItems[i]);
-					}
+					addUpdateItem(newItems[i]);
 				}
 				// $timeout(self.refresh, 500);
 			});
 		};
 
-		this.refresh();
+		this.init();
 
 		this.create = function(item, sucess, failure) {
 			ItemResource.save(
 				item,
 				function() {
+					//Do not add the item here since it has no ID, it will be added by the websocket callback
 					Alerter.success("Item Created", 2000);
-					self.items.push(item);
 					if(angular.isFunction(sucess)) sucess();
 				},
 				function(e) {
@@ -147,17 +161,7 @@ angular.module('items', [
 				item,
 				function() {
 					Alerter.success("Item Deleted", 2000);
-					var indexOfItem = self.items.indexOf(item);
-					if(indexOfItem == -1) {
-						for(var i = 0;i < self.items.length;i++) {
-							if(self.items[i].ID == item.ID) {
-								self.items.remove(i);
-								break;
-							}
-						}
-					} else {
-						self.items.remove(indexOfItem);
-					}
+					removeItem(item);
 					if(angular.isFunction(sucess)) sucess();
 				},
 				function(e) {
@@ -329,7 +333,6 @@ angular.module('items', [
 			$(element.val().split(",")).each(function (v, a) {
 				data.push({Term: a});
 			});
-			console.log(data);
 			callback(data);
 		}
 	};
@@ -345,7 +348,7 @@ angular.module('items', [
 		templateUrl: '/template/items/update-item.html',
 		controller: 'UpdateItemCtrl',
 		link: function(scope, element, attrs) {
-			
+
 		}
 	};
 })
