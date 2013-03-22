@@ -147,11 +147,6 @@ body {
 
 /* -- Forms -- */
 
-.form-item hr {
-	border-color: rgb(120, 120, 120);
-	border-width: 1px;
-}
-
 .form-item input {
 	min-width: 250px;
 }
@@ -160,11 +155,11 @@ body {
 	font-weight: bold;
 }
 
-.form-item .select2-container {
-	width: 265px;
+.tag-selector .select2-container {
+	width: 400px;
 }
 
-.form-item  .select2-container .select2-search-field {
+.tag-selector .select2-container .select2-search-field {
 	width: 20px;
 }
 
@@ -189,7 +184,7 @@ body {
 /* -- Modal -- */
 
 .modal {
-	overflow: scroll;
+	overflow: auto;
 	max-height: 80%;
 	left: 50%;
 	width: 1000px;

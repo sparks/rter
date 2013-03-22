@@ -15,11 +15,9 @@
 	</fieldset>
 	
 	<hr>
-
-	<label for="Tags">Tags</label>
-	<div name="Tags" multiple ui-select2="tagConfig" ng-model="itemCopy.Terms">
-	</div>
 	
+	<tag-selector terms="itemCopy.Terms"></tag-selector>
+
 	<hr>
 	
 	<div class="row-fluid">
