@@ -235,6 +235,7 @@ angular.module('items', [
 			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
         },
         initSelection: function (element, callback) {
+			console.log(element);
 			var data = [];
 			$(element.val().split(",")).each(function () {
 				data.push({Term: this});
@@ -325,9 +326,10 @@ angular.module('items', [
 		},
 		initSelection: function (element, callback) {
 			var data = [];
-			$(element.val().split(",")).each(function () {
-				data.push({Term: this});
+			$(element.val().split(",")).each(function (v, a) {
+				data.push({Term: a});
 			});
+			console.log(data);
 			callback(data);
 		}
 	};
@@ -343,6 +345,7 @@ angular.module('items', [
 		templateUrl: '/template/items/update-item.html',
 		controller: 'UpdateItemCtrl',
 		link: function(scope, element, attrs) {
+			
 		}
 	};
 })
