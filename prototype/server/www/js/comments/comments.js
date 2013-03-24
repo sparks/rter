@@ -29,8 +29,8 @@ angular.module('comments', [
 	$scope.createComment = function() {
 		CommentRessource.save(
 			$scope.newComment,
-			function() {
-				$scope.comments.push($scope.newComment);
+			function(c) {
+				$scope.comments.push(c);
 				$scope.newComment = {
 					ID: $scope.id,
 					Body: "",
@@ -41,10 +41,6 @@ angular.module('comments', [
 				console.log(e);
 			}
 		);
-	};
-
-	$scope.debug = function() {
-		console.log($scope.comments);
 	};
 })
 

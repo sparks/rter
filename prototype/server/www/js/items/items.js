@@ -196,10 +196,6 @@ angular.module('items', [
 	var defaultType = "";
 	$scope.item = {Type: defaultType};
 
-	$scope.debug = function() {
-		console.log($scope.item);
-	};
-
 	$scope.createItem = function() {
 		if($scope.item.StartTime !== undefined) $scope.item.StartTime = new Date($scope.item.StartTime);
 		if($scope.item.StopTime !== undefined) $scope.item.StopTime = new Date($scope.item.StopTime);
@@ -226,11 +222,6 @@ angular.module('items', [
 })
 
 .controller('UpdateItemCtrl', function($scope, Alerter, ItemCache) {
-	$scope.debug = function() {
-		console.log("original item", $scope.item);
-		console.log("copy item", $scope.itemCopy);
-	};
-
 	$scope.updateItem = function() {
 		if($scope.itemCopy.StartTime !== undefined) $scope.itemCopy.StartTime = new Date($scope.itemCopy.StartTime);
 		if($scope.itemCopy.StopTime !== undefined) $scope.itemCopy.StopTime = new Date($scope.itemCopy.StopTime);
@@ -341,10 +332,6 @@ angular.module('items', [
 		if($scope.dialog !== undefined) {
 			$scope.dialog.close();
 		}
-	};
-
-	$scope.debug = function() {
-		console.log($scope.item);
 	};
 })
 
