@@ -13,12 +13,12 @@
 <hr>
 
 <div class="row-fluid">
-	<div class="span4" style="border: 1px solid black">
+	<div class="span4">
 		<tag-selector terms="item.Terms"></tag-selector>
 		<button class="btn btn-primary" ng-click="updateItem()">Save</button>
 	</div>
-	<div class="span8" style="border: 1px solid black">
-		<comments-dialog itemID="{{item.ID}}"></comments-dialog>
+	<div class="span8">
+		<comments-dialog id="item.ID"></comments-dialog>
 	</div>
 </div>
 

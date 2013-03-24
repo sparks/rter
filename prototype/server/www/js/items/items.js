@@ -6,7 +6,8 @@ angular.module('items', [
 	'taxonomy',     //For tag-selector
 	'genericItem',  //generic item implementation
 	'rawItem',      //raw item implementation
-	'twitterItem'   //twitter item implementation
+	'twitterItem',  //twitter item implementation
+	'comments'      //Comments dialog
 ])
 
 .factory('ItemResource', function ($resource) {
