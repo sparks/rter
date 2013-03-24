@@ -5,6 +5,14 @@ body {
 	font-family: Arial;
 }
 
+hr {
+	border-top-color: rgb(208, 208, 208);
+}
+
+label {
+	font-weight: bold;
+}
+
 .right-align {
 	text-align: right;
 }
@@ -151,10 +159,6 @@ body {
 	min-width: 250px;
 }
 
-.form-item label {
-	font-weight: bold;
-}
-
 .tag-selector .select2-container {
 	width: 100%;
 }
@@ -181,11 +185,62 @@ body {
 	width: 450px;
 }
 
+/* -- Comments -- */
+
+.form-comment input {
+	width: 100%;
+}
+
+.comment-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 auto 20px auto;
+
+	max-height: 250px;
+	overflow: auto;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+
+	border: 1px solid rgb(208, 208, 208);
+}
+
+.comment-list li {
+	padding: 5px;
+	margin: 5px auto 5px auto;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+
+	border: 1px solid rgb(208, 208, 208);
+
+	width: 95%;
+}
+
+.comment header {
+	border-bottom: 1px solid rgb(208, 208, 208);
+	margin-bottom: 8px;
+	padding-bottom: 2px;
+}
+
+.comment .author {
+	color: rgb(4, 117, 100);
+	font-weight: bold;
+	margin-right: 6px;
+}
+
+.comment .time {
+	font-style: italic;
+}
+
 /* -- Modal -- */
 
 .modal {
 	overflow: auto;
-	max-height: 80%;
+	max-height: 92%;
+	top: 2%;
 	left: 50%;
 	width: 1000px;
 	margin-left: -500px;
@@ -194,6 +249,12 @@ body {
 
 .modal-open  {
 	overflow: hidden;
+}
+
+.modal .float-close {
+	position: absolute;
+	top: 10px;
+	right: 20px;
 }
 
 /* -- Alerts -- */

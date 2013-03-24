@@ -1,6 +1,7 @@
 angular.module('comments', [
-	'ngResource',   //$resource for Item
-	'alerts'       //Alerts for item actions
+	'ngResource', //$resource for Item
+	'alerts',     //Alerts for item actions
+	'moment'     //fromNow filter
 ])
 
 .factory('CommentRessource', function ($resource) {
@@ -42,6 +43,9 @@ angular.module('comments', [
 		);
 	};
 
+	$scope.debug = function() {
+		console.log($scope.comments);
+	};
 })
 
 .directive('commentsDialog', function(CommentRessource) {
