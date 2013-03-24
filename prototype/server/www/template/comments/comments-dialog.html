@@ -1,5 +1,5 @@
 <div class="comments-dialog">
-	<ul class="comment-list">
+	<ul class="comment-list" ng-hide="!comments.length">
 		<li ng-repeat="comment in comments | orderBy:'UpdateTime':true" class="comment">
 			<header>
 				<span class="author">{{comment.Author}}</span>

@@ -57,6 +57,13 @@ angular.module('comments', [
 		templateUrl: '/template/comments/comments-dialog.html',
 		controller: 'CommentsDialogCtrl',
 		link: function(scope, element, attrs) {
+			scope.$watch(
+				'comments',
+				function() {
+					element.children().children().scrollTop(0);
+				},
+				true
+			);
 		}
 	};
 });
