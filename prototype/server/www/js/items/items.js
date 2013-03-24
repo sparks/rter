@@ -321,7 +321,21 @@ angular.module('items', [
 	};
 })
 
-.controller('CloseupItemCtrl', function($scope) {
+.controller('CloseupItemCtrl', function($scope, ItemCache) {
+	$scope.updateItem = function() {
+		ItemCache.update(
+			$scope.item,
+			function() {
+				$scope.cancel();
+			},
+			function(e) {
+				if(e.status == 304) {
+					$scope.cancel();
+				}
+			}
+		);
+	};
+
 	$scope.cancel = function() {
 		if($scope.dialog !== undefined) {
 			$scope.dialog.close();

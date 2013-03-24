@@ -1,0 +1,10 @@
+<div class="comments-dialog">
+	<ul>
+		<li ng-repeat="comment in comments">{{comment.Body}}</li>
+	</ul>
+
+	<form name="commentForm" class="form-comment">
+		<input type="txt" name="Body" ng-model="newComment.Body">
+		<button class="btn btn-primary" ng-click="createComment()">Submit</button>
+	</form>
+</div>

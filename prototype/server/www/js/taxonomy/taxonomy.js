@@ -2,8 +2,8 @@ angular.module('taxonomy', [
 	'ngResource' //$resource for taxonomoy
 ])
 
-.factory('Taxonomy', function ($resource) {
-	var Taxonomy = $resource(
+.factory('TaxonomyRessource', function ($resource) {
+	var TaxonomyRessource = $resource(
 		'/1.0/taxonomy/:Term',
 		{},
 		{
@@ -11,10 +11,10 @@ angular.module('taxonomy', [
 		}
 	);
 
-	return Taxonomy;
+	return TaxonomyRessource;
 })
 
-.controller('TagSelectorCtrl', function($scope, Taxonomy) {
+.controller('TagSelectorCtrl', function($scope, TaxonomyRessource) {
 	if($scope.terms !== undefined) {
 		var concat = "";
 		for(var i = 0;i < $scope.terms.length;i++) {
@@ -24,7 +24,7 @@ angular.module('taxonomy', [
 	}
 
 	$scope.tagConfig = {
-		data: Taxonomy.query(),
+		data: TaxonomyRessource.query(),
 		multiple: true,
 		id: function(item) {
 			return item.Term;

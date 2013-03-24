@@ -18,8 +18,8 @@ angular.module('rter', [
     };
 })
 
-.controller('TagCloudCtrl', function($scope, TermViewRemote, Taxonomy) {
-	$scope.terms = Taxonomy.query(function() {
+.controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyRessource) {
+	$scope.terms = TaxonomyRessource.query(function() {
 		$scope.countMax = 0;
 
 		angular.forEach($scope.terms, function(val) {
