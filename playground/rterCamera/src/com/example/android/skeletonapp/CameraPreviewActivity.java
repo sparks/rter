@@ -16,7 +16,10 @@
 
 package com.example.android.skeletonapp;
 
+import java.util.Random;
+
 import com.example.android.skeletonapp.overlay.*;
+
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,6 +36,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -116,8 +120,27 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
 		// uid = convertStringToByteArray(sUID);
 
+		String androidIds[] = {
+			"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
+			"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
+			"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
+			"852decd1fbc083cf6853e46feebb08622d653602",
+			"e1830fcefc3f47647ffa08350348d7e34b142b0b",
+			"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
+			"acb519f53a55d9dea06efbcc804eda79d305282e",
+			"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
+			"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
+			"952decd1fbc083cf6853e56f1ebb08622d653602",
+			"y1830fcefc3f47647ffa05351348d7e34b142b0b",
+			"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
+			"qcb519f53a55d9dea06ef5cc104eda79d305282e"
+		};
 		
-		selected_uid = AndroidId;
+		int rnd = new Random().nextInt(androidIds.length);
+		
+	    
+		
+		selected_uid = androidIds[rnd]; //AndroidId;
 		frameInfo.uid = selected_uid.getBytes();
 		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
 		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
@@ -178,6 +201,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		int duration = Toast.LENGTH_SHORT;
 
 		Toast toast = Toast.makeText(this, text, duration);
+		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 		toast.show();
 		
 		
@@ -252,6 +276,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 			int duration = Toast.LENGTH_SHORT;
 
 			Toast toast = Toast.makeText(this, text, duration);
+			toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 			toast.show();
 			mCamera.takePicture(null, null, photoCallback);
 			Log.d(TAG, "starting picture thread");
@@ -270,7 +295,9 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 					runOnUiThread(new Runnable() {
 		                 public void run() {
 
-		                     Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG).show();
+		                     Toast toast = Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG);
+		                     toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
+		                     toast.show();
 		                }
 		            });
 					Looper.prepare();
