@@ -15,89 +15,89 @@ angular.module('taxonomy', [
 	return TaxonomyRankingResource;
 })
 
-// .factory('TaxonomyRankingCache', function($rootScope, SockJS, TaxonomyRankingResource) {
-// 	function TaxonomyRankingCache(term) {
-// 		var self = this;
+.factory('TaxonomyRankingCache', function($rootScope, SockJS, TaxonomyRankingResource) {
+	function TaxonomyRankingCache(term) {
+		var self = this;
 
-// 		this.term = term;
-// 		this.ranking = [];
-// 		this.stream = new SockJS('/1.0/streaming/taxonomy/'+term+'/ranking');
+		this.term = term;
+		this.ranking = [];
+		this.stream = new SockJS('/1.0/streaming/taxonomy/'+term+'/ranking');
 
-// 		function parseTermRanking(termRanking) {
-// 			if(termRanking.Ranking === undefined) return;
+		function parseTermRanking(termRanking) {
+			if(termRanking.Ranking === undefined) return;
 
-// 			var newRanking;
-// 			try {
-// 				newRanking = JSON.parse(termRanking.Ranking);
-// 			} catch(e) {
-// 				console.log("Receive invalid JSON ranking form server", e);
-// 				return;
-// 			}
+			var newRanking;
+			try {
+				newRanking = JSON.parse(termRanking.Ranking);
+			} catch(e) {
+				console.log("Receive invalid JSON ranking form server", e);
+				return;
+			}
 
-// 			replaceRanking(newRanking);
-// 		}
+			replaceRanking(newRanking);
+		}
 
-// 		function replaceRanking(r) {
-// 			self.ranking.length = 0;
-// 			Array.prototype.push.apply(self.ranking, r);
-// 		}
+		function replaceRanking(r) {
+			self.ranking.length = 0;
+			Array.prototype.push.apply(self.ranking, r);
+		}
 
-// 		this.stream.onopen = function() {
-// 			console.log('SockJS Item Stream Open');
-// 		};
+		this.stream.onopen = function() {
+			console.log('SockJS Taxonomy Stream Open for ' + self.term);
+		};
 
-// 		this.stream.onmessage = function(e) {
-// 			parseTermRanking(e.data);
-// 			$rootScope.$digest();
-// 		};
+		this.stream.onmessage = function(e) {
+			parseTermRanking(e.data);
+			$rootScope.$digest();
+		};
 
-// 		this.stream.onclose = function() {
-// 			console.log('SockJS Item Stream Closed');
-// 		};
+		this.stream.onclose = function() {
+			console.log('SockJS Taxonomy Stream Closed for ' + self.term);
+		};
 
-// 		this.init = function() {
-// 			TaxonomyRankingResource.get(
-// 				{Term: this.term},
-// 				function(termRanking) {
-// 					parseTermRanking(termRanking);
-// 				},
-// 				function(e) {
-// 					console.log(e);
-// 				}
-// 			);
-// 		};
+		this.init = function() {
+			TaxonomyRankingResource.get(
+				{Term: this.term},
+				function(termRanking) {
+					parseTermRanking(termRanking);
+				},
+				function(e) {
+					console.log(e);
+				}
+			);
+		};
 
-// 		this.init();
+		this.init();
 
-// 		this.update = function(newRanking, sucess, failure) {
-// 			var oldRanking = angular.copy(this.ranking);
+		this.update = function(newRanking, sucess, failure) {
+			var oldRanking = angular.copy(this.ranking);
 
-// 			replaceRanking(newRanking);
+			replaceRanking(newRanking);
 
-// 			TaxonomyRankingResource.update(
-// 				{
-// 					Term: this.term,
-// 					Ranking: JSON.stringify(newRanking)
-// 				},
-// 				function() {
-// 					//Success do nothing!
-// 					if(angular.isFunction(sucess)) sucess();
-// 				},
-// 				function(e) {
-// 					if(e.status != 304) {
-// 						Alerter.error("There was a problem updating the ranking. "+"Status:"+e.status+". Reply Body:"+e.data);
-// 						console.log(e);
+			TaxonomyRankingResource.update(
+				{
+					Term: this.term,
+					Ranking: JSON.stringify(newRanking)
+				},
+				function() {
+					//Success do nothing!
+					if(angular.isFunction(sucess)) sucess();
+				},
+				function(e) {
+					if(e.status != 304) {
+						Alerter.error("There was a problem updating the ranking. "+"Status:"+e.status+". Reply Body:"+e.data);
+						console.log(e);
 
-// 						replaceRanking(oldRanking);
-// 					}
-// 					if(angular.isFunction(failure)) failure(e);
-// 				}
-// 			);
-// 		};
-// 	}
+						replaceRanking(oldRanking);
+					}
+					if(angular.isFunction(failure)) failure(e);
+				}
+			);
+		};
+	}
 
-// 	return TaxonomyRankingCache;
-// })
+	return TaxonomyRankingCache;
+})
 
 .factory('TaxonomyResource', function ($resource) {
 	var TaxonomyResource = $resource(
