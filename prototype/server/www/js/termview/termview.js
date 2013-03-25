@@ -39,12 +39,12 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
+.controller('TermViewCtrl', function($scope, $filter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingResource) {
 	/* -- items and rankings  -- */
 
 	$scope.ranking = [];
 
-	TaxonomyRanking.get(
+	TaxonomyRankingResource.get(
 		{Term: $scope.term.Term},
 		function(r) {
 			$scope.ranking = JSON.parse(r.Ranking);
@@ -69,9 +69,9 @@ angular.module('termview', [
 	}, true);
 
 	$scope.dragCallback = function(a) {
-		var rankObject = [];
+		var newRanking = [];
 		angular.forEach($scope.rankedItems, function(v) {
-			rankObject.push(v.ID);
+			newRanking.push(v.ID);
 		});
 
 		var ranking = {
@@ -79,7 +79,7 @@ angular.module('termview', [
 			Ranking: JSON.stringify(rankObject)
 		};
 
-		TaxonomyRanking.update(ranking);
+		TaxonomyRankingResource.update(ranking);
 	};
 
 	$scope.closeupItemDialog = function(item){

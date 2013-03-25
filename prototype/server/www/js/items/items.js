@@ -26,7 +26,7 @@ angular.module('items', [
 	return new SockJS('/1.0/streaming/items');
 })
 
-.factory('ItemCache', function ($rootScope, $timeout, ItemResource, ItemStream, Alerter) {
+.factory('ItemCache', function ($rootScope, ItemResource, ItemStream, Alerter) {
 	function ItemCache() {
 		var self = this;
 
@@ -86,7 +86,6 @@ angular.module('items', [
 				for(var i = 0;i < newItems.length;i++) {
 					addUpdateItem(newItems[i]);
 				}
-				// $timeout(self.refresh, 500);
 			});
 		};
 

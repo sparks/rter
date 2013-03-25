@@ -2,8 +2,8 @@ angular.module('taxonomy', [
 	'ngResource' //$resource for taxonomoy
 ])
 
-.factory('TaxonomyRanking', function ($resource) {
-	var TaxonomyRanking = $resource(
+.factory('TaxonomyRankingResource', function ($resource) {
+	var TaxonomyRankingResource = $resource(
 		'/1.0/taxonomy/:Term/ranking',
 		{ Term: '@Term' },
 		{
@@ -11,7 +11,11 @@ angular.module('taxonomy', [
 		}
 	);
 
-	return TaxonomyRanking;
+	return TaxonomyRankingResource;
+})
+
+.factory('TaxonomyRankingCache', function($rootScope, TaxonomyRankingResource) {
+
 })
 
 .factory('TaxonomyResource', function ($resource) {
