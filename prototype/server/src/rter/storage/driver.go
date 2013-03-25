@@ -287,7 +287,7 @@ func Select(val interface{}) error {
 	case *data.ItemComment:
 		rows, err = Query("SELECT * FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
-		rows, err = Query("SELECT t.*, count(r.Term) FROM Terms AS t LEFT JOIN TermRelationships AS r ON r.Term = t.Term WHERE t.Term=?", v.Term)
+		rows, err = Query("SELECT t.*, count(r.Term) FROM Terms AS t LEFT JOIN TermRelationships AS r ON r.Term = t.Term WHERE t.Term=? GROUP by t.Term", v.Term)
 	case *data.TermRelationship:
 		rows, err = Query("SELECT * FROM TermRelationships WHERE Term=? and ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
