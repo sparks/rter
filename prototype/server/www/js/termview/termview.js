@@ -76,7 +76,7 @@ angular.module('termview', [
 
 		var ranking = {
 			Term: $scope.term.Term,
-			Ranking: JSON.stringify(rankObject)
+			Ranking: JSON.stringify(newRanking)
 		};
 
 		TaxonomyRankingResource.update(ranking);

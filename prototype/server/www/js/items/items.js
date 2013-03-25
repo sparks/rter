@@ -81,12 +81,17 @@ angular.module('items', [
 		};
 
 		this.init = function() {
-			ItemResource.query(function(newItems) {
-				self.items.length = 0;
-				for(var i = 0;i < newItems.length;i++) {
-					addUpdateItem(newItems[i]);
+			ItemResource.query(
+				function(newItems) {
+					self.items.length = 0;
+					for(var i = 0;i < newItems.length;i++) {
+						addUpdateItem(newItems[i]);
+					}
+				},
+				function(e) {
+					console.log(e);
 				}
-			});
+			);
 		};
 
 		this.init();
