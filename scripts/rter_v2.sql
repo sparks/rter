@@ -120,6 +120,7 @@ INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymou
 INSERT INTO UserDirections (Username) VALUES ("anonymous"), ("admin");
 
 INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES ("all", 1, "admin", "2013-03-19 00:00:00"), ("test", 0, "anonymous", "2013-03-19 00:00:00");
+INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES ("all", "",  "2013-03-19 00:00:00"), ("test", "",  "2013-03-19 00:00:00")
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (
