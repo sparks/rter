@@ -75,8 +75,9 @@ label {
 
 .tag-cloud {
 	list-style: none;
-	margin: 0;
 	padding: 0;
+	width: 60%;
+	margin: 30px auto 0 auto;
 }
 
 .tag-cloud li {

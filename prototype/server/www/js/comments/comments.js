@@ -4,21 +4,18 @@ angular.module('comments', [
 	'moment'     //fromNow filter
 ])
 
-.factory('CommentRessource', function ($resource) {
-	var CommentRessource = $resource(
+.factory('CommentResource', function ($resource) {
+	var CommentResource = $resource(
 		'/1.0/items/:ID/comments',
-		{},
-		{
-			save: { method: 'POST', params:{ ID: '@ID' } },
-			query: { method: 'GET', params:{ ID: '@ID' }, isArray: true }
-		}
+		{ ID: '@ID' },
+		{}
 	);
 
-	return CommentRessource;
+	return CommentResource;
 })
 
-.controller('CommentsDialogCtrl', function($scope, Alerter, CommentRessource) {
-	$scope.comments = CommentRessource.query({ID: $scope.id});
+.controller('CommentsDialogCtrl', function($scope, Alerter, CommentResource) {
+	$scope.comments = CommentResource.query({ID: $scope.id});
 
 	$scope.newComment = {
 		ID: $scope.id,
@@ -27,7 +24,7 @@ angular.module('comments', [
 	};
 
 	$scope.createComment = function() {
-		CommentRessource.save(
+		CommentResource.save(
 			$scope.newComment,
 			function(c) {
 				$scope.comments.push(c);
@@ -44,7 +41,7 @@ angular.module('comments', [
 	};
 })
 
-.directive('commentsDialog', function(CommentRessource) {
+.directive('commentsDialog', function(CommentResource) {
 	return {
 		restrict: 'E',
 		scope: {

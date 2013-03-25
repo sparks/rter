@@ -1,7 +1,8 @@
 angular.module('termview', [
-	'ng',   //filers
-	'ui',   //ui-sortable and map
-	'items' //ItemCache to load items into termview, various itemDialog services
+	'ng',      //filers
+	'ui',      //ui-sortable and map
+	'items',   //ItemCache to load items into termview, various itemDialog services
+	'taxonomy' //
 ])
 
 .factory('TermViewRemote', function () {
@@ -38,7 +39,16 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, UpdateItemDialog, CloseupItemDialog, TermViewRemote) {
+.controller('TermViewCtrl', function($scope, $filter, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
+	$scope.ranking = TaxonomyRanking.get(
+		{Term: $scope.term.Term},
+		function() {
+			console.log($scope.ranking);
+			console.log($scope.ranking.Ranking);
+			console.log(JSON.parse($scope.ranking.Ranking));
+		}
+	);
+
 	$scope.mapResized = false;
 
 	$scope.close = function() {
@@ -110,6 +120,10 @@ angular.module('termview', [
 		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
 		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
+	};
+
+	$scope.dragCallback = function() {
+		console.log("whamo");
 	};
 })
 

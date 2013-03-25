@@ -13,7 +13,7 @@ angular.module('items', [
 .factory('ItemResource', function ($resource) {
 	var ItemResource = $resource(
 		'/1.0/items/:ID',
-		{},
+		{ ID: '@ID' },
 		{
 			update: { method: 'PUT', params:{ ID: '@ID' } }
 		}
