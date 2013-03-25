@@ -1,0 +1,21 @@
+<div class="comments-dialog">
+	<ul class="comment-list" ng-hide="!comments.length">
+		<li ng-repeat="comment in comments | orderBy:'UpdateTime':true" class="comment">
+			<header>
+				<span class="author">{{comment.Author}}</span>
+				<span class="time">{{comment.UpdateTime | fromNow}}</span>
+			</header>
+			<article>{{comment.Body}}</article>
+		</li>
+	</ul>
+
+	<form name="commentForm" class="form-comment row-fluid form-inline">
+		<div class="span10">
+			<input type="text" name="Body" placeholder="New Comment" ng-model="newComment.Body">
+		</div>
+
+		<div class="span2 right-align">
+			<button class="btn btn-primary" ng-click="createComment()">Post</button>
+		</div>
+	</form>
+</div>

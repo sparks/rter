@@ -29,8 +29,12 @@
 	
 		<hr>
 
-		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Create</button>
-		<button class="btn btn-warning" ng-click="debug()">Debug</button>
+		<label for="Tags">Tags</label>
+		<tag-selector terms="item.Terms"></tag-selector>
+		
+		<hr>
+		
+		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Save</button>
 	</div>
 
 </form>

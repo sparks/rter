@@ -15,14 +15,14 @@
 		<div class="left span8">
 			<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
-			<ul class="grid" ui-sortable ng-model="items">		
-				<li ng-repeat="item in items | filterByTerm:term.Term"><a href="#" ng-click="updateItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+			<ul class="grid" ui-sortable ng-model="filteredItems">		
+				<li ui-event="{ mouseup : 'dragCallback()' }" ng-repeat="item in filteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 			</ul>
 		</div>
 
 		<div class="right span4">
-			<div ng-repeat="marker in markers" ui-map-marker="markers[$index]"
-			  ui-event="{}">
+			<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
+			  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
 			</div>
 			<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
 		</div>

@@ -3,15 +3,17 @@ angular.module('items', [
 	'ngResource',   //$resource for Item
 	'sockjs',       //sock for ItemCache
 	'alerts',       //Alerts for item actions
+	'taxonomy',     //For tag-selector
 	'genericItem',  //generic item implementation
 	'rawItem',      //raw item implementation
-	'twitterItem'   //twitter item implementation
+	'twitterItem',  //twitter item implementation
+	'comments'      //Comments dialog
 ])
 
 .factory('ItemResource', function ($resource) {
 	var ItemResource = $resource(
 		'/1.0/items/:ID',
-		{},
+		{ ID: '@ID' },
 		{
 			update: { method: 'PUT', params:{ ID: '@ID' } }
 		}
@@ -28,7 +30,31 @@ angular.module('items', [
 	function ItemCache() {
 		var self = this;
 
+		this.items = [];
 		this.stream = ItemStream;
+
+		function addUpdateItem(item) {
+			var found = false;
+
+			for(var i = 0;i < self.items.length;i++) {
+				if(self.items[i].ID == item.ID) {
+					self.items[i] = item;
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) self.items.push(item);
+		}
+
+		function removeItem(item) {
+			for(var i = 0;i < self.items.length;i++) {
+				if(self.items[i].ID == item.ID) {
+					self.items.remove(i);
+					break;
+				}
+			}
+		}
 
 		this.stream.onopen = function() {
 			console.log('SockJS Item Stream Open');
@@ -36,52 +62,42 @@ angular.module('items', [
 
 		this.stream.onmessage = function(e) {
 			var bundle = e.data;
-			if(bundle.action == "create") {
 
-			} else if(bundle.action == "update") {
-
-			} else if(bundle.action == "delete") {
-
+			if(bundle.Action == "create" || bundle.Action == "update") {
+				//Often if the user created the item, it will already be in place so treat as an update
+				addUpdateItem(bundle.Item);
+			} else if(bundle.Action == "delete") {
+				removeItem(bundle.Item);
 			} else {
 				console.log("Malformed message in Item Stream");
 				console.log(e);
 			}
-			// self.messages.push({text:bundle.Message, ID:bundle.ID});
-			// $rootScope.$digest();
+
+			$rootScope.$digest();
 		};
 
 		this.stream.onclose = function() {
 			console.log('SockJS Item Stream Closed');
 		};
 
-		this.items = [];
-
-		this.refresh = function() {
-			ItemResource.query(function(newItems) { //NOTE : Clearing everything causes ui-sortable to freakout
+		this.init = function() {
+			ItemResource.query(function(newItems) {
+				self.items.length = 0;
 				for(var i = 0;i < newItems.length;i++) {
-					var found = false;
-					for(var j = 0;i < self.items.length;j++) {
-						if(self.items[j].ID == newItems[i].ID) {
-							found = true;
-							break;
-						}
-					}
-					if(!found) {
-						self.items.push(newItems[i]);
-					}
+					addUpdateItem(newItems[i]);
 				}
 				// $timeout(self.refresh, 500);
 			});
 		};
 
-		this.refresh();
+		this.init();
 
 		this.create = function(item, sucess, failure) {
 			ItemResource.save(
 				item,
 				function() {
+					//Do not add the item here since it has no ID, it will be added by the websocket callback
 					Alerter.success("Item Created", 2000);
-					self.items.push(item);
 					if(angular.isFunction(sucess)) sucess();
 				},
 				function(e) {
@@ -146,17 +162,7 @@ angular.module('items', [
 				item,
 				function() {
 					Alerter.success("Item Deleted", 2000);
-					var indexOfItem = self.items.indexOf(item);
-					if(indexOfItem == -1) {
-						for(var i = 0;i < self.items.length;i++) {
-							if(self.items[i].ID == item.ID) {
-								self.items.remove(i);
-								break;
-							}
-						}
-					} else {
-						self.items.remove(indexOfItem);
-					}
+					removeItem(item);
 					if(angular.isFunction(sucess)) sucess();
 				},
 				function(e) {
@@ -169,6 +175,38 @@ angular.module('items', [
 	}
 
 	return new ItemCache();
+})
+
+
+.filter('orderByRanking', function() { //FIXED: this is n^2 probably not good
+	return function(input, ranking) {
+		if(ranking === undefined || ranking.length === 0) return input;
+
+		var out = [];
+		var stragglers = [];
+
+		for(var i = 0;i < input.length;i++) {
+			var found = false;
+			for(var j = 0;j < ranking.length;j++) {
+				if(input[i].ID == ranking[j] && out[j] === undefined) {
+					found = true;
+					out[j] = input[i];
+					break;
+				}
+			}
+			if(!found) {
+				stragglers.push(input[i]);
+			}
+		}
+
+		for(var i = 0;i < out.length;i++) {
+			if(out[i] === undefined) out.remove(i);
+		}
+
+		out.push.apply(out, stragglers);
+
+		return out;
+	};
 })
 
 .filter('filterByTerm', function() {
@@ -189,10 +227,6 @@ angular.module('items', [
 .controller('CreateItemCtrl', function($scope, Alerter, ItemCache) {
 	var defaultType = "";
 	$scope.item = {Type: defaultType};
-
-	$scope.debug = function() {
-		console.log($scope.item);
-	};
 
 	$scope.createItem = function() {
 		if($scope.item.StartTime !== undefined) $scope.item.StartTime = new Date($scope.item.StartTime);
@@ -220,11 +254,6 @@ angular.module('items', [
 })
 
 .controller('UpdateItemCtrl', function($scope, Alerter, ItemCache) {
-	$scope.debug = function() {
-		console.log("original item", $scope.item);
-		console.log("copy item", $scope.item);
-	};
-
 	$scope.updateItem = function() {
 		if($scope.itemCopy.StartTime !== undefined) $scope.itemCopy.StartTime = new Date($scope.itemCopy.StartTime);
 		if($scope.itemCopy.StopTime !== undefined) $scope.itemCopy.StopTime = new Date($scope.itemCopy.StopTime);
@@ -244,7 +273,7 @@ angular.module('items', [
 
 	$scope.deleteItem = function() {
 		ItemCache.remove(
-			item,
+			$scope.item,
 			function() {
 				$scope.cancel();
 			}
@@ -256,6 +285,8 @@ angular.module('items', [
 			$scope.dialog.close();
 		}
 	};
+
+	$scope.itemCopy = angular.copy($scope.item); //This must be here or we break the tag
 })
 
 .directive('updateItem', function() {
@@ -268,7 +299,7 @@ angular.module('items', [
 		templateUrl: '/template/items/update-item.html',
 		controller: 'UpdateItemCtrl',
 		link: function(scope, element, attrs) {
-			scope.itemCopy = angular.copy(scope.item);
+
 		}
 	};
 })
@@ -314,15 +345,25 @@ angular.module('items', [
 	};
 })
 
-.controller('CloseupItemCtrl', function($scope) {
+.controller('CloseupItemCtrl', function($scope, ItemCache) {
+	$scope.updateItem = function() {
+		ItemCache.update(
+			$scope.item,
+			function() {
+				$scope.cancel();
+			},
+			function(e) {
+				if(e.status == 304) {
+					$scope.cancel();
+				}
+			}
+		);
+	};
+
 	$scope.cancel = function() {
 		if($scope.dialog !== undefined) {
 			$scope.dialog.close();
 		}
-	};
-
-	$scope.debug = function() {
-		console.log($scope.item);
 	};
 })
 

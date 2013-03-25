@@ -1,6 +1,8 @@
 angular.module('termview', [
-	'ui',          //ui-sortable and map
-	'items'        //ItemCache to load items into termview, various itemDialog services
+	'ng',      //filers
+	'ui',      //ui-sortable and map
+	'items',   //ItemCache to load items into termview, various itemDialog services
+	'taxonomy' //
 ])
 
 .factory('TermViewRemote', function () {
@@ -37,7 +39,31 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, UpdateItemDialog, CloseupItemDialog, TermViewRemote) {
+.controller('TermViewCtrl', function($scope, $filter, $timeout, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
+	$scope.ranking = [];
+	TaxonomyRanking.get(
+		{Term: $scope.term.Term},
+		function(r) {
+			$scope.ranking = JSON.parse(r.Ranking);
+		}
+	);
+
+	$scope.dragCallback = function() {
+		$timeout(function() { //FIXME: This is an awful hack but using watch would probably cause a feedback loop
+			var rankObject = [];
+			angular.forEach($scope.filteredItems, function(v) {
+				rankObject.push(v.ID);
+			});
+
+			var ranking = {
+				Term: $scope.term.Term,
+				Ranking: JSON.stringify(rankObject)
+			};
+
+			TaxonomyRanking.update(ranking);
+		}, 1);
+	};
+
 	$scope.mapResized = false;
 
 	$scope.close = function() {
@@ -70,20 +96,28 @@ angular.module('termview', [
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
-	$scope.$watch('items', function(a, b) {
+	$scope.$watch('ranking', function() {
+		$scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')($scope.items, $scope.term.Term), $scope.ranking);
+	}, true);
+
+	$scope.$watch('items', function() {
+		$scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')($scope.items, $scope.term.Term), $scope.ranking);
+	}, true);
+
+	$scope.$watch('filteredItems', function(a, b) {
 		$scope.updateMarkers();
 	}, true);
 
-	$scope.markers = [];
+	$scope.markerBundles = [];
 
 	$scope.updateMarkers = function() {
-		angular.forEach($scope.markers, function(v) {
-			v.setMap(null);
+		angular.forEach($scope.markerBundles, function(v) {
+			v.marker.setMap(null);
 		});
 
-		$scope.markers = [];
+		$scope.markerBundles = [];
 
-		angular.forEach($scope.items, function(v) {
+		angular.forEach($scope.filteredItems, function(v) {
 			if(v.Lat === undefined || v.Lng === undefined || (v.Lat === 0 && v.Lng === 0)) return;
 
 			var m = new google.maps.Marker({
@@ -91,7 +125,11 @@ angular.module('termview', [
 				position: new google.maps.LatLng(v.Lat, v.Lng)
 			});
 
-			$scope.markers.push(m);
+			if(v.ThumbnailURI !== undefined && v.ThumbnailURI !== "") {
+				m.setIcon(new google.maps.MarkerImage(v.ThumbnailURI, null, null, null, new google.maps.Size(40, 40)));
+			}
+
+			$scope.markerBundles.push({marker: m, item: v});
 		});
 	};
 
@@ -102,7 +140,7 @@ angular.module('termview', [
 	};
 })
 
-.directive('termview', function(ItemCache) {
+.directive('termview', function(ItemCache, $filter) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -112,6 +150,7 @@ angular.module('termview', [
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			scope.items = ItemCache.items;
+			scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')(scope.items, scope.term.Term), scope.ranking);
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}
 	};

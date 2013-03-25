@@ -27,7 +27,7 @@ angular.module('twitterItem',  [
 
 })
 
-.directive('tileTwitterItem', function(Taxonomy) {
+.directive('tileTwitterItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -56,7 +56,7 @@ angular.module('twitterItem',  [
 
 })
 
-.directive('closeupTwitterItem', function(Taxonomy) {
+.directive('closeupTwitterItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

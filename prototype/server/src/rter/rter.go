@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/igm/sockjs-go/sockjs"
 	"log"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
+	"rter/streaming"
 	"rter/utils"
 	"rter/web"
 )
@@ -26,6 +28,9 @@ func main() {
 
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
+
+	s := streaming.NewItemStreamer()
+	sockjs.Install("/1.0/streaming/items", func(session sockjs.Conn) { s.SockJSHandler(session) }, sockjs.DefaultConfig)
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 
