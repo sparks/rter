@@ -40,14 +40,24 @@ angular.module('termview', [
 })
 
 .controller('TermViewCtrl', function($scope, $filter, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
-	$scope.ranking = TaxonomyRanking.get(
-		{Term: $scope.term.Term},
-		function() {
-			console.log($scope.ranking);
-			console.log($scope.ranking.Ranking);
-			console.log(JSON.parse($scope.ranking.Ranking));
-		}
-	);
+	// $scope.ranking = TaxonomyRanking.get(
+	// 	{Term: $scope.term.Term},
+	// 	function() {}
+	// );
+
+	$scope.dragCallback = function() {
+		// console.log($scope.filteredItems);
+
+		var rankObject = [];
+		angular.forEach($scope.filteredItems, function(v) {
+			rankObject.push(v.ID);
+		});
+
+		var ranking = {
+			Term: $scope.term.Term,
+			Ranking: rankObject
+		};
+	};
 
 	$scope.mapResized = false;
 
@@ -82,21 +92,23 @@ angular.module('termview', [
 	};
 
 	$scope.$watch('items', function(a, b) {
+		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
+	}, true);
+
+	$scope.$watch('filteredItems', function(a, b) {
 		$scope.updateMarkers();
 	}, true);
 
 	$scope.markerBundles = [];
 
 	$scope.updateMarkers = function() {
-		var filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
-
 		angular.forEach($scope.markerBundles, function(v) {
 			v.marker.setMap(null);
 		});
 
 		$scope.markerBundles = [];
 
-		angular.forEach(filteredItems, function(v) {
+		angular.forEach($scope.filteredItems, function(v) {
 			if(v.Lat === undefined || v.Lng === undefined || (v.Lat === 0 && v.Lng === 0)) return;
 
 			var m = new google.maps.Marker({
@@ -112,22 +124,14 @@ angular.module('termview', [
 		});
 	};
 
-	$scope.openMarkerInfo = function(m) {
-		console.log(m);
-	};
-
 	$scope.centerAt = function(location) {
 		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
 		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
 	};
-
-	$scope.dragCallback = function() {
-		console.log("whamo");
-	};
 })
 
-.directive('termview', function(ItemCache) {
+.directive('termview', function(ItemCache, $filter) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -137,6 +141,8 @@ angular.module('termview', [
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			scope.items = ItemCache.items;
+			scope.filteredItems = $filter('filterByTerm')(scope.items, scope.term.Term);
+
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}
 	};
