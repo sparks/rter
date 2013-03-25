@@ -1,7 +1,6 @@
 angular.module('genericItem', [
-	'ng',           //$timeout
-	'ui',           //Map
-	'ui.bootstrap' //select2
+	'ng', //$timeout
+	'ui'  //Map
 ])
 
 .controller('FormGenericItemCtrl', function($scope) {

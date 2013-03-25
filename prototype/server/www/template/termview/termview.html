@@ -15,8 +15,8 @@
 		<div class="left span8">
 			<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
-			<ul class="grid" ui-sortable ng-model="filteredItems">		
-				<li ui-event="{ mouseup : 'dragCallback()' }" ng-repeat="item in filteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+			<ul class="grid" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
+				<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 			</ul>
 		</div>
 
