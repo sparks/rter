@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"log"
 	"rter/data"
 	"time"
 )
@@ -24,6 +25,7 @@ func scanItemComment(comment *data.ItemComment, rows *sql.Rows) error {
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("ItemComment scanner failed to parse time.")
 		return err
 	}
 
@@ -57,6 +59,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("Item scanner failed to parse time.")
 		return err
 	}
 
@@ -65,6 +68,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	stopTime, err := time.Parse("2006-01-02 15:04:05", stopTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("Item scanner failed to parse time.")
 		return err
 	}
 
@@ -99,9 +103,14 @@ func scanTerm(term *data.Term, rows *sql.Rows) error {
 		)
 	}
 
+	if err != nil {
+		return err
+	}
+
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("Term scanner failed to parse time.")
 		return err
 	}
 
@@ -128,9 +137,14 @@ func scanTermRanking(ranking *data.TermRanking, rows *sql.Rows) error {
 		&updateTimeString,
 	)
 
+	if err != nil {
+		return err
+	}
+
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("TermRanking scanner failed to parse time.")
 		return err
 	}
 
@@ -167,6 +181,7 @@ func scanUser(user *data.User, rows *sql.Rows) error {
 	createTime, err := time.Parse("2006-01-02 15:04:05", createTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("User scanner failed to parse time.")
 		return err
 	}
 
@@ -188,9 +203,14 @@ func scanUserDirection(direction *data.UserDirection, rows *sql.Rows) error {
 		&updateTimeString,
 	)
 
+	if err != nil {
+		return err
+	}
+
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
+		log.Println("UserDirection scanner failed to parse time.")
 		return err
 	}
 
