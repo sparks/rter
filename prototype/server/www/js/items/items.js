@@ -177,6 +177,38 @@ angular.module('items', [
 	return new ItemCache();
 })
 
+
+.filter('orderByRanking', function() { //FIXED: this is n^2 probably not good
+	return function(input, ranking) {
+		if(ranking === undefined || ranking.length === 0) return input;
+
+		var out = [];
+		var stragglers = [];
+
+		for(var i = 0;i < input.length;i++) {
+			var found = false;
+			for(var j = 0;j < ranking.length;j++) {
+				if(input[i].ID == ranking[j] && out[j] === undefined) {
+					found = true;
+					out[j] = input[i];
+					break;
+				}
+			}
+			if(!found) {
+				stragglers.push(input[i]);
+			}
+		}
+
+		for(var i = 0;i < out.length;i++) {
+			if(out[i] === undefined) out.remove(i);
+		}
+
+		out.push.apply(out, stragglers);
+
+		return out;
+	};
+})
+
 .filter('filterByTerm', function() {
 	return function(input, term) {
 		if(term === "" || term === undefined) return input;

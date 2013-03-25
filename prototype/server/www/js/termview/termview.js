@@ -39,24 +39,29 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
-	// $scope.ranking = TaxonomyRanking.get(
-	// 	{Term: $scope.term.Term},
-	// 	function() {}
-	// );
+.controller('TermViewCtrl', function($scope, $filter, $timeout, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRanking) {
+	$scope.ranking = [];
+	TaxonomyRanking.get(
+		{Term: $scope.term.Term},
+		function(r) {
+			$scope.ranking = JSON.parse(r.Ranking);
+		}
+	);
 
 	$scope.dragCallback = function() {
-		// console.log($scope.filteredItems);
+		$timeout(function() { //FIXME: This is an awful hack but using watch would probably cause a feedback loop
+			var rankObject = [];
+			angular.forEach($scope.filteredItems, function(v) {
+				rankObject.push(v.ID);
+			});
 
-		var rankObject = [];
-		angular.forEach($scope.filteredItems, function(v) {
-			rankObject.push(v.ID);
-		});
+			var ranking = {
+				Term: $scope.term.Term,
+				Ranking: JSON.stringify(rankObject)
+			};
 
-		var ranking = {
-			Term: $scope.term.Term,
-			Ranking: rankObject
-		};
+			TaxonomyRanking.update(ranking);
+		}, 1);
 	};
 
 	$scope.mapResized = false;
@@ -91,8 +96,12 @@ angular.module('termview', [
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
-	$scope.$watch('items', function(a, b) {
-		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
+	$scope.$watch('ranking', function() {
+		$scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')($scope.items, $scope.term.Term), $scope.ranking);
+	}, true);
+
+	$scope.$watch('items', function() {
+		$scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')($scope.items, $scope.term.Term), $scope.ranking);
 	}, true);
 
 	$scope.$watch('filteredItems', function(a, b) {
@@ -141,8 +150,7 @@ angular.module('termview', [
 		controller: 'TermViewCtrl',
 		link: function(scope, element, attrs) {
 			scope.items = ItemCache.items;
-			scope.filteredItems = $filter('filterByTerm')(scope.items, scope.term.Term);
-
+			scope.filteredItems = $filter('orderByRanking')($filter('filterByTerm')(scope.items, scope.term.Term), scope.ranking);
 			navigator.geolocation.getCurrentPosition(scope.centerAt);
 		}
 	};
