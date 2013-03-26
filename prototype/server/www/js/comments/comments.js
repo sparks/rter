@@ -24,6 +24,7 @@ angular.module('comments', [
 	};
 
 	$scope.createComment = function() {
+		if($scope.newComment.Body === undefined || $scope.newComment.Body === "") return;
 		CommentResource.save(
 			$scope.newComment,
 			function(c) {
