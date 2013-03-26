@@ -55,6 +55,10 @@ angular.module('termview', [
 		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	}, true);
 
+	$scope.$watch('filteredItems', function() {
+		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	}, true);
+
 	$scope.$watch('ranking', function() {
 		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
 	}, true);
