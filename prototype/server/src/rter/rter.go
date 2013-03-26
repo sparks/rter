@@ -17,7 +17,7 @@ import (
 func main() {
 	setupLogger()
 
-	err := storage.OpenStorage("root", "nehil", "tcp", "localhost:3306", "rter")
+	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
 	if err != nil {
 		log.Fatalf("Failed to open connection to database %v", err)
 	}
@@ -29,7 +29,7 @@ func main() {
 	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) //Must register more specific paths first
 
 	crud := rest.CRUDRouter()
-	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud)) //Less specific paths later
+	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 

@@ -25,7 +25,7 @@ angular.module('rter', [
 		angular.forEach($scope.terms, function(val) {
 			if($scope.countMax < val.Count) $scope.countMax = val.Count;
 		});
-	});
+	}); //TODO: Make me dynamic
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);
@@ -34,7 +34,6 @@ angular.module('rter', [
 	$scope.termFontSize = function(term) {
 		return map(term.Count, 1, $scope.countMax, 12, 60);
 	};
-
 })
 
 .directive('tagCloud', function(ItemCache) {

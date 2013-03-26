@@ -2,29 +2,31 @@
 	<div class="control-bar row-fluid">
 		<div class="span6">
 			<b>View Mode:</b>
-			<button class="btn btn-success">Grid</button>
-			<button class="btn btn-success">List</button>
-			<button class="btn btn-success">Map</button>
+			<button class="btn btn-success" ng-click="changeViewMode('grid')">Grid</button>
+			<button class="btn btn-success" ng-click="changeViewMode('list')">List</button>
+			<button class="btn btn-success" ng-click="changeViewMode('map')">Map</button>
 		</div>
 		<div class="span6 right-align">
 			<button class="btn btn-danger" ng-click="close()">Close View</button>
 		</div>
 	</div>
+	
+	<div class="{{viewmode}}">
+		<div class="row-fluid">
+			<div class="left span8">
+				<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
-	<div class="row-fluid">
-		<div class="left span8">
-			<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-
-			<ul class="grid" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
-				<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
-			</ul>
-		</div>
-
-		<div class="right span4">
-			<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
-			  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
+				<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
+					<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+				</ul>
 			</div>
-			<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
+
+			<div class="controls span4">
+				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
+				  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
+				</div>
+				<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
+			</div>
 		</div>
 	</div>
 </div>

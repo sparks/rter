@@ -40,6 +40,13 @@ angular.module('termview', [
 })
 
 .controller('TermViewCtrl', function($scope, $filter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
+
+	$scope.viewmode = "grid";
+
+	$scope.changeViewMode = function(mode) {
+		$scope.viewmode = mode;
+	}
+
 	/* -- items and rankings  -- */
 
 	$scope.rankingCache = new TaxonomyRankingCache($scope.term.Term);

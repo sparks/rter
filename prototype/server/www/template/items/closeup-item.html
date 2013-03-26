@@ -23,14 +23,17 @@
 
 <div class="row-fluid">
 	<div class="span5">
-		<div class="row-fluid">
-			<div class="span10">
-				<tag-selector terms="item.Terms"></tag-selector>
+		<form name="closeupTagForm">
+			<div class="row-fluid">
+				<div class="span10">
+						<tag-selector terms="item.Terms"></tag-selector>
+					</form>
+				</div>
+				<div class="span2">
+					<button class="btn btn-primary" ng-click="updateItem()">Save</button>
+				</div>
 			</div>
-			<div class="span2">
-				<button class="btn btn-primary" ng-click="updateItem()">Save</button>
-			</div>
-		</div>
+		</form>
 	</div>
 	<div class="span7">
 		<comments-dialog id="item.ID"></comments-dialog>
