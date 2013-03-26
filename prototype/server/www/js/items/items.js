@@ -7,6 +7,7 @@ angular.module('items', [
 	'genericItem',  //generic item implementation
 	'rawItem',      //raw item implementation
 	'twitterItem',  //twitter item implementation
+	'youtubeItem',  //YouTube item implementation
 	'comments'      //Comments dialog
 ])
 

@@ -16,6 +16,8 @@ heading paperjs
 map filter
 secondary filters
 
+content type badge
+
 
 ##Mobile
 * More text on the device
