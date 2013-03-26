@@ -6,6 +6,7 @@
 		<option value="generic">Generic</option>
 		<option value="raw">Raw</option>
 		<option value="twitter">Twitter</option>
+		<option value="youtube">YouTube</option>
 	</select>
 
 	<div ng-hide="item.Type == ''">
@@ -18,6 +19,9 @@
 			</div>
 			<div ng-switch-when="twitter">
 				<form-twitter-item item="item" form="createItemForm"></form-twitter-item>
+			</div>
+			<div ng-switch-when="youtube">
+				<form-youtube-item item="item" form="createItemForm"></form-youtube-item>
 			</div>
 			<div ng-switch-when="raw">
 				<form-raw-item item="item" form="createItemForm"></form-raw-item>

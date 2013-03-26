@@ -39,9 +39,16 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
+.controller('TermViewCtrl', function($scope, $filter, $timeout, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
 
 	$scope.viewmode = "grid-view";
+
+	$scope.$watch('viewmode', function() {
+		$timeout(function() {
+			google.maps.event.trigger($scope.map, "resize");
+			$scope.map.setCenter($scope.mapCenter);
+		}, 0);
+	});
 
 	/* -- items and rankings  -- */
 

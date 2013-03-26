@@ -252,14 +252,28 @@ label {
 	border-color: red;
 }
 
-.form-generic-item, .form-raw-item {
+.form-generic-item, .form-raw-item, .form-youtube-item {
 	margin: auto;
 	width: 800px;
 }
 
-.form-generic-item .map, .closeup-item .map {
+.form-generic-item .map, .closeup-item .map, .form-youtube-item .map {
 	height: 400px;
 	width: 450px;
+}
+
+.closeup-item {
+	padding: 20px 0 20px 0;
+}
+
+.closeup-item .closeup-youtube-item {
+	text-align: center;
+}
+
+.closeup-item .closeup-youtube-item .map {
+	height: 315px;
+	width: 315px;
+	margin: auto;
 }
 
 /* -- Comments -- */

@@ -1,9 +1,9 @@
-angular.module('genericItem', [
+angular.module('youtubeItem', [
 	'ng', //$timeout
 	'ui'  //Map
 ])
 
-.controller('FormGenericItemCtrl', function($scope) {
+.controller('FormYoutubeItemCtrl', function($scope) {
 	if($scope.item.Author === undefined) {
 		$scope.item.Author = "anonymous"; //TODO: Replace with login
 	}
@@ -37,15 +37,15 @@ angular.module('genericItem', [
 	};
 })
 
-.directive('formGenericItem', function($timeout) {
+.directive('formYoutubeItem', function($timeout) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/generic/form-generic-item.html',
-		controller: 'FormGenericItemCtrl',
+		templateUrl: '/template/items/youtube/form-youtube-item.html',
+		controller: 'FormYoutubeItemCtrl',
 		link: function(scope, element, attr) {
 			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
 				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
@@ -63,31 +63,33 @@ angular.module('genericItem', [
 					google.maps.event.trigger(scope.map, "resize");
 					scope.map.setCenter(scope.mapCenter);
 				},
-				0
+				5
 			);
 		}
 	};
 })
 
-.controller('TileGenericItemCtrl', function($scope) {
-
+.controller('TileYoutubeItemCtrl', function($scope) {
+	$scope.youtubeID = $scope.item.ContentURI.match(/\/watch\?v=([0-9a-zA-Z].*)/)[1];
 })
 
-.directive('tileGenericItem', function() {
+.directive('tileYoutubeItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "="
 		},
-		templateUrl: '/template/items/generic/tile-generic-item.html',
-		controller: 'TileGenericItemCtrl',
+		templateUrl: '/template/items/youtube/tile-youtube-item.html',
+		controller: 'TileYoutubeItemCtrl',
 		link: function(scope, element, attr) {
 
 		}
 	};
 })
 
-.controller('CloseupGenericItemCtrl', function($scope) {
+.controller('CloseupYoutubeItemCtrl', function($scope) {
+	$scope.youtubeID = $scope.item.ContentURI.match(/\/watch\?v=([0-9a-zA-Z].*)/)[1];
+
 	if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined) {
 		$scope.mapCenter = new google.maps.LatLng($scope.item.Lat, $scope.item.Lng);
 	} else {
@@ -101,14 +103,14 @@ angular.module('genericItem', [
 	};
 })
 
-.directive('closeupGenericItem', function() {
+.directive('closeupYoutubeItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "="
 		},
-		templateUrl: '/template/items/generic/closeup-generic-item.html',
-		controller: 'CloseupGenericItemCtrl',
+		templateUrl: '/template/items/youtube/closeup-youtube-item.html',
+		controller: 'CloseupYoutubeItemCtrl',
 		link: function(scope, element, attr) {
 			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
 				scope.marker = new google.maps.Marker({
