@@ -66,8 +66,8 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 }
 
 func probe(message string, r *http.Request) {
-	log.Println(message)
-	log.Println(r.Method, r.URL)
+	// log.Println(message)
+	// log.Println(r.Method, r.URL)
 	// e, _ := json.Marshal(r)
 	// log.Println(string(e))
 }

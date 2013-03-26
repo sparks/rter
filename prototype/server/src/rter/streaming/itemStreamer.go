@@ -70,19 +70,17 @@ func (s *ItemStreamer) Close() {
 }
 
 func (s *ItemStreamer) SockJSHandler(session sockjs.Conn) {
-	log.Println("New SockJS ItemHandler")
-
 	localChan := make(chan *ItemBundle)
 
 	s.bundleChannels = append(s.bundleChannels, localChan)
 
 	go func() {
 		for {
-			message, ok := <-localChan
+			bundle, ok := <-localChan
 			if !ok { //Chanel was closed
 				break
 			}
-			json, err := json.Marshal(message)
+			json, err := json.Marshal(bundle)
 
 			if err != nil {
 				log.Println(err)
@@ -111,6 +109,4 @@ func (s *ItemStreamer) SockJSHandler(session sockjs.Conn) {
 	}
 
 	close(localChan)
-
-	log.Println("Closed SockJS ItemHandler")
 }

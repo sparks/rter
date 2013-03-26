@@ -57,7 +57,7 @@ angular.module('items', [
 		}
 
 		this.stream.onopen = function() {
-			console.log('SockJS Item Stream Open');
+
 		};
 
 		this.stream.onmessage = function(e) {
@@ -77,7 +77,7 @@ angular.module('items', [
 		};
 
 		this.stream.onclose = function() {
-			console.log('SockJS Item Stream Closed');
+
 		};
 
 		this.init = function() {

@@ -44,7 +44,11 @@ angular.module('termview', [
 
 	$scope.rankingCache = new TaxonomyRankingCache($scope.term.Term);
 
-	$scope.ranking = $scope.rankingCache.ranking;
+	if($scope.term.Term === "" || $scope.term.Term === undefined) {
+		$scope.ranking = [];
+	} else {
+		$scope.ranking = $scope.rankingCache.ranking;
+	}
 
 	$scope.items = ItemCache.items;
 
@@ -73,7 +77,9 @@ angular.module('termview', [
 			newRanking.push(v.ID);
 		});
 
-		$scope.rankingCache.update(newRanking);
+		if($scope.term.Term !== "" && $scope.term.Term !== undefined) {
+			$scope.rankingCache.update(newRanking);
+		}
 	};
 
 	$scope.closeupItemDialog = function(item){

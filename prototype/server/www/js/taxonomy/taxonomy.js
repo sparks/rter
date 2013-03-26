@@ -17,6 +17,8 @@ angular.module('taxonomy', [
 
 .factory('TaxonomyRankingCache', function($rootScope, SockJS, TaxonomyRankingResource) {
 	function TaxonomyRankingCache(term) {
+		if(term === "" || term === undefined) return;
+
 		var self = this;
 
 		this.term = term;
@@ -43,7 +45,7 @@ angular.module('taxonomy', [
 		}
 
 		this.stream.onopen = function() {
-			console.log('SockJS Taxonomy Stream Open for ' + self.term);
+
 		};
 
 		this.stream.onmessage = function(e) {
@@ -52,7 +54,7 @@ angular.module('taxonomy', [
 		};
 
 		this.stream.onclose = function() {
-			console.log('SockJS Taxonomy Stream Closed for ' + self.term);
+
 		};
 
 		this.init = function() {
