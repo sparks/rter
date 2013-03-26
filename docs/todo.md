@@ -2,9 +2,10 @@
 
 ##Server
 Autotagging!
+Users!
+
 
 ##Mobile
-* Show ID/user on tiles
 * More text on the device
 * device UUID
 * Custom URL 
