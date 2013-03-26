@@ -105,24 +105,24 @@ label {
 
 /* -- Term View Controls -- */
 
-.term-view .controls {
+.term-view .grid-view .right, .term-view .list-view .right  {
 	padding-top: 15px;
 }
 
-.term-view .controls .map {
+.term-view .grid-view .right .map, .term-view .list-view .right .map {
 	height: 350px;
 	width: 315px;
 }
 
 /* -- Term View Grid -- */
 
-.term-view .grid .item-list {
+.term-view .grid-view .item-list {
 	list-style: none;
 	padding: 0;
 	margin: 0 auto 0 auto;
 }
 
-.term-view .grid .item-list li {
+.term-view .grid-view .item-list li {
 	float: left;
 	width: 21%;
 
@@ -133,19 +133,19 @@ label {
 	height: 140px;
 }
 
-.term-view .grid .tile-item {
+.term-view .grid-view .tile-item {
 	width: 100%;
 	height: 140px;
 	position: relative;
 }
 
-.term-view .grid .tile-item img {
+.term-view .grid-view .tile-item img {
 	vertical-align: middle;
 	max-width: 100%;
 	max-height: 140px;
 }
 
-.term-view .grid .tile-item .author-badge {
+.term-view .grid-view .tile-item .author-badge {
 	position: absolute;
 	z-index: 10;
 
@@ -165,14 +165,14 @@ label {
 
 /* -- TermView List -- */
 
-.term-view .list .item-list {
+.term-view .list-view .item-list {
 	list-style: none;
 	padding: 0;
 	margin: 0 auto 0 auto;
 	width: 75%;
 }
 
-.term-view .list .tile-item {
+.term-view .list-view .tile-item {
 	position: relative;
 
 	text-align: center;
@@ -188,13 +188,13 @@ label {
 	border: 1px solid rgb(208, 208, 208);
 }
 
-.term-view .list .tile-item img {
+.term-view .list-view .tile-item img {
 	vertical-align: middle;
 	max-width: 100%;
 	max-height: 140px;
 }
 
-.term-view .list .tile-item .author-badge {
+.term-view .list-view .tile-item .author-badge {
 	position: absolute;
 	z-index: 10;
 
@@ -210,6 +210,24 @@ label {
 	font-size: 8pt;
 	color: white;
 	line-height: 14pt;
+}
+
+/* -- TermView Map -- */
+
+.term-view .map-view .right  {
+	padding-top: 15px;
+}
+
+.term-view .map-view .right .map {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 500px;
+	width: 950px;
+}
+
+.term-view .map-view .left {
+	display: none;
 }
 
 /* -- Forms -- */

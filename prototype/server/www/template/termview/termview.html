@@ -2,9 +2,11 @@
 	<div class="control-bar row-fluid">
 		<div class="span6">
 			<b>View Mode:</b>
-			<button class="btn btn-success" ng-click="changeViewMode('grid')">Grid</button>
-			<button class="btn btn-success" ng-click="changeViewMode('list')">List</button>
-			<button class="btn btn-success" ng-click="changeViewMode('map')">Map</button>
+			<div class="btn-group" data-toggle="buttons-checkbox">
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'grid-view'">Grid</button>
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'list-view'">List</button>
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'map-view'">Map</button>
+			</div>
 		</div>
 		<div class="span6 right-align">
 			<button class="btn btn-danger" ng-click="close()">Close View</button>
@@ -21,9 +23,9 @@
 				</ul>
 			</div>
 
-			<div class="controls span4">
+			<div class="right span4">
 				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
-				  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
+				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
 				</div>
 				<div id="map_canvas" class="map" ui-event="{mouseover: 'resizeMap()'}" ui-map="map" ui-options="mapOptions"></div>
 			</div>
