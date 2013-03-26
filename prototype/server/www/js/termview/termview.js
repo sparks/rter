@@ -43,6 +43,11 @@ angular.module('termview', [
 
 	$scope.viewmode = "grid-view";
 
+	$scope.$watch('viewmode', function() {
+		google.maps.event.trigger($scope.map, "resize");
+		$scope.map.setCenter($scope.mapCenter);
+	});
+
 	/* -- items and rankings  -- */
 
 	$scope.rankingCache = new TaxonomyRankingCache($scope.term.Term);

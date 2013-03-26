@@ -3,6 +3,18 @@
 ##Server
 Autotagging!
 Users!
+Comment socksz
+
+more text in views
+checkmarks so see
+tooltips
+invert main feed and lock
+
+dealt with markers
+
+heading paperjs
+map filter
+secondary filters
 
 
 ##Mobile
