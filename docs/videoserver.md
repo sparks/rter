@@ -88,8 +88,8 @@ On the [browser side](http://wiki.whatwg.org/wiki/Video_type_parameters#Browser_
   +---------------+  :  | (HTTP) |  :   +------------+  :  |    (HTTP)    |	 :  +---------+
                      :  +--------+  :                   :  +--------------+  :
                      :              :                   :                    :
-            H264 in MPEG2-TS     Loopback          HLS, PNG, M3U8           HTTP
-                  over HTTP       UDP/RTP             Files
+              H264 in MPEG2-TS   Loopback       M3U8, TS, MP4, OGV,       HTTP GET
+                  over HTTP    Pipe/UDP/RTP       WEBM, JPG Files         Download
 ```
 
 ### Server Endpoints
@@ -97,26 +97,29 @@ On the [browser side](http://wiki.whatwg.org/wiki/Video_type_parameters#Browser_
 POST /v1/ingest/:videoid/avc              # live ingest point for raw H264 AVC bitstreams
 POST /v1/ingest/:videoid/ts               # live ingest point for MPEG2-TS streams
 PUT  /v1/ingest/:videoid/chunk            # chunked file upload ingest point
-GET  /v1/videos/:videoid/mp4              # mp4 (H264, AAC) file download
-GET  /v1/videos/:videoid/ogg              # ogg (Theora, Vorbis) file download
-GET  /v1/videos/:videoid/m3u8             # HLS index file download
-GET  /v1/videos/:videoid/mpd              # DASH index file download
+GET  /v1/videos/:videoid/video.mp4        # mp4 (H264, AAC) file download
+GET  /v1/videos/:videoid/video.ogv        # ogg (Theora, Vorbis) file download
+GET  /v1/videos/:videoid/video.webm       # Webm (VP8, Vorbis) file download
+GET  /v1/videos/:videoid/index.m3u8       # HLS index file download
+GET  /v1/videos/:videoid/index.mpd        # DASH index file download
 GET  /v1/videos/:videoid/hls/:segment     # HLS named segment download
 GET  /v1/videos/:videoid/dash/:segment    # DASH named segment download
-GET  /v1/previews/:videoid/:thumbid       # preview thumbnail image download
-GET  /v1/posters/:videoid/:posterid       # video poster image download
+GET  /v1/videos/:videoid/thumb/:thumbid   # preview thumbnail image download
+GET  /v1/videos/:videoid/poster/:posterid # video poster image download
+GET  /v1/videos/:videoid/play             # HTML5 video tag player (test and demo only)
 ```
 
 ### Server Ingest API
 
 The API assumes the client obtained a valid __video source token__ from a backend app, including
 
-- UID of the to be created video stream
-- optional timestamp to verify freshness
+- URI of the to be created video stream
+- timestamp to verify token freshness
+- consumer (IP address + port) to identify valid sources
 - cryptographically signed hash for authenticity and integrity verification
 
 
-The ingest HTTP server accepts incoming video upload requests, checks source credentials, and starts an individual transcoder per incoming stream. The transcoder segments the stream and stores HLS compatible files at a location accessible by the distribution web server.
+The ingest HTTP server accepts incoming video upload requests, checks source credentials, and starts an individual transcoder per incoming stream. The transcoder segments the stream and stores HLS compatible files plus other video formats at a location accessible by the distribution web server.
 
 
 #### Supported formats for incoming live streams
@@ -147,7 +150,7 @@ The ingest HTTP server accepts incoming video upload requests, checks source cre
 
 
 #### Authentication
-- ID of the ingest video is part of the URI
+- URI, timestamp, consumer of the ingest resource plus application server signature
 - use HTTP auth headers for token passing
 - report auth error (stale token, invalid token)
 
@@ -163,7 +166,7 @@ The ingest HTTP server accepts incoming video upload requests, checks source cre
   - acknowledge reception HTTP 200
   - push raw data to transcoding pipe
 - End of Stream
-  - EOS signalling with empty HTTP PUT body from source
+  - EOS signalling with empty HTTP POST body from source
   - source can simply close connection (no handshake required)
   - on connection failure wait for source reconnection, and fail after a timeout
 
@@ -183,7 +186,7 @@ Segment files must be entirely written before they become accessible by clients.
 
 ### Server Rate Limiting
 
-Ingest endpoints are rate limited to avoid uploading too much data. What's limited:
+Ingest endpoints are rate limited to avoid uploading too much data. What's limited is the
 
 - total number of parallel ingest sessions (10)
 - cummulative ingest bandwidth (10000 kbit)
@@ -195,6 +198,76 @@ HTTP Response Headers
 - `X-Rate-Limit-Remaining`: the number of requests left for the 15 minute window
 - `X-Rate-Limit-Reset`: the remaining window before the rate limit resets in UTC epoch seconds
 
+### Performance Monitoring
+
+Measure performance-related events observable at the server's ingest and distribution enpoints. This data is useful for debugging connection problems and to gain a insights into network, protocol and client performance. Anonymize clients (hash source IP+port).
+
+Client phases
+- connecting and joining --> join time
+- playing --> play time
+- paused
+- buffering --> buffering time
+- stopped
+
+Interesting performance metrics
+- client timing statistics (min, mean, median, max)
+  - pre-roll time (first request send to play button press) [msec]
+  - start-up time (play button press to playback start) [msec]
+  - first stall/rebuffer event duration [msec]
+  - cummulated stall/rebuffer durations [msec]
+  - stall/rebuffer frequency (min, mean, median, max) [Hz]
+  - rebuffering rate (total buffering time to total play time) [%]
+  - bandwidth fluctuations (max-min bandwidth)/average bandwidth [%]
+  - seek-to-play time (seek event to playback start) [msec]
+  - live E2E latency (capture-to-display time) [msec]
+  - requested video data (requests may be aborted or fail) [msec]
+  - fetched/served video duration (data sent to client) [msec]
+  - play time = completed/played video duration [msec]
+  - join time = pre-roll + start-up
+- resource availability
+  - download timing [mean, peak, min bandwidth]
+- client engagement (event counters, possibility to aggregate with stream popularity)
+  - #seeks, #seek-to-live
+  - #play, #pause,
+  - #stalls
+  - #views started
+  - #views complete
+- stream popularity per stream id (possibility to split by region, device, browser)
+  - live sessions served [total]
+  - archived sessions served [total]
+  - per stream id popularity [%]
+  - per video format popularity [%]
+- server performance rolling over time (query periods: hour, day, month, etc.)
+  - inbound live sessions [total]
+  - inbound data rate [bps]
+  - outbound live sessions [total]
+  - outbound archived sessions [total]
+  - outbound data rate [bps]
+  - total bytes served [bytes]
+  - total live time served [sec]
+  - total archived time served [sec]
+
+
+Source-related measures (ingest side)
+- source browser type/version
+- location (GeoIP)
+- provider (ISP, GeoIP)
+- session start time
+- session end time
+- request start time (HTTP POST and chunked transfer)
+- request end time
+- request volume
+
+Client-related measures (download side)
+- browser type/version
+- browser API support
+- download events: [filename + offset + length] request start, request finish
+- player events: [type, time] seek, seek-to-live, start, play, pause, stall, complete
+- cummulated times: preroll, startup, first stall, sum stalls, seek-to-play, played
+
+Server-related measures (distribution side)
+- request start [id, time, client(browser, location, provider), file(id, format), offset, size]
+- request end [id, time]
 
 
 ### Examples
@@ -204,13 +277,12 @@ HTTP Response Headers
 This example assumes the incoming stream is already encoded at the correct H264 profile/level and that it's GOP structure (key frames) is aligned with the segmentation points. If not, segmentation will happen at key-frames resulting in segments of different duration.
 
 ```
-ffmpeg -v error -re -i ${pipe_path}/${video.uid}.stream -codec copy \
--map 0 -f segment -segment_time 2 -segment_list ${index_path}/${video.uid}.m3u8 \
--segment_format mpegts -segment_list_flags +live ${segment_path}/${video.uid}-%09d.ts
+ffmpeg -y -v error -i pipe:0 -f segment -codec copy -map 0 -segment_time 2 -segment_format \
+mpegts -segment_list_flags +live -segment_list_type hls -individual_header_trailer 1 \
+-segment_list ${index_path}/${video.uid}/index.m3u8 ${segment_path}/${video.uid}/%09d.ts
 ```
 
 - `-v error` log errors only
-- `-re' read input at native frame rate (used for realtime live streaming, maybe not necessary when input is already realtime)
 - `-i filename` input (named pipe for live streaming from HTTP server)
 - `-codec copy` copy encoded audio and video tracks
 - `-map 0` (in->out mapping) use the first input stream for the single output in our case
@@ -221,16 +293,14 @@ ffmpeg -v error -re -i ${pipe_path}/${video.uid}.stream -codec copy \
 - `-segment_list_flags +live` create a live-friendly index file
 - `-segment_list_size 0` how many segments to keep in the index file (0=all)
 - `-segment_list type` index file format (m3u8, csv, flat)
-- `file-%09d.ts` pattern for generation of segment filenames
+- `%09d.ts` pattern for generation of segment filenames (counter is automatically increased when writing)
 
 
 #### Transcode Live Stream from Source into distribution format
 ```
-#This is TODO
-./ffmpeg -v 9 -loglevel 99 -re -i sourcefile.avi -an \
--c:v libx264 -b:v 128k -vpre ipod320 \
--flags -global_header -map 0 -f segment -segment_time 4 \
--segment_list test.m3u8 -segment_format mpegts stream%05d.ts
+ffmpeg -y -v error -i pipe:0 -an -c:v libx264 -b:v 600k -vpre ipod320 \
+-flags -global_header -map 0 -f segment -segment_time 2 -segment_format mpegts \
+-segment_list ${index_path}/${video.uid}/index.m3u8 ${segment_path}/${video.uid}/%09d.ts
 ```
 
 - `-vstats_file file` dump video coding statistics to file.
@@ -239,18 +309,15 @@ ffmpeg -v error -re -i ${pipe_path}/${video.uid}.stream -codec copy \
 
 #### Output periodic thumbnail images
 ```
-ffmpeg -v error -y -re -i ${pipe_path}/${video.uid}.stream -vsync 1 -r ${rate} -f image2 -s ${thumbres} ${thumbnail_path}/${video.uid}-%09d.jpg
+ffmpeg -y -v quiet -i pipe:0 -f image2 160x90 -vsync 1 -vf fps=fps=1/25 thumb/%09d.jpg
 ```
 
-- `-v error` log errors only
-- `-y` overwrite output files
-- `-re' read input at native frame rate (used for realtime live streaming, maybe not necessary when input is already realtime)
 - `-i filename` input (named pipe for live streaming from HTTP server)
 - `-vsync 1` video sync method 'cfr' to duplicate and drop frames to achieve exactly the requested constant framerate.
 - `-r rate` video frame rate which may be a rational number, e.g. 0.5
 - `-f image2` use image output (codec is guessed from filename extension)
 - `-s res` output resolution, e.g. 160x90
-- `file-%09d.jpg` filename template
+- `%09d.jpg` filename template
 
 [1]: http://developer.apple.com/library/ios/#documentation/networkinginternet/conceptual/streamingmediaguide/UsingHTTPLiveStreaming/UsingHTTPLiveStreaming.html
 [2]: http://developer.apple.com/library/ios/#documentation/AVFoundation/Reference/AVFoundation_Constants/Reference/reference.html#//apple_ref/c/data/AVVideoCodecKey
