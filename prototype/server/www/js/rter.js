@@ -32,8 +32,9 @@ angular.module('rter', [
 	};
 
 	$scope.termFontSize = function(term) {
-		return term.Count/$scope.countMax*30;
+		return map(term.Count, 1, $scope.countMax, 12, 60);
 	};
+
 })
 
 .directive('tagCloud', function(ItemCache) {

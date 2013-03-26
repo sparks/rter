@@ -26,7 +26,7 @@ angular.module('taxonomy', [
 		this.stream = new SockJS('/1.0/streaming/taxonomy/'+term+'/ranking');
 
 		function parseTermRanking(termRanking) {
-			if(termRanking.Ranking === undefined) return;
+			if(termRanking.Ranking === "" || termRanking.Ranking === undefined) return;
 
 			var newRanking;
 			try {

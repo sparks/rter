@@ -29,7 +29,7 @@ func main() {
 	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) //Must register more specific paths first
 
 	crud := rest.CRUDRouter()
-	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
+	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud)) //Less specific paths later
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 

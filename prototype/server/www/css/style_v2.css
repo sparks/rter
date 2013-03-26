@@ -73,16 +73,21 @@ label {
 
 /* -- Tag Cloud -- */
 
-.tag-cloud {
+.tag-cloud .cloud {
 	list-style: none;
 	padding: 0;
 	width: 60%;
-	margin: 30px auto 0 auto;
+	margin: 45px auto 0 auto;
 }
 
-.tag-cloud li {
+.tag-cloud .cloud li {
 	display: inline;
 	padding: 3px 10px 3px 10px;
+}
+
+.tag-cloud .show-all {
+	display: block;
+	margin: auto;
 }
 
 /* -- Term View -- */

@@ -11,11 +11,11 @@ func StreamingRouter() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 
 	itemStreamer := NewItemStreamer()
-	sockHandler := sockjs.NewRouter("/", func(session sockjs.Conn) { itemStreamer.SockJSHandler(session) }, sockjs.DefaultConfig)
-	r.PathPrefix("/items").Handler(http.StripPrefix("/items", sockHandler))
+	itemSockHandler := sockjs.NewRouter("/", func(session sockjs.Conn) { itemStreamer.SockJSHandler(session) }, sockjs.DefaultConfig)
+	r.PathPrefix("/items").Handler(http.StripPrefix("/items", itemSockHandler))
 
 	termRankingStreamer := NewTermRankingStreamer()
-	r.PathPrefix("/taxonomy/{term}/ranking").HandlerFunc(
+	r.PathPrefix("/taxonomy/{term}/ranking").HandlerFunc( //TODO: Is there a better less weird way of doing this dynamic binding of the websockets
 		func(w http.ResponseWriter, r *http.Request) {
 			HandleTermRanking(termRankingStreamer, w, r)
 		},

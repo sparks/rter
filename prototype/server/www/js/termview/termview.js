@@ -20,7 +20,7 @@ angular.module('termview', [
 			if(term.Term !== "") {
 				this.termViews.push({term: term, heading: term.Term, active: true});
 			} else {
-				this.termViews.push({term: term, heading: "all", active: true});
+				this.termViews.push({term: term, heading: "All Items", active: true});
 			}
 		};
 
