@@ -44,6 +44,12 @@ func CRUDRouter() *mux.Router {
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE")
 
+	r.PathPrefix("/").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			probe("Unkown CRUD request", r)
+		},
+	)
+
 	return r
 }
 
@@ -60,8 +66,8 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 }
 
 func probe(message string, r *http.Request) {
-	// log.Println(message)
-	// log.Println(r.Method, r.URL)
+	log.Println(message)
+	log.Println(r.Method, r.URL)
 	// e, _ := json.Marshal(r)
 	// log.Println(string(e))
 }

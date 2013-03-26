@@ -1,5 +1,8 @@
 #ToDos
 
+##Server
+Autotagging!
+
 ##Mobile
 * Show ID/user on tiles
 * More text on the device
