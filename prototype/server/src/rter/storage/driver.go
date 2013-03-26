@@ -123,6 +123,9 @@ func Insert(val interface{}) error {
 	case *data.Item:
 		v.ID = ID
 
+		v.AddTerm("all", v.Author)
+		v.AddTerm("type:"+v.Type, v.Author)
+
 		_, err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID

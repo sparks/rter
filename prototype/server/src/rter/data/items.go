@@ -33,3 +33,12 @@ type ItemComment struct {
 
 	UpdateTime time.Time `json:",omitempty"`
 }
+
+func (i *Item) AddTerm(term string, author string) {
+	newTerm := new(Term)
+
+	newTerm.Term = term
+	newTerm.Author = author
+
+	i.Terms = append(i.Terms, newTerm)
+}
