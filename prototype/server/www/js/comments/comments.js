@@ -19,8 +19,7 @@ angular.module('comments', [
 
 	$scope.newComment = {
 		ID: $scope.id,
-		Body: "",
-		Author: "anonymous"
+		Body: ""
 	};
 
 	$scope.createComment = function() {
@@ -31,8 +30,7 @@ angular.module('comments', [
 				$scope.comments.push(c);
 				$scope.newComment = {
 					ID: $scope.id,
-					Body: "",
-					Author: "anonymous"
+					Body: ""
 				};
 			},
 			function(e) {
