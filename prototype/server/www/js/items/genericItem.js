@@ -4,10 +4,6 @@ angular.module('genericItem', [
 ])
 
 .controller('FormGenericItemCtrl', function($scope) {
-	if($scope.item.Author === undefined) {
-		$scope.item.Author = "anonymous"; //TODO: Replace with login
-	}
-
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
 	$scope.mapOptions = {
