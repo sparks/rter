@@ -105,8 +105,9 @@ angular.module('termview', [
 	}, true);
 
 	$scope.dragCallback = function(a, b) {
-		if($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== '')) {
+		if($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== '')) { //TODO: This should have a blur options instead maybe?
 			Alerter.warn("You cannot reorder items while your filters are enabled");
+			return;
 		}
 
 		var newRanking = [];

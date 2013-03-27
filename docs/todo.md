@@ -2,7 +2,6 @@
 
 ##Server
 ###Must
-* Drag right most is broken
 * Config old system
 * Config new system
 * Non destructive PUTs
