@@ -78,8 +78,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	user, permissions := auth.GetCredentials(w, r)
+
 	if (user == nil || permissions < 1) && vars["datatype"] != "users" {
-		http.Error(w, "", http.StatusUnauthorized)
+		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
 
@@ -230,6 +231,13 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Let's never send salt/hash out
+	switch v := val.(type) {
+	case *data.User:
+		v.Salt = ""
+		v.Password = ""
+	}
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -309,6 +317,15 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Let's never send salt/hash out
+	switch v := val.(type) {
+	case *[]*data.User:
+		for _, user := range *v {
+			user.Salt = ""
+			user.Password = ""
+		}
+	}
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -320,7 +337,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 	user, permissions := auth.GetCredentials(w, r)
 	if user == nil || permissions < 1 {
-		http.Error(w, "", http.StatusUnauthorized)
+		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
 
@@ -344,6 +361,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
+		if vars["key"] != user.Username {
+			http.Error(w, "Please don't hack other users", http.StatusUnauthorized)
+			return
+		}
 		val = new(data.User)
 	case "users/direction":
 		val = new(data.UserDirection)
@@ -412,7 +433,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 func Delete(w http.ResponseWriter, r *http.Request) {
 	user, permissions := auth.GetCredentials(w, r)
 	if user == nil || permissions < 1 {
-		http.Error(w, "", http.StatusUnauthorized)
+		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
 
@@ -446,6 +467,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 		val = comment
 	case "users":
+		if vars["key"] != user.Username {
+			http.Error(w, "Please don't delete other users", http.StatusUnauthorized)
+			return
+		}
+
 		user := new(data.User)
 		user.Username = vars["key"]
 
