@@ -47,6 +47,7 @@ func CRUDRouter() *mux.Router {
 	r.PathPrefix("/").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			probe("Unkown CRUD request", r)
+			http.NotFound(w, r)
 		},
 	)
 
@@ -66,8 +67,8 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 }
 
 func probe(message string, r *http.Request) {
-	// log.Println(message)
-	// log.Println(r.Method, r.URL)
+	log.Println(message)
+	log.Println(r.Method, r.URL)
 	// e, _ := json.Marshal(r)
 	// log.Println(string(e))
 }
@@ -94,10 +95,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
-		user := new(data.User)
-		user.HashAndSalt()
-
-		val = user
+		val = new(data.User)
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":
@@ -119,6 +117,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+	case *data.User:
+		v.HashAndSalt()
+		v.Role = "public" //TODO: Temporary while anyone can sign up maybe this will change?
 	}
 
 	if err != nil {
@@ -310,6 +311,12 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "PUT" {
+		http.Error(w, "fuckoff", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Update Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
