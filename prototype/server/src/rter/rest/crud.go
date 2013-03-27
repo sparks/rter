@@ -11,6 +11,8 @@ import (
 	"rter/storage"
 	"strconv"
 	"strings"
+	"time"
+	token "videoserver/auth"
 )
 
 var decoder = schema.NewDecoder()
@@ -124,6 +126,30 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = storage.Insert(val)
+
+	switch v := val.(type) {
+	case *data.Item:
+		if v.Type == "streaming-video-v1" {
+			v.UploadURI = "/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+			v.ThumbnailURI = "/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
+			v.ContentURI = "/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+		}
+
+		t, err := token.GenerateToken(v.UploadURI, r.RemoteAddr, time.Duration(3600)*time.Second, "1122AABBCCDDEEFF")
+
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Problem building streaming tokens, likely due to malformed request.", http.StatusInternalServerError)
+			return
+		}
+
+		s := make([]interface{}, 2)
+
+		s[0] = v
+		s[1] = t
+
+		val = s
+	}
 
 	if err != nil {
 		log.Println(err)
