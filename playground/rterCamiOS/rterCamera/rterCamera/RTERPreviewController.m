@@ -296,7 +296,8 @@
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
         NSLog(@"encoded frame");
         
-        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
+        //NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
+		NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.46.36:1234"]];
         [postRequest setHTTPMethod:@"POST"];
         [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
         [NSURLConnection sendAsynchronousRequest:postRequest
@@ -305,7 +306,7 @@
         {
             
             NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-            NSLog(@"%@", [dictionary description]);
+            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
         }];
         
         [encoder freePacket:&pkt];
