@@ -123,11 +123,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch v := val.(type) {
+	case *data.Item:
+		v.Author = user.Username
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+		v.Author = user.Username
 	case *data.User:
 		v.HashAndSalt()
 		v.Role = "public" //TODO: Temporary while anyone can sign up maybe this will change?
+	case *data.Term:
+		v.Author = user.Username
 	}
 
 	if err != nil {
