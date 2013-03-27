@@ -1,8 +1,15 @@
 angular.module('auth', [
-	'ng',                   //$http
-	'ui.bootstrap',         //dialog
-	'http-auth-interceptor' //$resource for taxonomoy
+	'ng',                    //$http
+	'ui.bootstrap',          //dialog
+	'http-auth-interceptor', //$resource for taxonomoy
+	'alerts'                 //Alerter
 ])
+
+.config(function(authServiceProvider) {
+	authServiceProvider.addIgnoreUrlExpression(function (response) {
+		return response.config.url === "/auth";
+	});
+})
 
 .factory('UserResource', function ($resource) {
 	var UserResource = $resource(
@@ -18,10 +25,13 @@ angular.module('auth', [
 	$scope.login = function() {
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
+			console.log("yay");
 			$scope.cancel();
 			authService.loginConfirmed();
 		})
 		.error(function(data, status, headers) {
+			console.log("sad");
+			console.log("Login Problem", data, status);
 			Alerter.error("Invalid login credentials.", 2000);
 		});
 	};
@@ -71,6 +81,7 @@ angular.module('auth', [
 				backdrop: true,
 				keyboard: true,
 				backdropClick: false,
+				dialogClass: 'modal login-modal',
 				resolve: {item: function() { return item; }},
 				templateUrl: '/template/auth/login-panel-dialog.html',
 				controller: 'LoginDialogCtrl'

@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	Username string
-	Password string `json:"-"`
+	Password string //TODO: Prevent from being sent
 	Salt     string `json:"-"`
 
 	Role       string
