@@ -253,28 +253,56 @@ label {
 	border-color: red;
 }
 
-.form-generic-item, .form-raw-item, .form-youtube-item {
+.form-generic-item, .form-raw-item, .form-youtube-item, .form-twitter-item {
 	margin: auto;
 	width: 800px;
 }
 
-.form-generic-item .map, .closeup-item .map, .form-youtube-item .map {
+.form-generic-item .map, .form-youtube-item .map, .form-twitter-item .map {
+	margin: auto;
+
+	height: 380px;
+	width: 380px;
+}
+
+/* -- Closeups -- */
+
+.closeup-item {
+	padding: 35px 0 20px 0;
+}
+
+.closeup-item .closeup-generic-item .map {
+	margin: auto;
+
 	height: 400px;
 	width: 450px;
 }
 
-.closeup-item {
-	padding: 20px 0 20px 0;
-}
-
-.closeup-item .closeup-youtube-item {
+.closeup-item .closeup-generic-item .left {
 	text-align: center;
 }
 
+.closeup-item .closeup-generic-item .left img {
+	width: 100%;
+	margin-bottom: 15px;
+}
+
+.closeup-item .closeup-generic-item .left div {
+	font-size: 14pt;
+	max-width: 80%;
+	margin: auto;
+
+	overflow-x: hidden;
+	overflow-y: visible;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 .closeup-item .closeup-youtube-item .map {
+	margin: auto;
+
 	height: 315px;
 	width: 315px;
-	margin: auto;
 }
 
 /* -- Comments -- */

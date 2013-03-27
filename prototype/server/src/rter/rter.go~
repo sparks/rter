@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/auth"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
@@ -17,7 +19,14 @@ import (
 func main() {
 	setupLogger()
 
+<<<<<<< HEAD
 	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+=======
+	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
+	flag.Parse()
+
+	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+>>>>>>> 171c97954eccb1b0f4ebbe762a80f6ba58428186
 	if err != nil {
 		log.Fatalf("Failed to open connection to database %v", err)
 	}
@@ -30,6 +39,8 @@ func main() {
 
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
+
+	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 
@@ -63,7 +74,11 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
-	http.Handle("/", r)
+	if *probe {
+		http.Handle("/", ProbeHandler(r))
+	} else {
+		http.Handle("/", r)
+	}
 
 	log.Println("Launching rtER Server")
 	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
@@ -78,6 +93,13 @@ func debug404(w http.ResponseWriter, r *http.Request) {
 	log.Println("404 Served")
 	log.Println(r.Method, r.URL)
 	http.NotFound(w, r)
+}
+
+func ProbeHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.URL)
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setupLogger() {

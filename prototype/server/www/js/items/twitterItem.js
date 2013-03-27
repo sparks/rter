@@ -1,21 +1,47 @@
 angular.module('twitterItem',  [
-	'ngResource',   //Twitter Rest API
+	'ng',   		//$timeout
 	'ui',           //Map
 	'ui.bootstrap'
 ])
 
 .controller('FormTwitterItemCtrl', function($scope, $resource) {
 
-	console.log("Inside Twitter Form Ctrl");
+	$scope.extra = {};
+	$scope.extra.ResultType = "recent";
+	
 	if($scope.item.Author === undefined) {
 		$scope.item.Author = "anonymous"; //TODO: Replace with login
 	}
-	
+	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
-	// 871025159  DELL kate leave here a message
+	$scope.mapOptions = {
+		center: $scope.mapCenter,
+		zoom: 10,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+
+	$scope.centerAt = function(location) {
+		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
+		$scope.map.setCenter(latlng);
+		$scope.mapCenter = latlng;
+	};
+
+	$scope.setMarker = function($event) {
+		if($scope.marker === undefined) {
+			$scope.marker = new google.maps.Marker({
+				map: $scope.map,
+				position: $event.latLng
+			});
+		} else {
+			$scope.marker.setPosition($event.latLng);
+		}
+
+		$scope.item.Lat = $event.latLng.lat();
+		$scope.item.Lng = $event.latLng.lng();
+	};
 })
                                                                                                                                      
-.directive('formTwitterItem', function() {
+.directive('formTwitterItem', function($timeout) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -25,13 +51,53 @@ angular.module('twitterItem',  [
 		templateUrl: '/template/items/twitter/form-twitter-item.html',
 		controller: 'FormTwitterItemCtrl',
 		link: function(scope, element, attr) {
-			console.log(scope.item);			
-			scope.$watch('item.searchTerm', function(newVal, oldVal){
-				console.log("Inside the watch");
-				scope.item.ContentURI = 'http://search.twitter.com/search.json?q='+newVal;
-			})
 
-			
+				if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+					var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
+					scope.marker = new google.maps.Marker({
+						map: scope.map,
+						position: latLng
+					});
+					scope.mapCenter = latLng;
+				} else {
+					navigator.geolocation.getCurrentPosition(scope.centerAt);
+				}
+				
+				scope.buildURL = function(){
+						
+					if(scope.extra.SearchTerm == undefined) {
+						console.log("Error:  Search Query not set");
+					}
+						
+					scope.searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
+										+ "&q=" + scope.extra.SearchTerm 
+										+ "&result_type=" + scope.extra.ResultType
+										+ "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";
+					scope.item.ContentURI = encodeURI(scope.searchURL);
+					console.log("Built ContentURI " + scope.item.ContentURI);
+				};
+
+
+				$timeout( //FIXME: Another map hack to render hidden maps
+					function() {
+						google.maps.event.trigger(scope.map, "resize");
+						scope.map.setCenter(scope.mapCenter);
+					},
+					0
+				);
+
+				console.log(scope.item, scope.extra);			
+				
+				scope.$watch('extra.SearchTerm', function(newVal, oldVal){
+					if(!(newVal == undefined))	scope.buildURL();
+				});
+				scope.$watch('extra.ResultType', function(newVal, oldVal){
+					if(!(newVal == undefined))	scope.buildURL();
+				}, true);
+				scope.$watch('item.Lat', function(newVal, oldVal){
+					if(!(newVal == undefined))	scope.buildURL();
+				}, true);
+
 		}
 	};
 })

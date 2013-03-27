@@ -7,6 +7,7 @@
 * Test ordering of new unranked elements as they are added
 * PaperJS import
 * Map filter systems
+* Update cloud on the fly
 
 ###Wish
 * Content type badge
