@@ -45,33 +45,17 @@ func CRUDRouter() *mux.Router {
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE")
 
-	r.PathPrefix("/").HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			probe("Unkown CRUD request", r)
-			http.NotFound(w, r)
-		},
-	)
-
 	return r
 }
 
 func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		probe("Options Request", r)
-
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
 		w.Header().Set("Access-Control-Allow-Methods", opts)
 
 		w.WriteHeader(http.StatusOK)
 	}
-}
-
-func probe(message string, r *http.Request) {
-	log.Println(message)
-	log.Println(r.Method, r.URL)
-	// e, _ := json.Marshal(r)
-	// log.Println(string(e))
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +67,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
-
-	probe("Create Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
@@ -160,8 +142,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func Read(w http.ResponseWriter, r *http.Request) {
-	probe("Read Request", r)
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
@@ -252,8 +232,6 @@ func Read(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReadWhere(w http.ResponseWriter, r *http.Request) {
-	probe("ReadWhere Request", r)
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
@@ -345,8 +323,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
-
-	probe("Update Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -441,8 +417,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
-
-	probe("Delete Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")

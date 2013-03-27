@@ -76,12 +76,13 @@ label {
 .tag-cloud .cloud {
 	list-style: none;
 	padding: 0;
-	width: 60%;
+	width: 75%;
 	margin: 45px auto 0 auto;
+	line-height: 50pt;
 }
 
 .tag-cloud .cloud li {
-	display: inline;
+	display: inline-block;
 	padding: 3px 10px 3px 10px;
 }
 

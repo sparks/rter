@@ -2,6 +2,8 @@
 
 ##Server
 ###Must
+* Config old system
+* Config new system
 * Test ordering of new unranked elements as they are added
 * PaperJS import
 * Map filter systems
