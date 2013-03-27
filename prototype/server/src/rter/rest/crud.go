@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"rter/auth"
 	"rter/data"
 	"rter/storage"
 	"strconv"
@@ -47,6 +48,7 @@ func CRUDRouter() *mux.Router {
 	r.PathPrefix("/").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			probe("Unkown CRUD request", r)
+			http.NotFound(w, r)
 		},
 	)
 
@@ -66,19 +68,26 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 }
 
 func probe(message string, r *http.Request) {
-	// log.Println(message)
-	// log.Println(r.Method, r.URL)
+	log.Println(message)
+	log.Println(r.Method, r.URL)
 	// e, _ := json.Marshal(r)
 	// log.Println(string(e))
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	user, permissions := auth.GetCredentials(w, r)
+
+	if (user == nil || permissions < 1) && vars["datatype"] != "users" {
+		http.Error(w, "Please Login", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Create Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
-
-	vars := mux.Vars(r)
 
 	var val interface{}
 
@@ -94,10 +103,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
-		user := new(data.User)
-		user.HashAndSalt()
-
-		val = user
+		val = new(data.User)
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":
@@ -117,8 +123,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch v := val.(type) {
+	case *data.Item:
+		v.Author = user.Username
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+		v.Author = user.Username
+	case *data.User:
+		v.HashAndSalt()
+		v.Role = "public" //TODO: Temporary while anyone can sign up maybe this will change?
+	case *data.Term:
+		v.Author = user.Username
 	}
 
 	if err != nil {
@@ -222,6 +236,13 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Let's never send salt/hash out
+	switch v := val.(type) {
+	case *data.User:
+		v.Salt = ""
+		v.Password = ""
+	}
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -301,6 +322,15 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Let's never send salt/hash out
+	switch v := val.(type) {
+	case *[]*data.User:
+		for _, user := range *v {
+			user.Salt = ""
+			user.Password = ""
+		}
+	}
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -310,6 +340,12 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "Please Login", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Update Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -330,6 +366,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
+		if vars["key"] != user.Username {
+			http.Error(w, "Please don't hack other users", http.StatusUnauthorized)
+			return
+		}
 		val = new(data.User)
 	case "users/direction":
 		val = new(data.UserDirection)
@@ -396,6 +436,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "Please Login", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Delete Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -426,6 +472,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 		val = comment
 	case "users":
+		if vars["key"] != user.Username {
+			http.Error(w, "Please don't delete other users", http.StatusUnauthorized)
+			return
+		}
+
 		user := new(data.User)
 		user.Username = vars["key"]
 

@@ -330,8 +330,8 @@ label {
 
 .modal {
 	overflow: auto;
-	max-height: 92%;
-	top: 2%;
+	max-height: 88%;
+	top: 4%;
 	left: 50%;
 	width: 1000px;
 	margin-left: -500px;
@@ -359,9 +359,40 @@ label {
 
 	text-align: left;
 
-	z-index: 5;
+	z-index: 2005;
 }
 
 #alerter .alert {
 	margin-bottom: 10px;
+}
+
+/* -- Login -- */
+
+#login-panel form {
+	width: 250px;
+	margin: auto;
+}
+
+#login-panel input {
+	width: 95%;
+}
+
+#login-panel h2 {
+	text-align: right;
+	width: 350px;
+	margin: auto;
+}
+
+.login-modal { /* must come after .modal */
+	overflow: auto;
+	top: 33%;
+	left: 50%;
+
+	height: 200px;
+	margin-top: -100px;
+
+	width: 400px;
+	margin-left: -200px;
+
+	padding: 20px 10px 40px 10px;
 }

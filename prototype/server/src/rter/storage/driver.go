@@ -123,6 +123,9 @@ func Insert(val interface{}) error {
 	case *data.Item:
 		v.ID = ID
 
+		v.AddTerm("all", v.Author)
+		v.AddTerm("type:"+v.Type, v.Author)
+
 		_, err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID
@@ -163,9 +166,8 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, Author=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
-			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
@@ -179,18 +181,16 @@ func Update(val interface{}) error {
 		)
 	case *data.ItemComment:
 		res, err = Exec(
-			"UPDATE ItemComments SET Author=?, Body=?, UpdateTime=? WHERE ID=?",
-			v.Author,
+			"UPDATE ItemComments SET Body=?, UpdateTime=? WHERE ID=?",
 			v.Body,
 			now,
 			v.ID,
 		)
 	case *data.Term:
 		res, err = Exec(
-			"UPDATE Terms SET Term=?, Automated=?, Author=?, UpdateTime=? WHERE Term=?",
+			"UPDATE Terms SET Term=?, Automated=?, UpdateTime=? WHERE Term=?",
 			v.Term,
 			v.Automated,
-			v.Author,
 			now,
 			v.Term,
 		)

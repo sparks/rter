@@ -19,19 +19,18 @@ angular.module('comments', [
 
 	$scope.newComment = {
 		ID: $scope.id,
-		Body: "",
-		Author: "anonymous"
+		Body: ""
 	};
 
 	$scope.createComment = function() {
+		if($scope.newComment.Body === undefined || $scope.newComment.Body === "") return;
 		CommentResource.save(
 			$scope.newComment,
 			function(c) {
 				$scope.comments.push(c);
 				$scope.newComment = {
 					ID: $scope.id,
-					Body: "",
-					Author: "anonymous"
+					Body: ""
 				};
 			},
 			function(e) {
