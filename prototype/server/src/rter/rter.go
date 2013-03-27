@@ -66,7 +66,7 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
-	http.Handle("/", r)
+	http.Handle("/", ProbeHandler(r))
 
 	log.Println("Launching rtER Server")
 	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
@@ -81,6 +81,13 @@ func debug404(w http.ResponseWriter, r *http.Request) {
 	log.Println("404 Served")
 	log.Println(r.Method, r.URL)
 	http.NotFound(w, r)
+}
+
+func ProbeHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.URL)
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setupLogger() {

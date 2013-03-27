@@ -25,12 +25,10 @@ angular.module('auth', [
 	$scope.login = function() {
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
-			console.log("yay");
 			$scope.cancel();
 			authService.loginConfirmed();
 		})
 		.error(function(data, status, headers) {
-			console.log("sad");
 			console.log("Login Problem", data, status);
 			Alerter.error("Invalid login credentials.", 2000);
 		});
