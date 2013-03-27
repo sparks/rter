@@ -64,26 +64,29 @@ angular.module('termview', [
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.filterQuery);
+	$scope.finalFilteredItems = $scope.textSearchedItems;
 
 	$scope.$watch('items', function() {
 		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	}, true);
 
-	$scope.$watch('filteredItems', function() {
+	$scope.$watch('[ranking, filteredItems]', function() {
 		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
 	}, true);
 
-	$scope.$watch('ranking', function() {
-		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	$scope.$watch('[rankedItems, textQuery]', function() {
+		$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.textQuery);
 	}, true);
 
-	$scope.$watch('rankedItems', function(a, b) {
+	$scope.$watch('textSearchedItems', function() {
+		$scope.finalFilteredItems = $scope.textSearchedItems;
 		$scope.updateMarkers();
 	}, true);
 
 	$scope.dragCallback = function(a) {
 		var newRanking = [];
-		angular.forEach($scope.rankedItems, function(v) {
+		angular.forEach($scope.textSearchedItems, function(v) {
 			newRanking.push(v.ID);
 		});
 
@@ -135,7 +138,7 @@ angular.module('termview', [
 
 		$scope.markerBundles = [];
 
-		angular.forEach($scope.rankedItems, function(v) {
+		angular.forEach($scope.textSearchedItems, function(v) {
 			if(v.Lat === undefined || v.Lng === undefined || (v.Lat === 0 && v.Lng === 0)) return;
 
 			var m = new google.maps.Marker({

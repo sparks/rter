@@ -20,12 +20,12 @@
 				<div ng-switch on="term.Term">
 					<div ng-switch-when="">
 						<ul class="item-list">		
-							<li ng-repeat="item in rankedItems | orderBy:'ID':true | orderBy:'StopTime':true | filter:filterQuery"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 					<div ng-switch-default>
 						<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
-							<li ng-repeat="item in rankedItems | filter:filterQuery"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 				</div>
@@ -39,9 +39,9 @@
 
 				<hr>
 
-				<form name="termViewFilterSerach" class="filter-search">
-					<label for="filterQuery">Filter Results</label>
-					<input type="text" class="search-query" name="filterQuery" ng-model="filterQuery" placeholder="Search">
+				<form name="termViewTextSerach" class="text-search">
+					<label for="textQuery">Filter Results</label>
+					<input type="text" class="search-query" name="textQuery" ng-model="textQuery" placeholder="Search">
 				</form>
 
 				<hr>
