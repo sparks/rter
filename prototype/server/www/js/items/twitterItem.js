@@ -12,9 +12,9 @@ angular.module('twitterItem',  [
 	}
 	
 
-	
+	// 871025159  DELL kate leave here a message
 })
-
+                                                                                                                                     
 .directive('formTwitterItem', function() {
 	return {
 		restrict: 'E',
@@ -55,14 +55,22 @@ angular.module('twitterItem',  [
 	}
 ;})
 
-.controller('CloseupTwitterItemCtrl', function($scope) {
-	
-	$scope.twitterConfig = $resource('http://search.twitter.com/:action',
-		{action: 'search.json', q:'montreal', callback: 'JSON_CALLBACK'},	
-		{get:{method : 'JSONP'}}
-	);
+.controller('CloseupTwitterItemCtrl', function($scope, $http) {
 
-	$scope.twitterConfig.get();
+	 $http({method: 'jsonp', url: 'https://api.twitter.com/1/statuses/oembed.json?id=316661563513782272&align=center&callback=JSON_CALLBACK', cache: false}).
+      success(function(data, status) {
+          console.log(data.html, status);
+          console.log($scope);
+        $scope.displayTweet =  data.html;
+        console.log($scope.displayTweet);
+        $scope.status = status;
+        $scope.data = data;
+      }).
+      error(function(data, status) {
+         console.log(data, status);
+        $scope.data = data || "Request failed";
+        $scope.status = status;
+    });
 })
 
 .directive('closeupTwitterItem', function() {
@@ -74,6 +82,9 @@ angular.module('twitterItem',  [
 		templateUrl: '/template/items/twitter/closeup-twitter-item.html',
 		controller: 'CloseupTwitterItemCtrl',
 		link: function(scope, element, attr) {
+			scope.addHTML = function(newhtml) {
+				element.append($(newhtl))
+			}
 
 		}
 	};
