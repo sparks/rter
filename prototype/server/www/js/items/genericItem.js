@@ -1,45 +1,12 @@
-angular.module('genericItem', ['ng', 'taxonomy'])
+angular.module('genericItem', [
+	'ng', //$timeout
+	'ui'  //Map
+])
 
-.controller('SubmitGenericItemCtrl', function($scope, Taxonomy) {
+.controller('FormGenericItemCtrl', function($scope) {
 	if($scope.item.Author === undefined) {
 		$scope.item.Author = "anonymous"; //TODO: Replace with login
 	}
-
-	//This is kinda terrible
-	if($scope.item.Terms !== undefined) {
-		var concat = "";
-		for(var i = 0;i < $scope.item.Terms.length;i++) {
-			concat += $scope.item.Terms[i].Term+",";
-		}
-		$scope.item.Terms = concat.substring(0, concat.length-1);
-	}
-
-	$scope.tagConfig = {
-		data: Taxonomy.query(),
-		multiple: true,
-		id: function(item) {
-			return item.Term;
-		},
-		formatResult: function(item) {
-            return item.Term;
-        },
-        formatSelection: function(item) {
-			return item.Term;
-        },
-        createSearchChoice: function(term) {
-			return {Term: term};
-        },
-        matcher: function(term, text, option) {
-			return option.Term.toUpperCase().indexOf(term.toUpperCase())>=0;
-        },
-        initSelection: function (element, callback) {
-			var data = [];
-			$(element.val().split(",")).each(function () {
-				data.push({Term: this});
-			});
-			callback(data);
-		}
-	};
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
@@ -51,14 +18,14 @@ angular.module('genericItem', ['ng', 'taxonomy'])
 
 	$scope.centerAt = function(location) {
 		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
-		$scope.myMap.setCenter(latlng);
+		$scope.map.setCenter(latlng);
 		$scope.mapCenter = latlng;
 	};
 
 	$scope.setMarker = function($event) {
 		if($scope.marker === undefined) {
 			$scope.marker = new google.maps.Marker({
-				map: $scope.myMap,
+				map: $scope.map,
 				position: $event.latLng
 			});
 		} else {
@@ -70,21 +37,82 @@ angular.module('genericItem', ['ng', 'taxonomy'])
 	};
 })
 
-.directive('submitGenericItem', function(Taxonomy) {
+.directive('formGenericItem', function($timeout) {
 	return {
 		restrict: 'E',
 		scope: {
 			item: "=",
 			form: "="
 		},
-		templateUrl: '/template/items/submit-generic-item.html',
-		controller: 'SubmitGenericItemCtrl',
+		templateUrl: '/template/items/generic/form-generic-item.html',
+		controller: 'FormGenericItemCtrl',
 		link: function(scope, element, attr) {
-			navigator.geolocation.getCurrentPosition(scope.centerAt);
+			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
+				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
+				scope.marker = new google.maps.Marker({
+					map: scope.map,
+					position: latLng
+				});
+				scope.mapCenter = latLng;
+			} else {
+				navigator.geolocation.getCurrentPosition(scope.centerAt);
+			}
 
+			$timeout( //FIXME: Another map hack to render hidden maps
+				function() {
+					google.maps.event.trigger(scope.map, "resize");
+					scope.map.setCenter(scope.mapCenter);
+				},
+				0
+			);
+		}
+	};
+})
+
+.controller('TileGenericItemCtrl', function($scope) {
+
+})
+
+.directive('tileGenericItem', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/generic/tile-generic-item.html',
+		controller: 'TileGenericItemCtrl',
+		link: function(scope, element, attr) {
+
+		}
+	};
+})
+
+.controller('CloseupGenericItemCtrl', function($scope) {
+	if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined) {
+		$scope.mapCenter = new google.maps.LatLng($scope.item.Lat, $scope.item.Lng);
+	} else {
+		$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
+	}
+
+	$scope.mapOptions = {
+		center: $scope.mapCenter,
+		zoom: 10,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+})
+
+.directive('closeupGenericItem', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			item: "="
+		},
+		templateUrl: '/template/items/generic/closeup-generic-item.html',
+		controller: 'CloseupGenericItemCtrl',
+		link: function(scope, element, attr) {
 			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
 				scope.marker = new google.maps.Marker({
-					map: scope.myMap,
+					map: scope.map,
 					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
 				});
 			}

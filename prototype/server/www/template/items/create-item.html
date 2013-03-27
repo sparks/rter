@@ -1,0 +1,44 @@
+<form name="createItemForm" class="create-item form-item">
+
+	<label for="type">Content Type</label>
+	<select name="type" ng-model="item.Type">
+		<option value="" disabled selected>Select Type</option>
+		<option value="generic">Generic</option>
+		<option value="raw">Raw</option>
+		<option value="twitter">Twitter</option>
+		<option value="youtube">YouTube</option>
+	</select>
+
+	<div ng-hide="item.Type == ''">
+		<hr>
+		
+		<fieldset ng-switch on="item.Type"> 
+			<div ng-switch-when="">
+			</div>
+			<div ng-switch-when="undefined">
+			</div>
+			<div ng-switch-when="twitter">
+				<form-twitter-item item="item" form="createItemForm"></form-twitter-item>
+			</div>
+			<div ng-switch-when="youtube">
+				<form-youtube-item item="item" form="createItemForm"></form-youtube-item>
+			</div>
+			<div ng-switch-when="raw">
+				<form-raw-item item="item" form="createItemForm"></form-raw-item>
+			</div>
+			<div ng-switch-default>
+				<form-generic-item item="item" form="createItemForm"></form-generic-item>
+			</div>
+		</fieldset>
+	
+		<hr>
+
+		<label for="Tags">Tags</label>
+		<tag-selector terms="item.Terms"></tag-selector>
+		
+		<hr>
+		
+		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Save</button>
+	</div>
+
+</form>

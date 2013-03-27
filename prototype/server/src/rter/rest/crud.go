@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"rter/auth"
 	"rter/data"
 	"rter/storage"
 	"strconv"
@@ -44,6 +45,13 @@ func CRUDRouter() *mux.Router {
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Update).Methods("PUT")
 	r.HandleFunc("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments}/{childkey}", Delete).Methods("DELETE")
 
+	r.PathPrefix("/").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			probe("Unkown CRUD request", r)
+			http.NotFound(w, r)
+		},
+	)
+
 	return r
 }
 
@@ -60,19 +68,25 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 }
 
 func probe(message string, r *http.Request) {
-	// log.Println(message)
-	// log.Println(r.Method, r.URL)
+	log.Println(message)
+	log.Println(r.Method, r.URL)
 	// e, _ := json.Marshal(r)
 	// log.Println(string(e))
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	user, permissions := auth.GetCredentials(w, r)
+	if (user == nil || permissions < 1) && vars["datatype"] != "users" {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Create Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
-
-	vars := mux.Vars(r)
 
 	var val interface{}
 
@@ -88,10 +102,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		val = new(data.ItemComment)
 	case "users":
-		user := new(data.User)
-		user.HashAndSalt()
-
-		val = user
+		val = new(data.User)
 	case "roles":
 		val = new(data.Role)
 	case "taxonomy":
@@ -113,6 +124,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
+	case *data.User:
+		v.HashAndSalt()
+		v.Role = "public" //TODO: Temporary while anyone can sign up maybe this will change?
 	}
 
 	if err != nil {
@@ -207,7 +221,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Select(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -279,9 +293,14 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = storage.SelectWhere(val, whereClause, args...)
+	switch val.(type) {
+	case *[]*data.Term:
+		err = storage.SelectQuery(val, "SELECT t.*, count(r.Term) FROM Terms AS t, TermRelationships AS r WHERE t.Term = r.Term GROUP BY t.Term")
+	default:
+		err = storage.SelectWhere(val, whereClause, args...)
+	}
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -299,6 +318,12 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Update Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -367,7 +392,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Update(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	} else if err != nil {
@@ -385,6 +410,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Delete Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -442,7 +473,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = storage.Delete(val)
 
-	if err == storage.ErrZeroMatches {
+	if err == storage.ErrZeroAffected {
 		http.Error(w, "No matches for query", http.StatusNotFound)
 		return
 	} else if err != nil {

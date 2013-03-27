@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS Users;
 CREATE TABLE IF NOT EXISTS Users (
 	Username VARCHAR(64) NOT NULL,
 	Password CHAR(128) NOT NULL,
-	Salt CHAR(16) NOT NULL,
+	Salt CHAR(128) NOT NULL,
 
 	Role VARCHAR(64) NOT NULL DEFAULT "public",
 	TrustLevel INT NOT NULL DEFAULT 0,
@@ -119,7 +119,8 @@ INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("
 INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymous", "", "", "public", 0), ("admin", "", "", "admin", 0);
 INSERT INTO UserDirections (Username) VALUES ("anonymous"), ("admin");
 
-INSERT INTO Terms (Term, Automated, Author) VALUES ("all", 1, "admin"), ("test", 0, "anonymous");
+INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES ("all", 1, "admin", "2013-03-19 00:00:00"), ("test", 0, "anonymous", "2013-03-19 00:00:00");
+INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES ("all", "",  "2013-03-19 00:00:00"), ("test", "",  "2013-03-19 00:00:00")
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (

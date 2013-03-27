@@ -103,6 +103,16 @@ func Insert(val interface{}) error {
 		return err
 	}
 
+	affected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected < 1 {
+		return ErrZeroAffected
+	}
+
 	ID, err := res.LastInsertId()
 
 	if err != nil {
@@ -113,7 +123,10 @@ func Insert(val interface{}) error {
 	case *data.Item:
 		v.ID = ID
 
-		err = ReconcileTerms(v, &v.Terms)
+		v.AddTerm("all", v.Author)
+		v.AddTerm("type:"+v.Type, v.Author)
+
+		_, err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.ID = ID
 		v.UpdateTime = now
@@ -136,6 +149,8 @@ func Insert(val interface{}) error {
 	case *data.UserDirection:
 		v.UpdateTime = now
 	}
+
+	listeners.NotifyInsert(val)
 
 	return err
 }
@@ -225,19 +240,29 @@ func Update(val interface{}) error {
 		return err
 	}
 
+	isAffected := false
+
+	switch v := val.(type) {
+	case *data.Item:
+		isAffected, err = ReconcileTerms(v, &v.Terms)
+	}
+
+	if err != nil {
+		return err
+	}
+
 	affected, err := res.RowsAffected()
 
 	if err != nil {
 		return err
 	}
 
-	if affected < 1 {
-		return ErrZeroMatches
+	if affected < 1 && !isAffected { //Check here for the issue of updating tags
+		return ErrZeroAffected
 	}
 
 	switch v := val.(type) {
 	case *data.Item:
-		err = ReconcileTerms(v, &v.Terms)
 	case *data.ItemComment:
 		v.UpdateTime = now
 	case *data.Term:
@@ -247,6 +272,8 @@ func Update(val interface{}) error {
 	case *data.UserDirection:
 		v.UpdateTime = now
 	}
+
+	listeners.NotifyUpdate(val)
 
 	return err
 }
@@ -263,7 +290,7 @@ func Select(val interface{}) error {
 	case *data.ItemComment:
 		rows, err = Query("SELECT * FROM ItemComments WHERE ID=?", v.ID)
 	case *data.Term:
-		rows, err = Query("SELECT * FROM Terms WHERE Term=?", v.Term)
+		rows, err = Query("SELECT t.*, count(r.Term) FROM Terms AS t LEFT JOIN TermRelationships AS r ON r.Term = t.Term WHERE t.Term=? GROUP by t.Term", v.Term)
 	case *data.TermRelationship:
 		rows, err = Query("SELECT * FROM TermRelationships WHERE Term=? and ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
@@ -283,7 +310,7 @@ func Select(val interface{}) error {
 	}
 
 	if !rows.Next() {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
 
 	switch v := val.(type) {
@@ -294,7 +321,11 @@ func Select(val interface{}) error {
 			return err
 		}
 
-		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", v.ID)
+		err = SelectWhere(&v.Terms, ", TermRelationships, Items WHERE Terms.Term = TermRelationships.Term AND TermRelationships.ItemID = Items.ID AND Items.ID=?", v.ID)
+
+		if err == ErrZeroAffected {
+			err = nil
+		}
 	case *data.ItemComment:
 		err = scanItemComment(v, rows)
 	case *data.Term:
@@ -319,26 +350,40 @@ func SelectAll(slicePtr interface{}) error {
 }
 
 func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) error {
-	var (
-		rows *sql.Rows
-		err  error
-	)
-
 	switch slicePtr.(type) {
 	case *[]*data.Item:
-		rows, err = Query("SELECT Items.* FROM Items "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Items.* FROM Items "+whereClause, args...)
 	case *[]*data.ItemComment:
-		rows, err = Query("SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT ItemComments.* FROM ItemComments "+whereClause, args...)
 	case *[]*data.Term:
-		rows, err = Query("SELECT Terms.* FROM Terms "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Terms.* FROM Terms "+whereClause, args...)
 	case *[]*data.TermRelationship:
-		rows, err = Query("SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT TermRelationships.* FROM TermRelationships "+whereClause, args...)
 	case *[]*data.Role:
-		rows, err = Query("SELECT Roles.* FROM Roles "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Roles.* FROM Roles "+whereClause, args...)
 	case *[]*data.User:
-		rows, err = Query("SELECT Users.* FROM Users "+whereClause, args...)
+		return SelectQuery(slicePtr, "SELECT Users.* FROM Users "+whereClause, args...)
+	}
+
+	return ErrUnsupportedDataType
+}
+
+func SelectQuery(slicePtr interface{}, query string, args ...interface{}) error {
+	switch slicePtr.(type) {
+	case *[]*data.Item:
+	case *[]*data.ItemComment:
+	case *[]*data.Term:
+	case *[]*data.TermRelationship:
+	case *[]*data.Role:
+	case *[]*data.User:
 	default:
 		return ErrUnsupportedDataType
+	}
+
+	rows, err := Query(query, args...)
+
+	if err != nil {
+		return err
 	}
 
 	for rows.Next() {
@@ -353,7 +398,7 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 
 			err = SelectWhere(&item.Terms, ", TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=?", item.ID)
 
-			if err != ErrZeroMatches && err != nil {
+			if err != ErrZeroAffected && err != nil {
 				return err
 			}
 
@@ -424,7 +469,7 @@ func SelectWhere(slicePtr interface{}, whereClause string, args ...interface{}) 
 	}
 
 	if sliceLen == 0 {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
 
 	return nil
@@ -470,8 +515,10 @@ func Delete(val interface{}) error {
 	}
 
 	if affected < 1 {
-		return ErrZeroMatches
+		return ErrZeroAffected
 	}
+
+	listeners.NotifyDelete(val)
 
 	return nil
 }

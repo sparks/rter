@@ -7,8 +7,10 @@ import (
 type Term struct {
 	Term string
 
-	Automated bool   `json:",omitempty"`
-	Author    string `json:"-"`
+	Count int
+
+	Automated bool `json:",omitempty"`
+	Author    string
 
 	UpdateTime time.Time `json:",omitempty"`
 }

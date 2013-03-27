@@ -1,51 +1,70 @@
-<!DOCTYPE HTML>
-<html ng-app='rter'>
+<!DOCTYPE html>
+<html lang='en' ng-app='rter'>
 <head>
 
 	<title>rtER Client</title>
 
-	<!-- Vendor CSS & JS -->
+	<!-- CSS -->
 
-	<script src="/vendor/jquery.js"></script>
-
-	<script src="/vendor/jquery-ui.js"></script>
-	<link href="/vendor/jquery-ui.css" rel="stylesheet">
-
-	<script src="/vendor/select2.js"></script>
-	<link href="/vendor/select2.css" rel="stylesheet">
-
-	<script src="/vendor/angular.js"></script>
-	<script src="/vendor/angular-resource.js"></script>
-
-	<script src="/vendor/angular-ui.js"></script>
-	<link href="/vendor/angular-ui.css" rel="stylesheet">
-
-	<script src="/vendor/ui-bootstrap-tpls.js"></script>
-	<link href="/vendor/bootstrap-combined.min.css" rel="stylesheet">
-
-	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
-
-	<!-- App CSS & JS -->
+	<link href="/vendor/jquery/jquery-ui.css" rel="stylesheet">
+	<link href="/vendor/select2/select2.css" rel="stylesheet">
+	<link href="/vendor/angular/angular-ui.css" rel="stylesheet">
+	<link href="/vendor/angular/bootstrap.css" rel="stylesheet">
 
 	<link rel="stylesheet" type="text/css" href="/css/style_v2.css">
 
+	<!-- VENDOR JS -->
+
+	<script src="/vendor/jquery/jquery.js"></script>
+
+	<script src="/vendor/jquery/jquery-ui.js"></script>
+
+	<script src="/vendor/select2/select2.js"></script>
+
+	<script src="/vendor/angular/angular.js"></script>
+	<script src="/vendor/angular/angular-resource.js"></script>
+
+	<script src="/vendor/angular/angular-ui.js"></script>
+	<script src="https://raw.github.com/angular-ui/angular-ui/master/modules/directives/sortable/sortable.js"></script>
+
+	<script src="/vendor/angular/ui-bootstrap-tpls.js"></script>
+
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
+
+	<script src="/vendor/sockjs.min.js"></script>
+
+	<script src="/vendor/moment.js"></script>
+
+	<script src="/vendor/angular/angular-http-auth.js"></script>
+
+	<!-- App JS -->
+
 	<script type="text/javascript" src="/js/util.js"></script>
+
+	<!-- Custom Angular -->
 
 	<script type="text/javascript" src="/js/rter.js"></script>
 
 	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
+	<script type="text/javascript" src="/js/auth/auth.js"></script>
 
 	<script type="text/javascript" src="/js/items/items.js"></script>
 	<script type="text/javascript" src="/js/items/genericItem.js"></script>
 	<script type="text/javascript" src="/js/items/rawItem.js"></script>
 	<script type="text/javascript" src="/js/items/twitterItem.js"></script>
+	<script type="text/javascript" src="/js/items/youtubeItem.js"></script>
+
+	<script type="text/javascript" src="/js/sockjs/sockjs.js"></script>
+	<script type="text/javascript" src="/js/momentjs/momentjs.js"></script>
 
 	<script type="text/javascript" src="/js/taxonomy/taxonomy.js"></script>
+
+	<script type="text/javascript" src="/js/comments/comments.js"></script>
 
 	<script type="text/javascript" src="/js/termview/termview.js"></script>
 
 </head>
-<body>
+<body ng-controller="RterCtrl">
 
 	<div id="alerter" ng-controller="AlertsCtrl">
 		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
@@ -61,23 +80,17 @@
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>
-			<pane heading="Submit">
-			 	<submit-item>
-				</submit-item>
+			<pane heading="Submit New Item">
+			 	<create-item>
+				</create-item>
 			</pane>
 
 			<pane heading="+">
-				<pane-builder>
-				</pane-builder>
+				<tag-cloud></tag-cloud>
  			</pane>
 
-			<pane heading="All" active="true">
-				<termview>
-				</termview>
-			</pane>
-
-			<pane ng-repeat="termview in termviews" heading="{{termview.term}}" active="termview.active">
-				<termview term="{{termview.term}}">
+			<pane ng-repeat="view in termViews" heading="{{view.heading}}" active="view.active">
+				<termview term="view.term">
 				</termview>
 			</pane>
 		</tabs>

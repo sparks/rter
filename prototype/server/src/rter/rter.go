@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/auth"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
+	"rter/streaming"
 	"rter/utils"
 	"rter/web"
 )
@@ -24,8 +26,13 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 
+	s := streaming.StreamingRouter()
+	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) //Must register more specific paths first
+
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
+
+	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 
@@ -51,7 +58,13 @@ func main() {
 	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "asset")))))
 	r.PathPrefix("/template").Handler(http.StripPrefix("/template", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "template")))))
 
-	// r.NotFoundHandler = http.HandlerFunc(rootRedirect)
+	r.HandleFunc("/favicon.ico",
+		func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "asset", "favicon.ico"))
+		},
+	)
+
+	r.NotFoundHandler = http.HandlerFunc(debug404)
 
 	http.Handle("/", r)
 
@@ -62,6 +75,12 @@ func main() {
 
 func rootRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+func debug404(w http.ResponseWriter, r *http.Request) {
+	log.Println("404 Served")
+	log.Println(r.Method, r.URL)
+	http.NotFound(w, r)
 }
 
 func setupLogger() {

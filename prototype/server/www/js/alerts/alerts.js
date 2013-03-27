@@ -1,4 +1,7 @@
-angular.module('alerts', ['ui.bootstrap', 'ng'])
+angular.module('alerts', [
+	'ui.bootstrap', //Alerts ui
+	'ng'            //Timeout mechanism
+])
 
 .factory('Alerter', function ($timeout) {
 	function Alerter() {

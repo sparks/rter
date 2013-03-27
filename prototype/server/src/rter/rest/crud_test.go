@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"github.com/bmizerany/assert"
 	"github.com/drewolson/testflight"
 	"net/http"
 	"rter/data"
@@ -45,7 +44,7 @@ func TestUpdateRole(t *testing.T) {
 
 	testUpdate(t, "/roles/"+role.Title, role)
 
-	assert.Equal(t, role.Permissions, 5)
+	structJSONCompare(t, role.Permissions, 5)
 }
 
 func TestReadRole(t *testing.T) {
@@ -53,7 +52,7 @@ func TestReadRole(t *testing.T) {
 
 	testRead(t, "/roles/"+role.Title, readrole)
 
-	assert.Equal(t, readrole, role)
+	structJSONCompare(t, readrole, role)
 }
 
 func TestReadAllRole(t *testing.T) {
@@ -83,7 +82,7 @@ func TestUpdateUser(t *testing.T) {
 
 	testUpdate(t, "/users/"+user.Username, user)
 
-	assert.Equal(t, user.TrustLevel, 5)
+	structJSONCompare(t, user.TrustLevel, 5)
 }
 
 func TestReadUser(t *testing.T) {
@@ -93,7 +92,7 @@ func TestReadUser(t *testing.T) {
 
 	readUser.CreateTime = user.CreateTime
 
-	assert.Equal(t, user, readUser)
+	structJSONCompare(t, user, readUser)
 }
 
 func TestReadAllUser(t *testing.T) {
@@ -125,7 +124,7 @@ func TestReadUserDirection(t *testing.T) {
 
 	readDirection.UpdateTime = direction.UpdateTime //hack
 
-	assert.Equal(t, direction, readDirection)
+	structJSONCompare(t, direction, readDirection)
 }
 
 func TestCreateItem(t *testing.T) {
@@ -152,7 +151,7 @@ func TestReadItem1(t *testing.T) {
 	readItem.StartTime = item.StartTime //hack
 	readItem.StopTime = item.StopTime   //hack
 
-	assert.Equal(t, item, readItem)
+	structJSONCompare(t, item, readItem)
 }
 
 func TestUpdateItem(t *testing.T) {
@@ -160,7 +159,7 @@ func TestUpdateItem(t *testing.T) {
 
 	testUpdate(t, "/items/"+strconv.FormatInt(item.ID, 10), item)
 
-	assert.Equal(t, item.Type, "different")
+	structJSONCompare(t, item.Type, "different")
 }
 
 func TestReadItem2(t *testing.T) {
@@ -171,7 +170,7 @@ func TestReadItem2(t *testing.T) {
 	readItem.StartTime = item.StartTime //hack
 	readItem.StopTime = item.StopTime   //hack
 
-	assert.Equal(t, item, readItem)
+	structJSONCompare(t, item, readItem)
 }
 
 func TestReadAllItems(t *testing.T) {
@@ -199,7 +198,7 @@ func TestUpdateItemComment(t *testing.T) {
 
 	testUpdate(t, "/items/"+strconv.FormatInt(item.ID, 10)+"/comments/"+strconv.FormatInt(comment.ID, 10), comment)
 
-	assert.Equal(t, comment.Body, "[deleted]")
+	structJSONCompare(t, comment.Body, "[deleted]")
 }
 
 func TestReadItemComment(t *testing.T) {
@@ -209,7 +208,7 @@ func TestReadItemComment(t *testing.T) {
 
 	readComment.UpdateTime = comment.UpdateTime
 
-	assert.Equal(t, comment, readComment)
+	structJSONCompare(t, comment, readComment)
 }
 
 func TestReadAllComment(t *testing.T) {
@@ -239,7 +238,31 @@ func TestReadTerm(t *testing.T) {
 
 	readTerm.UpdateTime = term.UpdateTime
 
-	assert.Equal(t, term, readTerm)
+	structJSONCompare(t, term, readTerm)
+}
+
+func TestAddTermToItem(t *testing.T) {
+	item.Terms = make([]*data.Term, 1)
+	item.Terms[0] = term
+
+	testUpdate(t, "/items/"+strconv.FormatInt(item.ID, 10), item)
+}
+
+func TestReadItem3(t *testing.T) {
+	readItem := new(data.Item)
+
+	testRead(t, "/items/"+strconv.FormatInt(item.ID, 10), readItem)
+
+	readItem.StartTime = item.StartTime //hack
+	readItem.StopTime = item.StopTime   //hack
+
+	if len(readItem.Terms) < 1 {
+		t.Error("There should be a term here")
+	}
+
+	readItem.Terms[0].UpdateTime = term.UpdateTime
+
+	structJSONCompare(t, item, readItem)
 }
 
 func TestReadAllTerm(t *testing.T) {
@@ -267,7 +290,7 @@ func TestReadTermRanking(t *testing.T) {
 	testRead(t, "/taxonomy/"+term.Term+"/ranking", readRanking)
 
 	readRanking.UpdateTime = ranking.UpdateTime
-	assert.Equal(t, ranking, readRanking)
+	structJSONCompare(t, ranking, readRanking)
 }
 
 func TestDeleteTerm(t *testing.T) {
@@ -302,7 +325,7 @@ func testCreate(t *testing.T, url string, v interface{}) {
 		func(r *testflight.Requester) {
 			response := r.Post(url, testflight.JSON, string(enc))
 
-			assert.Equal(t, 201, response.StatusCode)
+			structJSONCompare(t, 201, response.StatusCode)
 
 			err = json.Unmarshal([]byte(response.Body), v)
 
@@ -325,7 +348,7 @@ func testUpdate(t *testing.T, url string, v interface{}) {
 		func(r *testflight.Requester) {
 			response := r.Put(url, testflight.JSON, string(enc))
 
-			assert.Equal(t, http.StatusOK, response.StatusCode)
+			structJSONCompare(t, http.StatusOK, response.StatusCode)
 
 			err = json.Unmarshal([]byte(response.Body), v)
 
@@ -342,7 +365,7 @@ func testRead(t *testing.T, url string, v interface{}) {
 		func(r *testflight.Requester) {
 			response := r.Get(url)
 
-			assert.Equal(t, http.StatusOK, response.StatusCode)
+			structJSONCompare(t, http.StatusOK, response.StatusCode)
 
 			err := json.Unmarshal([]byte(response.Body), v)
 
@@ -359,7 +382,20 @@ func testDelete(t *testing.T, url string) {
 		func(r *testflight.Requester) {
 			response := r.Delete(url, testflight.JSON, "")
 
-			assert.Equal(t, http.StatusNoContent, response.StatusCode)
+			structJSONCompare(t, http.StatusNoContent, response.StatusCode)
 		},
 	)
+}
+
+func structJSONCompare(t *testing.T, a interface{}, b interface{}) {
+	j1, _ := json.Marshal(a)
+	j2, _ := json.Marshal(b)
+
+	// t.Log(string(j1), string(j2))
+
+	if string(j1) != string(j2) {
+		t.Error("Objects are not equal:")
+		t.Error(string(j1))
+		t.Error(string(j2))
+	}
 }

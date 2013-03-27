@@ -1,0 +1,46 @@
+<div class="closeup-item" ng-switch on="item.Type">
+	<div ng-switch-when="twitter">
+		<closeup-twitter-item item="item" dialog="dialog"></closeup-twitter-item>
+	</div>
+	<div ng-switch-when="youtube">
+		<closeup-youtube-item item="item" dialog="dialog"></closeup-youtube-item>
+	</div>
+	<div ng-switch-when="raw">
+		<closeup-raw-item item="item" dialog="dialog"></closeup-raw-item>
+	</div>
+	<div ng-switch-default>
+		<closeup-generic-item item="item" dialog="dialog"></closeup-generic-item>
+	</div>
+</div>
+
+<hr>
+
+<div class="row-fluid">
+	<div class="span5">
+		<label for="Tags">Tags</label>
+	</div>
+	<div class="span7">
+		<label>Comments</label>
+	</div>
+</div>
+
+<div class="row-fluid">
+	<div class="span5">
+		<form name="closeupTagForm">
+			<div class="row-fluid">
+				<div class="span10">
+						<tag-selector terms="item.Terms"></tag-selector>
+					</form>
+				</div>
+				<div class="span2">
+					<button class="btn btn-primary" ng-click="updateItem()">Save</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="span7">
+		<comments-dialog id="item.ID"></comments-dialog>
+	</div>
+</div>
+
+<button ui-scrollfix class="btn btn-danger float-close" ng-click="cancel()" ng-hide="!dialog">Close</button>

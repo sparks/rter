@@ -39,14 +39,14 @@ func (user *User) HashAndSalt() {
 	hasher := md5.New()
 
 	hasher.Write([]byte(fmt.Sprintf("%v", t.UnixNano())))
-	user.Salt = string(hasher.Sum(nil))
+	user.Salt = fmt.Sprintf("%x", hasher.Sum(nil))
 
 	hasher = md5.New()
 
 	hasher.Write([]byte(user.Salt))
 	hasher.Write([]byte(user.Password))
 
-	user.Password = string(hasher.Sum(nil))
+	user.Password = fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
 func (user *User) Auth(p string) bool {
@@ -55,7 +55,7 @@ func (user *User) Auth(p string) bool {
 	hasher.Write([]byte(user.Salt))
 	hasher.Write([]byte(p))
 
-	if string(hasher.Sum(nil)) == user.Password {
+	if fmt.Sprintf("%x", hasher.Sum(nil)) == user.Password {
 		return true
 	}
 

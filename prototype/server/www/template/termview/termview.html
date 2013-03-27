@@ -1,6 +1,34 @@
-<div id="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-<ul>
-	<li ng-repeat="item in items"><a target"_blank" href="{{item.ContentURI}}">{{item.ID}}-{{item.Type}}<img ng-src="{{item.ThumbnailURI}}"></a><button ng-click="updateItemDialog(item)" class="btn">Update</button></li>
-</ul>
+<div class="term-view">
+	<div class="control-bar row-fluid">
+		<div class="span6">
+			<b>View Mode:</b>
+			<div class="btn-group" data-toggle="buttons-checkbox">
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'grid-view'">Grid</button>
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'list-view'">List</button>
+			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'map-view'">Map</button>
+			</div>
+		</div>
+		<div class="span6 right-align">
+			<button class="btn btn-danger" ng-click="close()">Close View</button>
+		</div>
+	</div>
+	
+	<div class="{{viewmode}}">
+		<div class="row-fluid">
+			<div class="left span8">
+				<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
 
-<div id="main_map_canvas"></div>
+				<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
+					<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+				</ul>
+			</div>
+
+			<div class="right span4">
+				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
+				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
+				</div>
+				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions"></div>
+			</div>
+		</div>
+	</div>
+</div>

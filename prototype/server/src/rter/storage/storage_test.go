@@ -2,7 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"github.com/bmizerany/assert"
 	"rter/data"
 	"testing"
 	"time"
@@ -28,6 +27,16 @@ func TestOpenStorage(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// func CleanupStorage(t *testing.T) {
+// 	//Delete incase it crashed before
+// 	Delete(relationship)
+// 	Delete(term)
+// 	Delete(comment)
+// 	Delete(item)
+// 	Delete(user)
+// 	Delete(role)
+// }
 
 func TestInsertRole(t *testing.T) {
 	role = new(data.Role)
@@ -60,12 +69,16 @@ func TestSelectRole(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, role, selectedRole)
+	structJSONCompare(t, role, selectedRole)
 }
 
 func TestSelectAllRole(t *testing.T) {
 	roles := make([]*data.Role, 0)
-	SelectAll(&roles)
+	err := SelectAll(&roles)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(roles) == 0 {
 		t.Error("Nothing in Select All")
@@ -111,12 +124,16 @@ func TestSelectUser(t *testing.T) {
 
 	selectedUser.CreateTime = user.CreateTime //Hack because MySQL will eat part of the timestamp and they won't match
 
-	assert.Equal(t, user, selectedUser)
+	structJSONCompare(t, user, selectedUser)
 }
 
 func TestSelectAllUser(t *testing.T) {
 	users := make([]*data.User, 0)
-	SelectAll(&users)
+	err := SelectAll(&users)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(users) == 0 {
 		t.Error("Nothing in Select All")
@@ -152,7 +169,7 @@ func TestSelectUserDirection(t *testing.T) {
 
 	selectedDirection.UpdateTime = direction.UpdateTime //hack
 
-	assert.Equal(t, direction, selectedDirection)
+	structJSONCompare(t, direction, selectedDirection)
 }
 
 func TestInsertItem(t *testing.T) {
@@ -173,6 +190,8 @@ func TestInsertItem(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	t.Log("Item ID is", item.ID)
 }
 
 func TestSelectItem(t *testing.T) {
@@ -193,12 +212,16 @@ func TestSelectItem(t *testing.T) {
 	selectedItem.StartTime = item.StartTime //hack
 	selectedItem.StopTime = item.StopTime   //hack
 
-	assert.Equal(t, item, selectedItem)
+	structJSONCompare(t, item, selectedItem)
 }
 
 func TestSelectAllItem(t *testing.T) {
 	items := make([]*data.Item, 0)
-	SelectAll(&items)
+	err := SelectAll(&items)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if len(items) == 0 {
 		t.Error("Nothing in Select All")
@@ -232,7 +255,7 @@ func TestSelectItemComment(t *testing.T) {
 
 	selectedComment.UpdateTime = comment.UpdateTime
 
-	assert.Equal(t, comment, selectedComment)
+	structJSONCompare(t, comment, selectedComment)
 }
 
 func TestInsertTerm(t *testing.T) {
@@ -251,6 +274,7 @@ func TestInsertTerm(t *testing.T) {
 func TestSelectTerm(t *testing.T) {
 	selectedTerm := new(data.Term)
 	selectedTerm.Term = term.Term
+	t.Log(selectedTerm.Term)
 	err := Select(selectedTerm)
 
 	if err != nil {
@@ -262,15 +286,19 @@ func TestSelectTerm(t *testing.T) {
 
 	selectedTerm.UpdateTime = term.UpdateTime
 
-	assert.Equal(t, term, selectedTerm)
+	structJSONCompare(t, term, selectedTerm)
 }
 
-func TestSelectAllTerm(t *testing.T) {
+func TestFailSelectAllTerm(t *testing.T) {
 	terms := make([]*data.Term, 0)
-	SelectAll(&terms)
+	err := SelectAll(&terms)
 
-	if len(terms) == 0 {
-		t.Error("Nothing in Select All")
+	if err != nil && err != ErrZeroAffected {
+		t.Error(err)
+	}
+
+	if len(terms) != 0 {
+		t.Error("Shouldn't have gotten anything in Select All")
 	}
 }
 
@@ -300,7 +328,7 @@ func TestSelectTermRanking(t *testing.T) {
 
 	selectedRanking.UpdateTime = ranking.UpdateTime
 
-	assert.Equal(t, ranking, selectedRanking)
+	structJSONCompare(t, ranking, selectedRanking)
 }
 
 func TestInsertTermRelationship(t *testing.T) {
@@ -320,6 +348,19 @@ func TestSelectTermRelationship(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestSelectAllTerm(t *testing.T) { //By default only return those with relationships
+	terms := make([]*data.Term, 0)
+	err := SelectAll(&terms)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(terms) == 0 {
+		t.Error("Nothing in Select All")
 	}
 }
 
@@ -375,13 +416,13 @@ func TestCloseStorage(t *testing.T) {
 	CloseStorage()
 }
 
-func structJSONCompare(a interface{}, b interface{}) bool {
+func structJSONCompare(t *testing.T, a interface{}, b interface{}) {
 	j1, _ := json.Marshal(a)
 	j2, _ := json.Marshal(b)
 
 	if string(j1) != string(j2) {
-		return false
+		t.Error("Objects are not equal:")
+		t.Error(string(j1))
+		t.Error(string(j2))
 	}
-
-	return true
 }

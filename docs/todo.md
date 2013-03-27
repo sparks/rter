@@ -1,7 +1,27 @@
 #ToDos
 
+##Server
+Autotagging!
+Users!
+Comment socksz
+
+more text in views
+checkmarks so see
+tooltips
+invert main feed and lock
+
+dealt with markers
+
+heading paperjs
+map filter
+secondary filters
+
+content type badge
+
+add a tag and it appears in a random ranking
+
+
 ##Mobile
-* Show ID/user on tiles
 * More text on the device
 * device UUID
 * Custom URL 

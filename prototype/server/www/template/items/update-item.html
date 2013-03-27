@@ -1,0 +1,37 @@
+<form name="updateItemForm" class="update-item form-item">
+	
+	<fieldset ng-switch on="itemCopy.Type"> 
+		<div ng-switch-when="">
+		</div>
+		<div ng-switch-when="twitter">
+			<form-twitter-item item="itemCopy" form="updateItemForm"></form-twitter-item>
+		</div>
+		<div ng-switch-when="youtube">
+			<form-youtube-item item="itemCopy" form="updateItemForm"></form-youtube-item>
+		</div>
+		<div ng-switch-when="raw">
+			<form-raw-item item="itemCopy" form="updateItemForm"></form-raw-item>
+		</div>
+		<div ng-switch-default>
+			<form-generic-item item="itemCopy" form="updateItemForm"></form-generic-item>
+		</div>
+	</fieldset>
+	
+	<hr>
+	
+	<label for="Tags">Tags</label>
+	<tag-selector terms="itemCopy.Terms"></tag-selector>
+
+	<hr>
+	
+	<div class="row-fluid">
+		<div class="span6">
+			<button class="btn btn-primary" ng-click="updateItem()" ng-disabled="updateItemForm.$invalid">Save</button>
+			<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Cancel</button>
+		</div>
+		<div class="span6 right-align">
+			<button class="btn btn-danger" ng-click="deleteItem()">Delete</button>
+		</div>
+	</div>
+
+</form>

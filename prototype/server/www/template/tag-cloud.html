@@ -1,0 +1,7 @@
+<div class="tag-cloud">
+	<button class="btn btn-primary show-all" ng-click="addTermView({Term: ''})">Show All Items</button>
+	<hr>
+	<ul class="cloud">
+		<li ng-repeat="term in terms" style="font-size: {{termFontSize(term)}}pt;"><a href="#" ng-click="addTermView(term)">{{term.Term}}</a></li>
+	</ul>
+</div>
