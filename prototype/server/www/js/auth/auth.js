@@ -14,26 +14,23 @@ angular.module('auth', [
 	return UserResource;
 })
 
-.controller('LoginPanelCtrl', function($scope, $http, authService, UserResource) {
+.controller('LoginPanelCtrl', function($scope, $http, authService, UserResource, Alerter) {
 	$scope.login = function() {
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
-			console.log("yay");
-			console.log(data, status, headers);
+			$scope.cancel();
+			authService.loginConfirmed();
 		})
 		.error(function(data, status, headers) {
-			console.log(data, status, headers);
+			Alerter.error("Invalid login credentials.", 2000);
 		});
-
-		// $scope.cancel();
-		// authService.loginConfirmed();
 	};
 
 	$scope.signup = function() {
 		UserResource.save(
 			{Username: $scope.username, Password: $scope.password},
 			function() {
-				console.log("done");
+				Alerter.success("User "+$scope.username+" created!", 2000);
 			},
 			function(e) {
 				console.log(e);

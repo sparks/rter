@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"rter/auth"
 	"rter/data"
 	"rter/storage"
 	"strconv"
@@ -74,12 +75,18 @@ func probe(message string, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	user, permissions := auth.GetCredentials(w, r)
+	if (user == nil || permissions < 1) && vars["datatype"] != "users" {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Create Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
-
-	vars := mux.Vars(r)
 
 	var val interface{}
 
@@ -311,9 +318,9 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == "PUT" {
-		http.Error(w, "fuckoff", http.StatusUnauthorized)
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "", http.StatusUnauthorized)
 		return
 	}
 
@@ -403,6 +410,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
+	user, permissions := auth.GetCredentials(w, r)
+	if user == nil || permissions < 1 {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
 	probe("Delete Request", r)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
