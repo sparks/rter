@@ -18,6 +18,8 @@
 @synthesize passField;
 @synthesize cookieString;
 
+RTERPreviewController *preview;
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -25,6 +27,7 @@
 	userField.delegate = self;
 	passField.delegate = self;
 	cookieString = @"";
+	preview = nil;
 }
 
 - (void)didReceiveMemoryWarning
@@ -34,8 +37,8 @@
 }
 
 - (IBAction)startCamera:(id)sender {
-    if (![cookieString isEqualToString: @""]) {
-		RTERPreviewController *preview = [[RTERPreviewController alloc] init];
+    //if (![cookieString isEqualToString: @""]) {
+		preview = [[RTERPreviewController alloc] init];
 		
 		preview.delegate = self;
 		preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
@@ -43,7 +46,7 @@
 		[self presentViewController:preview
 						   animated:YES
 						 completion:nil];
-	}
+	//}
     
 }
 
@@ -95,17 +98,42 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-	NSLog(@"DidRecieveResponse");
-	NSLog(@"%d - %@", [(NSHTTPURLResponse*)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse*)response statusCode]] );
-	NSLog(@"%@", [(NSHTTPURLResponse*)response allHeaderFields]);
-	if ([(NSHTTPURLResponse*)response statusCode] == 200) {
-		NSDictionary *dict = [(NSHTTPURLResponse*)response allHeaderFields];
-		cookieString = [dict valueForKey:@"Set-Cookie"];
-		NSLog(@"Set-Cookie: %@", cookieString);
-		[self startCamera:nil];
+	if (connection == [preview getAuthConnection]) {
+		NSLog(@"DidRecieveResponse");
+
+		// Streaming token
+		NSLog(@"===Streaming Auth Response===");
+		NSLog(@"%d - %@", [(NSHTTPURLResponse*)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse*)response statusCode]] );
+		
+		if ([(NSHTTPURLResponse*)response statusCode] == 200) {
+		} else {
+			
+		}
+	} else {
+		// login auth
+		NSLog(@"%d - %@", [(NSHTTPURLResponse*)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse*)response statusCode]] );
+		NSLog(@"%@", [(NSHTTPURLResponse*)response allHeaderFields]);
+		if ([(NSHTTPURLResponse*)response statusCode] == 200) {
+			NSDictionary *dict = [(NSHTTPURLResponse*)response allHeaderFields];
+			cookieString = [dict valueForKey:@"Set-Cookie"];
+			NSLog(@"Set-Cookie: %@", cookieString);
+			[self startCamera:nil];
+		}
 	}
 }
 
+- (void)connection:(NSURLConnection *)aConn didReceiveData:(NSData *)data
+
+{
+	//if (aConn == [preview getAuthConnection]) {
+		NSLog(@"DATA:");
+		NSLog(@"%@", [data description]);
+		NSError *error;
+		NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:
+								  NSJSONReadingMutableContainers error:&error];
+	NSLog(@"%@",jsonDict);
+	//}
+}
 
 
 - (void)back {
