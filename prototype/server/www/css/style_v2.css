@@ -114,14 +114,23 @@ label {
 	height: 350px;
 	width: 315px;
 
-	margin: 0 auto 25px auto;
+	margin: 0 auto 15px auto;
 }
 
-.term-view .grid-view .filter-search {
+.term-view .grid-view .right .map-filter-en, .term-view .list-view .right .map-filter-en {
+	text-align: center;
+	margin-bottom: 15px;
+}
+
+.term-view .map-view .right .map-filter-en {
+	display: none;
+}
+
+.term-view .grid-view .filter-search, .term-view .list-view .filter-search {
 	margin-bottom: 25px;
 }
 
-.term-view .grid-view .filter-search input {
+.term-view .grid-view .filter-search input, .term-view .list-view .filter-search input {
 	display: block;
 	margin: auto;
 }
@@ -222,6 +231,10 @@ label {
 	font-size: 8pt;
 	color: white;
 	line-height: 14pt;
+}
+
+.item-list .blur {
+	opacity: 0.3;
 }
 
 /* -- TermView Map -- */

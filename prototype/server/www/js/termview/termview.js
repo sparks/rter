@@ -1,8 +1,9 @@
 angular.module('termview', [
-	'ng',      //filers
-	'ui',      //ui-sortable and map
-	'items',   //ItemCache to load items into termview, various itemDialog services
-	'taxonomy' //Rankings
+	'ng',       //filers
+	'ui',       //ui-sortable and map
+	'items',    //ItemCache to load items into termview, various itemDialog services
+	'taxonomy', //Rankings
+	'alerts'    //Alerter
 ])
 
 .factory('TermViewRemote', function () {
@@ -39,11 +40,18 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, $timeout, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
+.controller('TermViewCtrl', function($scope, $filter, $timeout, Alerter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
 
 	$scope.viewmode = "grid-view";
+	$scope.mapFilterEnable = false;
 
 	$scope.$watch('viewmode', function() {
+		$scope.mapCenter = $scope.map.getCenter();
+
+		if($scope.viewmode == 'map-view') {
+			$scope.mapFilterEnable = false;
+		}
+
 		$timeout(function() {
 			google.maps.event.trigger($scope.map, "resize");
 			$scope.map.setCenter($scope.mapCenter);
@@ -65,6 +73,7 @@ angular.module('termview', [
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
 	$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.filterQuery);
+	$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
 	$scope.finalFilteredItems = $scope.textSearchedItems;
 
 	$scope.$watch('items', function() {
@@ -80,13 +89,28 @@ angular.module('termview', [
 	}, true);
 
 	$scope.$watch('textSearchedItems', function() {
-		$scope.finalFilteredItems = $scope.textSearchedItems;
 		$scope.updateMarkers();
 	}, true);
 
-	$scope.dragCallback = function(a) {
+	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable]', function() {
+		if($scope.mapFilterEnable) {
+			$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
+		} else {
+			$scope.mapFilteredItems = $scope.textSearchedItems;
+		}
+	}, true);
+
+	$scope.$watch('mapFilteredItems', function() {
+		$scope.finalFilteredItems = $scope.mapFilteredItems;
+	}, true);
+
+	$scope.dragCallback = function(a, b) {
+		if($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== '')) {
+			Alerter.warn("You cannot reorder items while your filters are enabled");
+		}
+
 		var newRanking = [];
-		angular.forEach($scope.textSearchedItems, function(v) {
+		angular.forEach($scope.rankedItems, function(v) {
 			newRanking.push(v.ID);
 		});
 
@@ -110,6 +134,11 @@ angular.module('termview', [
 	};
 
 	/* -- Map -- */
+
+	$scope.boundsChanged = function() {
+		if(!$scope.mapFilterEnable) return;
+		$scope.mapBounds = $scope.map.getBounds();
+	};
 
 	$scope.markerBundles = [];
 

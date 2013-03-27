@@ -2,8 +2,10 @@
 
 ##Server
 ###Must
+* Drag right most is broken
 * Config old system
 * Config new system
+* Non destructive PUTs
 * Test ordering of new unranked elements as they are added
 * PaperJS import
 * Map filter systems

@@ -182,6 +182,24 @@ angular.module('items', [
 	return new ItemCache();
 })
 
+.filter('filterbyBounds', function() {
+	return function(input, bounds) {
+		out = [];
+		for(var i = 0;i < input.length;i++) {
+			if(input[i].Lat !== undefined && input[i].Lng !== undefined && bounds !== undefined) {
+				if(input[i].Lat < Math.min(bounds.getNorthEast().lat(), bounds.getSouthWest().lat()) || input[i].Lat > Math.max(bounds.getNorthEast().lat(), bounds.getSouthWest().lat())) {
+					//Outside via lat
+				} else if(input[i].Lng < Math.min(bounds.getNorthEast().lng(), bounds.getSouthWest().lng()) || input[i].Lng > Math.max(bounds.getNorthEast().lng(), bounds.getSouthWest().lng())) {
+					//Outside via lng
+				} else {
+					out.push(input[i]);
+				}
+			}
+		}
+
+		return out;
+	};
+})
 
 .filter('orderByRanking', function() { //FIXED: this is n^2 probably not good
 	return function(input, ranking) {
