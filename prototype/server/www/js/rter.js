@@ -8,8 +8,14 @@ angular.module('rter', [
 ])
 
 .controller('RterCtrl', function($scope, LoginDialog) {
+	$scope.loginDialogOpen = false;
 	$scope.$on('event:auth-loginRequired', function() {
-		LoginDialog.open();
+		if(!$scope.loginDialogOpen) {
+			$scope.loginDialogOpen = true;
+			LoginDialog.open().then(function() {
+				$scope.loginDialogOpen = false;
+			});
+		}
 	});
 })
 
