@@ -1,4 +1,5 @@
 angular.module('auth', [
+	'ng',                   //$http
 	'ui.bootstrap',         //dialog
 	'http-auth-interceptor' //$resource for taxonomoy
 ])
@@ -13,14 +14,19 @@ angular.module('auth', [
 	return UserResource;
 })
 
-.controller('LoginPanelCtrl', function($scope, authService, UserResource) {
+.controller('LoginPanelCtrl', function($scope, $http, authService, UserResource) {
 	$scope.login = function() {
-		console.log($scope.username);
-		console.log($scope.password);
+		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
+		.success(function(data, status, headers) {
+			console.log("yay");
+			console.log(data, status, headers);
+		})
+		.error(function(data, status, headers) {
+			console.log(data, status, headers);
+		});
 
-		$scope.cancel();
-
-		authService.loginConfirmed();
+		// $scope.cancel();
+		// authService.loginConfirmed();
 	};
 
 	$scope.signup = function() {

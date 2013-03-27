@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/auth"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
@@ -30,6 +31,8 @@ func main() {
 
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
+
+	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
 
 	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
 
