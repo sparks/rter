@@ -113,6 +113,17 @@ label {
 .term-view .grid-view .right .map, .term-view .list-view .right .map {
 	height: 350px;
 	width: 315px;
+
+	margin: 0 auto 25px auto;
+}
+
+.term-view .grid-view .filter-search {
+	margin-bottom: 25px;
+}
+
+.term-view .grid-view .filter-search input {
+	display: block;
+	margin: auto;
 }
 
 /* -- Term View Grid -- */
