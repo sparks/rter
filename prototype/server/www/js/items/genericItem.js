@@ -6,6 +6,9 @@ angular.module('genericItem', [
 .controller('FormGenericItemCtrl', function($scope) {
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
+	$scope.item.StartTime = new Date();
+	$scope.item.StopTime = $scope.item.StartTime;
+
 	$scope.mapOptions = {
 		center: $scope.mapCenter,
 		zoom: 10,
