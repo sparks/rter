@@ -17,10 +17,18 @@
 		<div class="row-fluid">
 			<div class="left span8">
 				<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-
-				<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
-					<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
-				</ul>
+				<div ng-switch on="term.Term">
+					<div ng-switch-when="">
+						<ul class="item-list">		
+							<li ng-repeat="item in rankedItems | orderBy:'ID':true | orderBy:'StopTime':true | filter:filterQuery"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+						</ul>
+					</div>
+					<div ng-switch-default>
+						<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
+							<li ng-repeat="item in rankedItems | filter:filterQuery"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+						</ul>
+					</div>
+				</div>
 			</div>
 
 			<div class="right span4">
@@ -28,6 +36,15 @@
 				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
 				</div>
 				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions"></div>
+
+				<hr>
+
+				<form name="termViewFilterSerach" class="filter-search">
+					<label for="filterQuery">Filter Results</label>
+					<input type="text" class="search-query" name="filterQuery" ng-model="filterQuery" placeholder="Search">
+				</form>
+
+				<hr>
 			</div>
 		</div>
 	</div>

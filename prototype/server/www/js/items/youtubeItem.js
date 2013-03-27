@@ -4,11 +4,10 @@ angular.module('youtubeItem', [
 ])
 
 .controller('FormYoutubeItemCtrl', function($scope) {
-	if($scope.item.Author === undefined) {
-		$scope.item.Author = "anonymous"; //TODO: Replace with login
-	}
-
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
+
+	$scope.item.StartTime = new Date();
+	$scope.item.StopTime = $scope.item.StartTime;
 
 	$scope.mapOptions = {
 		center: $scope.mapCenter,

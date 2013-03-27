@@ -1,36 +1,33 @@
 #ToDos
 
 ##Server
-Autotagging!
-Users!
-Comment socksz
+###Must
+* Config old system
+* Config new system
+* Test ordering of new unranked elements as they are added
+* PaperJS import
+* Map filter systems
+* Update cloud on the fly
 
-more text in views
-checkmarks so see
-tooltips
-invert main feed and lock
-
-dealt with markers
-
-heading paperjs
-map filter
-secondary filters
-
-content type badge
-
-add a tag and it appears in a random ranking
-
+###Wish
+* Content type badge
+* Sidebar filters
+* Sort and lock main feed
+* Viewed/Dealt with check box
+* Provide a lock on the mobile user control
+* WebSockets for comments (it's a chat system!)
+* Can include more information in tile view
+* Description field for items?
+* Tooltips to help use
 
 ##Mobile
-* More text on the device
-* device UUID
-* Custom URL 
+* More text on the device (tooltips etc)
+* Auth system
 * Location
-* UUID
-
-## Fixes and Improvements
-* JS benchmarking/improvements
-* Provide a lock on the mobile user control
+	* Broke on tablets
+* Debug information
+	* Error metrics
+	* compas
 
 ## New Features
 * Better closeup view (in context)

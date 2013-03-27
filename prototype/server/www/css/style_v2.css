@@ -76,12 +76,13 @@ label {
 .tag-cloud .cloud {
 	list-style: none;
 	padding: 0;
-	width: 60%;
+	width: 75%;
 	margin: 45px auto 0 auto;
+	line-height: 50pt;
 }
 
 .tag-cloud .cloud li {
-	display: inline;
+	display: inline-block;
 	padding: 3px 10px 3px 10px;
 }
 
@@ -112,6 +113,17 @@ label {
 .term-view .grid-view .right .map, .term-view .list-view .right .map {
 	height: 350px;
 	width: 315px;
+
+	margin: 0 auto 25px auto;
+}
+
+.term-view .grid-view .filter-search {
+	margin-bottom: 25px;
+}
+
+.term-view .grid-view .filter-search input {
+	display: block;
+	margin: auto;
 }
 
 /* -- Term View Grid -- */
@@ -257,23 +269,51 @@ label {
 	width: 800px;
 }
 
-.form-generic-item .map, .closeup-item .map, .form-youtube-item .map {
+.form-generic-item .map, .form-youtube-item .map {
+	margin: auto;
+
+	height: 380px;
+	width: 380px;
+}
+
+/* -- Closeups -- */
+
+.closeup-item {
+	padding: 35px 0 20px 0;
+}
+
+.closeup-item .closeup-generic-item .map {
+	margin: auto;
+
 	height: 400px;
 	width: 450px;
 }
 
-.closeup-item {
-	padding: 20px 0 20px 0;
-}
-
-.closeup-item .closeup-youtube-item {
+.closeup-item .closeup-generic-item .left {
 	text-align: center;
 }
 
+.closeup-item .closeup-generic-item .left img {
+	width: 100%;
+	margin-bottom: 15px;
+}
+
+.closeup-item .closeup-generic-item .left div {
+	font-size: 14pt;
+	max-width: 80%;
+	margin: auto;
+
+	overflow-x: hidden;
+	overflow-y: visible;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 .closeup-item .closeup-youtube-item .map {
+	margin: auto;
+
 	height: 315px;
 	width: 315px;
-	margin: auto;
 }
 
 /* -- Comments -- */
@@ -330,8 +370,8 @@ label {
 
 .modal {
 	overflow: auto;
-	max-height: 92%;
-	top: 2%;
+	max-height: 88%;
+	top: 4%;
 	left: 50%;
 	width: 1000px;
 	margin-left: -500px;
@@ -368,19 +408,6 @@ label {
 
 /* -- Login -- */
 
-#login-panel {
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-
-	border: 1px solid rgb(208, 208, 208);
-
-	margin: 15px auto 15px auto;
-	padding: 10px 10px 30px 10px;
-
-	width: 400px;
-}
-
 #login-panel form {
 	width: 250px;
 	margin: auto;
@@ -394,4 +421,18 @@ label {
 	text-align: right;
 	width: 350px;
 	margin: auto;
+}
+
+.login-modal { /* must come after .modal */
+	overflow: auto;
+	top: 33%;
+	left: 50%;
+
+	height: 200px;
+	margin-top: -100px;
+
+	width: 400px;
+	margin-left: -200px;
+
+	padding: 20px 10px 40px 10px;
 }

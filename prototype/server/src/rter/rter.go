@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -17,6 +18,9 @@ import (
 
 func main() {
 	setupLogger()
+
+	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
+	flag.Parse()
 
 	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
 	if err != nil {
@@ -66,7 +70,11 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
-	http.Handle("/", r)
+	if *probe {
+		http.Handle("/", ProbeHandler(r))
+	} else {
+		http.Handle("/", r)
+	}
 
 	log.Println("Launching rtER Server")
 	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
@@ -81,6 +89,13 @@ func debug404(w http.ResponseWriter, r *http.Request) {
 	log.Println("404 Served")
 	log.Println(r.Method, r.URL)
 	http.NotFound(w, r)
+}
+
+func ProbeHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.URL)
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setupLogger() {

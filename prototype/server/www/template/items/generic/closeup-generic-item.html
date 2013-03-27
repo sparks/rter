@@ -1,18 +1,12 @@
 <div class="closeup-generic-item row-fluid">
-	<div class="span5">
-		<h5>Content URL</h5>
-		<a target="_blank" href="{{item.ContentURI}}">{{item.ContentURI}}</a>
-
-		<h5>Thumbnail</h5>
-		<img ng-src="{{item.ThumbnailURI}}">
-
-		<h5>Latitude</h5>
-		{{item.Lat}}
-		<h5>Longitude</h5>
-		{{item.Lng}}
+	<div class="span6 left">
+		<a target="_blank" href="{{item.ContentURI}}">
+			<img ng-src="{{item.ThumbnailURI}}">
+			<div>{{item.ContentURI}}</div>
+		</a>
 	</div>
 
-	<div class="span7">
+	<div class="span6 right">
 		<div id="map_canvas" class="map" ui-event="{}" ui-map="map" ui-options="mapOptions"></div>
 	</div>
 </div>
