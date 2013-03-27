@@ -19,12 +19,14 @@ import (
 func main() {
 	setupLogger()
 
-
+<<<<<<< HEAD
+	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
+=======
 	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
 	flag.Parse()
 
 	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
-
+>>>>>>> 171c97954eccb1b0f4ebbe762a80f6ba58428186
 	if err != nil {
 		log.Fatalf("Failed to open connection to database %v", err)
 	}

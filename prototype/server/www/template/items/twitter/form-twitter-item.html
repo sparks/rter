@@ -1,20 +1,26 @@
 <div class="form-twitter-item row-fluid">
-	<div class="span5">
+	<div class="span6">
 		
 		<label for="SearchTerm">Search Term</label>
-		<input type="text" name="searchTerm" ng-model="item.searchTerm">
+		<input type="text" name="searchTerm" ng-model="extra.SearchTerm">
 		
-<!--
+		<label for="ResultType">Result Type</label>
+		<select name="ResultType" ng-model="extra.ResultType">
+		  <option value="recent" selected>Recent</option>
+		  <option value="popular">Popular</option>
+		  <option value="mixed">Mixed of Both</option>
+		</select>
+
 		<label for="Lat">Latitude</label>
 		<input type="number" step="any" name="Lat" ng-model="item.Lat">
 		<label for="Lng">Longitude</label>
 		<input type="number" step="any" name="Lng" ng-model="item.Lng">
--->
+
 	</div>
-<!--
-	<div class="span7">
+
+	<div class="span6">
 		<div id="map_canvas" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-map="map" ui-options="mapOptions"></div>
 		<div class="btn" ng-click="resizeMap()">Map Resize</div>
 	</div>
--->`
+
 </div>

@@ -277,12 +277,12 @@ label {
 	border-color: red;
 }
 
-.form-generic-item, .form-raw-item, .form-youtube-item {
+.form-generic-item, .form-raw-item, .form-youtube-item, .form-twitter-item {
 	margin: auto;
 	width: 800px;
 }
 
-.form-generic-item .map, .form-youtube-item .map {
+.form-generic-item .map, .form-youtube-item .map, .form-twitter-item .map {
 	margin: auto;
 
 	height: 380px;
