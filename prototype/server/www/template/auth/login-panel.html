@@ -1,0 +1,13 @@
+<div id="login-panel">
+	<h2>Login</h2>
+	<form name="loginForm">
+		<label for="username">Username</label>
+		<input type="text" placeholder="Username" ng-model="username" required>
+		<label for="password">Password</label>
+		<input type="password" placeholder="Password" ng-model="password" required>
+		<div>
+			<button class="btn btn-primary" ng-click="login()" ng-disabled="loginForm.$invalid">Submit</button>
+			<button class="btn btn-danger" ng-click="cancel()">Cancel</button>
+		</div>
+	</form>
+</div>

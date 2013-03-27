@@ -31,6 +31,8 @@
 
 	<script src="/vendor/moment.js"></script>
 
+	<script src="/vendor/angular/angular-http-auth.js"></script>
+
 	<!-- App CSS & JS -->
 
 	
@@ -38,11 +40,12 @@
 
 	<script type="text/javascript" src="/js/util.js"></script>
 
-	<!-- Angular -->
+	<!-- Custom Angular -->
 
 	<script type="text/javascript" src="/js/rter.js"></script>
 
 	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
+	<script type="text/javascript" src="/js/auth/auth.js"></script>
 
 	<script type="text/javascript" src="/js/items/items.js"></script>
 	<script type="text/javascript" src="/js/items/genericItem.js"></script>
@@ -60,7 +63,7 @@
 	<script type="text/javascript" src="/js/termview/termview.js"></script>
 
 </head>
-<body>
+<body ng-controller="RterCtrl">
 
 	<div id="alerter" ng-controller="AlertsCtrl">
 		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>

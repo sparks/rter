@@ -365,3 +365,33 @@ label {
 #alerter .alert {
 	margin-bottom: 10px;
 }
+
+/* -- Login -- */
+
+#login-panel {
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+
+	border: 1px solid rgb(208, 208, 208);
+
+	margin: 15px auto 15px auto;
+	padding: 10px 10px 30px 10px;
+
+	width: 400px;
+}
+
+#login-panel form {
+	width: 250px;
+	margin: auto;
+}
+
+#login-panel input {
+	width: 95%;
+}
+
+#login-panel h2 {
+	text-align: right;
+	width: 350px;
+	margin: auto;
+}

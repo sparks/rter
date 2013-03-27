@@ -1,21 +1,21 @@
 angular.module('rter', [
-	'ui.bootstrap', //Tabs
-	'alerts',       //Main alert box
-	'taxonomy',     //Taxonomy for tag-cloud
-	'termview'      //term-view directives and TermViewRemote
+	'ui.bootstrap',          //Tabs
+	'alerts',                //Main alert box
+	'taxonomy',              //Taxonomy for tag-cloud
+	'termview',              //term-view directives and TermViewRemote
+	'http-auth-interceptor', //401 catcher
+	'auth'                   //Login system
 ])
+
+.controller('RterCtrl', function($scope, LoginDialog) {
+	$scope.$on('event:auth-loginRequired', function() {
+		LoginDialog.open();
+	});
+})
 
 .controller('TabsCtrl', function($scope, TermViewRemote) {
 	$scope.termViews = TermViewRemote.termViews;
 	TermViewRemote.addTermView({Term: ""});
-})
-
-.directive('eatClick', function() {
-    return function(scope, element, attrs) {
-        $(element).click(function(event) {
-            event.preventDefault();
-        });
-    };
 })
 
 .controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {

@@ -18,6 +18,8 @@ secondary filters
 
 content type badge
 
+add a tag and it appears in a random ranking
+
 
 ##Mobile
 * More text on the device
