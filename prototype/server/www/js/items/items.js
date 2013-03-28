@@ -90,6 +90,7 @@ angular.module('items', [
 					}
 				},
 				function(e) {
+					console.log("Couldn't load items");
 					console.log(e);
 				}
 			);

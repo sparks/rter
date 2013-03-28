@@ -153,6 +153,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
@@ -244,6 +245,8 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		v.Password = ""
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -329,6 +332,8 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 			user.Password = ""
 		}
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
@@ -423,6 +428,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)

@@ -34,13 +34,19 @@ angular.module('rter', [
 })
 
 .controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
-	$scope.terms = TaxonomyResource.query(function() {
-		$scope.countMax = 0;
+	$scope.terms = TaxonomyResource.query(
+		function(a, b, c) {
+			console.log(a);
+			$scope.countMax = 0;
 
-		angular.forEach($scope.terms, function(val) {
-			if($scope.countMax < val.Count) $scope.countMax = val.Count;
-		});
-	}); //TODO: Make me dynamic
+			angular.forEach($scope.terms, function(val) {
+				if($scope.countMax < val.Count) $scope.countMax = val.Count;
+			});
+		},
+		function(e) {
+			console.log("Couldn't load tags", e);
+		}
+	); //TODO: Make me dynamic
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);
