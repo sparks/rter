@@ -7,6 +7,15 @@ angular.module('rter', [
 	'auth'                   //Login system
 ])
 
+.filter('if', function() {
+	return function(input, value) {
+		if (typeof(input) === 'string') {
+			input = [input, ''];
+		}
+		return value? input[0] : input[1];
+	};
+})
+
 .controller('RterCtrl', function($scope, LoginDialog) {
 	$scope.loginDialogOpen = false;
 	$scope.$on('event:auth-loginRequired', function() {

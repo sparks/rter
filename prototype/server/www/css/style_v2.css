@@ -117,12 +117,16 @@ label {
 	margin: 0 auto 15px auto;
 }
 
-.term-view .grid-view .right .map-filter-en, .term-view .list-view .right .map-filter-en {
+.term-view .grid-view .right .map-filter-en,
+.term-view .list-view .right .map-filter-en,
+.term-view .grid-view .right .filter-mode ,
+.term-view .list-view .right .filter-mode  {
 	text-align: center;
 	margin-bottom: 15px;
 }
 
-.term-view .map-view .right .map-filter-en {
+.term-view .map-view .right .map-filter-en,
+.term-view .map-view .right .filter-mode {
 	display: none;
 }
 
@@ -234,7 +238,7 @@ label {
 }
 
 .item-list .blur {
-	opacity: 0.3;
+	opacity: 0.2;
 }
 
 /* -- TermView Map -- */

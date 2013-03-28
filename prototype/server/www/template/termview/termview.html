@@ -20,18 +20,28 @@
 				<div ng-switch on="term.Term">
 					<div ng-switch-when="">
 						<ul class="item-list">		
-							<li ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 					<div ng-switch-default>
 						<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
-							<li ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 				</div>
 			</div>
 
 			<div class="right span4">
+				<div class="filter-mode">
+					<label for="filterMode">Filtering Mode</label>
+					<div class="btn-group" name="filterMode" data-toggle="buttons-checkbox">
+					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'blur'">Blur</button>
+					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'remove'">Remove</button>
+					</div>
+				</div>
+
+				<hr>
+
 				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
 				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
 				</div>
