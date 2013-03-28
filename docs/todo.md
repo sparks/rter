@@ -9,6 +9,7 @@
 * PaperJS import
 * Map filter systems
 * Update cloud on the fly
+* Main feed doesnt update realtime
 
 ###Wish
 * Content type badge
