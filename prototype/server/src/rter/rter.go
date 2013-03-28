@@ -22,7 +22,7 @@ import (
 func main() {
 	setupLogger()
 
-	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
+	probe := flag.Int("probe", 0, "probe and log Method and URL for every request")
 	https := flag.Bool("https", false, "use https")
 	gzip := flag.Bool("gzip", false, "enable gzip compression")
 
@@ -79,14 +79,14 @@ func main() {
 
 	var rootHandler http.Handler = r
 
-	if *probe {
-		log.Println("Probe Enabled")
-		rootHandler = ProbeHandler(rootHandler)
-	}
-
 	if *gzip {
 		log.Println("GZIP Enabled")
 		rootHandler = GzipHandler(rootHandler)
+	}
+
+	if *probe > 0 {
+		log.Println("Probe Enabled, Level", *probe)
+		rootHandler = ProbeHandler(*probe, rootHandler)
 	}
 
 	http.Handle("/", rootHandler)
@@ -101,12 +101,12 @@ func main() {
 	}
 }
 
-type gzipResponseWriter struct {
+type GzipResponseWriter struct {
 	io.Writer
 	http.ResponseWriter
 }
 
-func (w gzipResponseWriter) Write(b []byte) (int, error) {
+func (w GzipResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
@@ -122,7 +122,7 @@ func GzipHandler(h http.Handler) http.Handler {
 		gz := gzip.NewWriter(w)
 		defer gz.Close()
 
-		h.ServeHTTP(gzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
+		h.ServeHTTP(GzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
 	})
 }
 
@@ -132,9 +132,17 @@ func debug404(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
-func ProbeHandler(h http.Handler) http.Handler {
+func ProbeHandler(level int, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method, r.URL)
+		if level > 1 {
+			log.Println("Headers:")
+			for key, value := range r.Header {
+				log.Println("\t", key, "->", value)
+			}
+		}
+		if level > 0 {
+			log.Println(r.Method, r.URL)
+		}
 		h.ServeHTTP(w, r)
 	})
 }
