@@ -44,13 +44,23 @@ angular.module('termview', [
 
 	$scope.viewmode = "grid-view";
 	$scope.filterMode = "blur";
+	$scope.prevFilterMode = "blur";
 	$scope.mapFilterEnable = false;
 
-	$scope.$watch('viewmode', function() {
+	$scope.$watch('viewmode', function(newVal, oldVal) {
 		$scope.mapCenter = $scope.map.getCenter();
 
 		if($scope.viewmode == 'map-view') {
 			$scope.mapFilterEnable = false;
+		}
+
+		if(oldVal != "map-view" && newVal == "map-view") {
+			$scope.prevFilterMode = $scope.filterMode;
+			$scope.filterMode = "remove";
+		}
+
+		if(oldVal == "map-view" && newVal != "map-view") {
+			$scope.filterMode = $scope.prevFilterMode;
 		}
 
 		$timeout(function() {
