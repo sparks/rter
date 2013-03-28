@@ -1,6 +1,7 @@
 angular.module('genericItem', [
-	'ng', //$timeout
-	'ui'  //Map
+	'ng',  //$timeout
+	'ui',  //Map
+	'imap' //iMap
 ])
 
 .controller('FormGenericItemCtrl', function($scope) {
@@ -8,6 +9,7 @@ angular.module('genericItem', [
 
 	$scope.item.StartTime = new Date();
 	$scope.item.StopTime = $scope.item.StartTime;
+	$scope.item.heading = -75;
 
 	$scope.mapOptions = {
 		center: $scope.mapCenter,
@@ -25,7 +27,8 @@ angular.module('genericItem', [
 		if($scope.marker === undefined) {
 			$scope.marker = new google.maps.Marker({
 				map: $scope.map,
-				position: $event.latLng
+				position: $event.latLng,
+				animation: google.maps.Animation.DROP
 			});
 		} else {
 			$scope.marker.setPosition($event.latLng);
@@ -50,7 +53,8 @@ angular.module('genericItem', [
 				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
 				scope.marker = new google.maps.Marker({
 					map: scope.map,
-					position: latLng
+					position: latLng,
+					animation: google.maps.Animation.DROP
 				});
 				scope.mapCenter = latLng;
 			} else {
@@ -86,35 +90,21 @@ angular.module('genericItem', [
 	};
 })
 
-.controller('CloseupGenericItemCtrl', function($scope) {
-	if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined) {
-		$scope.mapCenter = new google.maps.LatLng($scope.item.Lat, $scope.item.Lng);
-	} else {
-		$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
-	}
+.controller('CloseupGenericItemCtrl', function($scope, ItemCache, CloseupItemDialog) {
 
-	$scope.mapOptions = {
-		center: $scope.mapCenter,
-		zoom: 10,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
 })
 
 .directive('closeupGenericItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
-			item: "="
+			item: "=",
+			dialog: "="
 		},
 		templateUrl: '/template/items/generic/closeup-generic-item.html',
 		controller: 'CloseupGenericItemCtrl',
 		link: function(scope, element, attr) {
-			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
-				scope.marker = new google.maps.Marker({
-					map: scope.map,
-					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
-				});
-			}
+			
 		}
 	};
 });

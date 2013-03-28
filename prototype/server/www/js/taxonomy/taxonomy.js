@@ -72,7 +72,7 @@ angular.module('taxonomy', [
 		this.init();
 
 		this.update = function(newRanking, sucess, failure) {
-			var oldRanking = angular.copy(this.ranking);
+			var oldRanking = this.ranking.slice(0);
 
 			replaceRanking(newRanking);
 

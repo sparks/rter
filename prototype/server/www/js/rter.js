@@ -35,8 +35,7 @@ angular.module('rter', [
 
 .controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
 	$scope.terms = TaxonomyResource.query(
-		function(a, b, c) {
-			console.log(a);
+		function() {
 			$scope.countMax = 0;
 
 			angular.forEach($scope.terms, function(val) {
