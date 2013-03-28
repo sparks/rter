@@ -1,8 +1,10 @@
 package main
 
 import (
+	"compress/gzip"
 	"flag"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,12 +16,16 @@ import (
 	"rter/streaming"
 	"rter/utils"
 	"rter/web"
+	"strings"
 )
 
 func main() {
 	setupLogger()
 
 	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
+	https := flag.Bool("https", false, "use https")
+	gzip := flag.Bool("gzip", false, "enable gzip compression")
+
 	flag.Parse()
 
 	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
@@ -71,19 +77,53 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
+	var rootHandler http.Handler = r
+
 	if *probe {
-		http.Handle("/", ProbeHandler(r))
-	} else {
-		http.Handle("/", r)
+		log.Println("Probe Enabled")
+		rootHandler = ProbeHandler(rootHandler)
 	}
 
+	if *gzip {
+		log.Println("GZIP Enabled")
+		rootHandler = GzipHandler(rootHandler)
+	}
+
+	http.Handle("/", rootHandler)
+
 	log.Println("Launching rtER Server")
-	// log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	if *https {
+		log.Println("Using HTTPS")
+		log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
+	} else {
+		log.Println("Using HTTP")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}
 }
 
-func rootRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+func GzipHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			h.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Encoding", "gzip")
+
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+
+		h.ServeHTTP(gzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
+	})
 }
 
 func debug404(w http.ResponseWriter, r *http.Request) {
