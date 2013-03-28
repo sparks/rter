@@ -19,7 +19,6 @@ import (
 func main() {
 	setupLogger()
 
-
 	probe := flag.Bool("probe", false, "probe and log Method and URL for every request")
 	flag.Parse()
 

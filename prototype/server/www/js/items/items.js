@@ -201,7 +201,7 @@ angular.module('items', [
 	};
 })
 
-.filter('orderByRanking', function() { //FIXED: this is n^2 probably not good
+.filter('orderByRanking', function() { //FIXME: this is n^2 probably not good
 	return function(input, ranking) {
 		if(ranking === undefined || ranking.length === 0) return input;
 

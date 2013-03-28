@@ -72,6 +72,7 @@ angular.module('termview', [
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+
 	$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.filterQuery);
 	$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
 	$scope.finalFilteredItems = $scope.textSearchedItems;
