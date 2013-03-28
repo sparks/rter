@@ -122,15 +122,15 @@ angular.module('twitterItem',  [
 ;})
 
 .controller('CloseupTwitterItemCtrl', function($scope, $http) {
-
-	 $http({method: 'jsonp', url: 'https://api.twitter.com/1/statuses/oembed.json?id=316661563513782272&align=center&callback=JSON_CALLBACK', cache: false}).
+	 console.log($scope.item.ContentURI);
+	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
       success(function(data, status) {
-          console.log(data.html, status);
+          console.log(data, status);
           console.log($scope);
         $scope.displayTweet =  data.html;
         console.log($scope.displayTweet);
         $scope.status = status;
-        $scope.data = data;
+        $scope.searchResult = data;
       }).
       error(function(data, status) {
          console.log(data, status);

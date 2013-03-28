@@ -1,12 +1,27 @@
 <div class="closeup-twitter-item">
-	I am a closeup twitter item! 
+	
 	<br>
 	
-	<!--<blockquote class="twitter-tweet" align="center"><p>Search API will now always return "real" Twitter user IDs. The with_twitter_user_id parameter is no longer necessary. An era has ended. ^TS</p>&mdash; Twitter API (@twitterapi) <a href="https://twitter.com/twitterapi/status/133640144317198338">November 7, 2011</a></blockquote> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script> -->
-	
-	<blockquote class="twitter-tweet" align="center"><p>@<a href="https://twitter.com/crew_r3y">crew_r3y</a> no no si te das cuenta el que le da es montreal eh pero bueno nose eh jaajajajja</p>&mdash; David Gacho Molina (@DavidGacho_RMCF) <a href="https://twitter.com/DavidGacho_RMCF/status/316661563513782272">March 26, 2013</a></blockquote>
-	<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script> 
-	
 
-	{{item.ContentURI}}
+	<ul class="twitter-list">
+		<li ng-repeat = "tweet in searchResult.results" class="twitter">
+			<header>
+				<span class="author">{{tweet.from_user}}</span>
+				<span class="time">{{tweet.created_at | fromNow}}</span>
+			</header>
+			<article>{{tweet.text}}</article>
+		</li>
+	</ul>
+
+
+
+	
+	<!--	<blockquote class="twitter-tweet" data-cards="hidden" align="center"><p>Search API will now always return "real" Twitter user IDs. The with_twitter_user_id parameter is no longer necessary. An era has ended. ^TS</p>&mdash; Twitter API (@twitterapi) <a href="https://twitter.com/twitterapi/status/133640144317198338">November 7, 2011</a></blockquote>
+	<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script> -->
+
+
+
+
+	
+	
 </div>
