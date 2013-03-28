@@ -101,14 +101,14 @@ angular.module('termview', [
 		}
 	}, true);
 
-	$scope.$watch('textSearchedItems', function() {
+	$scope.$watch('[textSearchedItems, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			$scope.finalMapItems = $scope.textSearchedItems;
 			$scope.updateMarkers();
 		}
 	}, true);
 
-	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable]', function() {
+	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			if($scope.mapFilterEnable) {
 				$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
@@ -118,7 +118,7 @@ angular.module('termview', [
 		}
 	}, true);
 
-	$scope.$watch('mapFilteredItems', function() {
+	$scope.$watch('[mapFilteredItems, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			$scope.finalFilteredItems = $scope.mapFilteredItems;
 		}
