@@ -1,22 +1,20 @@
 package main
 
 import (
-	"compress/gzip"
 	"flag"
 	"github.com/gorilla/mux"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"rter/auth"
+	"rter/compressor"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
 	"rter/streaming"
 	"rter/utils"
 	"rter/web"
-	"strings"
 )
 
 func main() {
@@ -77,53 +75,29 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
+	log.Println("Launching rtER Server")
+
 	var rootHandler http.Handler = r
 
 	if *gzip {
-		log.Println("GZIP Enabled")
-		rootHandler = GzipHandler(rootHandler)
+		log.Print("\t-GZIP Enabled")
+		rootHandler = compressor.GzipHandler(rootHandler)
 	}
 
 	if *probe > 0 {
-		log.Println("Probe Enabled, Level", *probe)
+		log.Print("\t-Probe Enabled, Level ", *probe)
 		rootHandler = ProbeHandler(*probe, rootHandler)
 	}
 
 	http.Handle("/", rootHandler)
 
-	log.Println("Launching rtER Server")
 	if *https {
-		log.Println("Using HTTPS")
+		log.Println("\t-Using HTTPS")
 		log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
 	} else {
-		log.Println("Using HTTP")
+		log.Println("\t-Using HTTP")
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}
-}
-
-type GzipResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
-
-func (w GzipResponseWriter) Write(b []byte) (int, error) {
-	return w.Writer.Write(b)
-}
-
-func GzipHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			h.ServeHTTP(w, r)
-			return
-		}
-
-		w.Header().Set("Content-Encoding", "gzip")
-
-		gz := gzip.NewWriter(w)
-		defer gz.Close()
-
-		h.ServeHTTP(GzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
-	})
 }
 
 func debug404(w http.ResponseWriter, r *http.Request) {
