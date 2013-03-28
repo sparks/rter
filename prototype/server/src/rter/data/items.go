@@ -2,6 +2,7 @@ package data
 
 import (
 	"time"
+	token "videoserver/auth"
 )
 
 type Item struct {
@@ -22,6 +23,8 @@ type Item struct {
 	StopTime  time.Time `json:",omitempty"`
 
 	Terms []*Term `json:",omitempty"`
+
+	Token *token.Token `json:",omitempty"`
 }
 
 type ItemComment struct {

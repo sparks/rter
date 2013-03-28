@@ -20,6 +20,7 @@
 * Can include more information in tile view
 * Description field for items?
 * Tooltips to help use
+* Callback/Hooks for CRUD instead of mass of witch statements
 
 ##Mobile
 * More text on the device (tooltips etc)

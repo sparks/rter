@@ -142,12 +142,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			s := []interface{}{
-				v,
-				t,
-			}
-
-			val = s
+			v.Token = t
 		}
 	}
 
