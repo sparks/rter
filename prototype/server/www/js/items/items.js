@@ -100,8 +100,9 @@ angular.module('items', [
 		this.create = function(item, sucess, failure) {
 			ItemResource.save(
 				item,
-				function() {
+				function(data) {
 					//Do not add the item here since it has no ID, it will be added by the websocket callback
+					console.log(data);
 					Alerter.success("Item Created", 2000);
 					if(angular.isFunction(sucess)) sucess();
 				},

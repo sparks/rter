@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"github.com/gorilla/sessions"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"rter/data"
@@ -45,18 +44,12 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) (*data.User, int) {
 func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	loginInfo := new(data.User)
 
-	bodybytes, _ := ioutil.ReadAll(r.Body)
-
-	// decoder := json.NewDecoder(r.Body)
-	// err := decoder.Decode(&loginInfo)
-
-	err := json.Unmarshal(bodybytes, &loginInfo)
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&loginInfo)
 
 	if err != nil {
 		log.Println("JSON problem")
 		log.Println(err)
-		log.Println("Body")
-		log.Println(string(bodybytes))
 		http.Error(w, "Malformed json.", http.StatusBadRequest)
 		return
 	}
