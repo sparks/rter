@@ -416,9 +416,13 @@ label {
 .twitter header {
 	border-bottom: 1px solid rgb(208, 208, 208);
 	margin-bottom: 8px;
-	padding-bottom: 2px;
+	padding-bottom: 8px;
 }
 
+.twitter header button {
+	float:right;
+	margin-right: 5px;
+}
 .twitter .author {
 	color: rgb(7, 91, 146);
 	font-weight: bold;

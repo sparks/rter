@@ -39,6 +39,9 @@ angular.module('twitterItem',  [
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
 	};
+
+
+	
 })
                                                                                                                                      
 .directive('formTwitterItem', function($timeout) {
@@ -118,18 +121,32 @@ angular.module('twitterItem',  [
 			
 			
 		}
-	}
-;})
+	};
+})
+.controller('embedTweetCardCtrl', function($scope) {
+
+})
+
+.directive('embedTweetCard', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			tweet: "="
+		},
+		templateUrl: '/template/items/twitter/twitter-card.html',
+		controller: 'embedTweetCardCtrl',
+		link: function(scope, element, attr) {
+			
+			
+		}
+	};
+})
 
 .controller('CloseupTwitterItemCtrl', function($scope, $http) {
 	 console.log($scope.item.ContentURI);
 	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
       success(function(data, status) {
           console.log(data, status);
-          console.log($scope);
-        $scope.displayTweet =  data.html;
-        console.log($scope.displayTweet);
-        $scope.status = status;
         $scope.searchResult = data;
       }).
       error(function(data, status) {
@@ -137,6 +154,25 @@ angular.module('twitterItem',  [
         $scope.data = data || "Request failed";
         $scope.status = status;
     });
+    $scope.showTweetCard = function(id, $event){
+		// alert(id, $event.target);
+		console.log(id, $event, $event.target);
+		var urlVar = 'http://api.twitter.com/1/statuses/oembed.json?id='+id
+					+'&align=center&omit_script=true&hide_thread=true&hide_media=true&callback=JSON_CALLBACK'
+		$http({method: 'jsonp', url: urlVar, cache: false}).
+	      success(function(data, status) {
+	          console.log(data.html, status);
+	          console.log($scope);
+	        $scope.displayTweet =  data.html;
+	        console.log($scope.displayTweet);
+
+	      }).
+	      error(function(data, status) {
+	         console.log(data, status);
+	        $scope.data = data || "Request failed";
+	        $scope.status = status;
+	    });
+	};  
 })
 
 .directive('closeupTwitterItem', function() {
@@ -148,9 +184,7 @@ angular.module('twitterItem',  [
 		templateUrl: '/template/items/twitter/closeup-twitter-item.html',
 		controller: 'CloseupTwitterItemCtrl',
 		link: function(scope, element, attr) {
-			scope.addHTML = function(newhtml) {
-				element.append($(newhtl))
-			}
+			
 
 		}
 	};
