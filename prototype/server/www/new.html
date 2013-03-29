@@ -29,7 +29,7 @@
 
 	<script src="/vendor/angular/ui-bootstrap-tpls.js"></script>
 
-	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&libraries=geometry&sensor=false"></script>
 
 	<script src="/vendor/sockjs.min.js"></script>
 
@@ -47,6 +47,8 @@
 
 	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
 	<script type="text/javascript" src="/js/auth/auth.js"></script>
+	<script type="text/javascript" src="/js/map/disp-map.js"></script>
+	<script type="text/javascript" src="/js/map/edit-map.js"></script>
 
 	<script type="text/javascript" src="/js/items/items.js"></script>
 	<script type="text/javascript" src="/js/items/genericItem.js"></script>
@@ -65,7 +67,7 @@
 
 </head>
 <body ng-controller="RterCtrl">
-
+	
 	<div id="alerter" ng-controller="AlertsCtrl">
 		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 	</div>

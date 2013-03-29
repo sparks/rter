@@ -39,7 +39,9 @@ angular.module('items', [
 
 			for(var i = 0;i < self.items.length;i++) {
 				if(self.items[i].ID == item.ID) {
-					self.items[i] = item;
+					for (var key in item) {
+						self.items[i][key] = item[key];
+					}
 					found = true;
 					break;
 				}

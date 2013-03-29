@@ -8,7 +8,7 @@ angular.module('taxonomy', [
 		'/1.0/taxonomy/:Term/ranking',
 		{ Term: '@Term' },
 		{
-			update: { method: 'PUT', params:{ Term: '@Term' } }
+			update: { method: 'PUT' }
 		}
 	);
 
@@ -72,7 +72,7 @@ angular.module('taxonomy', [
 		this.init();
 
 		this.update = function(newRanking, sucess, failure) {
-			var oldRanking = angular.copy(this.ranking);
+			var oldRanking = this.ranking.slice(0);
 
 			replaceRanking(newRanking);
 

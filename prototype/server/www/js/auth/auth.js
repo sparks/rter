@@ -21,6 +21,18 @@ angular.module('auth', [
 	return UserResource;
 })
 
+.factory('UserDirectionResource', function ($resource) {
+	var UserDirectionResource = $resource(
+		'/1.0/users/:Username/direction',
+		{Username: '@Username'},
+		{
+			update: { method: 'PUT' }
+		}
+	);
+
+	return UserDirectionResource;
+})
+
 .controller('LoginPanelCtrl', function($scope, $http, authService, UserResource, Alerter) {
 	$scope.login = function() {
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})

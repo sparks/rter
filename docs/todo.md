@@ -2,6 +2,8 @@
 
 ##Server
 ###Must
+* Maps centering is decentralized and wonky + breaks location of cone markers in imap
+
 * Config old system
 * Config new system
 * Non destructive PUTs
@@ -9,6 +11,7 @@
 * PaperJS import
 * Map filter systems
 * Update cloud on the fly
+* Main feed doesnt update realtime
 
 ###Wish
 * Content type badge

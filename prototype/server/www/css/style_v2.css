@@ -247,6 +247,16 @@ label {
 	padding-top: 15px;
 }
 
+.term-view .map-view .right hr {
+	display: none;
+}
+
+.term-view .map-view .text-search {
+	margin-top: 25px;
+	position: relative;
+	left: 100%;
+}
+
 .term-view .map-view .right .map {
 	position: absolute;
 	top: 0;

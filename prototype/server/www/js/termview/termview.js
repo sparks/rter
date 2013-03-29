@@ -44,13 +44,27 @@ angular.module('termview', [
 
 	$scope.viewmode = "grid-view";
 	$scope.filterMode = "blur";
+	$scope.prevFilterMode = "blur";
 	$scope.mapFilterEnable = false;
 
-	$scope.$watch('viewmode', function() {
+	$scope.$watch('mapFilterEnable', function() {
+		$scope.boundsChanged();
+	});
+
+	$scope.$watch('viewmode', function(newVal, oldVal) {
 		$scope.mapCenter = $scope.map.getCenter();
 
 		if($scope.viewmode == 'map-view') {
 			$scope.mapFilterEnable = false;
+		}
+
+		if(oldVal != "map-view" && newVal == "map-view") {
+			$scope.prevFilterMode = $scope.filterMode;
+			$scope.filterMode = "remove";
+		}
+
+		if(oldVal == "map-view" && newVal != "map-view") {
+			$scope.filterMode = $scope.prevFilterMode;
 		}
 
 		$timeout(function() {
@@ -101,14 +115,14 @@ angular.module('termview', [
 		}
 	}, true);
 
-	$scope.$watch('textSearchedItems', function() {
+	$scope.$watch('[textSearchedItems, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			$scope.finalMapItems = $scope.textSearchedItems;
 			$scope.updateMarkers();
 		}
 	}, true);
 
-	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable]', function() {
+	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			if($scope.mapFilterEnable) {
 				$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
@@ -118,7 +132,7 @@ angular.module('termview', [
 		}
 	}, true);
 
-	$scope.$watch('mapFilteredItems', function() {
+	$scope.$watch('[mapFilteredItems, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			$scope.finalFilteredItems = $scope.mapFilteredItems;
 		}

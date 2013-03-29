@@ -1,32 +1,37 @@
 package main
 
 import (
-	"compress/gzip"
 	"flag"
 	"github.com/gorilla/mux"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"rter/auth"
+	"rter/compressor"
 	"rter/mobile"
 	"rter/rest"
 	"rter/storage"
 	"rter/streaming"
 	"rter/utils"
 	"rter/web"
-	"strings"
+)
+
+var (
+	probeLevel   = flag.Int("probe", 0, "perform logging on requests")
+	httpsFlag    = flag.Bool("https", false, "enable https")
+	httpFlag     = flag.Bool("http", true, "enable http")
+	gzipFlag     = flag.Bool("gzip", false, "enable gzip compression")
+	logfile      = flag.String("log-file", "", "set server logfile")
+	serveLogFlag = flag.Bool("serve-log-file", true, "serve logfile over http")
 )
 
 func main() {
+	flag.Parse()
+
 	setupLogger()
 
-	probe := flag.Int("probe", 0, "probe and log Method and URL for every request")
-	https := flag.Bool("https", false, "use https")
-	gzip := flag.Bool("gzip", false, "enable gzip compression")
-
-	flag.Parse()
+	log.Println("Launching rtER Server")
 
 	err := storage.OpenStorage("rter", "j2pREch8", "tcp", "localhost:3306", "rter")
 
@@ -75,55 +80,60 @@ func main() {
 		},
 	)
 
+	if *serveLogFlag && *logfile != "" { //Sorta hacky this also depends on the setupLogger running before in case envvar was set
+		log.Println("\t-Serve Log Enabled")
+		r.HandleFunc("/log",
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, *logfile)
+			},
+		).Methods("GET")
+	}
+
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
 	var rootHandler http.Handler = r
 
-	if *gzip {
-		log.Println("GZIP Enabled")
-		rootHandler = GzipHandler(rootHandler)
+	if *gzipFlag {
+		log.Print("\t-GZIP Enabled")
+		rootHandler = compressor.GzipHandler(rootHandler)
 	}
 
-	if *probe > 0 {
-		log.Println("Probe Enabled, Level", *probe)
-		rootHandler = ProbeHandler(*probe, rootHandler)
+	if *probeLevel > 0 {
+		log.Print("\t-Probe Enabled, Level ", *probeLevel)
+		rootHandler = ProbeHandler(*probeLevel, rootHandler)
 	}
 
 	http.Handle("/", rootHandler)
 
-	log.Println("Launching rtER Server")
-	if *https {
-		log.Println("Using HTTPS")
-		log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
-	} else {
-		log.Println("Using HTTP")
-		log.Fatal(http.ListenAndServe(":8080", nil))
+	waits := make([]chan bool, 0)
+
+	if *httpsFlag {
+		httpsChan := make(chan bool)
+		waits = append(waits, httpsChan)
+
+		go func() {
+			log.Println("\t-Using HTTPS")
+			log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
+
+			httpsChan <- true
+		}()
 	}
-}
 
-type GzipResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
+	if *httpFlag {
+		httpChan := make(chan bool)
+		waits = append(waits, httpChan)
 
-func (w GzipResponseWriter) Write(b []byte) (int, error) {
-	return w.Writer.Write(b)
-}
+		go func() {
+			log.Println("\t-Using HTTP")
+			log.Fatal(http.ListenAndServe(":8080", nil))
 
-func GzipHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			h.ServeHTTP(w, r)
-			return
-		}
+			httpChan <- true
+		}()
+	}
 
-		w.Header().Set("Content-Encoding", "gzip")
-
-		gz := gzip.NewWriter(w)
-		defer gz.Close()
-
-		h.ServeHTTP(GzipResponseWriter{Writer: gz, ResponseWriter: w}, r)
-	})
+	for _, w := range waits {
+		<-w
+	}
 }
 
 func debug404(w http.ResponseWriter, r *http.Request) {
@@ -134,27 +144,31 @@ func debug404(w http.ResponseWriter, r *http.Request) {
 
 func ProbeHandler(level int, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if level > 1 {
-			log.Println("Headers:")
-			for key, value := range r.Header {
-				log.Println("\t", key, "->", value)
+		if r.URL.Path != "/log" {
+			if level > 1 {
+				log.Println("Headers:")
+				for key, value := range r.Header {
+					log.Println("\t", key, "->", value)
+				}
 			}
-		}
-		if level > 0 {
-			log.Println(r.Method, r.URL)
+			if level > 0 {
+				log.Println(r.Method, r.URL)
+			}
 		}
 		h.ServeHTTP(w, r)
 	})
 }
 
 func setupLogger() {
-	logOutputFile := os.Getenv("RTER_LOGFILE")
+	if *logfile == "" { //flag takes precendence over ENV variable
+		*logfile = os.Getenv("RTER_LOGFILE")
+	}
 
-	if logOutputFile != "" {
-		logFile, err := os.Create(logOutputFile)
+	if *logfile != "" {
+		file, err := os.Create(*logfile)
 
 		if err == nil {
-			log.SetOutput(logFile)
+			log.SetOutput(file)
 		} else {
 			log.Println(err)
 		}

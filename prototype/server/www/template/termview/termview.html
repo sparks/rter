@@ -45,7 +45,9 @@
 				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
 				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
 				</div>
-				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-bounds_changed': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
+				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-dragend': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
+
+				<!-- 'bounds_changed center_changed click dblclick drag dragend dragstart heading_changed idle maptypeid_changed mousemove mouseout mouseover projection_changed resize rightclick tilesloaded tilt_changed zoom_changed' -->
 
 				<div class="map-filter-en">
 					<label for="mapFitlerEnable">Use Map as Filter</label>

@@ -109,10 +109,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.Item:
 		v.Author = user.Username
-
-		v.UploadURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
-		v.ThumbnailURI = "http://localhost:8081/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
-		v.ContentURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+		if v.Type == "streaming-video-v1" {
+			v.UploadURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+			v.ThumbnailURI = "http://localhost:8081/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
+			v.ContentURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+		}
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
 		v.Author = user.Username
@@ -152,8 +153,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
@@ -404,6 +405,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		v.Username = vars["key"]
 	case (*data.UserDirection):
 		v.Username = vars["key"]
+		v.LockUsername = user.Username
 	case (*data.Role):
 		v.Title = vars["key"]
 	case (*data.Term):
