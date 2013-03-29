@@ -20,12 +20,12 @@
 				<div ng-switch on="term.Term">
 					<div ng-switch-when="">
 						<ul class="item-list">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="updateItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 					<div ng-switch-default>
 						<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="updateItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 				</div>
@@ -43,7 +43,7 @@
 				<hr>
 
 				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
-				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
+				  ui-event="{'map-click': 'updateItemDialog(bundle.item)'}">
 				</div>
 				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-dragend': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
 
