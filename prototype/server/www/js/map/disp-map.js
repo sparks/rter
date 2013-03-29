@@ -1,9 +1,10 @@
 angular.module('disp-map', [
-	'ui', //Map
-	'ng'  //$timeout
+	'ui',  //Map
+	'ng',   //$timeout
+	'auth' //UserDirectionResource
 ])
 
-.controller('DispMapCtrl', function($scope, $timeout) {
+.controller('DispMapCtrl', function($scope, $timeout, UserDirectionResource) {
 	$scope.targetHeading = 0;
 
 	$scope.mapOptions = {
@@ -36,6 +37,7 @@ angular.module('disp-map', [
 	$scope.rebuildFov = function() {
 		if($scope.enableFov === undefined) return;
 		if($scope.item.Heading === undefined) return;
+		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var vshape = {
 			path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
@@ -64,6 +66,7 @@ angular.module('disp-map', [
 	$scope.rebuildDir = function() {
 		if($scope.enableFov === undefined) return;
 		if($scope.targetHeading === undefined) return;
+		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var arrow = {
 			path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -95,6 +98,8 @@ angular.module('disp-map', [
 
 		$scope.targetHeading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
 		$scope.rebuildDir();
+
+		UserDirectionResource.update({Username: $scope.item.Author, Heading: $scope.targetHeading});
 	};
 
 	$scope.$watch('[item.Lat, item.Lng]', function() {

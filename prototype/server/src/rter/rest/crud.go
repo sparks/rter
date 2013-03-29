@@ -405,6 +405,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		v.Username = vars["key"]
 	case (*data.UserDirection):
 		v.Username = vars["key"]
+		v.LockUsername = user.Username
 	case (*data.Role):
 		v.Title = vars["key"]
 	case (*data.Term):
