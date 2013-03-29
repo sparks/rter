@@ -47,6 +47,10 @@ angular.module('termview', [
 	$scope.prevFilterMode = "blur";
 	$scope.mapFilterEnable = false;
 
+	$scope.$watch('mapFilterEnable', function() {
+		$scope.boundsChanged();
+	});
+
 	$scope.$watch('viewmode', function(newVal, oldVal) {
 		$scope.mapCenter = $scope.map.getCenter();
 

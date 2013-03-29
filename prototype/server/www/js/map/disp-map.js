@@ -113,6 +113,12 @@ angular.module('disp-map', [
 		$scope.rebuildFov();
 	});
 
+	$scope.$watch('[enableFov, enableDir, enableMarker]', function() {
+		$scope.rebuildMarker();
+		$scope.rebuildFov();
+		$scope.rebuildDir();
+	}, true);
+
 })
 
 .directive('dispMap', function() {
