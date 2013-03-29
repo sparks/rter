@@ -8,7 +8,7 @@ angular.module('taxonomy', [
 		'/1.0/taxonomy/:Term/ranking',
 		{ Term: '@Term' },
 		{
-			update: { method: 'PUT', params:{ Term: '@Term' } }
+			update: { method: 'PUT' }
 		}
 	);
 
