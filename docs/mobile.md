@@ -11,7 +11,9 @@
  		* The item should have a Type, a StartTime and a StopTime set before the StartTime (mostly done Dan)
  		* If a available this should also include Lat/Lng and Heading (Cameron or Dan?)
  	* The returned JSON includes the following fields which are saved: ID, Upload URI, Token (Dan?)
- * The streaming beings (done stepan). The UploadURI saved from before is used (not done Dan)
+ * The streaming beings (done stepan). 
+ 	* The UploadURI saved from before is used (not done Dan)
+ 	* With every POST to the video server the authorization token must be passed in the Authorization header field. See the [token documentation](https://github.com/sparks/rter/blob/master/prototype/videoserver/src/videoserver/auth/token.go) for exact information about how the JSON should be reformated before being placed in the headers of the video POST requests.
  * OPENGL is initialized (Cameron/Stepan)
  * During the streaming the following happens at regular intervals (~every second?) 
  	* The item is updated on the server via PUT using the ID saved from before. This update changes the Lat/Lng/Heading info. (Cameron?)
