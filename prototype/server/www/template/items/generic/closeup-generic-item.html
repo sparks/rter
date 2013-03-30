@@ -7,10 +7,21 @@
 			</a>
 		</div>
 
-		<div class="span6 right">
-			<disp-map item="item" enable-marker></disp-map>
+		<div class="span6 right" ng-switch on="item.HasHeading">
+			<div ng-switch-when="true" ng-switch on="item.Live">
+				<div ng-switch-when="true">
+					<disp-map item="item" enable-fov enable-dir enable-marker></disp-map>
+				</div>
+				<div ng-switch-default>
+					<disp-map item="item" enable-fov enable-marker></disp-map>
+				</div>
+			</div>
+			<div ng-switch-default>
+				<disp-map item="item" enable-marker></disp-map>
+			</div>
 		</div>
 	</div>
+
 	<div ng-switch-default>
 		<div class="span12">
 			<a target="_blank" href="{{item.ContentURI}}">
