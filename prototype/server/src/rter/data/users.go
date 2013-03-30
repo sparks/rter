@@ -22,9 +22,9 @@ type UserDirection struct {
 	LockUsername string `json:",omitempty"`
 	Command      string `json:",omitempty"`
 
-	Heading float64
-	Lat     float64
-	Lng     float64
+	Heading float64 `json:",omitempty"`
+	Lat     float64 `json:",omitempty"`
+	Lng     float64 `json:",omitempty"`
 
 	UpdateTime time.Time `json:",omitempty"`
 }

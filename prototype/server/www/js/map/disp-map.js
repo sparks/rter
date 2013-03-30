@@ -5,8 +5,6 @@ angular.module('disp-map', [
 ])
 
 .controller('DispMapCtrl', function($scope, $timeout, UserDirectionResource) {
-	$scope.targetHeading = 0;
-
 	$scope.mapOptions = {
 		zoom: 16,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
@@ -36,7 +34,9 @@ angular.module('disp-map', [
 
 	$scope.rebuildFov = function() {
 		if($scope.enableFov === undefined) return;
-		if($scope.item.Heading === undefined) return;
+		if($scope.item.Heading === undefined) {
+			$scope.item.Heading = 0;
+		}
 		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var vshape = {
@@ -65,7 +65,16 @@ angular.module('disp-map', [
 
 	$scope.rebuildDir = function() {
 		if($scope.enableDir === undefined) return;
-		if($scope.targetHeading === undefined) return;
+		if($scope.userDir === undefined) {
+			$scope.userDir = UserDirectionResource.get(
+				{Username: $scope.item.Author},
+				function() {
+					if($scope.userDir.Heading === undefined) $scope.userDir.Heading = 0;
+					$scope.rebuildDir();
+				}
+			);
+			return;
+		}
 		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var arrow = {
@@ -75,7 +84,7 @@ angular.module('disp-map', [
 			fillColor: '#AAA',
 			strokeWeight: 3,
 			scale: 10,
-			rotation: $scope.targetHeading,
+			rotation: $scope.userDir.Heading,
 			anchor: new google.maps.Point(0, 10)
 		};
 
@@ -96,10 +105,10 @@ angular.module('disp-map', [
 	$scope.mapClick = function($event) {
 		if($scope.enableDir === undefined) return;
 
-		$scope.targetHeading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
+		$scope.userDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
 		$scope.rebuildDir();
 
-		UserDirectionResource.update({Username: $scope.item.Author, Heading: $scope.targetHeading});
+		UserDirectionResource.update($scope.userDir);
 	};
 
 	$scope.$watch('[item.Lat, item.Lng]', function() {

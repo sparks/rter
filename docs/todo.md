@@ -2,6 +2,7 @@
 
 ##Server
 ###Must
+* Invalid cookie wipe
 * Config old system
 * Config new system
 * Non destructive PUTs

@@ -125,8 +125,6 @@ func main() {
 }
 
 func debug404(w http.ResponseWriter, r *http.Request) {
-	log.Println("404 Served")
-	log.Println(r.Method, r.URL)
 	http.NotFound(w, r)
 }
 
