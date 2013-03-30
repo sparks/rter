@@ -119,10 +119,11 @@ CREATE TABLE IF NOT EXISTS TermRankings (
 
 INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("responder", 3), ("editor", 7), ("admin", 15);
 
-INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymous", "", "", "public", 0), ("admin", "", "", "admin", 0);
+INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES ("anonymous", "", "", "public", 0, "2013-03-19 00:00:00"), ("admin", "", "", "admin", 0, "2013-03-19 00:00:00");
 INSERT INTO UserDirections (Username) VALUES ("anonymous"), ("admin");
 
 INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES ("all", 1, "admin", "2013-03-19 00:00:00"), ("test", 0, "anonymous", "2013-03-19 00:00:00");
+INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES ("all", "",  "2013-03-19 00:00:00"), ("test", "",  "2013-03-19 00:00:00")
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (
