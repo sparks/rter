@@ -120,6 +120,4 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(strconv.FormatFloat(userDirection.Heading, 'f', 6, 64)))
-
-	log.Println("legacy upload complete, phone_id", user.Username, ", heading", item.HasHeading, ", position", item.HasGeo)
 }
