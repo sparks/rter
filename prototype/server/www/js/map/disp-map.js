@@ -64,7 +64,7 @@ angular.module('disp-map', [
 	};
 
 	$scope.rebuildDir = function() {
-		if($scope.enableFov === undefined) return;
+		if($scope.enableDir === undefined) return;
 		if($scope.targetHeading === undefined) return;
 		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 

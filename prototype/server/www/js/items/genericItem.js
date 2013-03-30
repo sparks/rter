@@ -1,7 +1,7 @@
 angular.module('genericItem', [
 	'ng',       //$timeout
-	'disp-map', //maps
-	'edit-map'  //maps
+	'edit-map', //maps
+	'disp-map'  //maps
 ])
 
 .controller('FormGenericItemCtrl', function($scope) {
