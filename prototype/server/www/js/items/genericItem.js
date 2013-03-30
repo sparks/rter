@@ -1,5 +1,4 @@
 angular.module('genericItem', [
-	'ng',       //$timeout
 	'edit-map', //maps
 	'disp-map'  //maps
 ])
@@ -13,7 +12,7 @@ angular.module('genericItem', [
 	$scope.item.Live = false;
 })
 
-.directive('formGenericItem', function($timeout) {
+.directive('formGenericItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

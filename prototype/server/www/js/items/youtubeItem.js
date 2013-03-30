@@ -1,5 +1,4 @@
 angular.module('youtubeItem', [
-	'ng',       //$timeout
 	'edit-map', //Maps
 	'disp-map'  //Maps
 ])
@@ -13,7 +12,7 @@ angular.module('youtubeItem', [
 	$scope.item.Live = false;
 })
 
-.directive('formYoutubeItem', function($timeout) {
+.directive('formYoutubeItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

@@ -17,18 +17,9 @@
 		<div class="row-fluid">
 			<div class="left span8">
 				<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
-				<div ng-switch on="term.Term">
-					<div ng-switch-when="">
-						<ul class="item-list">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems | orderBy:'ID':true | orderBy:'StopTime':true"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
-						</ul>
-					</div>
-					<div ng-switch-default>
-						<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
-						</ul>
-					</div>
-				</div>
+				<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
+					<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+				</ul>
 			</div>
 
 			<div class="right span4">

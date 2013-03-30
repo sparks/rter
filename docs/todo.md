@@ -2,8 +2,6 @@
 
 ##Server
 ###Must
-* Maps centering is decentralized and wonky + breaks location of cone markers in imap
-
 * Config old system
 * Config new system
 * Non destructive PUTs
