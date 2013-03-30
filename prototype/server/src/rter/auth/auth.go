@@ -60,7 +60,7 @@ func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	err = storage.Select(user)
 
 	if err == storage.ErrZeroAffected {
-		log.Println("No such user")
+		log.Println("No such user: ", user.Username)
 		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	} else if err != nil {
@@ -70,7 +70,7 @@ func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !user.Auth(loginInfo.Password) {
-		log.Println("Wrong Password")
+		log.Println("Wrong Password for: ", user.Username)
 		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	}

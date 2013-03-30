@@ -186,6 +186,12 @@ label {
 	font-size: 8pt;
 	color: white;
 	line-height: 14pt;
+
+	max-width: 60px;
+	overflow-x: hidden;
+	overflow-y: visible;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 /* -- TermView List -- */

@@ -13,6 +13,7 @@
 * Sidebar filters
 * Viewed/Dealt with check box
 * Provide a lock on the mobile user control
+* Websockets for Userdirection
 * WebSockets for comments (it's a chat system!)
 * Can include more information in tile view
 * Description field for items?

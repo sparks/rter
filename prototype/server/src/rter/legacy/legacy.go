@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"rter/data"
 	"rter/storage"
 	"rter/utils"
 	"strconv"
@@ -20,49 +21,74 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	phoneID := r.FormValue("phone_id")
+	user := new(data.User)
+	user.Username = r.FormValue("phone_id")
 
-	if !utils.PhoneIDValidator.MatchString(phoneID) {
-		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		log.Println("upload failed, phone_id malformed:", phoneID)
+	err = storage.Select(user)
+
+	if err == storage.ErrZeroAffected {
+		log.Println("upload failed, phone_id invalid:", user.Username)
+		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
-	rows := storage.MustQuery("SELECT * FROM phones where phone_id = ?;", phoneID)
+	os.Mkdir(filepath.Join(utils.UploadPath, user.Username), os.ModeDir|0755)
 
-	if !rows.Next() {
-		http.Error(w, "Malformed Request: Invalid phone_id", http.StatusBadRequest)
-		log.Println("upload failed, phone_id invalid:", phoneID)
+	matchingItems := make([]*data.Item, 0)
+	err = storage.SelectWhere(&matchingItems, "WHERE Type=\"streaming-video-v0\" AND Author=?", user.Username)
+
+	exists := true
+
+	if err == storage.ErrZeroAffected {
+		exists = false
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
-	os.Mkdir(filepath.Join(utils.UploadPath, phoneID), os.ModeDir|0755)
+	var item *data.Item
 
-	valid_pos := true
-	valid_heading := true
-
-	lat, err := strconv.ParseFloat(r.FormValue("lat"), 64)
-	if err != nil {
-		valid_pos = false
+	if exists {
+		item = matchingItems[0]
+	} else {
+		item = new(data.Item)
 	}
 
-	lng, err := strconv.ParseFloat(r.FormValue("lng"), 64)
+	item.Author = user.Username
+
+	item.Type = "streaming-video-v0"
+	item.Live = true
+	item.HasGeo = true
+	item.HasHeading = true
+
+	item.Lat, err = strconv.ParseFloat(r.FormValue("lat"), 64)
 	if err != nil {
-		valid_pos = false
+		item.HasGeo = false
 	}
 
-	heading, err := strconv.ParseFloat(r.FormValue("heading"), 64)
+	item.Lng, err = strconv.ParseFloat(r.FormValue("lng"), 64)
 	if err != nil {
-		valid_heading = false
+		item.HasGeo = false
 	}
 
-	t := time.Now()
+	item.Heading, err = strconv.ParseFloat(r.FormValue("heading"), 64)
+	if err != nil {
+		item.HasHeading = false
+	}
+
+	item.StartTime = time.Now()
+	item.StopTime = item.StartTime
 	path := utils.UploadPath
 
 	if strings.HasSuffix(header.Filename, ".png") {
-		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", phoneID, t.UnixNano()))
+		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", user.Username, item.StopTime.UnixNano()))
 	} else if strings.HasSuffix(header.Filename, ".jpg") || strings.HasSuffix(header.Filename, "jpeg") {
-		path = filepath.Join(path, fmt.Sprintf("%v/%v.jpg", phoneID, t.UnixNano()))
+		path = filepath.Join(path, fmt.Sprintf("%v/%v.jpg", user.Username, item.StopTime.UnixNano()))
 	}
 
 	outputFile, err := os.Create(path)
@@ -73,22 +99,27 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	path = path[len(utils.RterDir):]
 
-	if valid_pos && valid_heading {
-		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath, geolat, geolng, heading) VALUES(?, \"mobile\", ?, ?, ?, ?);", phoneID, path, lat, lng, heading)
-	} else if valid_pos {
-		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath, geolat, geolng) VALUES(?, \"mobile\", ?, ?, ?);", phoneID, path, lat, lng)
+	item.ContentURI = path
+	item.ThumbnailURI = path
+
+	if exists {
+		storage.Update(item)
 	} else {
-		storage.MustQuery("INSERT INTO content (content_id, content_type, filepath) VALUES(?, \"mobile\",  ?);", phoneID, path)
+		storage.Insert(item)
 	}
 
-	rows = storage.MustQuery("SELECT target_heading from phones where phone_id=?", phoneID)
+	userDirection := new(data.UserDirection)
+	userDirection.Username = user.Username
 
-	if rows.Next() {
-		var target_heading []byte
-		err := rows.Scan(&target_heading)
-		utils.Must(err)
-		w.Write(target_heading)
+	err = storage.Select(userDirection)
+
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		return
 	}
 
-	log.Println("upload complete, phone_id", phoneID, ", heading", valid_heading, ", position", valid_pos)
+	w.Write([]byte(strconv.FormatFloat(userDirection.Heading, 'f', 6, 64)))
+
+	log.Println("legacy upload complete, phone_id", user.Username, ", heading", item.HasHeading, ", position", item.HasGeo)
 }
