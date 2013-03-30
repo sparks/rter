@@ -64,13 +64,17 @@ func main() {
 		},
 	)
 
-	if *serveLogFlag && *logfile != "" { //Sorta hacky this also depends on the setupLogger running before in case envvar was set
-		log.Println("\t-Serve Log Enabled")
-		r.HandleFunc("/log",
-			func(w http.ResponseWriter, r *http.Request) {
-				http.ServeFile(w, r, *logfile)
-			},
-		).Methods("GET")
+	if *serveLogFlag {
+		if *logfile == "" { //Sorta hacky this also depends on the setupLogger running before in case envvar was set
+			log.Println("\t-Serve Log Disable (No Log File)")
+		} else {
+			log.Println("\t-Serve Log Enabled")
+			r.HandleFunc("/log",
+				func(w http.ResponseWriter, r *http.Request) {
+					http.ServeFile(w, r, *logfile)
+				},
+			).Methods("GET")
+		}
 	}
 
 	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
