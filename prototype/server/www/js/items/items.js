@@ -226,7 +226,10 @@ angular.module('items', [
 		}
 
 		for(var i = 0;i < out.length;i++) {
-			if(out[i] === undefined) out.remove(i);
+			if(out[i] === undefined) {
+				out.remove(i);
+				i--;
+			}
 		}
 
 		out.push.apply(out, stragglers);

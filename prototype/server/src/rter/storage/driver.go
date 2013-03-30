@@ -17,7 +17,7 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
 			v.Author,
 			v.ThumbnailURI,
