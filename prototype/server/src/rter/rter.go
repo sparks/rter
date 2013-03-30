@@ -9,12 +9,11 @@ import (
 	"path/filepath"
 	"rter/auth"
 	"rter/compressor"
-	"rter/mobile"
+	"rter/legacy"
 	"rter/rest"
 	"rter/storage"
 	"rter/streaming"
 	"rter/utils"
-	"rter/web"
 )
 
 var (
@@ -48,24 +47,6 @@ func main() {
 	crud := rest.CRUDRouter()
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud))
 
-	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
-
-	r.HandleFunc("/multiup", mobile.MultiUploadHandler)
-
-	r.HandleFunc("/submit", web.SubmitHandler).Methods("POST")
-	r.HandleFunc("/submit",
-		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "submit.html"))
-		},
-	).Methods("GET")
-
-	r.PathPrefix("/ajax").HandlerFunc(web.ClientAjax)
-
-	r.HandleFunc("/", web.ClientHandler)
-	r.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(utils.WWWPath, "new.html"))
-	})
-
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
 
 	r.PathPrefix("/css").Handler(http.StripPrefix("/css", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "css")))))
@@ -88,6 +69,13 @@ func main() {
 			},
 		).Methods("GET")
 	}
+
+	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST")
+	r.HandleFunc("/multiup", legacy.MultiUploadHandler)
+
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(utils.WWWPath, "new.html"))
+	})
 
 	r.NotFoundHandler = http.HandlerFunc(debug404)
 
