@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -23,6 +24,8 @@ var (
 	gzipFlag     = flag.Bool("gzip", false, "enable gzip compression")
 	logfile      = flag.String("log-file", "", "set server logfile")
 	serveLogFlag = flag.Bool("serve-log-file", true, "serve logfile over http")
+	httpPort     = flag.Int("http-port", 8080, "set the http port to use")
+	httpsPort    = flag.Int("https-port", 10433, "set the https port to use")
 )
 
 func main() {
@@ -100,8 +103,8 @@ func main() {
 		waits = append(waits, httpsChan)
 
 		go func() {
-			log.Println("\t-Using HTTPS")
-			log.Fatal(http.ListenAndServeTLS(":10443", "cert.pem", "key.pem", nil))
+			log.Println(fmt.Sprintf("\t-Using HTTPS on port %v", *httpsPort))
+			log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%v", *httpsPort), "cert.pem", "key.pem", nil))
 
 			httpsChan <- true
 		}()
@@ -112,8 +115,8 @@ func main() {
 		waits = append(waits, httpChan)
 
 		go func() {
-			log.Println("\t-Using HTTP")
-			log.Fatal(http.ListenAndServe(":8080", nil))
+			log.Println(fmt.Sprintf("\t-Using HTTP on port %v", *httpPort))
+			log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", *httpPort), nil))
 
 			httpChan <- true
 		}()
