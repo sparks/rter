@@ -165,7 +165,7 @@ INSERT INTO UserDirections (Username, UpdateTime) VALUES
 	("952decd1fbc083cf6853e56f1ebb08622d653602", "2013-03-19 00:00:00"), 
 	("y1830fcefc3f47647ffa05351348d7e34b142b0b", "2013-03-19 00:00:00"), 
 	("x8ad32292ff86b4148e0f55412b9b55efad32d1e", "2013-03-19 00:00:00"), 
-	("qcb519f53a55d9dea06ef5cc104eda79d305282e", "2013-03-19 00:00:00"), 
+	("qcb519f53a55d9dea06ef5cc104eda79d305282e", "2013-03-19 00:00:00")
 ;
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
