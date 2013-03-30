@@ -316,7 +316,7 @@ label {
 	width: 450px;
 }
 
-.closeup-item .closeup-generic-item .left {
+.closeup-item .closeup-generic-item .left, .closeup-item .closeup-youtube-item .left {
 	text-align: center;
 }
 

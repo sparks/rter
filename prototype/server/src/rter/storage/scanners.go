@@ -44,10 +44,12 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 		&item.ThumbnailURI,
 		&item.ContentURI,
 		&item.UploadURI,
-		&item.HasGeo,
+		&item.HasHeading,
 		&item.Heading,
+		&item.HasGeo,
 		&item.Lat,
 		&item.Lng,
+		&item.Live,
 		&startTimeString,
 		&stopTimeString,
 	)

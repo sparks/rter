@@ -33,6 +33,14 @@ angular.module('edit-map', [
 
 		$scope.setMarker($event.latLng);
 	};
+
+	$scope.$watch('[item.Lat, item.Lng]', function() {
+		if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined && ($scope.item.Lat !== 0 || $scope.item.Lng !== 0)) {
+			$scope.item.HasGeo = true;
+		} else {
+			$scope.item.HasGeo = false;
+		}
+	}, true);
 })
 
 .directive('editMap', function($timeout) {

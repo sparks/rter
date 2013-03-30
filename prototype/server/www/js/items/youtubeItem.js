@@ -7,6 +7,10 @@ angular.module('youtubeItem', [
 .controller('FormYoutubeItemCtrl', function($scope) {
 	$scope.item.StartTime = new Date();
 	$scope.item.StopTime = $scope.item.StartTime;
+
+	$scope.item.HasHeading = false;
+	$scope.item.HasGeo = false;
+	$scope.item.Live = false;
 })
 
 .directive('formYoutubeItem', function($timeout) {

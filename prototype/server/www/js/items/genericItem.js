@@ -1,12 +1,16 @@
 angular.module('genericItem', [
 	'ng',       //$timeout
-	'disp-map', //maps
-	'edit-map'  //maps
+	'edit-map', //maps
+	'disp-map'  //maps
 ])
 
 .controller('FormGenericItemCtrl', function($scope) {
 	$scope.item.StartTime = new Date();
 	$scope.item.StopTime = $scope.item.StartTime;
+
+	$scope.item.HasHeading = false;
+	$scope.item.HasGeo = false;
+	$scope.item.Live = false;
 })
 
 .directive('formGenericItem', function($timeout) {
