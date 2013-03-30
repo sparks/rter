@@ -5,7 +5,7 @@
  	* Log in to MYSQL as root mysql user and run this commands:
  	* `CREATE DATABASE rter;`
  * You can delete existing databases if you need
- * Log in to MYSQL as root mysql user and run this commands:
+ 	* Log in to MYSQL as root mysql user and run this commands:
  	* `DROP DATABASE nameofdb;`
  * Create new mysql user
  	* Log in to MYSQL as root mysql user and run these commands:
