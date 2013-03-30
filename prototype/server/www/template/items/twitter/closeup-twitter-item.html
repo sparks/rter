@@ -5,7 +5,7 @@
 	<br>
 
 	<ul class="twitter-list">
-		<li ng-repeat = "tweet in searchResult.results" class="twitter" ng-click = 'showTweetCard(tweet.id, $event)'>
+		<li ng-repeat = "tweet in searchResult.results" class="twitter" >
 			
 			
 			
@@ -14,7 +14,7 @@
 				<span>(@{{tweet.from_user}})</span>
 				<span class="time">{{tweet.created_at | fromNow}}</span>
 				
-				<button class="btn btn-mini btn-danger"> Promote </button>
+				<button class="btn btn-mini btn-danger" ng-click='test(tweet, $event)'> Promote </button>
 				<button class="btn btn-mini btn-info"> React </button>
 			</header>
 			<article>{{tweet.text}}</article>
@@ -24,5 +24,4 @@
 	</ul>
 
 	<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-	
 </div>

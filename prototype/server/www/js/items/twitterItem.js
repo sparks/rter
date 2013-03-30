@@ -72,11 +72,15 @@ angular.module('twitterItem',  [
 						console.log("Error:  Search Query not set");
 					}
 						
-					scope.searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
+					var searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
 										+ "&q=" + scope.extra.SearchTerm 
 										+ "&result_type=" + scope.extra.ResultType
-										+ "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";
-					scope.item.ContentURI = encodeURI(scope.searchURL);
+
+					if(!(scope.item.Lat == undefined)){
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";		
+					}
+										
+					scope.item.ContentURI = encodeURI(searchURL);
 					console.log("Built ContentURI " + scope.item.ContentURI);
 				};
 
@@ -142,7 +146,7 @@ angular.module('twitterItem',  [
 	};
 })
 
-.controller('CloseupTwitterItemCtrl', function($scope, $http) {
+.controller('CloseupTwitterItemCtrl', function($scope, $http, ItemCache, CloseupItemDialog) {
 	 console.log($scope.item.ContentURI);
 	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
       success(function(data, status) {
@@ -154,6 +158,8 @@ angular.module('twitterItem',  [
         $scope.data = data || "Request failed";
         $scope.status = status;
     });
+    
+    /*
     $scope.showTweetCard = function(id, $event){
 		// alert(id, $event.target);
 		console.log(id, $event, $event.target);
@@ -172,6 +178,27 @@ angular.module('twitterItem',  [
 	        $scope.data = data || "Request failed";
 	        $scope.status = status;
 	    });
+	};*/
+
+
+	$scope.test = function(tweet, $event) {
+			
+			var newItem = {} ;
+			newItem.Type = "SingleTweet";
+			newItem.ContentURI = "http://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}";
+
+			console.log("it worked",$event );
+			console.log("item - ",newItem );			
+			ItemCache.create(
+			{Type: "generic", ContentURI: tweet.id_str },
+			function() {
+			if($scope.dialog !== undefined) {
+			$scope.dialog.close();
+			}
+		},
+		function(e) {
+			console.log(e);
+		});
 	};  
 })
 
