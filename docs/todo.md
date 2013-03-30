@@ -5,23 +5,18 @@
 * Config old system
 * Config new system
 * Non destructive PUTs
-* Test ordering of new unranked elements as they are added
-* PaperJS import
-* Map filter systems
 * Update cloud on the fly
-* Main feed doesnt update realtime
 
 ###Wish
 * Content type badge
 * Sidebar filters
-* Sort and lock main feed
 * Viewed/Dealt with check box
 * Provide a lock on the mobile user control
 * WebSockets for comments (it's a chat system!)
 * Can include more information in tile view
 * Description field for items?
 * Tooltips to help use
-* Callback/Hooks for CRUD instead of mass of witch statements
+* Callback/Hooks for CRUD instead of mass of switch statements
 
 ##Mobile
 * More text on the device (tooltips etc)
