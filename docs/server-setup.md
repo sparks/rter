@@ -2,10 +2,13 @@
 
  * Install go and Mysql
  * Create a database called 'rter'
- 	* Log in as root mysql user and run this commands:
+ 	* Log in to MYSQL as root mysql user and run this commands:
  	* `CREATE DATABASE rter;`
+ * You can delete existing databases if you need
+ * Log in to MYSQL as root mysql user and run this commands:
+ 	* `DROP DATABASE nameofdb;`
  * Create new mysql user
- 	* Log in as root mysql user and run these commands:
+ 	* Log in to MYSQL as root mysql user and run these commands:
  	* `CREATE USER 'rter'@'localhost' IDENTIFIED BY 'j2pREch8';`
  	* `GRANT ALL PRIVILEGES ON rter . * TO 'rter'@'localhost';`
  	* `FLUSH PRIVILEGES;`
