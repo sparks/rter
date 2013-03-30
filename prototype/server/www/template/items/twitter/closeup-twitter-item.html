@@ -1,27 +1,27 @@
 <div class="closeup-twitter-item">
 	
-	<br>
 	
+	<!--<blockquote class="twitter-tweet"><p>SEC Greenlights One Style Of Equity Crowdfunding For Startups <a href="http://t.co/wbO7gM9wIC" title="http://tcrn.ch/ZrwOOm">tcrn.ch/ZrwOOm</a> by @<a href="https://twitter.com/joshconstine">joshconstine</a></p>&mdash; TechCrunch (@TechCrunch) <a href="https://twitter.com/TechCrunch/status/317349947462807552">March 28, 2013</a></blockquote> -->
+	<br>
 
 	<ul class="twitter-list">
-		<li ng-repeat = "tweet in searchResult.results" class="twitter">
+		<li ng-repeat = "tweet in searchResult.results" class="twitter" >
+			
+			
+			
 			<header>
-				<span class="author">{{tweet.from_user}}</span>
+				<span class="author"><a href="http://twitter.com/{{tweet.from_user}}">{{tweet.from_user_name}} </a></span>
+				<span>(@{{tweet.from_user}})</span>
 				<span class="time">{{tweet.created_at | fromNow}}</span>
+				
+				<button class="btn btn-mini btn-danger" ng-click='test(tweet, $event)'> Promote </button>
+				<button class="btn btn-mini btn-info"> React </button>
 			</header>
 			<article>{{tweet.text}}</article>
+			<!--<iframe src="https://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}">
+		</iframe>-->
 		</li>
 	</ul>
 
-
-
-	
-	<!--	<blockquote class="twitter-tweet" data-cards="hidden" align="center"><p>Search API will now always return "real" Twitter user IDs. The with_twitter_user_id parameter is no longer necessary. An era has ended. ^TS</p>&mdash; Twitter API (@twitterapi) <a href="https://twitter.com/twitterapi/status/133640144317198338">November 7, 2011</a></blockquote>
-	<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script> -->
-
-
-
-
-	
-	
+	<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>

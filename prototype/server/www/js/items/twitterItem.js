@@ -39,6 +39,9 @@ angular.module('twitterItem',  [
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
 	};
+
+
+	
 })
                                                                                                                                      
 .directive('formTwitterItem', function($timeout) {
@@ -69,11 +72,15 @@ angular.module('twitterItem',  [
 						console.log("Error:  Search Query not set");
 					}
 						
-					scope.searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
+					var searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
 										+ "&q=" + scope.extra.SearchTerm 
 										+ "&result_type=" + scope.extra.ResultType
-										+ "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";
-					scope.item.ContentURI = encodeURI(scope.searchURL);
+
+					if(!(scope.item.Lat == undefined)){
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";		
+					}
+										
+					scope.item.ContentURI = encodeURI(searchURL);
 					console.log("Built ContentURI " + scope.item.ContentURI);
 				};
 
@@ -118,18 +125,32 @@ angular.module('twitterItem',  [
 			
 			
 		}
-	}
-;})
+	};
+})
+.controller('embedTweetCardCtrl', function($scope) {
 
-.controller('CloseupTwitterItemCtrl', function($scope, $http) {
+})
+
+.directive('embedTweetCard', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			tweet: "="
+		},
+		templateUrl: '/template/items/twitter/twitter-card.html',
+		controller: 'embedTweetCardCtrl',
+		link: function(scope, element, attr) {
+			
+			
+		}
+	};
+})
+
+.controller('CloseupTwitterItemCtrl', function($scope, $http, ItemCache, CloseupItemDialog) {
 	 console.log($scope.item.ContentURI);
 	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
       success(function(data, status) {
           console.log(data, status);
-          console.log($scope);
-        $scope.displayTweet =  data.html;
-        console.log($scope.displayTweet);
-        $scope.status = status;
         $scope.searchResult = data;
       }).
       error(function(data, status) {
@@ -137,6 +158,48 @@ angular.module('twitterItem',  [
         $scope.data = data || "Request failed";
         $scope.status = status;
     });
+    
+    /*
+    $scope.showTweetCard = function(id, $event){
+		// alert(id, $event.target);
+		console.log(id, $event, $event.target);
+		var urlVar = 'http://api.twitter.com/1/statuses/oembed.json?id='+id
+					+'&align=center&omit_script=true&hide_thread=true&hide_media=true&callback=JSON_CALLBACK'
+		$http({method: 'jsonp', url: urlVar, cache: false}).
+	      success(function(data, status) {
+	          console.log(data.html, status);
+	          console.log($scope);
+	        $scope.displayTweet =  data.html;
+	        console.log($scope.displayTweet);
+
+	      }).
+	      error(function(data, status) {
+	         console.log(data, status);
+	        $scope.data = data || "Request failed";
+	        $scope.status = status;
+	    });
+	};*/
+
+
+	$scope.test = function(tweet, $event) {
+			
+			var newItem = {} ;
+			newItem.Type = "SingleTweet";
+			newItem.ContentURI = "http://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}";
+
+			console.log("it worked",$event );
+			console.log("item - ",newItem );			
+			ItemCache.create(
+			{Type: "generic", ContentURI: tweet.id_str },
+			function() {
+			if($scope.dialog !== undefined) {
+			$scope.dialog.close();
+			}
+		},
+		function(e) {
+			console.log(e);
+		});
+	};  
 })
 
 .directive('closeupTwitterItem', function() {
@@ -148,9 +211,7 @@ angular.module('twitterItem',  [
 		templateUrl: '/template/items/twitter/closeup-twitter-item.html',
 		controller: 'CloseupTwitterItemCtrl',
 		link: function(scope, element, attr) {
-			scope.addHTML = function(newhtml) {
-				element.append($(newhtl))
-			}
+			
 
 		}
 	};
