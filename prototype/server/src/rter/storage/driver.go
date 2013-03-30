@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-// SELECT * FROM Terms , TermRelationships, Items WHERE Terms.Term=TermRelationships.Term AND TermRelationships.ItemID=Items.ID AND Items.ID=1
-// Select Items.*, GROUP_CONCAT(TermRelationships.Term) Terms FROM Items, TermRelationships where Items.ID=1 AND TermRelationships.ItemID=1
-// Select Items.*, GROUP_CONCAT(TermRelationships.Term) FROM Items, TermRelationships WHERE Items.ID=TermRelationships.ItemID GROUP BY Items.ID
-
 func Insert(val interface{}) error {
 	var (
 		res sql.Result
@@ -21,16 +17,18 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasGeo, Heading, Lat, Lng, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
 			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
-			v.HasGeo,
+			v.HasHeading,
 			v.Heading,
+			v.HasGeo,
 			v.Lat,
 			v.Lng,
+			v.Live,
 			v.StartTime.UTC(),
 			v.StopTime.UTC(),
 		)
@@ -166,15 +164,17 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasGeo=?, Heading=?, Lat=?, Lng=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasHeading=?, Heading=?, HasGeo=?, Lat=?, Lng=?, Live=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
-			v.HasGeo,
+			v.HasHeading,
 			v.Heading,
+			v.HasGeo,
 			v.Lat,
 			v.Lng,
+			v.Live,
 			v.StartTime.UTC(),
 			v.StopTime.UTC(),
 			v.ID,

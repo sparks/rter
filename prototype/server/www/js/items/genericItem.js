@@ -7,6 +7,8 @@ angular.module('genericItem', [
 .controller('FormGenericItemCtrl', function($scope) {
 	$scope.item.StartTime = new Date();
 	$scope.item.StopTime = $scope.item.StartTime;
+	$scope.item.HasHeading = false;
+	$scope.item.Live = false;
 })
 
 .directive('formGenericItem', function($timeout) {

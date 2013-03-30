@@ -14,11 +14,14 @@ type Item struct {
 	ContentURI   string `json:",omitempty"`
 	UploadURI    string `json:",omitempty"`
 
-	HasGeo  bool    `json:",omitempty"`
-	Heading float64 `json:",omitempty"`
-	Lat     float64 `json:",omitempty"`
-	Lng     float64 `json:",omitempty"`
+	HasHeading bool    `json:",omitempty"`
+	Heading    float64 `json:",omitempty"`
 
+	HasGeo bool    `json:",omitempty"`
+	Lat    float64 `json:",omitempty"`
+	Lng    float64 `json:",omitempty"`
+
+	Live      bool      `json:",omitempty"`
 	StartTime time.Time `json:",omitempty"`
 	StopTime  time.Time `json:",omitempty"`
 
