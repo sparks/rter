@@ -79,7 +79,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
 
-	var val interface{} // Generic container for the new item
+	var val interface{} // Generic container for the new object
 
 	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
@@ -168,7 +168,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
 	w.WriteHeader(http.StatusCreated)
 
-	// Return the item we've inserted in the database
+	// Return the object we've inserted in the database.
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -177,24 +177,28 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Generic Read handler for reading single items
+// Generic Read handler for reading single objects
 func Read(w http.ResponseWriter, r *http.Request) {
+	//No Auth for the moment
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
 	vars := mux.Vars(r)
 
 	var (
-		val interface{}
+		val interface{} // Generic container for the read object
 		err error
 	)
 
+	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
 
 	if childtype, ok := vars["childtype"]; ok {
 		types = append(types, childtype)
 	}
 
+	// Switch based on that URI like representation and instantiate something in the generic container. Also infer the identifier from the vars and perform validation.
 	switch strings.Join(types, "/") {
 	case "items":
 		item := new(data.Item)
@@ -242,6 +246,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform the Select
 	err = storage.Select(val)
 
 	if err == storage.ErrZeroAffected {
@@ -253,15 +258,16 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Let's never send salt/hash out
+	// Important. Let's never send salt/hash out.
 	switch v := val.(type) {
 	case *data.User:
 		v.Salt = ""
 		v.Password = ""
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
 
+	// Return the object we've selected from the database.
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -270,7 +276,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Generic Read handler for reading multiple items possibly with a query
+// Generic Read handler for reading multiple objects possibly with a query
 func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -278,19 +284,21 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	var (
-		val interface{}
+		val interface{} // Generic container for the read objecs
 		err error
 	)
 
-	whereClause := ""
-	args := make([]interface{}, 0)
+	whereClause := ""              //We may build up some sort of WHERE clause for the DB request
+	args := make([]interface{}, 0) //This WHERE clause would then require some arguments
 
+	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
 
 	if childtype, ok := vars["childtype"]; ok {
 		types = append(types, childtype)
 	}
 
+	// Switch based on that URI like representation and instantiate something in the generic container. Also infer the identifier from the vars and perform validation.
 	switch strings.Join(types, "/") {
 	case "items":
 		items := make([]*data.Item, 0)
@@ -298,6 +306,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	case "items/comments":
 		comments := make([]*data.ItemComment, 0)
 
+		// Selecting comments is reliant on the item ID
 		whereClause = "WHERE ItemID=?"
 		var itemID int64
 		itemID, err = strconv.ParseInt(vars["key"], 10, 64)
@@ -324,6 +333,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Sadly due to the need to load Term.Count value we must have some custom queries here
 	switch val.(type) {
 	case *[]*data.Term:
 		err = storage.SelectQuery(val, "SELECT t.*, count(r.Term) FROM Terms AS t, TermRelationships AS r WHERE t.Term = r.Term GROUP BY t.Term")
@@ -340,7 +350,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Let's never send salt/hash out
+	// Important. Let's never send salt/hash out
 	switch v := val.(type) {
 	case *[]*data.User:
 		for _, user := range *v {
@@ -349,8 +359,9 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
 
+	// Return the selected objects
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -371,14 +382,16 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
 	vars := mux.Vars(r)
-	var val interface{}
+	var val interface{} // Generic container for the updated object
 
+	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
 
 	if childtype, ok := vars["childtype"]; ok {
 		types = append(types, childtype)
 	}
 
+	// Switch based on that URI like representation and instantiate something in the generic container. Also infer the identifier from the vars and perform validation.
 	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
@@ -403,6 +416,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Decode the JSON into our generic object
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&val)
 
@@ -412,6 +426,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate JSON, run pre-update hooks, etc...
 	switch v := val.(type) {
 	case (*data.Item):
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
@@ -436,6 +451,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Run the update
 	err = storage.Update(val)
 
 	if err == storage.ErrZeroAffected {
@@ -447,8 +463,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
 
+	// Return the updated item
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -471,16 +488,18 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	var (
-		val interface{}
+		val interface{} // Generic container for the deleted object
 		err error
 	)
 
+	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
 
 	if childtype, ok := vars["childtype"]; ok {
 		types = append(types, childtype)
 	}
 
+	// Switch based on that URI like representation and instantiate something in the generic container. Also infer the identifier from the vars and perform validation.
 	switch strings.Join(types, "/") {
 	case "items":
 		item := new(data.Item)
@@ -523,6 +542,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform the delete
 	err = storage.Delete(val)
 
 	if err == storage.ErrZeroAffected {
@@ -534,5 +554,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Confirm the delete
 	w.WriteHeader(http.StatusNoContent)
 }
