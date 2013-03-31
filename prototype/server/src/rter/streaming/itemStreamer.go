@@ -77,24 +77,24 @@ func (s *ItemStreamer) SockJSHandler(session sockjs.Conn) {
 	go func() {
 		for {
 			bundle, ok := <-localChan
-			if !ok { //Chanel was closed
+			if !ok { // Chanel was closed
 				break
 			}
 			json, err := json.Marshal(bundle)
 
 			if err != nil {
 				log.Println(err)
-				continue //Keep trying!
+				continue // Keep trying!
 			}
 			_, err = session.WriteMessage(json)
 			if err != nil {
 				log.Println(err)
-				break //Assume connection has died
+				break // Assume connection has died
 			}
 		}
 	}()
 
-	for { //This is needed to catch the closure of the sock
+	for { // This is needed to catch the closure of the sock
 		_, err := session.ReadMessage()
 		if err != nil {
 			break

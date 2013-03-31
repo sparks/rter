@@ -8,7 +8,7 @@ func ReconcileTerms(item *data.Item, terms *[]*data.Term) (bool, error) {
 	isAffected := false
 
 	for _, term := range *terms {
-		//Look for non-existing terms and make them
+		// Look for non-existing terms and make them
 		term.Author = item.Author
 		err := Insert(term)
 
@@ -69,9 +69,9 @@ func ReconcileTerms(item *data.Item, terms *[]*data.Term) (bool, error) {
 		isAffected = true
 	}
 
-	//Build all the links again
+	// Build all the links again
 	for _, term := range *terms {
-		//Don't care about rows affected
+		// Don't care about rows affected
 		res, err = tx.Exec(
 			"INSERT IGNORE INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
 			term.Term,

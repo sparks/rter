@@ -1,3 +1,6 @@
+// Provide a RESTful CRUD API.
+//
+// Create, Read, Update, Delete actions can be performed (where appropriate) on all the core data structures given in rter/data. The package creates a router via CRUDRouter() which can be attached to any http prefix
 package rest
 
 import (
@@ -17,6 +20,7 @@ import (
 
 var decoder = schema.NewDecoder()
 
+// Generate a new CRUD router for RESTful access to the rtER datastructures. Includes support for OPTIONS Method to check what functionality is available
 func CRUDRouter() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 
@@ -50,6 +54,7 @@ func CRUDRouter() *mux.Router {
 	return r
 }
 
+// Respond to requests with the OPTIONS Method.
 func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -60,12 +65,13 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 	}
 }
 
+// Generic Create handler
 func Create(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	user, permissions := auth.GetCredentials(w, r)
+	user, permissions := auth.GetCredentials(r)
 
-	if (user == nil || permissions < 1) && vars["datatype"] != "users" {
+	if (user == nil || permissions < 1) && vars["datatype"] != "users" { // Allow anyone to create users for now
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
 	}
@@ -73,14 +79,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
 
-	var val interface{}
+	var val interface{} // Generic container for the new item
 
+	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
 
 	if childtype, ok := vars["childtype"]; ok {
 		types = append(types, childtype)
 	}
 
+	// Switch based on that URI like representation and instantiate something in the generic container
 	switch strings.Join(types, "/") {
 	case "items":
 		val = new(data.Item)
@@ -97,6 +105,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform the JSON decode
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&val)
 
@@ -106,10 +115,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform post decode actions, setting automated field, validate values, exectute hooks, etc ...
 	switch v := val.(type) {
 	case *data.Item:
 		v.Author = user.Username
-		if v.Type == "streaming-video-v1" {
+		if v.Type == "streaming-video-v1" { // We provide this information for video streams since we provide the video server
 			v.UploadURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
 			v.ThumbnailURI = "http://localhost:8081/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
 			v.ContentURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
@@ -119,7 +129,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		v.Author = user.Username
 	case *data.User:
 		v.HashAndSalt()
-		v.Role = "public" //TODO: Temporary while anyone can sign up maybe this will change?
+		v.Role = "public" // TODO: Temporary while anyone can sign up maybe this will change?
 	case *data.Term:
 		v.Author = user.Username
 	}
@@ -130,8 +140,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Perform the DB insert
 	err = storage.Insert(val)
 
+	// Exectute post insert hooks, etc ...
 	switch v := val.(type) {
 	case *data.Item:
 		if v.Type == "streaming-video-v1" {
@@ -149,13 +161,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		http.Error(w, "Error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
 	w.WriteHeader(http.StatusCreated)
 
+	// Return the item we've inserted in the database
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(val)
 
@@ -164,6 +177,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Generic Read handler for reading single items
 func Read(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -239,7 +253,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Let's never send salt/hash out
+	// Let's never send salt/hash out
 	switch v := val.(type) {
 	case *data.User:
 		v.Salt = ""
@@ -256,6 +270,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Generic Read handler for reading multiple items possibly with a query
 func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -325,7 +340,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Let's never send salt/hash out
+	// Let's never send salt/hash out
 	switch v := val.(type) {
 	case *[]*data.User:
 		for _, user := range *v {
@@ -344,8 +359,9 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Generic Update handler
 func Update(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(w, r)
+	user, permissions := auth.GetCredentials(r)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
@@ -441,8 +457,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Generic Delete handler
 func Delete(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(w, r)
+	user, permissions := auth.GetCredentials(r)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return

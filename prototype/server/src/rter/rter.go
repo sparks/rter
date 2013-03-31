@@ -1,26 +1,20 @@
-/*
-
-The rtER web Server provides the RESTful API, Streaming API, Authentication and the web client interface.
-
-RESTful API access to all the rtER datastructures and user account with authentication support. The Streaming API provides realtime stream of certain data structures. Secure authentication with cookies is provided. A interactive/collaborative web client is served.is
-
-Options:
-
-	-gzip=false: enable gzip compression
-	-http=true: enable http
-	-http-port=8080: set the http port to use
-	-https=false: enable https
-	-https-port=10433: set the https port to use
-	-log-file="": set server logfile
-	-probe=0: perform logging on requests
-	-serve-log-file=true: serve logfile over http
-
-Env Variable:
-
-	RTER_LOGFILE: set server logfile (flag takes precedence)
-	RTER_DIR: set the dir where the 'www' and 'uploads' directories are located
-
-*/
+// The rtER web Server provides the RESTful API, Streaming API, Authentication and the web client interface.
+//
+// RESTful API access to all the rtER data structures and user account with authentication support. The Streaming API provides real-time stream of certain data structures. Secure authentication with cookies is provided. A interactive and collaborative web client is served.is
+//
+// Options:
+// 	-gzip=false: enable gzip compression
+// 	-http=true: enable http
+// 	-http-port=8080: set the http port to use
+// 	-https=false: enable https
+// 	-https-port=10433: set the https port to use
+// 	-log-file="": set server logfile
+// 	-probe=0: perform logging on requests
+//	-serve-log-file=true: serve log file over http
+//
+// Env Variable:
+// 	RTER_LOGFILE: set server log file (flag takes precedence)
+// 	RTER_DIR: set the dir where the 'www' and 'uploads' directories are located
 package main
 
 import (
@@ -40,6 +34,10 @@ import (
 	"rter/utils"
 )
 
+// TODO: Make a flag for the rter-dir 
+// TODO: Make a flag for the secret token (video server)
+// TODO: Make a flag for the cookie signing (auth)
+// TODO: Make a flag for the video server URI
 var (
 	probeLevel   = flag.Int("probe", 0, "perform logging on requests")
 	httpsFlag    = flag.Bool("https", false, "enable https")
@@ -65,17 +63,17 @@ func main() {
 	}
 	defer storage.CloseStorage()
 
-	//First setup the subrouters
+	// First setup the subrouters
 
 	r := mux.NewRouter().StrictSlash(true)
 
 	s := streaming.StreamingRouter()
-	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) //Must register more specific paths first
+	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) // Must register more specific paths first
 
 	crud := rest.CRUDRouter()
-	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud)) //Less specific paths later
+	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud)) // Less specific paths later
 
-	//Hand static files
+	// Hand static files
 
 	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
 
@@ -91,7 +89,7 @@ func main() {
 		},
 	).Methods("GET")
 
-	if *serveLogFlag { //Should be run after setupLogger() since it depends on setting up logfile
+	if *serveLogFlag { // Should be run after setupLogger() since it depends on setting up logfile
 		if *logfile == "" {
 			log.Println("\t-Serve Log Disable (No Log File)")
 		} else {
@@ -104,40 +102,40 @@ func main() {
 		}
 	}
 
-	//Specific Handlers
+	// Specific Handlers
 
-	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST") //Authentication service
-	r.HandleFunc("/multiup", legacy.MultiUploadHandler)         //Legacy support for android prototype app
+	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST") // Authentication service
+	r.HandleFunc("/multiup", legacy.MultiUploadHandler)         // Legacy support for android prototype app
 
-	r.HandleFunc("/", //Web client
+	r.HandleFunc("/", // Web client
 		func(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "index.html"))
 		},
 	)
 
-	//Server final setup and adjustement
+	// Server final setup and adjustement
 
-	r.NotFoundHandler = http.HandlerFunc(Debug404) //Catch all 404s
+	r.NotFoundHandler = http.HandlerFunc(Debug404) // Catch all 404s
 
 	var rootHandler http.Handler = r
 
-	if *gzipFlag { //Wrap rootHandler with on the fly gzip compressor
+	if *gzipFlag { // Wrap rootHandler with on the fly gzip compressor
 		log.Print("\t-GZIP Enabled")
 		rootHandler = compressor.GzipHandler(rootHandler)
 	}
 
-	if *probeLevel > 0 { //Wrap rootHandler with debugging probe
+	if *probeLevel > 0 { // Wrap rootHandler with debugging probe
 		log.Print("\t-Probe Enabled, Level ", *probeLevel)
 		rootHandler = ProbeHandler(*probeLevel, rootHandler)
 	}
 
 	http.Handle("/", rootHandler)
 
-	//Launch Server
+	// Launch Server
 
-	waits := make([]chan bool, 0) //Prevent from quitting till server routines finish
+	waits := make([]chan bool, 0) // Prevent from quitting till server routines finish
 
-	if *httpsFlag { //HTTPS
+	if *httpsFlag { // HTTPS
 		httpsChan := make(chan bool)
 		waits = append(waits, httpsChan)
 
@@ -149,7 +147,7 @@ func main() {
 		}()
 	}
 
-	if *httpFlag { //HTTP
+	if *httpFlag { // HTTP
 		httpChan := make(chan bool)
 		waits = append(waits, httpChan)
 
@@ -162,7 +160,7 @@ func main() {
 	}
 
 	for _, w := range waits {
-		<-w //Wait for all the ListenAndServe routines to finish
+		<-w // Wait for all the ListenAndServe routines to finish
 	}
 }
 
@@ -172,7 +170,7 @@ func Debug404(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
-// Returns the same handler, but intercepts the request first and logs the Method and URL for each request.
+// Returns the same handler, but intercepts the request first and logs the Method and URL.
 func ProbeHandler(level int, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/log" {
@@ -190,9 +188,9 @@ func ProbeHandler(level int, h http.Handler) http.Handler {
 	})
 }
 
-//Set the log output file based on flag or env variable if available. (Flag takes precedence).
+// Set the log output file based on flag or env variable if available. (Flag takes precedence).
 func setupLogger() {
-	if *logfile == "" { //flag takes precendence over ENV variable
+	if *logfile == "" { // flag takes precendence over ENV variable
 		*logfile = os.Getenv("RTER_LOGFILE")
 	}
 

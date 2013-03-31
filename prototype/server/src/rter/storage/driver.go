@@ -41,8 +41,8 @@ func Insert(val interface{}) error {
 			now,
 		)
 	case *data.Term:
-		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
-		//accidental remake of a term
+		// There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		// accidental remake of a term
 		res, err = Exec(
 			"INSERT IGNORE INTO Terms (Term, Automated, Author, UpdateTime) VALUES (?, ?, ?, ?)",
 			v.Term,
@@ -51,15 +51,15 @@ func Insert(val interface{}) error {
 			now,
 		)
 	case *data.TermRelationship:
-		//Nothing can go wrong with INSERT IGNORE since the key is whole entry
+		// Nothing can go wrong with INSERT IGNORE since the key is whole entry
 		res, err = Exec(
 			"INSERT IGNORE INTO TermRelationships (Term, ItemID) VALUES (?, ?)",
 			v.Term,
 			v.ItemID,
 		)
 	case *data.TermRanking:
-		//There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
-		//accidental remake of a term
+		// There is basically no danger with INSERT IGNORE there is nothing we would want to change if there is 
+		// accidental remake of a term
 		res, err = Exec(
 			"INSERT IGNORE INTO TermRankings (Term, Ranking, UpdateTime) VALUES (?, ?, ?)",
 			v.Term,
@@ -254,7 +254,7 @@ func Update(val interface{}) error {
 		return err
 	}
 
-	if affected < 1 && !isAffected { //Check here for the issue of updating tags
+	if affected < 1 && !isAffected { // Check here for the issue of updating tags
 		return ErrZeroAffected
 	}
 
@@ -489,14 +489,14 @@ func Delete(val interface{}) error {
 		res, err = Exec("DELETE FROM TermRelationships WHERE Term=? AND ItemID=?", v.Term, v.ItemID)
 	case *data.TermRanking:
 		// res, err = Exec("DELETE FROM TermRankings WHERE Term=?", v.Term)
-		return ErrCannotDelete //DB will autodelete
+		return ErrCannotDelete // DB will autodelete
 	case *data.Role:
 		res, err = Exec("DELETE FROM Roles WHERE Title=?", v.Title)
 	case *data.User:
 		res, err = Exec("DELETE FROM Users WHERE Username=?", v.Username)
 	case *data.UserDirection:
 		// res, err = Exec("DELETE FROM UserDirections WHERE Username=?", v.Username)
-		return ErrCannotDelete //DB will autodelete
+		return ErrCannotDelete // DB will autodelete
 	default:
 		return ErrUnsupportedDataType
 	}

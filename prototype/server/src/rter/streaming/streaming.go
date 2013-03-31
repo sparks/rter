@@ -15,7 +15,7 @@ func StreamingRouter() *mux.Router {
 	r.PathPrefix("/items").Handler(http.StripPrefix("/items", itemSockHandler))
 
 	termRankingStreamer := NewTermRankingStreamer()
-	r.PathPrefix("/taxonomy/{term}/ranking").HandlerFunc( //TODO: Is there a better less weird way of doing this dynamic binding of the websockets
+	r.PathPrefix("/taxonomy/{term}/ranking").HandlerFunc( // TODO: Is there a better less weird way of doing this dynamic binding of the websockets
 		func(w http.ResponseWriter, r *http.Request) {
 			HandleTermRanking(termRankingStreamer, w, r)
 		},
@@ -39,14 +39,3 @@ func probe(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Method, r.URL)
 }
-
-// 727	func StripPrefix(prefix string, h Handler) Handler {
-// 728		return HandlerFunc(func(w ResponseWriter, r *Request) {
-// 729			if !strings.HasPrefix(r.URL.Path, prefix) {
-// 730				NotFound(w, r)
-// 731				return
-// 732			}
-// 733			r.URL.Path = r.URL.Path[len(prefix):]
-// 734			h.ServeHTTP(w, r)
-// 735		})
-// 736	}

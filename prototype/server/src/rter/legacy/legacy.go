@@ -1,3 +1,6 @@
+// Provides support for the early prototype Android App.strconv
+//
+// Mimics the behavior of the rtER server v1 and accepts streams of images from android phones running the prototype app. This relies on users with Username matching the phone_id already existing in the DB (much like in the rtER server v1
 package legacy
 
 import (
@@ -15,6 +18,7 @@ import (
 	"time"
 )
 
+// Handle a POST request with an image, phone_id, lat, lng and heading. Return a target heading from the web UI
 func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	imageFile, header, err := r.FormFile("image")
 	if err != nil {

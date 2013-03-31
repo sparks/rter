@@ -2,6 +2,7 @@
 
 ##Server
 ###Must
+* Don't return target heading if it's too old
 * Invalid cookie wipe
 * Config new system
 * Non destructive PUTs
@@ -18,6 +19,7 @@
 * Description field for items?
 * Tooltips to help use
 * Callback/Hooks for CRUD instead of mass of switch statements
+* Store foreign item tokens in the DB such as the video server token?
 
 ##Mobile
 * More text on the device (tooltips etc)
