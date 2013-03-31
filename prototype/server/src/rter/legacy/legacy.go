@@ -12,14 +12,13 @@ import (
 	"path/filepath"
 	"rter/data"
 	"rter/storage"
-	"rter/utils"
 	"strconv"
 	"strings"
 	"time"
 )
 
 // Handle a POST request with an image, phone_id, lat, lng and heading. Return a target heading from the web UI
-func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
+func MultiUploadHandler(rterDir string, uploadPath string, w http.ResponseWriter, r *http.Request) {
 	imageFile, header, err := r.FormFile("image")
 	if err != nil {
 		return
@@ -40,7 +39,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	os.Mkdir(filepath.Join(utils.UploadPath, user.Username), os.ModeDir|0755)
+	os.Mkdir(filepath.Join(uploadPath, user.Username), os.ModeDir|0755)
 
 	matchingItems := make([]*data.Item, 0)
 	err = storage.SelectWhere(&matchingItems, "WHERE Type=\"streaming-video-v0\" AND Author=?", user.Username)
@@ -87,7 +86,7 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	item.StartTime = time.Now()
 	item.StopTime = item.StartTime
-	path := utils.UploadPath
+	path := uploadPath
 
 	if strings.HasSuffix(header.Filename, ".png") {
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.png", user.Username, item.StopTime.UnixNano()))
@@ -96,12 +95,15 @@ func MultiUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	outputFile, err := os.Create(path)
-	utils.Must(err)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Error, likely due to malformed request.", http.StatusInternalServerError)
+	}
 	defer outputFile.Close()
 
 	io.Copy(outputFile, imageFile)
 
-	path = path[len(utils.RterDir):]
+	path = path[len(rterDir):]
 
 	item.ContentURI = path
 	item.ThumbnailURI = path

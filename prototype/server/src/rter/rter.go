@@ -31,7 +31,6 @@ import (
 	"rter/rest"
 	"rter/storage"
 	"rter/streaming"
-	"rter/utils"
 )
 
 // TODO: Make a flag for the rter-dir 
@@ -47,12 +46,17 @@ var (
 	serveLogFlag = flag.Bool("serve-log-file", true, "serve logfile over http")
 	httpPort     = flag.Int("http-port", 8080, "set the http port to use")
 	httpsPort    = flag.Int("https-port", 10433, "set the https port to use")
+	rterDir      = flag.String("rter-dir", "", "sets the dir 'www' and 'uploads' will be")
 )
 
 func main() {
 	flag.Parse()
 
 	setupLogger()
+	setupRterDir()
+
+	var uploadPath = filepath.Join(*rterDir, "uploads")
+	var wwwPath = filepath.Join(*rterDir, "www")
 
 	log.Println("Launching rtER Server")
 
@@ -67,25 +71,23 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 
-	s := streaming.StreamingRouter()
-	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", s)) // Must register more specific paths first
+	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", streaming.StreamingRouter())) // Must register more specific paths first
 
-	crud := rest.CRUDRouter()
-	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", crud)) // Less specific paths later
+	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", rest.CRUDRouter())) // Less specific paths later
 
 	// Hand static files
 
-	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(utils.UploadPath))))
+	r.PathPrefix("/uploads").Handler(http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadPath))))
 
-	r.PathPrefix("/css").Handler(http.StripPrefix("/css", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "css")))))
-	r.PathPrefix("/js").Handler(http.StripPrefix("/js", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "js")))))
-	r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "vendor")))))
-	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "asset")))))
-	r.PathPrefix("/template").Handler(http.StripPrefix("/template", http.FileServer(http.Dir(filepath.Join(utils.WWWPath, "template")))))
+	r.PathPrefix("/css").Handler(http.StripPrefix("/css", http.FileServer(http.Dir(filepath.Join(wwwPath, "css")))))
+	r.PathPrefix("/js").Handler(http.StripPrefix("/js", http.FileServer(http.Dir(filepath.Join(wwwPath, "js")))))
+	r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(wwwPath, "vendor")))))
+	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(wwwPath, "asset")))))
+	r.PathPrefix("/template").Handler(http.StripPrefix("/template", http.FileServer(http.Dir(filepath.Join(wwwPath, "template")))))
 
 	r.HandleFunc("/favicon.ico",
 		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "asset", "favicon.ico"))
+			http.ServeFile(w, r, filepath.Join(wwwPath, "asset", "favicon.ico"))
 		},
 	).Methods("GET")
 
@@ -105,11 +107,15 @@ func main() {
 	// Specific Handlers
 
 	r.HandleFunc("/auth", auth.AuthHandlerFunc).Methods("POST") // Authentication service
-	r.HandleFunc("/multiup", legacy.MultiUploadHandler)         // Legacy support for android prototype app
+	r.HandleFunc("/multiup",                                    // Legacy support for android prototype app
+		func(w http.ResponseWriter, r *http.Request) {
+			legacy.MultiUploadHandler(*rterDir, uploadPath, w, r)
+		},
+	)
 
 	r.HandleFunc("/", // Web client
 		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filepath.Join(utils.WWWPath, "index.html"))
+			http.ServeFile(w, r, filepath.Join(wwwPath, "index.html"))
 		},
 	)
 
@@ -202,5 +208,12 @@ func setupLogger() {
 		} else {
 			log.Println(err)
 		}
+	}
+}
+
+// Set the log output file based on flag or env variable if available. (Flag takes precedence).
+func setupRterDir() {
+	if *rterDir == "" { // flag takes precendence over ENV variable
+		*rterDir = os.Getenv("RTER_DIR")
 	}
 }
