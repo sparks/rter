@@ -3,18 +3,17 @@
 ##Server
 ###Must
 * Invalid cookie wipe
-* Config old system
 * Config new system
 * Non destructive PUTs
-* Update cloud on the fly
+* Update tag-cloud on the fly
+* Update Map-Dir on the fly (Userdirection)
+* Update comments on the fly (it's a chat system!)
 
 ###Wish
 * Content type badge
 * Sidebar filters
 * Viewed/Dealt with check box
 * Provide a lock on the mobile user control
-* Websockets for Userdirection
-* WebSockets for comments (it's a chat system!)
 * Can include more information in tile view
 * Description field for items?
 * Tooltips to help use

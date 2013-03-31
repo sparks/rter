@@ -1,6 +1,6 @@
 # McGill Water Scenario
 
-## Scenario
+## Scenario (Round 2)
 In this short scenario we are going to present a scenario based loosely on real events that occured at McGill. We want to use this scenario to help us think together about the features of our system and how they could be used in an emergency. In particular our data filtering system and how it can be used collaboratively.
 
 Last month, a 48-inch water main broke at the top of the hill that descends into downtown Montreal, right through the main McGill campus. There was massive flooding through all of the streets and into many of the buildings on surrounding campus, with black ice underneath, making it practically impassable in many spots. The campus was almost completely surrounded by water making it challenging to find a way off campus.
@@ -16,3 +16,27 @@ Also since we are trying to build our system with collaboration in mind, repetio
 (Possible blurb about interactive video, e.g. direct field users to look away from drama for safe route. But I think it's too specific and should be left out for this scenario)
 
 Of course in this context the data would have been most useful for the McGill comunity, and we are not a group trained responders. However we think it provides a simple illustration of how a group of people in an emergency could be using our system to share and manage information to help acheive a common goal: finding safe routes off campus. We could imagine replacing the McGill members with emergency responders are looking for safe staging areas, clear routes to move injured people in and out, maybe looking for vantage point access the broken water main, etc. Collaborating using information both from the responders and from outside source to answer a common question or understand a situation better.
+
+## Scenario (Round 3)
+
+[VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]
+Here in Quebec, as well as places like Red Wing, Minnesota, floods are a major problem, impacting the lives of thousands of people at a time. Closer to home for our Mozilla Ignite development team, earlier this year our campus here at McGill University was inundated with water, resulting in millions of dollars in damages, when a construction crew broke a 48-inch water main directly connected to a major reservoir on a hill over the main campus. As water coursed through the streets and flooded buildings, information was scattered, stale and hard to come by. Some of the best and most current information came from social media. Videos of the damage and dangerous areas were circulated widely, eventually ending up in media reports.
+
+[VISUALS: SNAPSHOTS, ETC OF WHAT WE DID IN PREVIOUS ROUNDS]
+Over the previous two development rounds, we told you about the VOST volunteer organizations who are activated by official emergency response teams, and their difficulty in managing such information in real-time to help both emergency responders and the larger public in a catastrophe. We've also shown early prototypes of the three technology pieces of our Mozilla Ignite system: First, our immersive CAVE environment showing a street view with embedded real-time video and sensor content, designed to support emergency operation centres directly. Second, a web tool for VOST-type volunteers that aggregates information from social media, as other existing tools also attempt to do, but that also promotes live video to a first-class citizen, which requires lower latency and higher bandwidth networks than usually available. Third, we demonstrated an early version of our mobile video application, running on an Android smartphone, that not only sends live video to our web app, but also allows someone observing the video to intelligently direct it to more useful viewpoints without having to resort to a live phone call and verbal commands.
+
+Today, we're going to use a flood scenario to demonstrate our progress, then paint a picture of where we expect to be by June of this year with further development.
+
+Most important, we want to tell you about our inroads with emergency response teams who are beginning to test and evaluate our system for practical use. The feedback we've received from them has driven the bulk of our development this milestone, and has come from two primary sources. Thomas Poirier is a <title> for the province of Quebec, and works out of the Emergency Operation Centre (EOC) in Quebec City. He has promoted interest in our system within <their organization>; some of our team members have visited their EOC to demonstrate our Ignite tools to their response management and technology team members. They have already begun using the prototype system, providing detailed feedback on key changes and additional features that would be required to deploy such a tool in practice. Their technical team has received the go-ahead from their management to explore integrating rtER into their existing EOC tool set.
+
+[VIDEO OF THOMAS SAYING SOMETHING ABOUT HOW THEY WOULD ANTICIPATE USING IT]
+
+[something from, or at least about, Red Wing is important here, as they are in the USA...]
+
+[ACTUAL DEMO OF FEATURES TBD, MAKING SURE TO KEEP TYING IT BACK TO THE FEEDBACK FROM QUEBEC AND MINNESOTA USERS]
+
+As with the previous milestones, our code is publicly available on github, including the server and smartphone applications, for anyone to use. Anyone with an Android phone or tablet can download our app from the website, run it, and see their video streaming live on our website. This is the system that the Quebec and Minnesota emergency responders have been evaluating on their own tablets and phones.
+
+In the final development round running through June, we anticipate...
+
+[Is this too much?]  We would welcome the opportunity to demonstrate our system live to US Ignite participants in Chicago in June. By then, with continued development and testing with the responders in Minnesota and Quebec, we expect that we would have a quite compelling demonstration, likely with members of the participating emergency response organizations providing testimonials, based on their ongoing evaluation, of how the technology would enhance their response capabilities.
