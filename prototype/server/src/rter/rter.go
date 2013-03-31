@@ -33,7 +33,6 @@ import (
 	"rter/streaming"
 )
 
-// TODO: Make a flag for the rter-dir 
 // TODO: Make a flag for the secret token (video server)
 // TODO: Make a flag for the cookie signing (auth)
 // TODO: Make a flag for the video server URI
