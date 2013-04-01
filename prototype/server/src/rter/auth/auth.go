@@ -17,20 +17,38 @@ var store = sessions.NewCookieStore(
 	[]byte("new-authentication-key"), // This is the key which is used to sign cookies
 )
 
-// Examine the request for a valid session cookie. If one is found, return the username and user permissions
-func GetCredentials(r *http.Request) (*data.User, int) {
+// Examine the request for a valid session cookie. If one is found, return the username and user permissions. If the cookie is somehow invalid it will be unset.
+//
+// If dbValidate is set to true the username specified in the cookie will be loaded and validated againsts the database. If the user no longer exists the session will be unset. This also means that the returned User will have fully populated fields.
+func Challenge(w http.ResponseWriter, r *http.Request, dbValidate bool) (*data.User, int) {
 	session, _ := store.Get(r, "rter-credentials") // Will return an empty map if there isn't a valid session cookie
 
 	user := new(data.User)
 
 	uval, ok := session.Values["username"]
 	if !ok {
+		deleteSession(session, w, r)
 		return nil, 0
 	}
 
 	user.Username, ok = uval.(string)
 	if !ok {
+		deleteSession(session, w, r)
 		return nil, 0
+	}
+
+	if dbValidate {
+		err := storage.Select(user)
+
+		if err != nil {
+			log.Println(err)
+			if err == storage.ErrZeroAffected {
+				log.Println("Valid Cookie for non-existant user: ", user.Username)
+			}
+
+			deleteSession(session, w, r)
+			return nil, 0
+		}
 	}
 
 	pval, ok := session.Values["permissions"]
@@ -44,6 +62,11 @@ func GetCredentials(r *http.Request) (*data.User, int) {
 	}
 
 	return user, permissions
+}
+
+func deleteSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) {
+	session.Options = &sessions.Options{MaxAge: -1}
+	session.Save(r, w)
 }
 
 // Handle requests containing JSON with user credentials. If the credentials are valid the response will set a session cookie effectively logging in the user.

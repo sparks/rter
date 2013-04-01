@@ -374,7 +374,7 @@ angular.module('items', [
 	};
 })
 
-.controller('CloseupItemCtrl', function($scope, ItemCache) {
+.controller('CloseupItemCtrl', function($scope, ItemCache, UpdateItemDialog) {
 	$scope.updateItem = function() {
 		ItemCache.update(
 			$scope.item,
@@ -385,6 +385,20 @@ angular.module('items', [
 				if(e.status == 304) {
 					$scope.cancel();
 				}
+			}
+		);
+	};
+
+	$scope.editDialog = function() {
+		$scope.cancel();
+		UpdateItemDialog.open($scope.item);
+	};
+
+	$scope.deleteItem = function() {
+		ItemCache.remove(
+			$scope.item,
+			function() {
+				$scope.cancel();
 			}
 		);
 	};

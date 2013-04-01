@@ -69,7 +69,7 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 func Create(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 
 	if (user == nil || permissions < 1) && vars["datatype"] != "users" { // Allow anyone to create users for now
 		http.Error(w, "Please Login", http.StatusUnauthorized)
@@ -143,6 +143,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	// Perform the DB insert
 	err = storage.Insert(val)
 
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		return
+	}
+
 	// Exectute post insert hooks, etc ...
 	switch v := val.(type) {
 	case *data.Item:
@@ -157,12 +163,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 			v.Token = t
 		}
-	}
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Error, likely due to malformed request.", http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
@@ -372,7 +372,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 
 // Generic Update handler
 func Update(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
@@ -382,7 +382,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
 	vars := mux.Vars(r)
-	var val interface{} // Generic container for the updated object
+	var (
+		val interface{} // Generic container for the updated object
+		err error
+	)
 
 	// Build a URI like representation of the datatype
 	types := []string{vars["datatype"]}
@@ -394,31 +397,70 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	// Switch based on that URI like representation and instantiate something in the generic container. Also infer the identifier from the vars and perform validation.
 	switch strings.Join(types, "/") {
 	case "items":
-		val = new(data.Item)
+		v := new(data.Item)
+		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+
+		val = v
 	case "items/comments":
-		val = new(data.ItemComment)
+		v := new(data.ItemComment)
+		v.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
+
+		val = v
 	case "users":
 		if vars["key"] != user.Username {
 			http.Error(w, "Please don't hack other users", http.StatusUnauthorized)
 			return
 		}
-		val = new(data.User)
+
+		v := new(data.User)
+		v.Username = vars["key"]
+
+		val = v
 	case "users/direction":
-		val = new(data.UserDirection)
+		v := new(data.UserDirection)
+		v.Username = vars["key"]
+
+		val = v
 	case "roles":
-		val = new(data.Role)
+		v := new(data.Role)
+		v.Title = vars["key"]
+
+		val = v
 	case "taxonomy":
-		val = new(data.Term)
+		v := new(data.Term)
+		v.Term = vars["key"]
+
+		val = v
 	case "taxonomy/ranking":
-		val = new(data.TermRanking)
+		v := new(data.TermRanking)
+		v.Term = vars["key"]
+
+		val = v
 	default:
 		http.NotFound(w, r)
 		return
 	}
 
-	// Decode the JSON into our generic object
+	if err != nil {
+		log.Println(err, vars)
+		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
+		return
+	}
+
+	err = storage.Select(val) //Load previous values so that update is non distructive of empty fields
+
+	if err == storage.ErrZeroAffected {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		return
+	}
+
+	// Decode the JSON into our generic object. The decode will leave unscpecified fields untouched.
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&val)
+	err = decoder.Decode(&val)
 
 	if err != nil {
 		log.Println(err)
@@ -427,11 +469,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate JSON, run pre-update hooks, etc...
+	//We must reset fields we set earlier incase they were changed during the JSON decode
 	switch v := val.(type) {
 	case (*data.Item):
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
+		v.Author = user.Username
 	case (*data.ItemComment):
 		v.ID, err = strconv.ParseInt(vars["childkey"], 10, 64)
+		v.Author = user.Username
 	case (*data.User):
 		v.Username = vars["key"]
 	case (*data.UserDirection):
@@ -441,12 +486,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		v.Title = vars["key"]
 	case (*data.Term):
 		v.Term = vars["key"]
+		v.Author = user.Username
 	case (*data.TermRanking):
 		v.Term = vars["key"]
 	}
 
 	if err != nil {
-		log.Println(err)
+		log.Println(err, vars)
 		http.Error(w, "Malformed key in URI", http.StatusBadRequest)
 		return
 	}
@@ -476,7 +522,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 // Generic Delete handler
 func Delete(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
