@@ -315,7 +315,7 @@ label {
 	padding: 35px 0 20px 0;
 }
 
-.closeup-item .closeup-generic-item .map {
+.closeup-item .closeup-generic-item .map, .closeup-item .closeup-streamingVideoV1-item .map {
 	margin: auto;
 
 	height: 400px;
