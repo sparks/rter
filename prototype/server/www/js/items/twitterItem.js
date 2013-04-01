@@ -9,9 +9,6 @@ angular.module('twitterItem',  [
 	$scope.extra = {};
 	$scope.extra.ResultType = "recent";
 	
-	if($scope.item.Author === undefined) {
-		$scope.item.Author = "anonymous"; //TODO: Replace with login
-	}
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
 	$scope.mapOptions = {
@@ -34,13 +31,13 @@ angular.module('twitterItem',  [
 				position: $event.latLng
 			});
 			//making the circle
-			$scope.center = $event.latLng;
-			$scope.radius = 10*1000; //10km in meters
+			$scope.extra.radius = 10*1000; //10km in meters
 			$scope.circle = new google.maps.Circle({
 				map: $scope.map,
-				center: $scope.center,
-				radius: $scope.radius,
+				center: $scope.marker.getPosition(),
+				radius: $scope.extra.radius,
 				editable: true,
+				draggable: false,
 				fillColor: "#FF0000",
 				fillOpacity: 0.3,
 				strokeColor: "#FF0000",
@@ -49,14 +46,18 @@ angular.module('twitterItem',  [
 
 			});
 			google.maps.event.addListener($scope.circle, 'radius_changed', function() {
-				$scope.radius = $scope.circle.getRadius();
-				console.log("new radius" + radius);
+				$scope.extra.radius = $scope.circle.getRadius();
+				console.log("Radius changed and calling buildURl");
+				$scope.buildURL();
 			});
-			google.maps.event.addListener(circle, 'radius_changed', function() {
-			  	$scope.center = $scope.circle.getCenter();
+			google.maps.event.addListener($scope.circle, 'center_changed', function() {
+			  	$scope.marker.setPosition($scope.circle.getCenter());
+			  	console.log("Center changed and calling buildURl");
+			  	$scope.buildURL();
 			});
 		} else {
 			$scope.marker.setPosition($event.latLng);
+			$scope.circle.setCenter($event.latLng);
 		}
 
 		$scope.item.Lat = $event.latLng.lat();
@@ -102,7 +103,7 @@ angular.module('twitterItem',  [
 										+ "&result_type=" + scope.extra.ResultType
 
 					if(!(scope.item.Lat == undefined)){
-						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";		
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+(scope.extra.radius/1000)+"km";		
 					}
 										
 					scope.item.ContentURI = encodeURI(searchURL);
