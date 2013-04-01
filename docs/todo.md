@@ -3,9 +3,11 @@
 ##Server
 ###Must
 * Don't return target heading if it's too old
-* Invalid cookie wipe
+
 * Config new system
-* Non destructive PUTs
+
+* Invalid cookie wipe
+
 * Update tag-cloud on the fly
 * Update Map-Dir on the fly (Userdirection)
 * Update comments on the fly (it's a chat system!)

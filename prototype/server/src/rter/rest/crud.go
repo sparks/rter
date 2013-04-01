@@ -69,7 +69,7 @@ func StateOptions(opts string) func(http.ResponseWriter, *http.Request) {
 func Create(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 
 	if (user == nil || permissions < 1) && vars["datatype"] != "users" { // Allow anyone to create users for now
 		http.Error(w, "Please Login", http.StatusUnauthorized)
@@ -143,6 +143,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	// Perform the DB insert
 	err = storage.Insert(val)
 
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		return
+	}
+
 	// Exectute post insert hooks, etc ...
 	switch v := val.(type) {
 	case *data.Item:
@@ -157,12 +163,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 			v.Token = t
 		}
-	}
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Error, likely due to malformed request.", http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json") // Header are important when GZIP is enabled
@@ -372,7 +372,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 
 // Generic Update handler
 func Update(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
@@ -522,7 +522,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 // Generic Delete handler
 func Delete(w http.ResponseWriter, r *http.Request) {
-	user, permissions := auth.GetCredentials(r)
+	user, permissions := auth.Challenge(w, r, true)
 	if user == nil || permissions < 1 {
 		http.Error(w, "Please Login", http.StatusUnauthorized)
 		return
