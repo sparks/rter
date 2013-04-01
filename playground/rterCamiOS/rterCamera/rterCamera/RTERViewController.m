@@ -62,9 +62,9 @@ RTERPreviewController *preview;
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.173:8080/auth"]];
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/auth"]];
 	
-	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.46.36:1234"]];
+	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/auth"]];
 	[request setHTTPMethod:@"POST"];
 	[request setHTTPShouldHandleCookies:YES];
 	[request setHTTPBody:postData];
@@ -98,6 +98,8 @@ RTERPreviewController *preview;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+	//NSLog(@"Connection: %@\n, AuthConnection: %@", connection, [preview getAuthConnection]);
+	
 	if (connection == [preview getAuthConnection]) {
 		NSLog(@"DidRecieveResponse");
 
@@ -125,14 +127,21 @@ RTERPreviewController *preview;
 - (void)connection:(NSURLConnection *)aConn didReceiveData:(NSData *)data
 
 {
-	//if (aConn == [preview getAuthConnection]) {
+	if (aConn == [preview getAuthConnection]) {
 		NSLog(@"DATA:");
-		NSLog(@"%@", [data description]);
+		//NSLog(@"%@", [data description]);
 		NSError *error;
 		NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:
 								  NSJSONReadingMutableContainers error:&error];
-	NSLog(@"%@",jsonDict);
-	//}
+		NSLog(@"%@",jsonDict);
+		NSLog(@"AuthString:=====\nrtER rter_resource=\"%@\", rter_signature=\"%@\", rter_valid_until=\"%@\"", [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_resource"], [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_signature"], [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_valid_until"]);
+		NSString *authString = [NSString stringWithFormat:@"rtER rter_resource=\"%@\", rter_signature=\"%@\", rter_valid_until=\"%@\"",
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_resource"],
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_signature"],
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_valid_until"]];
+		[preview setAuthString:authString];
+		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
+	}
 }
 
 
