@@ -43,4 +43,13 @@
 	</div>
 </div>
 
-<button class="btn btn-danger float-close" ng-click="cancel()" ng-hide="!dialog">Close</button>
+<div class="float-control-left" ng-hide="!dialog">
+	<button class="btn btn-danger" ng-click="deleteItem()">Delete</button>
+</div>
+
+
+<div class="float-control-right" ng-hide="!dialog">
+	<button class="btn btn-success" ng-click="editDialog()">Edit</button>
+	<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Close</button>
+</div>
+

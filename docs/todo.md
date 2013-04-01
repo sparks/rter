@@ -2,19 +2,18 @@
 
 ##Server
 ###Must
-* Don't return target heading if it's too old
-
 * Config new system
-
-* Minimize call to db for auth
 
 * Update tag-cloud on the fly
 * Update Map-Dir on the fly (Userdirection)
 * Update comments on the fly (it's a chat system!)
 
-###Wish
+* Don't return target heading if it's too old
+* Minimize call to db for auth
+
+###Wish List
+* Live badge
 * Content type badge
-* Sidebar filters
 * Viewed/Dealt with check box
 * Provide a lock on the mobile user control
 * Can include more information in tile view
@@ -22,6 +21,7 @@
 * Tooltips to help use
 * Callback/Hooks for CRUD instead of mass of switch statements
 * Store foreign item tokens in the DB such as the video server token?
+* Mo4r sidebar filters
 
 ##Mobile
 * More text on the device (tooltips etc)
