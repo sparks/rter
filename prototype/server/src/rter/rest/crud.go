@@ -119,11 +119,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.Item:
 		v.Author = user.Username
-		if v.Type == "streaming-video-v1" { // We provide this information for video streams since we provide the video server
-			v.UploadURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
-			v.ThumbnailURI = "http://localhost:8081/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
-			v.ContentURI = "http://localhost:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
-		}
 	case *data.ItemComment:
 		v.ItemID, err = strconv.ParseInt(vars["key"], 10, 64)
 		v.Author = user.Username
@@ -153,6 +148,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.Item:
 		if v.Type == "streaming-video-v1" {
+			v.UploadURI = "http://142.157.58.36:8081/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+			v.ThumbnailURI = "http://142.157.58.36:8081/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
+			v.ContentURI = "http://142.157.58.36:8081/v1/videos/" + strconv.FormatInt(v.ID, 10)
+
 			t, err := token.GenerateToken(v.UploadURI, r.RemoteAddr, time.Duration(3600)*time.Second, "1122AABBCCDDEEFF")
 
 			if err != nil {
@@ -162,6 +161,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 			}
 
 			v.Token = t
+
+			err = storage.Update(v) //FIXME: This is awful, but probably not workaroundable?
+
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
