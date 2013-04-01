@@ -6,7 +6,7 @@
 
 * Config new system
 
-* Invalid cookie wipe
+* Minimize call to db for auth
 
 * Update tag-cloud on the fly
 * Update Map-Dir on the fly (Userdirection)

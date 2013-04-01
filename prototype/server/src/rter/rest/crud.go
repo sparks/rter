@@ -399,7 +399,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	case "items":
 		v := new(data.Item)
 		v.ID, err = strconv.ParseInt(vars["key"], 10, 64)
-		log.Println("a")
+
 		val = v
 	case "items/comments":
 		v := new(data.ItemComment)
