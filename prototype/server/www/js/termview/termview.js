@@ -108,7 +108,6 @@ angular.module('termview', [
 
 	$scope.$watch('[rankedItems, filterMode]', function() {
 		if($scope.filterMode == 'blur') {
-			$scope.updateMarkers();
 			$scope.finalFilteredItems = $scope.rankedItems;
 			$scope.finalMapItems = $scope.rankedItems;
 		}
@@ -123,8 +122,11 @@ angular.module('termview', [
 	$scope.$watch('[textSearchedItems, filterMode]', function() {
 		if($scope.filterMode == 'remove') {
 			$scope.finalMapItems = $scope.textSearchedItems;
-			$scope.updateMarkers();
 		}
+	}, true);
+
+	$scope.$watch('finalMapItems', function() {
+		$scope.updateMarkers();
 	}, true);
 
 	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable, filterMode]', function() {

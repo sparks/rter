@@ -15,11 +15,9 @@
 				<span class="time">{{tweet.created_at | fromNow}}</span>
 				
 				<button class="btn btn-mini btn-danger" ng-click='test(tweet, $event)'> Promote </button>
-				<button class="btn btn-mini btn-info"> React </button>
+				<button class="btn btn-mini btn-info"><a href="https://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}" target="_blank">React</a>  </button>
 			</header>
 			<article>{{tweet.text}}</article>
-			<!--<iframe src="https://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}">
-		</iframe>-->
 		</li>
 	</ul>
 

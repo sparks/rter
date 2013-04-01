@@ -1,3 +1,6 @@
+// Provides an interface to the storage solution with drivers for datatypes from rter/data
+//
+// Functions are provided to make MySQL storage easier to use within the rtER project. This includes helps for setting up the connection and running queries.
 package storage
 
 import (
@@ -13,18 +16,22 @@ var (
 	ErrCannotDelete        = errors.New("Storage doesn't allow deleting that.")
 )
 
+// Begin a new transaction against the current db.
 func Begin() (*sql.Tx, error) {
 	return db.Begin()
 }
 
+// Run an exec against the current connected db.
 func Exec(query string, args ...interface{}) (sql.Result, error) {
 	return db.Exec(query, args...)
 }
 
+// Run a query against the current connected db.
 func Query(query string, args ...interface{}) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
+// Run an exec against the current connected db. Fatal if the query throws an error.
 func MustExec(query string, args ...interface{}) sql.Result {
 	res, err := db.Exec(query, args...)
 	if err != nil {
@@ -33,6 +40,7 @@ func MustExec(query string, args ...interface{}) sql.Result {
 	return res
 }
 
+// Run a query against the current connected db. Fatal if the query throws an error.
 func MustQuery(query string, args ...interface{}) *sql.Rows {
 	rows, err := db.Query(query, args...)
 	if err != nil {
@@ -41,6 +49,7 @@ func MustQuery(query string, args ...interface{}) *sql.Rows {
 	return rows
 }
 
+// Print out all the results from an SQL query to STOUT via fmt in a readable format
 func DumpRows(rows *sql.Rows) {
 	// Get column names
 	columns, err := rows.Columns()
