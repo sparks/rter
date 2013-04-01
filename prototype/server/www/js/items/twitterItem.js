@@ -16,7 +16,7 @@ angular.module('twitterItem',  [
 
 	$scope.mapOptions = {
 		center: $scope.mapCenter,
-		zoom: 10,
+		zoom: 15,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
@@ -27,10 +27,33 @@ angular.module('twitterItem',  [
 	};
 
 	$scope.setMarker = function($event) {
+		
 		if($scope.marker === undefined) {
 			$scope.marker = new google.maps.Marker({
 				map: $scope.map,
 				position: $event.latLng
+			});
+			//making the circle
+			$scope.center = $event.latLng;
+			$scope.radius = 10*1000; //10km in meters
+			$scope.circle = new google.maps.Circle({
+				map: $scope.map,
+				center: $scope.center,
+				radius: $scope.radius,
+				editable: true,
+				fillColor: "#FF0000",
+				fillOpacity: 0.3,
+				strokeColor: "#FF0000",
+			    strokeOpacity: 0.8,
+			    strokeWeight: 2
+
+			});
+			google.maps.event.addListener($scope.circle, 'radius_changed', function() {
+				$scope.radius = $scope.circle.getRadius();
+				console.log("new radius" + radius);
+			});
+			google.maps.event.addListener(circle, 'radius_changed', function() {
+			  	$scope.center = $scope.circle.getCenter();
 			});
 		} else {
 			$scope.marker.setPosition($event.latLng);
@@ -62,9 +85,11 @@ angular.module('twitterItem',  [
 						position: latLng
 					});
 					scope.mapCenter = latLng;
+
 				} else {
 					navigator.geolocation.getCurrentPosition(scope.centerAt);
 				}
+				
 				
 				scope.buildURL = function(){
 						
@@ -185,10 +210,10 @@ angular.module('twitterItem',  [
 			
 			var newItem = {} ;
 			newItem.Type = "SingleTweet";
-			newItem.ContentURI = "http://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}";
-
+			newItem.ContentURI = "http://twitter.com/"+tweet.from_user+"/status/"+tweet.id_str;
 			console.log("it worked",$event );
-			console.log("item - ",newItem );			
+			console.log(tweet, "item - ", newItem );	
+
 			ItemCache.create(
 			{Type: "generic", ContentURI: tweet.id_str },
 			function() {
