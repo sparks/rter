@@ -213,10 +213,15 @@ angular.module('twitterItem',  [
 			newItem.Type = "SingleTweet";
 			newItem.ContentURI = "http://twitter.com/"+tweet.from_user+"/status/"+tweet.id_str;
 			console.log("it worked",$event );
-			console.log(tweet, "item - ", newItem );	
-
+			if(tweet.geo != null)
+			{
+				newItem.Lat = tweet.geo.coordinates[0];
+				newItem.Lng = tweet.geo.coordinates[1];					
+			}
+			console.log(newItem);
+			
 			ItemCache.create(
-			{Type: "generic", ContentURI: tweet.id_str },
+			newItem,
 			function() {
 			if($scope.dialog !== undefined) {
 			$scope.dialog.close();
