@@ -9,14 +9,11 @@ angular.module('twitterItem',  [
 	$scope.extra = {};
 	$scope.extra.ResultType = "recent";
 	
-	if($scope.item.Author === undefined) {
-		$scope.item.Author = "anonymous"; //TODO: Replace with login
-	}
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
 	$scope.mapOptions = {
 		center: $scope.mapCenter,
-		zoom: 10,
+		zoom: 15,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
@@ -27,13 +24,40 @@ angular.module('twitterItem',  [
 	};
 
 	$scope.setMarker = function($event) {
+		
 		if($scope.marker === undefined) {
 			$scope.marker = new google.maps.Marker({
 				map: $scope.map,
 				position: $event.latLng
 			});
+			//making the circle
+			$scope.extra.radius = 10*1000; //10km in meters
+			$scope.circle = new google.maps.Circle({
+				map: $scope.map,
+				center: $scope.marker.getPosition(),
+				radius: $scope.extra.radius,
+				editable: true,
+				draggable: false,
+				fillColor: "#FF0000",
+				fillOpacity: 0.3,
+				strokeColor: "#FF0000",
+			    strokeOpacity: 0.8,
+			    strokeWeight: 2
+
+			});
+			google.maps.event.addListener($scope.circle, 'radius_changed', function() {
+				$scope.extra.radius = $scope.circle.getRadius();
+				console.log("Radius changed and calling buildURl");
+				$scope.buildURL();
+			});
+			google.maps.event.addListener($scope.circle, 'center_changed', function() {
+			  	$scope.marker.setPosition($scope.circle.getCenter());
+			  	console.log("Center changed and calling buildURl");
+			  	$scope.buildURL();
+			});
 		} else {
 			$scope.marker.setPosition($event.latLng);
+			$scope.circle.setCenter($event.latLng);
 		}
 
 		$scope.item.Lat = $event.latLng.lat();
@@ -62,9 +86,11 @@ angular.module('twitterItem',  [
 						position: latLng
 					});
 					scope.mapCenter = latLng;
+
 				} else {
 					navigator.geolocation.getCurrentPosition(scope.centerAt);
 				}
+				
 				
 				scope.buildURL = function(){
 						
@@ -77,7 +103,7 @@ angular.module('twitterItem',  [
 										+ "&result_type=" + scope.extra.ResultType
 
 					if(!(scope.item.Lat == undefined)){
-						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+10+"mi";		
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+(scope.extra.radius/1000)+"km";		
 					}
 										
 					scope.item.ContentURI = encodeURI(searchURL);
@@ -185,10 +211,10 @@ angular.module('twitterItem',  [
 			
 			var newItem = {} ;
 			newItem.Type = "SingleTweet";
-			newItem.ContentURI = "http://twitter.com/{{tweet.from_user}}/status/{{tweet.id_str}}";
-
+			newItem.ContentURI = "http://twitter.com/"+tweet.from_user+"/status/"+tweet.id_str;
 			console.log("it worked",$event );
-			console.log("item - ",newItem );			
+			console.log(tweet, "item - ", newItem );	
+
 			ItemCache.create(
 			{Type: "generic", ContentURI: tweet.id_str },
 			function() {

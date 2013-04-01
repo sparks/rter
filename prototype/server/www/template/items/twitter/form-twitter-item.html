@@ -1,8 +1,10 @@
 <div class="form-twitter-item row-fluid">
 	<div class="span6">
 		
-		<label for="SearchTerm">Search Term</label>
-		<input type="text" name="searchTerm" ng-model="extra.SearchTerm">
+		<div ng-class="{error: form.SearchTerm.$invalid}">
+			<label for="SearchTerm">Search Term</label>
+			<input type="text" name="SearchTerm" ng-model="extra.SearchTerm" required>
+		</div>
 		
 		<label for="ResultType">Result Type</label>
 		<select name="ResultType" ng-model="extra.ResultType">
