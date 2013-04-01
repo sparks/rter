@@ -26,6 +26,10 @@
 * Mo4r sidebar filters
 
 ##Mobile
+* Stream doesnt work a second time without logout
+* Orientation problem
+* Login with keyboard in the way
+
 * More text on the device (tooltips etc)
 * Auth system
 * Location

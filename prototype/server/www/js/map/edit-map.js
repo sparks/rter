@@ -65,7 +65,7 @@ angular.module('edit-map', [
 			$timeout( //FIXME: Another map hack to render hidden maps
 				function() {
 					google.maps.event.trigger(scope.map, "resize");
-					scope.map.setCenter(scope.mapCenter);
+					scope.map.setCenter(scope.map.getCenter());
 				},
 				0
 			);
