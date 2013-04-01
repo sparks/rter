@@ -322,12 +322,19 @@ label {
 	width: 450px;
 }
 
-.closeup-item .closeup-generic-item .left, .closeup-item .closeup-youtube-item .left {
+.closeup-item .closeup-generic-item .left, .closeup-item .closeup-youtube-item .left, .closeup-item .closeup-streamingVideoV1-item .left {
 	text-align: center;
 }
 
 .closeup-item .closeup-generic-item .left img {
 	width: 100%;
+	margin-bottom: 15px;
+}
+
+
+.closeup-item .closeup-streamingVideoV1-item .left video {
+	width: 100%;
+	max-width: 640px;
 	margin-bottom: 15px;
 }
 
