@@ -8,6 +8,8 @@
 * Update Map-Dir on the fly (Userdirection)
 * Update comments on the fly (it's a chat system!)
 
+* Image upload
+
 * Don't return target heading if it's too old
 * Minimize call to db for auth
 
