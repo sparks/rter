@@ -1,14 +1,15 @@
 angular.module('items', [
-	'ui.bootstrap', //dialog
-	'ngResource',   //$resource for Item
-	'sockjs',       //sock for ItemCache
-	'alerts',       //Alerts for item actions
-	'taxonomy',     //For tag-selector
-	'genericItem',  //generic item implementation
-	'rawItem',      //raw item implementation
-	'twitterItem',  //twitter item implementation
-	'youtubeItem',  //YouTube item implementation
-	'comments'      //Comments dialog
+	'ui.bootstrap',         //dialog
+	'ngResource',           //$resource for Item
+	'sockjs',               //sock for ItemCache
+	'alerts',               //Alerts for item actions
+	'taxonomy',             //For tag-selector
+	'genericItem',          //generic item implementation
+	'rawItem',              //raw item implementation
+	'twitterItem',          //twitter item implementation
+	'youtubeItem',          //YouTube item implementation
+	'streamingVideoV1Item', //Streaming Video V1 item implementation
+	'comments'              //Comments dialog
 ])
 
 .factory('ItemResource', function ($resource) {
