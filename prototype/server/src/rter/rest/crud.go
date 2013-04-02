@@ -155,6 +155,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 			url, err := url.Parse(r.RemoteAddr)
 
+			log.Println(r.RemoteAddr)
+			log.Println(url)
+			log.Pritnln(url.Host)
+
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Problem building streaming tokens, not remote addresse available.", http.StatusBadRequest)
