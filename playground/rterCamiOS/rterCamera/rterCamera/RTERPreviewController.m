@@ -329,7 +329,7 @@
 	NSLog(@"Attempting to get Streaming token:");
 	
 	// the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\",\"HasGeo\":true,\"HasHeading\":true,\"Live\":true}"];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request

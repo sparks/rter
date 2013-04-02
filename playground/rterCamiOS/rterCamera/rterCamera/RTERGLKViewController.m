@@ -116,46 +116,28 @@
 -(void)getHeadingPutCoordindates {
     
     
-    NSURL *url = [NSURL URLWithString:@"http://rter.cim.mcgill.ca/1.0/users/sparky/direction"];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca/1.0/users/%@/direction",[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
-    //[urlRequest setHTTPMethod:@"GET"];
-    //[urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     if (!currentGetConnection) {
         currentGetConnection = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self startImmediately:YES];
         headingData = [[NSMutableData alloc]init];
         [currentGetConnection start];
         NSLog(@"GetConnectionDidStart");
     }
-    //put the id of the item in here
-   /* NSURL *putUrl = [NSURL URLWithString:@"http://rter.cim.mcgill.ca:8080/1.0/items/<id of item>"];
-    //NSMutableURLRequest *putUrlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
-    [urlRequest setHTTPMethod:@"PUT"];
-    [urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    if (!currentPutConnection) {
-        currentPutConnection = [[NSURLConnection alloc]initWithRequest:putUrlRequest delegate:self startImmediately:YES];
-        //headingData = [[NSMutableData alloc]init];
-        [currentPutConnection start];
-        NSLog(@"PutConnectionDidStart");
-    }*/
-    
+       
     
     ////PUT REQUEST
-    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca:8080/1.0/items/%@",[previewController itemID]]]];
+    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca/1.0/items/%@",[previewController itemID]]]];
     
     
     // the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Lat\":\"%f\",\"Lng\":\"%f\",\"Heading\":\"%f\"}",latitude,longitude,currentOrientation];
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Lat\":%f,\"Lng\":%f,\"Heading\":%f}",latitude,longitude,currentOrientation];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 
     
     [putRequest setHTTPMethod:@"PUT"];
     [putRequest setHTTPBody:postData];
     [putRequest setValue:[[previewController delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
-
-    
-    
-
-    //[putRequest setValue:[previewController getAuthString] forHTTPHeaderField:@"Authorization"];
     
     [NSURLConnection sendAsynchronousRequest:putRequest
                                        queue:putQueue
@@ -511,7 +493,9 @@
 -(NSUInteger)supportedInterfaceOrientations{
     return UIInterfaceOrientationMaskLandscapeRight;
 }*/
-
+-(void)dealloc {
+    [getHeadingTimer invalidate];
+}
 
 - (void)didReceiveMemoryWarning
 {

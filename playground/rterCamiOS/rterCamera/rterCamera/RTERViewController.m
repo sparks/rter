@@ -17,6 +17,7 @@
 @synthesize userField;
 @synthesize passField;
 @synthesize cookieString;
+@synthesize userName;
 
 RTERPreviewController *preview;
 
@@ -57,6 +58,9 @@ RTERPreviewController *preview;
 	
 	NSLog(@"Attempting auth:\n\t%@\n\t%@", self.userField.text, self.passField.text);
 	
+    
+    userName = userField.text;
+    
 	// the json string to post
 	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [self.userField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [self.passField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
@@ -142,6 +146,8 @@ RTERPreviewController *preview;
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
         [preview setItemID:[jsonDict objectForKey:@"ID"]];
+        NSLog(@"\n\nITEMID: %@\n\n",preview.itemID);
+        
         
         // ready to start sending frames
         [preview startRecording];
