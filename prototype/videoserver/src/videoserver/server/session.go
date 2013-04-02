@@ -189,9 +189,16 @@ func (s *Session) Close() *Error {
 func (s *Session) ValidateRequest(r *http.Request, t int) *Error {
 
 	// on the first call store caller IP
+	caller := r.RemoteAddr
+
+	if s.c.Hack.Disable_port_check {
+		// strip port from caller address
+		caller = strings.Split(r.RemoteAddr, ":")[0]
+	}
+
 	if s.Consumer == "" {
-		s.Consumer = r.RemoteAddr
-	} else if s.Consumer != r.RemoteAddr {
+		s.Consumer = caller
+	} else if s.Consumer != caller {
 		// check if this is the same consumer
 		return ErrorInvalidClient
 	}

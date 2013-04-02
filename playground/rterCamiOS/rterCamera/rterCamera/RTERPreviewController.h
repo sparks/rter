@@ -10,7 +10,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <AVFoundation/AVFoundation.h>
 #import <dispatch/dispatch.h>
-
+#import <GLKit/GLKit.h>
 #import <QuartzCore/QuartzCore.h>
 
 @protocol RTERPreviewControllerDelegate <NSObject>
@@ -21,7 +21,8 @@
 
 @end
 
-@interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate>
+@class RTERGLKViewController;
+@interface RTERPreviewController : UIViewController<AVCaptureAudioDataOutputSampleBufferDelegate,NSURLConnectionDelegate>
 {
     // dispatch queue for encoding and POSTing
     dispatch_queue_t postQueue;
@@ -35,12 +36,15 @@
 
 @property (strong, nonatomic) IBOutlet UIToolbar *toobar;
 
+@property (nonatomic,retain) IBOutlet GLKView *glkView;
+
 @property (nonatomic, retain) NSString *streamingToken;
 @property (nonatomic, retain) NSString *streamingEndpoint;
+@property (nonatomic, retain) NSString *itemID;
 
 - (NSURLConnection*)getAuthConnection;
 - (void)setAuthString:(NSString*)newAuth;
-
+-(NSString *)getAuthString;
 - (IBAction)clickedStart:(id)sender;
 
 - (IBAction)clickedBack:(id)sender;
