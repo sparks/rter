@@ -9,7 +9,7 @@
 #import "RTERPreviewController.h"
 #import <math.h>
 #import "RTERVideoEncoder.h"
-
+#import "RTERGLKViewController.h"
 #define DESIRED_FPS 15
 
 @interface RTERPreviewController ()
@@ -31,7 +31,10 @@
     RTERVideoEncoder *encoder;
 	
 	NSURLConnection *streamingAuthConnection;
-	NSString *authString;
+	NSString *authString; //If authString doesn't have to be private it should be a property CB
+    
+    GLKView* _glkView;
+    RTERGLKViewController* _glkVC;
 }
 
 @end
@@ -42,6 +45,9 @@
 @synthesize previewView;
 @synthesize streamingToken;
 @synthesize streamingEndpoint;
+@synthesize glkView = _glkView;
+@synthesize itemID;
+
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -172,6 +178,19 @@
     // start the capture session so that the preview shows up
     [captureSession startRunning];
     
+    //Create OpenGL Layer
+    
+    //create eaglcontext
+    EAGLContext *context = [[EAGLContext alloc]initWithAPI:kEAGLRenderingAPIOpenGLES1];
+    
+    //assign context to synthesized GLKView
+    _glkView.context = context;
+    [self.glkView setNeedsDisplay];
+    
+    //initialize View Controller for the GLKView
+    _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView previewController:self];
+
+    
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -240,12 +259,14 @@
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
 		
+        sendingData = YES;
+        
 		// get token for video streaming
 		[self getStreamingToken];
 		
         // start recording
-        sendingData = YES;
-        [self startRecording];
+//        
+//        [self startRecording];
 		
         
         [(UIBarButtonItem *) sender setTitle:@"stop"];
@@ -325,14 +346,23 @@
 	[request setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
 	
 	streamingAuthConnection = [NSURLConnection connectionWithRequest:request delegate:[self delegate]];
+    //streamingAuthConnection = [[NSURLConnection alloc]initWithRequest:request delegate:self startImmediately:YES];
 }
+
+
 
 -(NSURLConnection*)getAuthConnection{
 	return streamingAuthConnection;
 }
 
+
+
 -(void)setAuthString:(NSString*)newAuth {
 	authString = newAuth;
+}
+
+-(NSString *)getAuthString {
+    return authString;
 }
 
 /* process the frames here */
@@ -352,19 +382,32 @@
         [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
 		[postRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
 		[postRequest setValue:authString forHTTPHeaderField:@"Authorization"];
+        
+        dispatch_async(postQueue, ^{
+            NSHTTPURLResponse *response;
+            NSError *err;
+            NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
+            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
+            NSDictionary *dictionary = [response allHeaderFields];
+            NSLog( @"%@", [dictionary description]);
+        });
 		
-        [NSURLConnection sendAsynchronousRequest:postRequest
-                                           queue:postOpQueue
-                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
-        {
-            
-            NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
-        }];
+//        [NSURLConnection sendAsynchronousRequest:postRequest
+//                                           queue:postOpQueue
+//                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
+//        {
+//            
+//            NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
+//            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
+//        }];
         
         [encoder freePacket:&pkt];
     
     }
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
 }
 
 - (IBAction)clickedBack:(id)sender {

@@ -201,10 +201,13 @@ func (s *State) AuthenticateRequest(r *http.Request, key string) *Error {
 		}
 	}
 
-	// assemble URL (r.URL.String() fails when no hostname is set for server)
+	// assemble our own URL (r.URL.String() fails because Golang's http package
+	// does not fill its URL structure properly)
 	var url string
-	if r.URL.Scheme != "" {
-		url += r.URL.Scheme + "://"
+	if s.c.Server.Secure_mode {
+		url = "https://"
+	} else {
+		url = "http://"
 	}
 	url += s.serverRoot + r.URL.Path
 
