@@ -7,13 +7,25 @@ angular.module('streamingVideoV1Item', [
 .controller('TileStreamingVideoV1ItemCtrl', function($scope) {
 	$scope.video = {};
 
+	$scope.livethumbConfig = {
+		showtitle: false,
+		autoplay: true,
+		selectable: true,
+		skimmable: true,
+		clickable: true,
+		interval: 2,
+		debuglive: false,
+		width: 140,
+		video: $scope.video
+	};
+
 	$scope.$watch('item', function() {
 		if(!$scope.item) return;
 
-		$scope.video.title = "Live";
+		$scope.video.title = "";
 		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI;
 		$scope.video.StartTime = $scope.item.StartTime;
-		$scope.video.EndTime = $scope.item.StopTime;
+		$scope.video.StopTime = $scope.item.StopTime;
 	}, true);
 })
 
