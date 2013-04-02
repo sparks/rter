@@ -1,10 +1,20 @@
 angular.module('streamingVideoV1Item', [
-	'edit-map', //maps
-	'disp-map'  //maps
+	'tsunamijs.livethumbnail', //Live Thumbnails
+	'edit-map',                //maps
+	'disp-map'                 //maps
 ])
 
 .controller('TileStreamingVideoV1ItemCtrl', function($scope) {
+	$scope.video = {};
 
+	$scope.$watch('item', function() {
+		if(!$scope.item) return;
+
+		$scope.video.title = "Live";
+		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI;
+		$scope.video.StartTime = $scope.item.StartTime;
+		$scope.video.EndTime = $scope.item.StopTime;
+	}, true);
 })
 
 .directive('tileStreamingVideoV1Item', function() {

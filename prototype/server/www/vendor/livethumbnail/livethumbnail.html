@@ -1,0 +1,11 @@
+<div class="tjs-thumb-wrapper">
+  <div class="tjs-thumb-title" ng-show="c.showtitle" ng-style="{'width': c.width + 10}">{{c.video.title}}</div>
+  <div class="thumbnail tjs-thumb" ng-class="{'selected': selected}" ng-click="mouseClicked()" ng-mousemove="skipTo($event)" ng-style="{'width': c.width, 'minWidth': c.width}">
+    <div class="tjs-thumb-image" ng-style="{'width': c.width, 'height': c.height, 'backgroundImage': 'url(' + bgimageurl +')'}"></div>
+    <div class="tjs-thumb-skimmer" ng-class="{'enabled': c.skimmable}" ng-style="{'width': c.width}" ng-show="isSkimming()" ng-mousemove="skipTo($event)">
+      <div class="tjs-layer tjs-thumb-skimmer-background"></div>
+      <div class="tjs-layer tjs-thumb-skimmer-playhead" ng-style="{'width': skimmerWidth + '%'}"></div>
+    </div>
+    <div class="tjs-thumb-status" ng-class="{'live': isLive(), 'skimming': isSkimming(), 'playback': isEOS(), 'paused': isPaused()}">{{status}}</div>
+  </div>
+</div>

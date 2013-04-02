@@ -1,0 +1,29 @@
+.tjs-thumb-status {
+  position: relative;
+  text-align: right;
+  margin: 0;
+  padding: 0;
+  top: -90px;
+  right: 5px;
+  height: 0;
+}
+
+.tjs-thumb-status.live {
+  color: #32CD32;
+  text-shadow: 0 0 1px #000;
+}
+
+.tjs-thumb-status.skimming {
+  color: #DDD;
+  text-shadow: 0 0 1px #000;
+}
+
+.tjs-thumb-status.paused {
+  color: #FF4500;
+  text-shadow: 0 0 1px #000;
+}
+
+.tjs-thumb-status.playback {
+  color: #EEE;
+  text-shadow: 0 0 1px #000;
+}

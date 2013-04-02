@@ -1,0 +1,16 @@
+<div class="span9">
+    <div class="row">
+        <div class="span3" ng-repeat="video in livevideos4thumbs">
+            <div live-thumbnail="{showtitle: showtitle, autoplay: autoplay, selectable: selectable, skimmable: skimmable, clickable: clickable, interval: 2, debuglive: debuglive, video: video}"></div>
+        </div>
+    </div>
+</div>
+<div class="span3">
+      <h3>Live Configuration</h3>
+      <input type="checkbox" ng-init="showtitle=true" ng-model="showtitle"> Show Title</input><br />
+      <input type="checkbox" ng-init="autoplay=true" ng-model="autoplay"> Autoplay</input><br />
+      <input type="checkbox" ng-init="skimmable=true" ng-model="skimmable"> Enable Skimming</input><br/>
+      <input type="checkbox" ng-init="selectable=true" ng-model="selectable"> Enable Selection</input><br/>
+      <input type="checkbox" ng-init="clickable=true" ng-model="clickable"> Clickable</input><br />
+      <input type="checkbox" ng-init="debuglive=true" ng-model="debuglive"> Fake Live Stream</input>
+</div>
