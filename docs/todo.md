@@ -1,82 +1,63 @@
-#ToDos
-
-##Server
-###Must
-* append logfile
-* Hijack bug
-
-* Detect EOS in app
-* Permissions on made dir (rw group x for dirs)
-* Ability to read main log from Videoserver
-
-* single tweet type lower case
-* Set start-stop time and other fields for tweets
-
-* Validate stream doesn already exist
-* Config new system
-
-* Update tag-cloud on the fly
-* Update Map-Dir on the fly (Userdirection)
-* Update comments on the fly (it's a chat system!)
-
-* Image upload
-
+# ToDos
+## Server
+### FixMe
+* Append logfile don't overwrite (this should be a flag option)
+* Hijack bug (don't crash the whole server when websockets are hijacked)
+* Twitter items
+	* Single tweet type should be lower case
+	* Set start-stop time and other fields for tweets
+* Finish videoStreamingV1 item implemenation (use tiles from alex)
+* Caching services
+	* Update tag-cloud on the fly
+	* Update Map-Dir on the fly (Userdirection)
+	* Update comments on the fly (it's a chat system!)
+* Image upload, especially for user submitted generic content. 
+* Validate stream doesn already exist in the server before handing out a token
 * Don't return target heading if it's too old
 * Minimize call to db for auth
 
-###Wish List
-* Live badge
-* Content type badge
-* Viewed/Dealt with check box
+### Short Term Wish List
+* Tile view improvements
+	* Live badge
+	* Content type badge
+	* Viewed/Dealt with check box
+	* Generaly make more informative
+* Stream of live items
 * Provide a lock on the mobile user control
-* Can include more information in tile view
-* Description field for items?
-* Tooltips to help use
-* Callback/Hooks for CRUD instead of mass of switch statements
-* Store foreign item tokens in the DB such as the video server token?
-* Mo4r sidebar filters
+* Tour of the UI (tool tips, animations ...)
+* Structural
+	* Callback/Hooks for CRUD instead of mass of switch statements
+	* Store foreign item tokens in the DB such as the video server token?
+* Self rebooting server
 
-##Mobile
-* Stream doesnt work a second time without logout
-* Orientation problem
-* Login with keyboard in the way
-
-* More text on the device (tooltips etc)
-* Auth system
-* Location
-	* Broke on tablets
-* Debug information
-	* Error metrics
-	* compas
-
-## New Features
-* Better closeup view (in context)
-* Twitter integration
-	* Specific twitter view
-	* Source single tweets
-	* Source searches/hashtags
-	* Replay directly to groups of tweets
-	* Stat view?
-* News/webpage integration
-	* Specific news view
-	* version?
-* Implement tagging (taxonomy)
-* Implement tabs
-	* Perment base tabs (view all, diff priority levels)
-	* New tabs as a view into a tag. Ranking in this view is unique.
-	* Can we involve location in this tabs/tag dynamics
-* Timeline
+### Long Term Wish List
+* Timeline with scrubber
 * Logging
-* Timefilter/scrubber
-
-## More Features!
-* Sort by
+* More filters for the sidebar
 	* by trust levels
 	* By content type
 	* By associated "task" or response group?
-* Automated tagging features to do this tagging
+* Standard auto tagging format (maybe TOML/JSON/XML spec)
 
-## Even More Features!
+### Even More Features!
 * Auto window tiling mechanism for multi screen. Breakout UI/UX elements accross windows
 * Free roam mode for phone
-* Location detection in browser for starting position
+
+## VideoServer
+### Bugs and Feature Requests
+* Check permissions on directories
+
+## Mobile
+
+### Both
+* More debug information
+	* Compas and Lat/Lng readout
+	* Show uncertainty metrics onscreen
+
+### iOS
+* Stream doesnt work a second time without logout
+* Orientation bug
+
+### Android
+* Use new Auth system
+* Location/orientation issues (can be reproduced easily on Nehil's tablet)
