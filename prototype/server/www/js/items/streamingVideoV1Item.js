@@ -59,7 +59,6 @@ angular.module('streamingVideoV1Item', [
 		priority: 99, // it needs to run after the attributes are interpolated
 		link: function(scope, element, attr) {
 			attr.$observe('autoplayIf', function(value) {
-				console.log("Bam", value);
 				if (!value)
 					return;
 
