@@ -10,6 +10,9 @@
 		"session_maxage": 30,
 		"logfile": "../../data/log/videoserver.log"
 	},
+	"hack": {
+		"disable_port_check": false
+	},
 	"limits": {
 		"max_cpu": 1,
 		"max_memory_mbytes": 128,
