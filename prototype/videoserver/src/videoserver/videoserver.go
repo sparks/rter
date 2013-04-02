@@ -74,8 +74,19 @@ var S *server.State
 
 func main() {
 
-	var err error
 	C.ParseConfig()
+
+	// redirect logging if logfile is specified and can be created
+	if C.Server.Logfile != "" {
+		file, err := os.OpenFile(C.Server.Logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, utils.PERM_FILE)
+
+		if err == nil {
+			log.SetOutput(file)
+		}
+	}
+
+	var err error
+
 	if !C.Server.Production_mode {
 		C.Print()
 	}

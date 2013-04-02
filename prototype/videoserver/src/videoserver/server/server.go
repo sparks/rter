@@ -59,6 +59,8 @@ func ServeError(w http.ResponseWriter, error string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	fmt.Fprintln(w, error)
+
+	log.Printf("ServerError %d: %s", code, error)
 }
 
 // new HTTP status codes not defined in net/http

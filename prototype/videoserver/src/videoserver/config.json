@@ -8,7 +8,7 @@
 		"key_file": "",
 		"session_timeout": 10,
 		"session_maxage": 30,
-		"logfile": ""
+		"logfile": "../../data/log/videoserver.log"
 	},
 	"limits": {
 		"max_cpu": 1,
@@ -32,8 +32,8 @@
 	},
 	"transcode": {
 		"command": "/usr/local/bin/ffmpeg",
-		"log_path": "./data/log",
-		"output_path": "./data",
+		"log_path": "../../data/log",
+		"output_path": "../../data",
 		"hls": {
 			"enabled": true,
 			"segment_length": 2

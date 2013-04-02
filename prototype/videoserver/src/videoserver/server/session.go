@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 	"videoserver/config"
+	"videoserver/utils"
 )
 
 // Transcoder states
@@ -111,7 +112,7 @@ func (s *Session) Open(t int) *Error {
 
 	// create logfile
 	logname := s.c.Transcode.Log_path + "/" + s.idstr + ".log"
-	s.LogFile, _ = os.OpenFile(logname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	s.LogFile, _ = os.OpenFile(logname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, utils.PERM_FILE)
 
 	// start transcode process
 	var attr os.ProcAttr

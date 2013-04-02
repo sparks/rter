@@ -28,6 +28,7 @@ type ServerConfig struct {
 		Key_file        string `json:"key_file"`
 		Session_timeout uint64 `json:"session_timeout"`
 		Session_maxage  uint64 `json:"session_maxage"`
+		Logfile         string `json:"logfile"`
 	}
 	// limits
 	Limits struct {
@@ -103,6 +104,7 @@ func (c *ServerConfig) ParseConfig() {
 	c.Server.Key_file = ""                                  // SSL private key
 	c.Server.Session_timeout = 10                           // close after 10 seconds inactivity
 	c.Server.Session_maxage = 3600                          // keep state for at most 1 hour
+	c.Server.Logfile = ""                                   // logfile, console if empty
 	c.Limits.Max_cpu = 1                                    // max number of CPUs used
 	c.Limits.Max_memory_mbytes = 128                        // max amount of memory used
 	c.Limits.Max_ingest_sessions = 10                       // max active sessions
@@ -155,9 +157,7 @@ func (c *ServerConfig) Print() {
 	if b, err := json.MarshalIndent(c, "", "  "); err != nil {
 		log.Printf("ServerConfig error: %s", err)
 	} else {
-		log.Printf("ServerConfig:")
-		os.Stdout.Write(b)
-		os.Stdout.WriteString("\n")
+		log.Printf("ServerConfig: %s", b)
 	}
 }
 
