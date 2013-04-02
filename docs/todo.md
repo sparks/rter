@@ -2,6 +2,8 @@
 
 ##Server
 ###Must
+* single tweet type lower case
+* Set start-stop time and other fields for tweets
 * Config new system
 
 * Update tag-cloud on the fly
