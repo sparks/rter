@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"net/url"
 	"rter/auth"
 	"rter/data"
 	"rter/storage"
@@ -152,7 +153,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 			v.ThumbnailURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb"
 			v.ContentURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10)
 
-			t, err := token.GenerateToken(v.UploadURI, r.RemoteAddr, time.Duration(3600)*time.Second, "1122AABBCCDDEEFF")
+			url, err := url.Parse(r.RemoteAddr)
+
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Problem building streaming tokens, not remote addresse available.", http.StatusBadRequest)
+				return
+			}
+
+			t, err := token.GenerateToken(v.UploadURI, url.Host, time.Duration(3600)*time.Second, "1122AABBCCDDEEFF")
 
 			if err != nil {
 				log.Println(err)
