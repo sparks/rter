@@ -142,9 +142,6 @@ RTERPreviewController *preview;
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
         [preview setItemID:[jsonDict objectForKey:@"ID"]];
-        
-        // ready to start sending frames
-        [preview startRecording];
 	}
 }
 

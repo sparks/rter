@@ -29,6 +29,7 @@
     
     // encoder
     RTERVideoEncoder *encoder;
+    CMVideoDimensions dimensions;
 	
 	NSURLConnection *streamingAuthConnection;
 	NSString *authString; //If authString doesn't have to be private it should be a property CB
@@ -83,7 +84,7 @@
     captureSession = [[AVCaptureSession alloc] init];
     
     // encoder
-    encoder = [[RTERVideoEncoder alloc] init];
+//    encoder = [[RTERVideoEncoder alloc] init];
 
     // video session settings
     
@@ -102,11 +103,11 @@
         captureSession.sessionPreset = AVCaptureSessionPreset352x288;
         NSLog(@"352x288");
         
-        CMVideoDimensions dimensions;
+//        CMVideoDimensions dimensions;
         dimensions.width = 352;
         dimensions.height = 288;
                 
-        [encoder setupEncoderWithDimesions:dimensions];
+//        [encoder setupEncoderWithDimesions:dimensions];
     }
 //    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
 //        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
@@ -258,16 +259,15 @@
 
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
-		
         sendingData = YES;
+        
+        [self initEncoder];
         
 		// get token for video streaming
 		[self getStreamingToken];
 		
         // start recording
-//        
-//        [self startRecording];
-		
+        [self startRecording];
         
         [(UIBarButtonItem *) sender setTitle:@"stop"];
     } else {
@@ -327,26 +327,57 @@
 
 -(void) getStreamingToken {
 	NSLog(@"Attempting to get Streaming token:");
+    dispatch_async(postQueue, ^{
 	
-	// the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
-	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+        // the json string to post
+        NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
+        NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
-	// setup the request
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/1.0/items"]];
+        // setup the request
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/1.0/items"]];
 	
-	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/1.0/items"]];
+        //NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/1.0/items"]];
 	
-	[request setHTTPMethod:@"POST"];
-	[request setHTTPShouldHandleCookies:YES];
-	[request setHTTPBody:postData];
-	[request setAllowsCellularAccess:YES];
-	[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-	[request setValue:[NSString stringWithFormat:@"%d",[postData length]] forHTTPHeaderField:@"Content-Length"];
-	[request setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+        [request setHTTPMethod:@"POST"];
+        [request setHTTPShouldHandleCookies:YES];
+        [request setHTTPBody:postData];
+        [request setAllowsCellularAccess:YES];
+        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        [request setValue:[NSString stringWithFormat:@"%d",[postData length]] forHTTPHeaderField:@"Content-Length"];
+        [request setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
 	
-	streamingAuthConnection = [NSURLConnection connectionWithRequest:request delegate:[self delegate]];
-    //streamingAuthConnection = [[NSURLConnection alloc]initWithRequest:request delegate:self startImmediately:YES];
+        //streamingAuthConnection = [NSURLConnection connectionWithRequest:request delegate:[self delegate]];
+        //streamingAuthConnection = [[NSURLConnection alloc]initWithRequest:request delegate:self startImmediately:YES];
+        NSURLResponse *response;
+        NSError *err;
+        NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&err];
+        
+        NSLog(@"DidRecieveResponse");
+        
+		// Streaming token
+		NSLog(@"===Streaming Auth Response===");
+		NSLog(@"%d - %@", [(NSHTTPURLResponse*)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse*)response statusCode]] );
+		
+		if ([(NSHTTPURLResponse*)response statusCode] == 200) {
+		} else {
+			
+		}
+        
+        NSLog(@"DATA:");
+		//NSLog(@"%@", [data description]);
+		NSError *error;
+		NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:
+								  NSJSONReadingMutableContainers error:&error];
+		NSLog(@"%@",jsonDict);
+		NSLog(@"AuthString:=====\nrtER rter_resource=\"%@\", rter_signature=\"%@\", rter_valid_until=\"%@\"", [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_resource"], [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_signature"], [[jsonDict objectForKey:@"Token"] objectForKey:@"rter_valid_until"]);
+		NSString *authString = [NSString stringWithFormat:@"rtER rter_resource=\"%@\", rter_signature=\"%@\", rter_valid_until=\"%@\"",
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_resource"],
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_signature"],
+								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_valid_until"]];
+		[self setAuthString:authString];
+		self.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
+        [self setItemID:[jsonDict objectForKey:@"ID"]];
+    });
 }
 
 
@@ -374,16 +405,23 @@
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
         NSLog(@"encoded frame");
         
-        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/avc", streamingEndpoint]]];
-		
-		//NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.46.36:1234"]];
-		
-        [postRequest setHTTPMethod:@"POST"];
-        [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
-		[postRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
-		[postRequest setValue:authString forHTTPHeaderField:@"Authorization"];
+        // copy pkt to nsdata object which will be sent
+        NSData *frameData = [NSData dataWithBytes:pkt.data length:pkt.size];
         
+        // free pkt
+        [encoder freePacket:&pkt];
+        
+        // POST frame in the serial postQueue
         dispatch_async(postQueue, ^{
+            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/avc", streamingEndpoint]]];
+            
+            //NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.46.36:1234"]];
+            
+            [postRequest setHTTPMethod:@"POST"];
+            [postRequest setHTTPBody:frameData];
+            [postRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+            [postRequest setValue:authString forHTTPHeaderField:@"Authorization"];
+
             NSHTTPURLResponse *response;
             NSError *err;
             NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
@@ -401,7 +439,7 @@
 //            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
 //        }];
         
-        [encoder freePacket:&pkt];
+        
     
     }
 }
@@ -412,5 +450,11 @@
 
 - (IBAction)clickedBack:(id)sender {
     [self onExit];
+}
+
+- (void)initEncoder {
+    // encoder
+    encoder = [[RTERVideoEncoder alloc] init];
+    [encoder setupEncoderWithDimesions:dimensions];
 }
 @end
