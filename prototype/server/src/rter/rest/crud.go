@@ -157,7 +157,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 			log.Println(r.RemoteAddr)
 			log.Println(url)
-			log.Pritnln(url.Host)
+			log.Println(url.Host)
 
 			if err != nil {
 				log.Println(err)
