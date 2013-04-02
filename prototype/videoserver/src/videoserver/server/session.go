@@ -259,7 +259,7 @@ func (s *Session) Write(r *http.Request, t int) *Error {
 	// reset session close timeout (potential race condition with timeout handler)
 	s.Timer.Stop()
 
-	log.Printf("Writing data to session %d", s.UID)
+	log.Printf("Writing data from client %s to session %d", r.RemoteAddr, s.UID)
 
 	// check request compatibility (mime type, content)
 	if err := s.ValidateRequest(r, t); err != nil {
