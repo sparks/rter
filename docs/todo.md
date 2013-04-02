@@ -55,6 +55,7 @@
 	* Show uncertainty metrics onscreen
 
 ### iOS
+* Port needs to remain constant throughout stream
 * Stream doesnt work a second time without logout
 * Orientation bug
 
