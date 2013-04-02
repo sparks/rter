@@ -1,0 +1,9 @@
+{
+	"ID": "7",
+	"UploadURI": "http://localhost:8081/v1/ingest/0",
+	"Token": {
+		"rter_resource": "http://localhost:8081/v1/ingest/0",
+		"rter_signature": "cnRlcl9jb25zdW1lciUzRCU1QiUzQSUzQTElNUQlM0E1NjU1MiUyNnJ0ZXJfcmVzb3VyY2UlM0RodHRwJTNBJTJGJTJGbG9jYWxob3N0JTNBODA4MSUyRnYxJTJGaW5nZXN0JTJGMCUyNnJ0ZXJfdmFsaWRfdW50aWwlM0QxMzY0NTc0NDY3b1aKbWSYzXXD6E%2B3QwN1VvhGsjfDxSUe%2FK%2FlH%2FZtlCg%3D",
+		"rter_valid_until": "1364574467"
+	}
+}

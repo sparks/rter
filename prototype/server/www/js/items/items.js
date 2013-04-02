@@ -1,14 +1,15 @@
 angular.module('items', [
-	'ui.bootstrap', //dialog
-	'ngResource',   //$resource for Item
-	'sockjs',       //sock for ItemCache
-	'alerts',       //Alerts for item actions
-	'taxonomy',     //For tag-selector
-	'genericItem',  //generic item implementation
-	'rawItem',      //raw item implementation
-	'twitterItem',  //twitter item implementation
-	'youtubeItem',  //YouTube item implementation
-	'comments'      //Comments dialog
+	'ui.bootstrap',         //dialog
+	'ngResource',           //$resource for Item
+	'sockjs',               //sock for ItemCache
+	'alerts',               //Alerts for item actions
+	'taxonomy',             //For tag-selector
+	'genericItem',          //generic item implementation
+	'rawItem',              //raw item implementation
+	'twitterItem',          //twitter item implementation
+	'youtubeItem',          //YouTube item implementation
+	'streamingVideoV1Item', //Streaming Video V1 item implementation
+	'comments'              //Comments dialog
 ])
 
 .factory('ItemResource', function ($resource) {
@@ -39,7 +40,9 @@ angular.module('items', [
 
 			for(var i = 0;i < self.items.length;i++) {
 				if(self.items[i].ID == item.ID) {
-					self.items[i] = item;
+					for (var key in item) {
+						self.items[i][key] = item[key];
+					}
 					found = true;
 					break;
 				}
@@ -90,6 +93,7 @@ angular.module('items', [
 					}
 				},
 				function(e) {
+					console.log("Couldn't load items");
 					console.log(e);
 				}
 			);
@@ -100,7 +104,7 @@ angular.module('items', [
 		this.create = function(item, sucess, failure) {
 			ItemResource.save(
 				item,
-				function() {
+				function(data) {
 					//Do not add the item here since it has no ID, it will be added by the websocket callback
 					Alerter.success("Item Created", 2000);
 					if(angular.isFunction(sucess)) sucess();
@@ -182,8 +186,26 @@ angular.module('items', [
 	return new ItemCache();
 })
 
+.filter('filterbyBounds', function() {
+	return function(input, bounds) {
+		out = [];
+		for(var i = 0;i < input.length;i++) {
+			if(input[i].Lat !== undefined && input[i].Lng !== undefined && bounds !== undefined) {
+				if(input[i].Lat < Math.min(bounds.getNorthEast().lat(), bounds.getSouthWest().lat()) || input[i].Lat > Math.max(bounds.getNorthEast().lat(), bounds.getSouthWest().lat())) {
+					//Outside via lat
+				} else if(input[i].Lng < Math.min(bounds.getNorthEast().lng(), bounds.getSouthWest().lng()) || input[i].Lng > Math.max(bounds.getNorthEast().lng(), bounds.getSouthWest().lng())) {
+					//Outside via lng
+				} else {
+					out.push(input[i]);
+				}
+			}
+		}
 
-.filter('orderByRanking', function() { //FIXED: this is n^2 probably not good
+		return out;
+	};
+})
+
+.filter('orderByRanking', function() { //FIXME: this is n^2 probably not good
 	return function(input, ranking) {
 		if(ranking === undefined || ranking.length === 0) return input;
 
@@ -205,7 +227,10 @@ angular.module('items', [
 		}
 
 		for(var i = 0;i < out.length;i++) {
-			if(out[i] === undefined) out.remove(i);
+			if(out[i] === undefined) {
+				out.remove(i);
+				i--;
+			}
 		}
 
 		out.push.apply(out, stragglers);
@@ -350,7 +375,7 @@ angular.module('items', [
 	};
 })
 
-.controller('CloseupItemCtrl', function($scope, ItemCache) {
+.controller('CloseupItemCtrl', function($scope, ItemCache, UpdateItemDialog) {
 	$scope.updateItem = function() {
 		ItemCache.update(
 			$scope.item,
@@ -361,6 +386,20 @@ angular.module('items', [
 				if(e.status == 304) {
 					$scope.cancel();
 				}
+			}
+		);
+	};
+
+	$scope.editDialog = function() {
+		$scope.cancel();
+		UpdateItemDialog.open($scope.item);
+	};
+
+	$scope.deleteItem = function() {
+		ItemCache.remove(
+			$scope.item,
+			function() {
+				$scope.cancel();
 			}
 		);
 	};

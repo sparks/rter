@@ -9,8 +9,13 @@
 #import <UIKit/UIKit.h>
 #import "RTERPreviewController.h"
 
-@interface RTERViewController : UIViewController<RTERPreviewControllerDelegate>
+@interface RTERViewController : UIViewController<RTERPreviewControllerDelegate,NSURLConnectionDataDelegate,UITextFieldDelegate>
+
+@property(nonatomic, strong) IBOutlet UITextField *userField;
+@property(nonatomic, strong) IBOutlet UITextField *passField;
+@property(nonatomic, retain) NSString *cookieString;
 
 - (IBAction)startCamera:(id)sender;
+- (IBAction)login:(id)sender;
 
 @end

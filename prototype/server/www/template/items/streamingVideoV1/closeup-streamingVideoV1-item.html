@@ -1,0 +1,37 @@
+<div class="closeup-streamingVideoV1-item row-fluid" ng-switch on="item.HasGeo">
+	<div ng-switch-when="true">
+		<div class="span6 left">
+			<video controls autoplay-if="{{item.Live}}" ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
+				<source ng-src="{{item.ContentURI}}/index.m3u8" type="application/x-mpegURL">
+				<source ng-src="{{item.ContentURI}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">
+				<source ng-src="{{item.ContentURI}}/video.webm" type="video/webm; codecs=vp8,vorbis">
+				<source ng-src="{{item.ContentURI}}/video.ogv" type="video/ogg; codecs=theora,vorbis">
+			</video>
+		</div>
+
+		<div class="span6 right" ng-switch on="item.HasHeading">
+			<div ng-switch-when="true" ng-switch on="item.Live">
+				<div ng-switch-when="true">
+					<disp-map item="item" enable-fov enable-dir enable-marker></disp-map>
+				</div>
+				<div ng-switch-default>
+					<disp-map item="item" enable-fov enable-marker></disp-map>
+				</div>
+			</div>
+			<div ng-switch-default>
+				<disp-map item="item" enable-marker></disp-map>
+			</div>
+		</div>
+	</div>
+
+	<div ng-switch-default>
+		<div class="span12 left">
+			<video controls autoplay-if="{{item.Live}}" ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
+				<source ng-src="{{item.ContentURI}}/index.m3u8" type="application/x-mpegURL">
+				<source ng-src="{{item.ContentURI}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">
+				<source ng-src="{{item.ContentURI}}/video.webm" type="video/webm; codecs=vp8,vorbis">
+				<source ng-src="{{item.ContentURI}}/video.ogv" type="video/ogg; codecs=theora,vorbis">
+			</video>
+		</div>
+	</div>
+</div>

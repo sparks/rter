@@ -1,8 +1,8 @@
 <fieldset class="form-generic-item row-fluid">
-	<fieldset class="span5">
+	<fieldset class="span6">
 		<div ng-class="{error: form.ContentURI.$invalid}">
 			<label for="ContentURI">Content URL</label>
-			<input type="url" name="ContentURI" ng-model="item.ContentURI">
+			<input type="url" name="ContentURI" ng-model="item.ContentURI" required>
 		</div>
 
 		<label for="ThumbnailURI">Thumbnail</label>
@@ -14,7 +14,7 @@
 		<input type="number" step="any" name="Lng" ng-model="item.Lng">
 	</fieldset>
 
-	<fieldset class="span7">
-		<div id="map_canvas" class="map" ui-event="{'map-click': 'setMarker($event)'}" ui-map="map" ui-options="mapOptions"></div>
+	<fieldset class="span6">
+		<edit-map item="item"></edit-map>
 	</fieldset>
 </fieldset>

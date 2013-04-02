@@ -122,7 +122,7 @@ func TestReadUserDirection(t *testing.T) {
 
 	testRead(t, "/users/"+user.Username+"/direction", readDirection)
 
-	readDirection.UpdateTime = direction.UpdateTime //hack
+	readDirection.UpdateTime = direction.UpdateTime // hack
 
 	structJSONCompare(t, direction, readDirection)
 }
@@ -148,8 +148,8 @@ func TestReadItem1(t *testing.T) {
 
 	testRead(t, "/items/"+strconv.FormatInt(item.ID, 10), readItem)
 
-	readItem.StartTime = item.StartTime //hack
-	readItem.StopTime = item.StopTime   //hack
+	readItem.StartTime = item.StartTime // hack
+	readItem.StopTime = item.StopTime   // hack
 
 	structJSONCompare(t, item, readItem)
 }
@@ -167,8 +167,8 @@ func TestReadItem2(t *testing.T) {
 
 	testRead(t, "/items/"+strconv.FormatInt(item.ID, 10), readItem)
 
-	readItem.StartTime = item.StartTime //hack
-	readItem.StopTime = item.StopTime   //hack
+	readItem.StartTime = item.StartTime // hack
+	readItem.StopTime = item.StopTime   // hack
 
 	structJSONCompare(t, item, readItem)
 }
@@ -253,8 +253,8 @@ func TestReadItem3(t *testing.T) {
 
 	testRead(t, "/items/"+strconv.FormatInt(item.ID, 10), readItem)
 
-	readItem.StartTime = item.StartTime //hack
-	readItem.StopTime = item.StopTime   //hack
+	readItem.StartTime = item.StartTime // hack
+	readItem.StopTime = item.StopTime   // hack
 
 	if len(readItem.Terms) < 1 {
 		t.Error("There should be a term here")

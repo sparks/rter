@@ -1,18 +1,33 @@
-<div class="closeup-generic-item row-fluid">
-	<div class="span5">
-		<h5>Content URL</h5>
-		<a target="_blank" href="{{item.ContentURI}}">{{item.ContentURI}}</a>
+<div class="closeup-generic-item row-fluid" ng-switch on="item.HasGeo">
+	<div ng-switch-when="true">
+		<div class="span6 left">
+			<a target="_blank" href="{{item.ContentURI}}">
+				<img ng-src="{{item.ThumbnailURI}}">
+				<div>{{item.ContentURI}}</div>
+			</a>
+		</div>
 
-		<h5>Thumbnail</h5>
-		<img ng-src="{{item.ThumbnailURI}}">
-
-		<h5>Latitude</h5>
-		{{item.Lat}}
-		<h5>Longitude</h5>
-		{{item.Lng}}
+		<div class="span6 right" ng-switch on="item.HasHeading">
+			<div ng-switch-when="true" ng-switch on="item.Live">
+				<div ng-switch-when="true">
+					<disp-map item="item" enable-fov enable-dir enable-marker></disp-map>
+				</div>
+				<div ng-switch-default>
+					<disp-map item="item" enable-fov enable-marker></disp-map>
+				</div>
+			</div>
+			<div ng-switch-default>
+				<disp-map item="item" enable-marker></disp-map>
+			</div>
+		</div>
 	</div>
 
-	<div class="span7">
-		<div id="map_canvas" class="map" ui-event="{}" ui-map="map" ui-options="mapOptions"></div>
+	<div ng-switch-default>
+		<div class="span12 left">
+			<a target="_blank" href="{{item.ContentURI}}">
+				<img ng-src="{{item.ThumbnailURI}}">
+				<div>{{item.ContentURI}}</div>
+			</a>
+		</div>
 	</div>
 </div>

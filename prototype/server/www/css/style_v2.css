@@ -76,12 +76,13 @@ label {
 .tag-cloud .cloud {
 	list-style: none;
 	padding: 0;
-	width: 60%;
+	width: 75%;
 	margin: 45px auto 0 auto;
+	line-height: 50pt;
 }
 
 .tag-cloud .cloud li {
-	display: inline;
+	display: inline-block;
 	padding: 3px 10px 3px 10px;
 }
 
@@ -112,6 +113,30 @@ label {
 .term-view .grid-view .right .map, .term-view .list-view .right .map {
 	height: 350px;
 	width: 315px;
+
+	margin: 0 auto 15px auto;
+}
+
+.term-view .grid-view .right .map-filter-en,
+.term-view .list-view .right .map-filter-en,
+.term-view .grid-view .right .filter-mode ,
+.term-view .list-view .right .filter-mode  {
+	text-align: center;
+	margin-bottom: 15px;
+}
+
+.term-view .map-view .right .map-filter-en,
+.term-view .map-view .right .filter-mode {
+	display: none;
+}
+
+.term-view .grid-view .filter-search, .term-view .list-view .filter-search {
+	margin-bottom: 25px;
+}
+
+.term-view .grid-view .filter-search input, .term-view .list-view .filter-search input {
+	display: block;
+	margin: auto;
 }
 
 /* -- Term View Grid -- */
@@ -124,7 +149,7 @@ label {
 
 .term-view .grid-view .item-list li {
 	float: left;
-	width: 21%;
+	width: 20%;
 
 	margin: 2%;
 
@@ -161,6 +186,12 @@ label {
 	font-size: 8pt;
 	color: white;
 	line-height: 14pt;
+
+	max-width: 60px;
+	overflow-x: hidden;
+	overflow-y: visible;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 /* -- TermView List -- */
@@ -212,10 +243,24 @@ label {
 	line-height: 14pt;
 }
 
+.item-list .blur {
+	opacity: 0.2;
+}
+
 /* -- TermView Map -- */
 
 .term-view .map-view .right  {
 	padding-top: 15px;
+}
+
+.term-view .map-view .right hr {
+	display: none;
+}
+
+.term-view .map-view .text-search {
+	margin-top: 25px;
+	position: relative;
+	left: 100%;
 }
 
 .term-view .map-view .right .map {
@@ -252,28 +297,63 @@ label {
 	border-color: red;
 }
 
-.form-generic-item, .form-raw-item, .form-youtube-item {
+.form-generic-item, .form-raw-item, .form-youtube-item, .form-twitter-item {
 	margin: auto;
 	width: 800px;
 }
 
-.form-generic-item .map, .closeup-item .map, .form-youtube-item .map {
+.form-generic-item .map, .form-youtube-item .map, .form-twitter-item .map {
+	margin: auto;
+
+	height: 380px;
+	width: 380px;
+}
+
+/* -- Closeups -- */
+
+.closeup-item {
+	padding: 35px 0 20px 0;
+}
+
+.closeup-item .closeup-generic-item .map, .closeup-item .closeup-streamingVideoV1-item .map {
+	margin: auto;
+
 	height: 400px;
 	width: 450px;
 }
 
-.closeup-item {
-	padding: 20px 0 20px 0;
-}
-
-.closeup-item .closeup-youtube-item {
+.closeup-item .closeup-generic-item .left, .closeup-item .closeup-youtube-item .left, .closeup-item .closeup-streamingVideoV1-item .left {
 	text-align: center;
 }
 
+.closeup-item .closeup-generic-item .left img {
+	width: 100%;
+	margin-bottom: 15px;
+}
+
+
+.closeup-item .closeup-streamingVideoV1-item .left video {
+	width: 100%;
+	max-width: 640px;
+	margin-bottom: 15px;
+}
+
+.closeup-item .closeup-generic-item .left div {
+	font-size: 14pt;
+	max-width: 80%;
+	margin: auto;
+
+	overflow-x: hidden;
+	overflow-y: visible;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 .closeup-item .closeup-youtube-item .map {
+	margin: auto;
+
 	height: 315px;
 	width: 315px;
-	margin: auto;
 }
 
 /* -- Comments -- */
@@ -325,13 +405,65 @@ label {
 .comment .time {
 	font-style: italic;
 }
+/* -- Twitter -- */
+
+
+.twitter-list {
+	list-style: none;
+	padding: 5px;
+	margin: 0 auto 20px auto;
+
+	max-height: 300px;
+	overflow: auto;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border-bottom: 1px solid rgb(208, 208, 208);
+	border-top: 1px solid rgb(208, 208, 208);
+}
+
+.twitter-list li {
+	padding: 5px;
+	margin: 5px auto 5px auto;
+
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+
+	border: 1px solid rgb(208, 208, 208);
+
+	width: 95%;
+}
+
+.twitter header {
+	border-bottom: 1px solid rgb(208, 208, 208);
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+}
+
+.twitter header button {
+	float:right;
+	margin-right: 5px;
+}
+.twitter .author {
+	color: rgb(7, 91, 146);
+	font-weight: bold;
+	margin-right: 6px;
+}
+
+.twitter .time {
+	font-style: italic;
+	color: #6E7980;
+}
+
 
 /* -- Modal -- */
 
 .modal {
 	overflow: auto;
-	max-height: 92%;
-	top: 2%;
+	max-height: 88%;
+	top: 4%;
 	left: 50%;
 	width: 1000px;
 	margin-left: -500px;
@@ -342,7 +474,13 @@ label {
 	overflow: hidden;
 }
 
-.modal .float-close {
+.modal .float-control-left {
+	position: absolute;
+	top: 10px;
+	left: 20px;
+}
+
+.modal .float-control-right {
 	position: absolute;
 	top: 10px;
 	right: 20px;
@@ -368,19 +506,6 @@ label {
 
 /* -- Login -- */
 
-#login-panel {
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-
-	border: 1px solid rgb(208, 208, 208);
-
-	margin: 15px auto 15px auto;
-	padding: 10px 10px 30px 10px;
-
-	width: 400px;
-}
-
 #login-panel form {
 	width: 250px;
 	margin: auto;
@@ -394,4 +519,18 @@ label {
 	text-align: right;
 	width: 350px;
 	margin: auto;
+}
+
+.login-modal { /* must come after .modal */
+	overflow: auto;
+	top: 33%;
+	left: 50%;
+
+	height: 200px;
+	margin-top: -100px;
+
+	width: 400px;
+	margin-left: -200px;
+
+	padding: 20px 10px 40px 10px;
 }

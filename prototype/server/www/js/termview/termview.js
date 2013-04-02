@@ -1,8 +1,9 @@
 angular.module('termview', [
-	'ng',      //filers
-	'ui',      //ui-sortable and map
-	'items',   //ItemCache to load items into termview, various itemDialog services
-	'taxonomy' //Rankings
+	'ng',       //filers
+	'ui',       //ui-sortable and map
+	'items',    //ItemCache to load items into termview, various itemDialog services
+	'taxonomy', //Rankings
+	'alerts'    //Alerter
 ])
 
 .factory('TermViewRemote', function () {
@@ -39,14 +40,35 @@ angular.module('termview', [
 	return new TermViewRemote();
 })
 
-.controller('TermViewCtrl', function($scope, $filter, $timeout, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
+.controller('TermViewCtrl', function($scope, $filter, $timeout, Alerter, ItemCache, UpdateItemDialog, CloseupItemDialog, TermViewRemote, TaxonomyRankingCache) {
 
 	$scope.viewmode = "grid-view";
+	$scope.filterMode = "blur";
+	$scope.prevFilterMode = "blur";
+	$scope.mapFilterEnable = false;
 
-	$scope.$watch('viewmode', function() {
+	$scope.$watch('mapFilterEnable', function() {
+		$scope.boundsChanged();
+	});
+
+	$scope.$watch('viewmode', function(newVal, oldVal) {
+		$scope.mapCenter = $scope.map.getCenter();
+
+		if($scope.viewmode == 'map-view') {
+			$scope.mapFilterEnable = false;
+		}
+
+		if(oldVal != "map-view" && newVal == "map-view") {
+			$scope.prevFilterMode = $scope.filterMode;
+			$scope.filterMode = "remove";
+		}
+
+		if(oldVal == "map-view" && newVal != "map-view") {
+			$scope.filterMode = $scope.prevFilterMode;
+		}
+
 		$timeout(function() {
-			google.maps.event.trigger($scope.map, "resize");
-			$scope.map.setCenter($scope.mapCenter);
+			$scope.resizeMap();
 		}, 0);
 	});
 
@@ -63,25 +85,85 @@ angular.module('termview', [
 	$scope.items = ItemCache.items;
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
-	$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
+	$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
+
+	$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
+
+	$scope.finalMapItems = $scope.rankedItems;
+	$scope.finalFilteredItems = $scope.rankedItems;
+
+	$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.filterQuery);
+	$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
 
 	$scope.$watch('items', function() {
 		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
+		$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
+		$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
 	}, true);
 
-	$scope.$watch('filteredItems', function() {
-		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	$scope.$watch('[ranking, orderedByStopTime]', function() {
+		$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
 	}, true);
 
-	$scope.$watch('ranking', function() {
-		$scope.rankedItems = $filter('orderByRanking')($scope.filteredItems, $scope.ranking);
+	$scope.$watch('[rankedItems, filterMode]', function() {
+		if($scope.filterMode == 'blur') {
+			$scope.finalFilteredItems = $scope.rankedItems;
+			$scope.finalMapItems = $scope.rankedItems;
+		}
 	}, true);
 
-	$scope.$watch('rankedItems', function(a, b) {
+	$scope.$watch('[rankedItems, textQuery, filterMode]', function() {
+		if($scope.filterMode == 'remove') {
+			$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.textQuery);
+		}
+	}, true);
+
+	$scope.$watch('[textSearchedItems, filterMode]', function() {
+		if($scope.filterMode == 'remove') {
+			$scope.finalMapItems = $scope.textSearchedItems;
+		}
+	}, true);
+
+	$scope.$watch('finalMapItems', function() {
 		$scope.updateMarkers();
 	}, true);
 
-	$scope.dragCallback = function(a) {
+	$scope.$watch('[textSearchedItems, mapBounds, mapFilterEnable, filterMode]', function() {
+		if($scope.filterMode == 'remove') {
+			if($scope.mapFilterEnable) {
+				$scope.mapFilteredItems = $filter('filterbyBounds')($scope.textSearchedItems, $scope.mapBounds);
+			} else {
+				$scope.mapFilteredItems = $scope.textSearchedItems;
+			}
+		}
+	}, true);
+
+	$scope.$watch('[mapFilteredItems, filterMode]', function() {
+		if($scope.filterMode == 'remove') {
+			$scope.finalFilteredItems = $scope.mapFilteredItems;
+		}
+	}, true);
+
+	$scope.isFiltered = function(item) {
+		var filtered = [item];
+
+		filtered = $filter('filter')(filtered, $scope.textQuery);
+
+		if($scope.mapFilterEnable) {
+			filtered = $filter('filterbyBounds')(filtered, $scope.mapBounds);
+		}
+
+		if(filtered.length === 0) return true;
+		else return false;
+	};
+
+	$scope.dragCallback = function(a, b) {
+		if($scope.filterMode == 'remove' && ($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== ''))) { //TODO: This should have a blur options instead maybe?
+			Alerter.warn("You cannot reorder items while your filters are enabled", 2000);
+			return;
+		}
+
 		var newRanking = [];
 		angular.forEach($scope.rankedItems, function(v) {
 			newRanking.push(v.ID);
@@ -108,6 +190,10 @@ angular.module('termview', [
 
 	/* -- Map -- */
 
+	$scope.boundsChanged = function() {
+		$scope.mapBounds = $scope.map.getBounds();
+	};
+
 	$scope.markerBundles = [];
 
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
@@ -118,14 +204,10 @@ angular.module('termview', [
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
-	$scope.mapResized = false;
-
-	$scope.resizeMap = function() { //FIXME: Another map hack to render hidden maps
-		if(!$scope.mapResized) {
-			$scope.mapResized = true;
-			google.maps.event.trigger($scope.map, "resize");
-			$scope.map.setCenter($scope.mapCenter);
-		}
+	$scope.resizeMap = function() {
+		google.maps.event.trigger($scope.map, "resize");
+		$scope.map.setCenter($scope.mapCenter);
+		$scope.mapBounds = $scope.map.getBounds();
 	};
 
 	$scope.updateMarkers = function() {
@@ -135,7 +217,7 @@ angular.module('termview', [
 
 		$scope.markerBundles = [];
 
-		angular.forEach($scope.rankedItems, function(v) {
+		angular.forEach($scope.finalMapItems, function(v) {
 			if(v.Lat === undefined || v.Lng === undefined || (v.Lat === 0 && v.Lng === 0)) return;
 
 			var m = new google.maps.Marker({

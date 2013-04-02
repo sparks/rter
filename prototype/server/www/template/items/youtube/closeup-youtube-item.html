@@ -1,8 +1,15 @@
-<div class="closeup-youtube-item row-fluid">
-	<div class="span7">
-		<iframe width="560" height="315" src="http://www.youtube.com/embed/{{youtubeID}}" frameborder="0" allowfullscreen></iframe>
+<div class="closeup-youtube-item row-fluid" ng-switch on="item.HasGeo">
+	<div ng-switch-when="true">
+		<div class="left span7">
+			<iframe width="560" height="315" src="http://www.youtube.com/embed/{{youtubeID}}" frameborder="0" allowfullscreen></iframe>
+		</div>
+		<div class="right span5">
+			<disp-map item="item" enable-marker></disp-map>
+		</div>
 	</div>
-	<div class="span5">
-		<div id="map_canvas" class="map" ui-event="{}" ui-map="map" ui-options="mapOptions"></div>
+	<div ng-switch-default>
+		<div class="span12 left">
+			<iframe width="560" height="315" src="http://www.youtube.com/embed/{{youtubeID}}" frameborder="0" allowfullscreen></iframe>
+		</div>
 	</div>
 </div>

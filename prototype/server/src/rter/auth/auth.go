@@ -1,3 +1,7 @@
+// Provides and authentication service for the rtER server. Users can present their credentials (in JSON). Upon valid credentials they are given a signed session cookie (use gorilla/sessions) to keep them signed in. Passwords are sent in plain text so it's not great over http.
+//
+// Also provides a GetCredentials callback which can be used to check if a user is logged in if so get their permissions.
+//
 package auth
 
 import (
@@ -10,22 +14,41 @@ import (
 )
 
 var store = sessions.NewCookieStore(
-	[]byte("new-authentication-key"),
+	[]byte("new-authentication-key"), // This is the key which is used to sign cookies
 )
 
-func GetCredentials(w http.ResponseWriter, r *http.Request) (*data.User, int) {
-	session, _ := store.Get(r, "rter-credentials")
+// Examine the request for a valid session cookie. If one is found, return the username and user permissions. If the cookie is somehow invalid it will be unset.
+//
+// If dbValidate is set to true the username specified in the cookie will be loaded and validated againsts the database. If the user no longer exists the session will be unset. This also means that the returned User will have fully populated fields.
+func Challenge(w http.ResponseWriter, r *http.Request, dbValidate bool) (*data.User, int) {
+	session, _ := store.Get(r, "rter-credentials") // Will return an empty map if there isn't a valid session cookie
 
 	user := new(data.User)
 
 	uval, ok := session.Values["username"]
 	if !ok {
+		deleteSession(session, w, r)
 		return nil, 0
 	}
 
 	user.Username, ok = uval.(string)
 	if !ok {
+		deleteSession(session, w, r)
 		return nil, 0
+	}
+
+	if dbValidate {
+		err := storage.Select(user)
+
+		if err != nil {
+			log.Println(err)
+			if err == storage.ErrZeroAffected {
+				log.Println("Valid Cookie for non-existant user: ", user.Username)
+			}
+
+			deleteSession(session, w, r)
+			return nil, 0
+		}
 	}
 
 	pval, ok := session.Values["permissions"]
@@ -41,26 +64,39 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) (*data.User, int) {
 	return user, permissions
 }
 
+func deleteSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) {
+	session.Options = &sessions.Options{MaxAge: -1}
+	session.Save(r, w)
+}
+
+// Handle requests containing JSON with user credentials. If the credentials are valid the response will set a session cookie effectively logging in the user.
+//
+// Expected JSON format:
+// 	{"Username":"theusername", "Password":"userpassword"}
+//
+// Invalid credentials will result in a 401 StatusUnauthorized response. Malformed JSON will result in a 400 StatusBadRequest or possibly 500 StatusInternalServerError.
 func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	log.Println("Auth")
+	// Parse the JSON into a user object
 	loginInfo := new(data.User)
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&loginInfo)
 
 	if err != nil {
+		log.Println("JSON problem")
 		log.Println(err)
 		http.Error(w, "Malformed json.", http.StatusBadRequest)
 		return
 	}
 
+	// Try and load the actual user
 	user := new(data.User)
 	user.Username = loginInfo.Username
 
 	err = storage.Select(user)
 
 	if err == storage.ErrZeroAffected {
-		log.Println("No such user")
+		log.Println("No such user: ", user.Username)
 		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	} else if err != nil {
@@ -69,12 +105,14 @@ func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate
 	if !user.Auth(loginInfo.Password) {
-		log.Println("Wrong Password")
+		log.Println("Wrong Password for: ", user.Username)
 		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	}
 
+	// Get role permissions
 	role := new(data.Role)
 	role.Title = user.Role
 
@@ -82,8 +120,10 @@ func AuthHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println("Issues loading role during auth", err)
+		role.Permissions = 0 // Default to no permissions
 	}
 
+	// Build a cookie session
 	session, _ := store.Get(r, "rter-credentials")
 
 	session.Values["username"] = user.Username

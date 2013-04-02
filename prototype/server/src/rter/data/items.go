@@ -1,39 +1,49 @@
+// Provides datastructures and associated func for rtER
+//
+// The datastructures reflect the core information we are storing and manipulating in the rtER project.
 package data
 
 import (
 	"time"
+	token "videoserver/auth"
 )
 
 type Item struct {
-	ID     int64
+	ID     int64 //Unique identifier
 	Type   string
-	Author string
+	Author string //Tied to User.Username in DB
 
-	ThumbnailURI string `json:",omitempty"`
-	ContentURI   string `json:",omitempty"`
-	UploadURI    string `json:",omitempty"`
+	ThumbnailURI string `json:",omitempty"` //URI for Thumbnail to be shown online
+	ContentURI   string `json:",omitempty"` //URI for Content to be displayed online
+	UploadURI    string `json:",omitempty"` //URI for where Content will be uploaded by the Author (often provided by the server)
 
-	HasGeo  bool    `json:",omitempty"`
-	Heading float64 `json:",omitempty"`
-	Lat     float64 `json:",omitempty"`
-	Lng     float64 `json:",omitempty"`
+	HasHeading bool    `json:",omitempty"` //Marks if Heading data is valid
+	Heading    float64 `json:",omitempty"`
 
+	HasGeo bool    `json:",omitempty"` //Marks if location data is valid
+	Lat    float64 `json:",omitempty"`
+	Lng    float64 `json:",omitempty"`
+
+	Live      bool      `json:",omitempty"` //Marks if this Item's content is 'live'
 	StartTime time.Time `json:",omitempty"`
-	StopTime  time.Time `json:",omitempty"`
+	StopTime  time.Time `json:",omitempty"` //Should be set before StartTime for 'live' data when the StopTime is unknown
 
-	Terms []*Term `json:",omitempty"`
+	Terms []*Term `json:",omitempty"` //Note this field isn't available in the DB, only for convenience
+
+	Token *token.Token `json:",omitempty"` //Note this field isn't available in the DB, only for convenience
 }
 
 type ItemComment struct {
-	ID     int64
-	ItemID int64
-	Author string
+	ID     int64  //Unique identifier
+	ItemID int64  //Unique of the associated Item. Tied to Item.ID in DB
+	Author string //Tied to User.Username in DB
 
 	Body string
 
 	UpdateTime time.Time `json:",omitempty"`
 }
 
+//A convenience method to add a Term to an item
 func (i *Item) AddTerm(term string, author string) {
 	newTerm := new(Term)
 

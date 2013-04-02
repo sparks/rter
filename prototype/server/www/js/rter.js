@@ -7,6 +7,15 @@ angular.module('rter', [
 	'auth'                   //Login system
 ])
 
+.filter('if', function() {
+	return function(input, value) {
+		if (typeof(input) === 'string') {
+			input = [input, ''];
+		}
+		return value? input[0] : input[1];
+	};
+})
+
 .controller('RterCtrl', function($scope, LoginDialog) {
 	$scope.loginDialogOpen = false;
 	$scope.$on('event:auth-loginRequired', function() {
@@ -25,13 +34,18 @@ angular.module('rter', [
 })
 
 .controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
-	$scope.terms = TaxonomyResource.query(function() {
-		$scope.countMax = 0;
+	$scope.terms = TaxonomyResource.query(
+		function() {
+			$scope.countMax = 0;
 
-		angular.forEach($scope.terms, function(val) {
-			if($scope.countMax < val.Count) $scope.countMax = val.Count;
-		});
-	}); //TODO: Make me dynamic
+			angular.forEach($scope.terms, function(val) {
+				if($scope.countMax < val.Count) $scope.countMax = val.Count;
+			});
+		},
+		function(e) {
+			console.log("Couldn't load tags", e);
+		}
+	); //TODO: Make me dynamic
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);

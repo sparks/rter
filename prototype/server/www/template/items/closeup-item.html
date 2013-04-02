@@ -8,6 +8,9 @@
 	<div ng-switch-when="raw">
 		<closeup-raw-item item="item" dialog="dialog"></closeup-raw-item>
 	</div>
+	<div ng-switch-when="streaming-video-v1">
+		<closeup-streaming-video-v1-item item="item" dialog="dialog"></closeup-streaming-video-v1-item>
+	</div>
 	<div ng-switch-default>
 		<closeup-generic-item item="item" dialog="dialog"></closeup-generic-item>
 	</div>
@@ -43,4 +46,13 @@
 	</div>
 </div>
 
-<button ui-scrollfix class="btn btn-danger float-close" ng-click="cancel()" ng-hide="!dialog">Close</button>
+<div class="float-control-left" ng-hide="!dialog">
+	<button class="btn btn-danger" ng-click="deleteItem()">Delete</button>
+</div>
+
+
+<div class="float-control-right" ng-hide="!dialog">
+	<button class="btn btn-success" ng-click="editDialog()">Edit</button>
+	<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Close</button>
+</div>
+

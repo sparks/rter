@@ -1,43 +1,18 @@
 angular.module('youtubeItem', [
-	'ng', //$timeout
-	'ui'  //Map
+	'edit-map', //Maps
+	'disp-map'  //Maps
 ])
 
 .controller('FormYoutubeItemCtrl', function($scope) {
-	if($scope.item.Author === undefined) {
-		$scope.item.Author = "anonymous"; //TODO: Replace with login
-	}
+	$scope.item.StartTime = new Date();
+	$scope.item.StopTime = $scope.item.StartTime;
 
-	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
-
-	$scope.mapOptions = {
-		center: $scope.mapCenter,
-		zoom: 10,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
-
-	$scope.centerAt = function(location) {
-		var latlng = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
-		$scope.map.setCenter(latlng);
-		$scope.mapCenter = latlng;
-	};
-
-	$scope.setMarker = function($event) {
-		if($scope.marker === undefined) {
-			$scope.marker = new google.maps.Marker({
-				map: $scope.map,
-				position: $event.latLng
-			});
-		} else {
-			$scope.marker.setPosition($event.latLng);
-		}
-
-		$scope.item.Lat = $event.latLng.lat();
-		$scope.item.Lng = $event.latLng.lng();
-	};
+	$scope.item.HasHeading = false;
+	$scope.item.HasGeo = false;
+	$scope.item.Live = false;
 })
 
-.directive('formYoutubeItem', function($timeout) {
+.directive('formYoutubeItem', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -47,24 +22,7 @@ angular.module('youtubeItem', [
 		templateUrl: '/template/items/youtube/form-youtube-item.html',
 		controller: 'FormYoutubeItemCtrl',
 		link: function(scope, element, attr) {
-			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
-				var latLng = new google.maps.LatLng(scope.item.Lat, scope.item.Lng);
-				scope.marker = new google.maps.Marker({
-					map: scope.map,
-					position: latLng
-				});
-				scope.mapCenter = latLng;
-			} else {
-				navigator.geolocation.getCurrentPosition(scope.centerAt);
-			}
 
-			$timeout( //FIXME: Another map hack to render hidden maps
-				function() {
-					google.maps.event.trigger(scope.map, "resize");
-					scope.map.setCenter(scope.mapCenter);
-				},
-				5
-			);
 		}
 	};
 })
@@ -89,18 +47,6 @@ angular.module('youtubeItem', [
 
 .controller('CloseupYoutubeItemCtrl', function($scope) {
 	$scope.youtubeID = $scope.item.ContentURI.match(/\/watch\?v=([0-9a-zA-Z].*)/)[1];
-
-	if($scope.item.Lat !== undefined && $scope.item.Lng !== undefined) {
-		$scope.mapCenter = new google.maps.LatLng($scope.item.Lat, $scope.item.Lng);
-	} else {
-		$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
-	}
-
-	$scope.mapOptions = {
-		center: $scope.mapCenter,
-		zoom: 10,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
 })
 
 .directive('closeupYoutubeItem', function() {
@@ -112,12 +58,7 @@ angular.module('youtubeItem', [
 		templateUrl: '/template/items/youtube/closeup-youtube-item.html',
 		controller: 'CloseupYoutubeItemCtrl',
 		link: function(scope, element, attr) {
-			if(scope.item.Lat !== undefined && scope.item.Lng !== undefined) {
-				scope.marker = new google.maps.Marker({
-					map: scope.map,
-					position: new google.maps.LatLng(scope.item.Lat, scope.item.Lng)
-				});
-			}
+
 		}
 	};
 });

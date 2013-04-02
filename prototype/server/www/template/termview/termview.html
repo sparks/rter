@@ -16,18 +16,57 @@
 	<div class="{{viewmode}}">
 		<div class="row-fluid">
 			<div class="left span8">
-				<div class="nocontent" ng-show="!items.length">No Content for {{term}}</div>
+				<div class="nocontent" ng-show="!items.length">No Content<span ng-show="term.Term.length"> for {{term.Term}}</span></div>
+				<div ng-switch on="term.Term">
+					<div ng-switch-when="">
+						<ul class="item-list">		
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+						</ul>
+					</div>
 
-				<ul class="item-list" ui-sortable="{stop: dragCallback}" ng-model="rankedItems">		
-					<li ng-repeat="item in rankedItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
-				</ul>
+					<div ng-switch-default>
+						<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#" ng-click="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
+						</ul>
+					</div>
+				</div>
 			</div>
 
 			<div class="right span4">
+				<div class="filter-mode">
+					<label for="filterMode">Filtering Mode</label>
+					<div class="btn-group" name="filterMode" data-toggle="buttons-checkbox">
+					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'blur'">Blur</button>
+					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'remove'">Remove</button>
+					</div>
+				</div>
+
+				<hr>
+
 				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
 				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
 				</div>
-				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions"></div>
+				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-dragend': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
+
+				<!-- 'bounds_changed center_changed click dblclick drag dragend dragstart heading_changed idle maptypeid_changed mousemove mouseout mouseover projection_changed resize rightclick tilesloaded tilt_changed zoom_changed' -->
+
+				<div class="map-filter-en">
+					<label for="mapFitlerEnable">Use Map as Filter</label>
+					<div class="btn-group" name="mapFilterEnable" data-toggle="buttons-checkbox">
+					    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="true">On</button>
+					    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="false">Off</button>
+					</div>
+				</div>
+
+				<hr>
+
+				<form name="termViewTextSerach" class="text-search">
+					<label for="textQuery">Filter Results</label>
+
+					<input type="text" class="search-query" name="textQuery" ng-model="textQuery" placeholder="Search">
+				</form>
+
+				<hr>
 			</div>
 		</div>
 	</div>

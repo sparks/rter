@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS Users;
 CREATE TABLE IF NOT EXISTS Users (
 	Username VARCHAR(64) NOT NULL,
 	Password CHAR(128) NOT NULL,
-	Salt CHAR(16) NOT NULL,
+	Salt CHAR(128) NOT NULL,
 
 	Role VARCHAR(64) NOT NULL DEFAULT "public",
 	TrustLevel INT NOT NULL DEFAULT 0,
@@ -54,11 +54,14 @@ CREATE TABLE IF NOT EXISTS Items (
 	ContentURI VARCHAR(2048) NOT NULL DEFAULT "",
 	UploadURI VARCHAR(2048) NOT NULL DEFAULT "",
 
-	HasGeo TINYINT(1) NOT NULL DEFAULT 0,
+	HasHeading TINYINT(1) NOT NULL DEFAULT 0,
 	Heading DECIMAL(9, 6) NOT NULL DEFAULT 0,
+
+	HasGeo TINYINT(1) NOT NULL DEFAULT 0,
 	Lat DECIMAL(9, 6) NOT NULL DEFAULT 0,
 	Lng DECIMAL(9, 6) NOT NULL DEFAULT 0,
 
+	Live TINYINT(1) NOT	NULL DEFAULT 0,
 	StartTime DATETIME NOT NULL,
 	StopTime DATETIME NOT NULL,
 
@@ -116,10 +119,54 @@ CREATE TABLE IF NOT EXISTS TermRankings (
 
 INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("responder", 3), ("editor", 7), ("admin", 15);
 
-INSERT INTO Users (Username, Password, Salt, Role, TrustLevel) VALUES ("anonymous", "", "", "public", 0), ("admin", "", "", "admin", 0);
-INSERT INTO UserDirections (Username) VALUES ("anonymous"), ("admin");
+INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES 
+	("anonymous", "", "", "public", 0, "2013-03-19 00:00:00"), 
+	("admin", "", "", "admin", 0, "2013-03-19 00:00:00")
+;
+INSERT INTO UserDirections (Username, UpdateTime) VALUES 
+	("anonymous", "2013-03-19 00:00:00"), 
+	("admin", "2013-03-19 00:00:00")
+;
 
-INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES ("all", 1, "admin", "2013-03-19 00:00:00"), ("test", 0, "anonymous", "2013-03-19 00:00:00");
+INSERT INTO Terms (Term, Automated, Author, UpdateTime) VALUES 
+	("all", 1, "admin", "2013-03-19 00:00:00"), 
+	("test", 0, "anonymous", "2013-03-19 00:00:00")
+;
+INSERT INTO TermRankings (Term, Ranking, UpdateTime) VALUES 
+	("all", "",  "2013-03-19 00:00:00"), 
+	("test", "",  "2013-03-19 00:00:00")
+;
+
+INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES
+	("1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("b6200c5cc15cfbddde2874c40952a7aa25a869dd", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("852decd1fbc083cf6853e46feebb08622d653602", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("e1830fcefc3f47647ffa08350348d7e34b142b0b", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("48ad32292ff86b4148e0f754c2b9b55efad32d1e", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("acb519f53a55d9dea06efbcc804eda79d305282e", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("ze7f033bfc7b3625fa06c5a316b54b2c81eeff98", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("t6200c5cc15cfbddde2875c41952a7aa25a869dd", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("952decd1fbc083cf6853e56f1ebb08622d653602", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("y1830fcefc3f47647ffa05351348d7e34b142b0b", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("x8ad32292ff86b4148e0f55412b9b55efad32d1e", "", "", "observer", 0, "2013-03-19 00:00:00"),
+	("qcb519f53a55d9dea06ef5cc104eda79d305282e", "", "", "observer", 0, "2013-03-19 00:00:00")
+;
+INSERT INTO UserDirections (Username, UpdateTime) VALUES 
+	("1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98", "2013-03-19 00:00:00"), 
+	("fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98", "2013-03-19 00:00:00"), 
+	("b6200c5cc15cfbddde2874c40952a7aa25a869dd", "2013-03-19 00:00:00"), 
+	("852decd1fbc083cf6853e46feebb08622d653602", "2013-03-19 00:00:00"), 
+	("e1830fcefc3f47647ffa08350348d7e34b142b0b", "2013-03-19 00:00:00"), 
+	("48ad32292ff86b4148e0f754c2b9b55efad32d1e", "2013-03-19 00:00:00"), 
+	("acb519f53a55d9dea06efbcc804eda79d305282e", "2013-03-19 00:00:00"), 
+	("ze7f033bfc7b3625fa06c5a316b54b2c81eeff98", "2013-03-19 00:00:00"), 
+	("t6200c5cc15cfbddde2875c41952a7aa25a869dd", "2013-03-19 00:00:00"), 
+	("952decd1fbc083cf6853e56f1ebb08622d653602", "2013-03-19 00:00:00"), 
+	("y1830fcefc3f47647ffa05351348d7e34b142b0b", "2013-03-19 00:00:00"), 
+	("x8ad32292ff86b4148e0f55412b9b55efad32d1e", "2013-03-19 00:00:00"), 
+	("qcb519f53a55d9dea06ef5cc104eda79d305282e", "2013-03-19 00:00:00")
+;
 
 -- DROP TABLE IF EXISTS TaxonomyRankingsArchive;
 -- CREATE TABLE IF NOT EXISTS TaxonomyRankingsArchive (

@@ -1,36 +1,44 @@
 #ToDos
 
 ##Server
-Autotagging!
-Users!
-Comment socksz
+###Must
+* single tweet type lower case
+* Set start-stop time and other fields for tweets
+* Config new system
 
-more text in views
-checkmarks so see
-tooltips
-invert main feed and lock
+* Update tag-cloud on the fly
+* Update Map-Dir on the fly (Userdirection)
+* Update comments on the fly (it's a chat system!)
 
-dealt with markers
+* Image upload
 
-heading paperjs
-map filter
-secondary filters
+* Don't return target heading if it's too old
+* Minimize call to db for auth
 
-content type badge
-
-add a tag and it appears in a random ranking
-
+###Wish List
+* Live badge
+* Content type badge
+* Viewed/Dealt with check box
+* Provide a lock on the mobile user control
+* Can include more information in tile view
+* Description field for items?
+* Tooltips to help use
+* Callback/Hooks for CRUD instead of mass of switch statements
+* Store foreign item tokens in the DB such as the video server token?
+* Mo4r sidebar filters
 
 ##Mobile
-* More text on the device
-* device UUID
-* Custom URL 
-* Location
-* UUID
+* Stream doesnt work a second time without logout
+* Orientation problem
+* Login with keyboard in the way
 
-## Fixes and Improvements
-* JS benchmarking/improvements
-* Provide a lock on the mobile user control
+* More text on the device (tooltips etc)
+* Auth system
+* Location
+	* Broke on tablets
+* Debug information
+	* Error metrics
+	* compas
 
 ## New Features
 * Better closeup view (in context)

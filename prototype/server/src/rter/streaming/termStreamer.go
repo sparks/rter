@@ -50,29 +50,29 @@ func (t *TermRankingStreamer) SockJSHandler(term string, session sockjs.Conn) {
 	go func() {
 		for {
 			termRanking, ok := <-localChan
-			if !ok { //Chanel was closed
+			if !ok { // Chanel was closed
 				break
 			}
 
 			if termRanking.Term != term {
-				continue //Ignore
+				continue // Ignore
 			}
 
 			json, err := json.Marshal(termRanking)
 
 			if err != nil {
 				log.Println(err)
-				continue //Keep trying!
+				continue // Keep trying!
 			}
 			_, err = session.WriteMessage(json)
 			if err != nil {
 				log.Println(err)
-				break //Assume connection has died
+				break // Assume connection has died
 			}
 		}
 	}()
 
-	for { //This is needed to catch the closure of the sock
+	for { // This is needed to catch the closure of the sock
 		_, err := session.ReadMessage()
 		if err != nil {
 			break

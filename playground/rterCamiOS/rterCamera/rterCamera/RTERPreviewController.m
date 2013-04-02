@@ -29,6 +29,9 @@
     
     // encoder
     RTERVideoEncoder *encoder;
+	
+	NSURLConnection *streamingAuthConnection;
+	NSString *authString;
 }
 
 @end
@@ -37,6 +40,8 @@
 
 @synthesize toobar;
 @synthesize previewView;
+@synthesize streamingToken;
+@synthesize streamingEndpoint;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -66,7 +71,9 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    // capture session
+    streamingToken = @"";
+	
+	// capture session
     captureSession = [[AVCaptureSession alloc] init];
     
     // encoder
@@ -214,7 +221,14 @@
         }
         [captureSession stopRunning];
     }
-    [[self delegate] back];
+    
+	// get rid of tokens and authentication data for streaming
+	streamingAuthConnection = nil;
+	streamingEndpoint = nil;
+	streamingToken = nil;
+	
+	[[self delegate] back];
+	
 }
 
 - (void)didReceiveMemoryWarning
@@ -225,9 +239,14 @@
 
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
+		
+		// get token for video streaming
+		[self getStreamingToken];
+		
         // start recording
         sendingData = YES;
         [self startRecording];
+		
         
         [(UIBarButtonItem *) sender setTitle:@"stop"];
     } else {
@@ -284,47 +303,67 @@
     CMTimeShow(conn.videoMaxFrameDuration);
 }
 
+
+-(void) getStreamingToken {
+	NSLog(@"Attempting to get Streaming token:");
+	
+	// the json string to post
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
+	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+	
+	// setup the request
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/1.0/items"]];
+	
+	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/1.0/items"]];
+	
+	[request setHTTPMethod:@"POST"];
+	[request setHTTPShouldHandleCookies:YES];
+	[request setHTTPBody:postData];
+	[request setAllowsCellularAccess:YES];
+	[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+	[request setValue:[NSString stringWithFormat:@"%d",[postData length]] forHTTPHeaderField:@"Content-Length"];
+	[request setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+	
+	streamingAuthConnection = [NSURLConnection connectionWithRequest:request delegate:[self delegate]];
+}
+
+-(NSURLConnection*)getAuthConnection{
+	return streamingAuthConnection;
+}
+
+-(void)setAuthString:(NSString*)newAuth {
+	authString = newAuth;
+}
+
 /* process the frames here */
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    //CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
-    //CGSize imageSize = CVImageBufferGetEncodedSize( imageBuffer );
-    //NSLog( @"frame captured at %.fx%.f", imageSize.width, imageSize.height );
         
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
         NSLog(@"encoded frame");
         
-        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
+        NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/avc", streamingEndpoint]]];
+		
+		//NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.46.36:1234"]];
+		
         [postRequest setHTTPMethod:@"POST"];
         [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
+		[postRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+		[postRequest setValue:authString forHTTPHeaderField:@"Authorization"];
+		
         [NSURLConnection sendAsynchronousRequest:postRequest
                                            queue:postOpQueue
                                completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
         {
             
             NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-            NSLog(@"%@", [dictionary description]);
+            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
         }];
         
         [encoder freePacket:&pkt];
     
-//        dispatch_async(postQueue, ^{
-//            NSMutableURLRequest *postRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.34.160:8080/v1/ingest/0/avc"]];
-//            [postRequest setHTTPMethod:@"POST"];
-//            [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
-//            
-//            NSHTTPURLResponse *response;
-//            NSError *err;
-//
-//            sendSynchronousRequest:postRequest returningResponse:&response error:&err];
-//            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
-//            NSDictionary *dictionary = [response allHeaderFields];
-//            NSLog([dictionary description]);
-//            //        }
-//            [encoder freePacket:&pkt];
-//        });
     }
 }
 

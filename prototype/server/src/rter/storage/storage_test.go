@@ -28,16 +28,6 @@ func TestOpenStorage(t *testing.T) {
 	}
 }
 
-// func CleanupStorage(t *testing.T) {
-// 	//Delete incase it crashed before
-// 	Delete(relationship)
-// 	Delete(term)
-// 	Delete(comment)
-// 	Delete(item)
-// 	Delete(user)
-// 	Delete(role)
-// }
-
 func TestInsertRole(t *testing.T) {
 	role = new(data.Role)
 	role.Title = "TestRole"
@@ -122,7 +112,7 @@ func TestSelectUser(t *testing.T) {
 	t.Log(selectedUser.CreateTime.UTC())
 	t.Log(user.CreateTime.UTC())
 
-	selectedUser.CreateTime = user.CreateTime //Hack because MySQL will eat part of the timestamp and they won't match
+	selectedUser.CreateTime = user.CreateTime // Hack because MySQL will eat part of the timestamp and they won't match
 
 	structJSONCompare(t, user, selectedUser)
 }
@@ -167,7 +157,7 @@ func TestSelectUserDirection(t *testing.T) {
 	t.Log(selectedDirection.UpdateTime.UTC())
 	t.Log(direction.UpdateTime.UTC())
 
-	selectedDirection.UpdateTime = direction.UpdateTime //hack
+	selectedDirection.UpdateTime = direction.UpdateTime // hack
 
 	structJSONCompare(t, direction, selectedDirection)
 }
@@ -209,8 +199,8 @@ func TestSelectItem(t *testing.T) {
 	t.Log(item.StopTime.UTC())
 	t.Log(selectedItem.StopTime.UTC())
 
-	selectedItem.StartTime = item.StartTime //hack
-	selectedItem.StopTime = item.StopTime   //hack
+	selectedItem.StartTime = item.StartTime // hack
+	selectedItem.StopTime = item.StopTime   // hack
 
 	structJSONCompare(t, item, selectedItem)
 }
@@ -351,7 +341,7 @@ func TestSelectTermRelationship(t *testing.T) {
 	}
 }
 
-func TestSelectAllTerm(t *testing.T) { //By default only return those with relationships
+func TestSelectAllTerm(t *testing.T) { // By default only return those with relationships
 	terms := make([]*data.Term, 0)
 	err := SelectAll(&terms)
 

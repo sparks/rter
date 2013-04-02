@@ -15,11 +15,11 @@ start() {
 	export RTER_DIR='/usr/local/share/rter/'
 	export RTER_LOGFILE='/var/log/rter.log'
 	setcap 'cap_net_bind_service=+ep' /usr/local/share/rter/rter
-	start-stop-daemon --start --background --exec /usr/local/share/rter/rter --make-pidfile --pidfile /var/run/rter.pid --chuid rter
+	start-stop-daemon --start --background --make-pidfile --pidfile /var/run/rter.pid --chuid rter --exec /usr/local/share/rter/rter -- --gzip --http-port 80 --serve-log-file
 }
 
 stop() {
-	start-stop-daemon --stop --exec /usr/local/share/rter/rter --pidfile /var/run/rter.pid
+	start-stop-daemon --stop --pidfile /var/run/rter.pid --exec /usr/local/share/rter/rter
 }
 
 case "$1" in 

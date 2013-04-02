@@ -1,7 +1,4 @@
-angular.module('rawItem', [
-	'ui',           //Map
-	'ui.bootstrap', //select2
-])
+angular.module('rawItem', [])
 
 .controller('FormRawItemCtrl', function($scope) {
 

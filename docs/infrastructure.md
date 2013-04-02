@@ -138,14 +138,13 @@ No matter what we do we will have to use a special 'live' video player since bro
 	* Title
 	* Permissions
 * User (attributes)
-	* ID
 	* Username
 	* Password/Salt
 	* Role
 	* Trust Level
 	* Created Time
 * User Direction (child of User)
-	* User ID 
+	* User
 	* LockUser ID
 	* Command
 	* Heading/Lat/Lng
@@ -165,8 +164,9 @@ No matter what we do we will have to use a special 'live' video player since bro
 	* URI (content)
 	* URI (thumbnail)
 	* URI (upload)
-	* Has location
+	* Has heading/has location
 	* Lat/Lng/Heading
+	* Live
 	* Start Time
 	* Stop Time
 * Comments (child of item) (attributes)
@@ -213,10 +213,10 @@ No matter what we do we will have to use a special 'live' video player since bro
 * /items/:id/ DELETE _delete item, return Status No Content 204_
 ------
 * /items/:id/comments/ GET _get all comments as JSON_
-* /items/:id/comments/ POST _create comment for item with :id, return comment as JSON_
-<!-- * /items/:id/comments/:id/ GET _get comment, JSON_ -->
-<!-- * /items/:id/comments/:id/ PUT _update comment, return updated comment as JSON_ -->
-<!-- * /items/:id/comments/:id/ DELETE _delete comment, return Status No Content 204_ -->
+* /items/:id/comments/ POST _create comment for item with :id, return comment as JSON_ 
+* /items/:id/comments/:id/ GET _get comment, JSON_
+* /items/:id/comments/:id/ PUT _update comment, return updated comment as JSON_
+ * /items/:id/comments/:id/ DELETE _delete comment, return Status No Content 204_
 ------
 * /taxonomy/?query GET _get all terms or filtered by query, return found terms as JSON_
 * /taxonomy/ POST _create term, send JSON return term as JSON_

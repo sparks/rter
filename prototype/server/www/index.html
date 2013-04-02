@@ -1,667 +1,103 @@
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lang='en' ng-app='rter'>
 <head>
+
 	<title>rtER Client</title>
-	<link rel="stylesheet" type="text/css" href="css/style_v1.css">
-	
-	<script type="text/javascript" src="vendor/jquery.js"></script>
 
-	<script type="text/javascript" src="vendor/jquery.gridster.js"></script>
-	<link rel="stylesheet" type="text/css" href="vendor/jquery.gridster.css">
+	<!-- CSS -->
 
-	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&amp;sensor=false"></script>
+	<link href="/vendor/jquery/jquery-ui.css" rel="stylesheet">
+	<link href="/vendor/select2/select2.css" rel="stylesheet">
+	<link href="/vendor/angular/angular-ui.css" rel="stylesheet">
+	<link href="/vendor/angular/bootstrap.css" rel="stylesheet">
 
-	<script type="text/javascript">
-		Array.prototype.remove = function(from, to) {
-			var rest = this.slice((to || from) + 1 || this.length);
-			this.length = from < 0 ? this.length + from : from;
-			return this.push.apply(this, rest);
-		};
+	<link rel="stylesheet" type="text/css" href="/css/style_v2.css">
 
-		var gridster;
-		var was_dragged, pushing_target, pushing_layout, pushing_description;
-		var offline_count;
+	<!-- VENDOR JS -->
 
-		var selected_widget;
-		var content;
-		var clicked;
+	<script src="/vendor/jquery/jquery.js"></script>
 
-		$.ajaxSetup ({
-			cache: false
-		});
+	<script src="/vendor/jquery/jquery-ui.js"></script>
 
+	<script src="/vendor/select2/select2.js"></script>
 
-		$(document).ready(function() {
-			initialize();
-			was_dragged = false;
-			pushing_target = false;
-			pusing_layout = false;
-			selected_widget = null;
-			offline_count = 0;
+	<script src="/vendor/angular/angular.js"></script>
+	<script src="/vendor/angular/angular-resource.js"></script>
 
-			content = {{.Content}};
+	<script src="/vendor/angular/angular-ui.js"></script>
+	<script src="https://raw.github.com/angular-ui/angular-ui/master/modules/directives/sortable/sortable.js"></script>
 
-			//Build gridster
-			gridster = $(".gridster > ul").gridster({
-				widget_margins: [10, 10],
-				widget_base_dimensions: [140, 140],
-				serialize_params: function($w, wgd) { return { content_id: $w.data('content').content_id, col: wgd.col, row: wgd.row, size_x: wgd.size_x, size_y: wgd.size_y } }
-			}).data('gridster');
+	<script src="/vendor/angular/ui-bootstrap-tpls.js"></script>
 
-			gridster.cols = 4 //Can't figure out why I'm not getting 6 cols automatically but I'll just force it
-			$(".gridster > ul").width(gridster.min_widget_width*gridster.cols);
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcUMaRThwPYcWcyW4U2Rf3xG5YaGr6ZvA&libraries=geometry&sensor=false"></script>
 
-			if(content.length == 0) {
-				$("#nocontent").show();
-			}
+	<script src="/vendor/sockjs.min.js"></script>
 
-			//Add all the widget without worrying about layout
-			for(var i = 0;i < content.length;i++) {
-				addAsWidget(content[i]);
-			}
+	<script src="/vendor/moment.js"></script>
 
-			$("#closeup_close").click(function(e) {
-				e.preventDefault();
-				hideDetail();
-				clearSelectedWidget();
-			});
+	<script src="/vendor/angular/angular-http-auth.js"></script>
 
-			$("#closeuptext > div > a").click(function(e) {
-				e.preventDefault();
-				if(selected_widget != null) {
-					selected_widget.data("content").description = $("#closeuptext > textarea").val();
-					pushDescription(selected_widget.data("content"));
-				}
-			});
+	<!-- App JS -->
 
-			updateLayout(content);
-			setInterval(getContent, 2500);
-		});
+	<script type="text/javascript" src="/js/util.js"></script>
 
-		function showDetail($w) {
-			if(selected_widget == null || selected_widget.data('content').filepath != $w.data('content').filepath) {
-				crossfadeImg($("#view > img"), $w.data('content').filepath);
-			}
+	<!-- Custom Angular -->
 
-			closeup_map.setCenter(new google.maps.LatLng($w.data('content').lat, $w.data('content').lng))
-			google.maps.event.trigger(closeup_map, 'resize')
+	<script type="text/javascript" src="/js/rter.js"></script>
 
-			coneTo($w.data('content').heading);
-			cutearrowTo($w.data('content').target_heading);
+	<script type="text/javascript" src="/js/alerts/alerts.js"></script>
+	<script type="text/javascript" src="/js/auth/auth.js"></script>
+	<script type="text/javascript" src="/js/map/disp-map.js"></script>
+	<script type="text/javascript" src="/js/map/edit-map.js"></script>
 
-			if($w.data("content").url.length != 0) {
-				$("#closeuplink").show();
-				$("#closeuplink > a").attr("href", $w.data("content").url);
-				$("#closeuplink > a").html($w.data("content").url);
-			} else {
-				$("#closeuplink").hide();
-			}
+	<script type="text/javascript" src="/js/items/items.js"></script>
+	<script type="text/javascript" src="/js/items/genericItem.js"></script>
+	<script type="text/javascript" src="/js/items/rawItem.js"></script>
+	<script type="text/javascript" src="/js/items/twitterItem.js"></script>
+	<script type="text/javascript" src="/js/items/youtubeItem.js"></script>
+	<script type="text/javascript" src="/js/items/streamingVideoV1Item.js"></script>
 
-			$("#closeuptext > textarea").val($w.data("content").description);
+	<script type="text/javascript" src="/js/sockjs/sockjs.js"></script>
+	<script type="text/javascript" src="/js/momentjs/momentjs.js"></script>
 
-			$("#closeup").slideDown("fast", function() {
-				google.maps.event.trigger(closeup_map, 'resize')
-			});
-		}
+	<script type="text/javascript" src="/js/taxonomy/taxonomy.js"></script>
 
-		function hideDetail() {
-			$("#closeup").slideUp("fast", function() {
+	<script type="text/javascript" src="/js/comments/comments.js"></script>
 
-			});
-		}
+	<script type="text/javascript" src="/js/termview/termview.js"></script>
 
-		function refreshDetail() {
-			if(selected_widget != null) {
-				$i = $("#view > img");
-
-				if($i.attr("src") != selected_widget.data('content').filepath) {
-					crossfadeImg($i, selected_widget.data('content').filepath);
-
-					closeup_map.setCenter(new google.maps.LatLng(selected_widget.data('content').lat, selected_widget.data('content').lng));
-					google.maps.event.trigger(closeup_map, 'resize');
-
-					coneTo(selected_widget.data('content').heading);
-				}
-
-				cutearrowTo(selected_widget.data('content').target_heading);
-			}
-		}
-
-		function addAsWidget(content) {
-			var $img = $(document.createElement('img')).attr('src', content.filepath);
-			var $span = $(document.createElement('div')).text(content.content_id.substring(0, 5));
-			$span.attr('class', 'idspan');
-			var $a = $(document.createElement('a')).append($img);
-			$a.append($span);
-			$a.click(widgetClickFunction);
-			$a.mouseup(widgetMouseUpFunction);
-			$a.attr('href', '#');
-
-			var $li = $(document.createElement('li')).append($a);
-			$li.attr('content_id', content.content_id);
-
-			gridster.add_widget($li, 1, 1);
-
-			$li.data('content', content);
-			content.$el = $li;
-		}
-
-		function updateWidget($w, content) {
-			$i = $w.children().first().children().first();
-			if($i.attr("src") != content.filepath) {
-				crossfadeImg($i, content.filepath);
-			}
-
-			$w.data('content', content);
-			content.$el = $w;
-		}
-
-		function widgetMouseUpFunction(e) {
-			if($(this).parent().hasClass("dragging")) {
-				was_dragged = true;
-			} else {
-				was_dragged = false;
-			}
-		}
-
-		function widgetClickFunction(e) {
-			e.preventDefault();
-			if(was_dragged) {
-				was_dragged = false;
-				if(gridster.$changed != null && (gridster.$changed).length > 0) {
-					pushLayout(gridster.serialize());
-					// pushLayout(gridster.serialize_changed());
-				}
-			} else {
-				selectWidget($(this).parent());
-			}
-		}
-
-		function selectWidget($w) {
-			if(selected_widget == null || (selected_widget != null && selected_widget.data('content').content_id != $w.data('content').content_id)) {
-				//If nothing selected or we are not clickling on the same one
-				$w.css("border", "3px solid #33D011"); 
-				clearSelectedWidget(); //Clear old one
-				showDetail($w); //Closeup
-				selected_widget = $w;
-			} else {
-				hideDetail();
-				clearSelectedWidget();
-			}
-		}
-
-		function clearSelectedWidget() {
-			if(selected_widget != null) {
-				selected_widget.css("border", "none");
-				selected_widget = null;
-			}
-		}
-
-		function setTargetHeading(new_target_heading) {
-			if(selected_widget != null) {
-				pushing_target = true;
-				selected_widget.data('content').target_heading = new_target_heading;
-
-				$.ajax({
-					url: "/ajax/pushheading",
-					type: 'POST',
-					data: JSON.stringify(selected_widget.data('content'), function(key, value) {
-						if (key == "" || key == "target_heading" || key == "content_id") {
-							return value;
-						} else {
-							return undefined;
-						}
-					}),
-					processData: false, //Prevent the data from being transformed into a query string
-					timeout: 2400,
-					dataType: "json",
-					contentType: 'application/json',
-					success: function(data, status, err) {
-						pushing_target = false;
-					},
-					error: function(xhr, status, err) { 
-						pushing_target = false;
-					}
-				});
-			}
-		}
-
-		function pushDescription(description) {
-			pushing_description = true;
-			$.ajax({
-				url: "/ajax/pushdescription",
-				type: 'POST',
-				data: JSON.stringify(selected_widget.data('content'), function(key, value) {
-					if (key == "" || key == "description" || key == "content_id") {
-						return value;
-					} else {
-						return undefined;
-					}
-				}),
-				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 2400,
-				dataType: "json",
-				contentType: 'application/json',
-				success: function(data, status, err) {
-					pushing_description = false;
-				},
-				error: function(xhr, status, err) { 
-					pushing_description = false;
-				}
-			});
-		}
-
-		function pushLayout(layout) {
-			pushing_layout = true;
-			$.ajax({
-				url: "/ajax/pushlayout",
-				type: 'POST',
-				data: JSON.stringify(layout),
-				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 2400,
-				dataType: "json",
-				contentType: 'application/json',
-				success: function(data, status, err) {
-					pushing_layout = false;
-				},
-				error: function(xhr, status, err) { 
-					pushing_layout = false;
-				}
-			});
-		}
-
-		function getContent() {
-			$.ajax({
-				url: "/ajax/getlayout",
-				type: 'POST',
-				data: "",
-				processData: false, //Prevent the data from being transformed into a query string
-				timeout: 2400,
-				dataType: "json",
-				contentType: 'application/json',
-				success: function(data, status, err) {
-					$("#offline").hide();
-					offline_count = 0;
-
-					if(data != null && !gridster.drag_api.is_dragging && !pushing_layout && !pushing_target && !pushing_description) {
-						updateContent(data);
-						updateLayout(content);
-					}
-				},
-				error: function(xhr, status, err) { 
-					offline_count++;
-					if(status == "error" || offline_count > 3) {
-						$("#offline").show();
-						$("#offline > span").html(status);
-					}
-				}
-			});
-		}
-
-		function updateContent(updated_content) {
-			if(updated_content.length != 0) {
-				$("#nocontent").hide();
-			}
-
-			for(var i = 0;i < updated_content.length;i++) {
-				$w = $("[content_id='"+updated_content[i].content_id+"']");
-				$i = $("[content_id='"+updated_content[i].content_id+"'] > a > img");
-
-				if($w.length == 0) {
-					addAsWidget(updated_content[i]);
-				} else {
-					updateWidget($w, updated_content[i]);
-				}
-
-				if(!updateMarker(updated_content[i])) {
-					addMarker(updated_content[i]);
-				}
-			}
-
-			content = updated_content;
-
-			checkOnScreen();
-			refreshDetail();
-		}
-
-		function crossfadeImg($i, new_src) {
-			$i.data("next_src",  new_src);
-			$i.fadeOut("fast", function() {
-				$(this).attr('src', $(this).data("next_src"));
-				$(this).removeData("next_src");
-				$(this).fadeIn("fast");
-			});
-		}
-
-		function updateLayout(layout) {
-			for(var i = 0;i < layout.length;i++) {
-				if(layout[i].col == 0 && layout[i].row == 0) continue;
-
-				$w = layout[i].$el;
-				gridster.remove_from_gridmap($w.coords().grid);
-			}
-
-			for(var i = 0;i < layout.length;i++) {
-				if(layout[i].col == 0 && layout[i].row == 0) continue;
-
-				$w = layout[i].$el;
-
-				if(!gridster.is_empty(layout[i].col, layout[i].row)) {
-					gridster.empty_cells(layout[i].col, layout[i].row, 1, 1);
-				}
-
-				//Perform the move
-				$w.attr({
-					'data-col': layout[i].col,
-					'data-row': layout[i].row
-				});
-
-				//Change the correct associated position inside the widget
-				$w.coords().grid.col = layout[i].col;
-				$w.coords().grid.row = layout[i].row;
-
-				//Push it back into the internal mapping
-				gridster.add_to_gridmap($w.coords().grid, $w);
-			}
-
-			for(var i = 0;i < layout.length;i++) {
-				if(layout[i].col == 0 && layout[i].row == 0) continue;
-
-				$w = layout[i].$el;
-				gridster.add_to_gridmap($w.coords().grid, $w);
-			}
-
-			//Recompute the CSS height of the container
-			gridster.set_dom_grid_height();
-			//Assuming we don't want to record the change since we caused it
-			gridster.$changed = $([]);
-		}
-
-		var main_map, closeup_map;
-		var locations = new Array();
-		var montreal = new google.maps.LatLng(45.50745, -73.5793);
-		var quebec = new google.maps.LatLng(46.796534,-71.252518);
-
-		function gotLocation(location) {
-			location = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
-			main_map.setCenter(location);
-		}
-
-		function initialize() {
-			var mainMapOptions = {
-				center: quebec,
-				zoom: 10,
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
-			};
-
-			var closeupMapOptions = {
-				center: quebec,
-				zoom: 17,
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
-				disableDefaultUI: true,
-				disableDoubleClickZoom: true,
-				draggable: false
-			};
-
-
-			main_map = new google.maps.Map(document.getElementById("main_map_canvas"), mainMapOptions);
-			closeup_map = new google.maps.Map(document.getElementById("closeup_map_canvas"), closeupMapOptions);
-	
-			google.maps.event.addListener(main_map, 'bounds_changed', function() {
-				checkOnScreen();
-			});
-
-			navigator.geolocation.getCurrentPosition(gotLocation);
-		}
-
-		function checkOnScreen() {
-			bounds = main_map.getBounds();
-
-			for(var i = 0;i < content.length;i++) {
-				if(content[i].content_type == "mobile") {
-					$el = $("[content_id='"+content[i].content_id+"'] > a > img").first();
-
-					if(content[i].lat < Math.min(bounds.getNorthEast().lat(), bounds.getSouthWest().lat()) || content[i].lat > Math.max(bounds.getNorthEast().lat(), bounds.getSouthWest().lat())) {
-						$el.css("opacity", "0.3");
-					} else if(content[i].lng < Math.min(bounds.getNorthEast().lng(), bounds.getSouthWest().lng()) || content[i].lng > Math.max(bounds.getNorthEast().lng(), bounds.getSouthWest().lng())) {
-						$el.css("opacity", "0.3");
-					} else {
-						$el.css("opacity", "1");
-					}
-				}
-			}
-		}
-		
-		function addMarker(position) {
-			//position should have lat, lng and content_id fields
-			
-			position.marker = new google.maps.Marker({
-				position: new google.maps.LatLng(position.lat, position.lng),
-				map: main_map,
-				icon: new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
-			});
-			
-			(function(content_id) {
-				google.maps.event.addListener(position.marker, 'click', function(marker) {
-					selectWidget($("[content_id='"+content_id+"']"));
-				});
-			})(position.content_id);
-
-			locations.push(position);
-		}
-
-		function removeMarker(position) {
-			//position should have lat, lng and content_id fields
-
-			for(var i = 0;i < locations.length;i++) {
-				if(locations[i].content_id == position.content_id) {
-					locations[i].marker.setMap(null);
-					locations.remove(i);
-					return true;
-				}
-			}
-
-			if(position.marker != null) {
-				position.margin.setMap(null);
-				return true;
-			}
-
-			return false;
-		}
-
-		function updateMarker(position) {
-			for(var i = 0;i < locations.length;i++) {
-				if(locations[i].content_id == position.content_id) {
-					if(locations[i].lat != position.lat || locations.lng != position.lng) {
-						locations[i].marker.setPosition(new google.maps.LatLng(position.lat, position.lng));
-					}
-					if(locations[i].marker.getIcon().url != position.filepath) {
-						locations[i].marker.setIcon(
-							new google.maps.MarkerImage(position.filepath, null, null, null, new google.maps.Size(30, 30))
-						);
-					}
-					return true;
-				}
-			}
-
-			return false;
-		}
-	</script>
-
-	<script type="text/javascript" src="vendor/paper.js"></script>
-
-	<script type="text/paperscript" canvas="heading_selector">
-	    var alpha = 0.7;
-
-	    var center = view.center;
-	    var radius = 2*view.size.width;
-	    var FOV = 35;
-
-		// var myCircle = new Path.Circle(center, radius);
-	    // myCircle.fillColor = new GrayColor(0.15, alpha);
-
-	    var cone = new Path();
-	    cone.style = {
-	    	fillColor: new GrayColor(0.3, alpha),
-	    	strokeColor: new GrayColor(0.3, alpha),
-	    	strokeWidth: 1,
-	    	strokeCap: 'butt',
-	    	closed: true
-	    };
-
-	    var cone_vector = new Point(radius, 0);
-		cone.add(center);
-	    cone.add(center + cone_vector.rotate(FOV));
-	    cone.arcTo(center + cone_vector, center + cone_vector.rotate(-FOV));
-
-	    var target = new Path();
-	    target.style = {
-	    	strokeColor: new RgbColor(0.6, 0, 0),
-	    	strokeWidth: 3,
-	    	strokeCap: 'round'
-	    };
-
-	    var target_vector = new Point(radius, 0);
-	    target.add(center);
-	    target.add(center+cone_vector);
-	    target.visible = false;
-
-	    placeLetter(center+new Point(0, radius+4), "S");
-	    placeLetter(center+new Point(0, -radius+4), "N");
-	    placeLetter(center+new Point(-radius, 0), "W");
-	    placeLetter(center+new Point(radius, 0), "E");
-
-	    var cutearrow = new Path();
-	    cutearrow.style = {
-	    	fillColor: new GrayColor(0.4),
-	    	strokeColor: new GrayColor(1),
-	    	strokeWidth: 2,
-	    	strokeCap: 'butt',
-	    	closed: true
-	    };
-
-	    var cutearrow_vector = new Point(radius, 0);
-	    cutearrow.add(center+new Point(6, 0));
-	    cutearrow.add(center+new Point(0, 12));
-	    cutearrow.add(center+new Point(-6, 0));
-	    cutearrow.add(center+new Point(0, 2));
-	    cutearrow.add(center+new Point(6, 0));
-
-	    cutearrow.scale(2);
-	    cutearrow.translate(0, 60);
-	    cutearrow.rotate(-90, center);
-
-	    function placeLetter(point, letter) {
-	    	var text = new PointText(point);
-	    	text.paragraphStyle.justification = 'center';
-	    	text.fillColor = 'black';
-	    	text.content = letter;
-	    }
-
-	    function coneTo(angle) {
-	    	angle = angle-90;
-	    	if(angle < -180) angle += 360;
-
-	    	cone.rotate(angle-cone_vector.angle, center);
-	    	cone_vector.angle = angle;
-	    }
-
-	    window.coneTo = coneTo;
-
-	    function targetTo(angle) {
-	    	target.rotate(angle-target_vector.angle, center);
-	    	target_vector.angle = angle;
-	    }
-
-	    function cutearrowTo(angle) {
-	    	angle = angle-90;
-	    	if(angle < -180) angle += 360;
-
-	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
-	    	cutearrow_vector.angle = angle;
-	    }
-
-	    window.cutearrowTo = cutearrowTo;
-
-	    function onMouseDown(event) {
-		    mouseHandle(event);
-	    }
-
-	    function onMouseDrag(event) {
-	    	mouseHandle(event);
-	    }
-
-	    function onMouseUp(event) {
-	    	var angle = cutearrow_vector.angle;
-	    	angle = angle+90;
-	    	if(angle > 180) {
-	    		angle -= 360;
-	    	}
-	    	window.setTargetHeading(angle);
-	    }
-
-	    function mouseHandle(event) {
-	    	angle = (event.point-center).angle;
-	    	cutearrow.rotate(angle-cutearrow_vector.angle, center);
-	    	cutearrow_vector.angle = angle;
-
-	    }
-
-	    function onFrame(event) {
-	    	if(Math.abs(cutearrow_vector.angle-cone_vector.angle) > FOV) {
-		    	if(event.count%60 < 30) {
-		    		cutearrow.strokeColor = new RgbColor(0.8, 0, 0);
-		    	} else {
-		    		cutearrow.strokeColor = new GrayColor(1);
-		    	}
-		    } else {
-		    	cutearrow.strokeColor = new GrayColor(1);
-		    }
-	    }
-    </script>
 </head>
-<body>
-	<div id="offline">Cannot Reach Server: <span></span></div>
-
-	<div id="header">
-		<div id="rter"><a href="/"><img src="asset/rter.png" width="50"></a></div>
-
-		<div id="titleblock">
-			<h2>Real-Time Emergency Response</h2>
-
-			<p>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></p>
-		</div>
+<body ng-controller="RterCtrl">
+	
+	<div id="alerter" ng-controller="AlertsCtrl">
+		<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 	</div>
 
-	<div id="submit"><a href="/submit">Submit New Content</a></div>
+	<header id="appbadge">
+		<img src="asset/rter.png" width="50">
+		<hgroup>
+			<h1>Real-Time Emergency Response</h1>
+			<h2>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></h2>
+		</hgroup>
+	</header>
 
-	<div class="stripe" id="closeup">
-		<div class="container">
-			<div id="view">
-				<img src="">
-			</div>
-			<div id="closeuplink"><a target="_blank" href="http://dev.mysql.com/doc/refman/5.0/en/create-table.html">http://dev.mysql.com/doc/refman/5.0/en/create-table.html</a></div>
+	<div ng-controller="TabsCtrl" id="maintabber">
+		<tabs>
+			<pane heading="Submit New Item">
+			 	<create-item>
+				</create-item>
+			</pane>
 
-			<canvas id="heading_selector" width="300" height="300"></canvas>
-			<div id="closeup_map_canvas"></div>
+			<pane heading="+">
+				<tag-cloud></tag-cloud>
+ 			</pane>
 
-			<div id="closeuptext">
-				<textarea></textarea>
-				<div><a href="#">Save</a></div>
-			</div>
-
-			<div id="closeup_close"><a href="#">[close]</a></div>
-		</div>
+			<pane ng-repeat="view in termViews" heading="{{view.heading}}" active="view.active">
+				<termview term="view.term">
+				</termview>
+			</pane>
+		</tabs>
 	</div>
 
-	<div class="stripe">
-		<div class="container gridster">
-			<ul>
-			</ul>
-
-			<div id="main_map_canvas"></div>
-			<div id="nocontent">No Content Available</div>
-		</div>
-	</div>
 </body>
 </html>

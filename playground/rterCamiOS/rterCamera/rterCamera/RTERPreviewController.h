@@ -17,6 +17,7 @@
 
 @required
 - (void)back;
+- (NSString*)cookieString;
 
 @end
 
@@ -33,6 +34,12 @@
 @property (strong, nonatomic) IBOutlet UIView *previewView;
 
 @property (strong, nonatomic) IBOutlet UIToolbar *toobar;
+
+@property (nonatomic, retain) NSString *streamingToken;
+@property (nonatomic, retain) NSString *streamingEndpoint;
+
+- (NSURLConnection*)getAuthConnection;
+- (void)setAuthString:(NSString*)newAuth;
 
 - (IBAction)clickedStart:(id)sender;
 
