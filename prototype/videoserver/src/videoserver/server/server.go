@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -20,14 +21,29 @@ import (
 
 type State struct {
 	c              *config.ServerConfig
+	serverRoot     string
 	activeSessions map[uint64]*Session
 	closedSessions map[uint64]*time.Timer
 }
 
 // instantiate new server
 func NewServer(conf *config.ServerConfig) *State {
+
+	var d string
+	if conf.Server.Addr == "" {
+		n, _ := os.Hostname()
+		d += n
+	} else {
+		d += conf.Server.Addr
+	}
+
+	if conf.Server.Port > 0 {
+		d += ":" + strconv.FormatUint(conf.Server.Port, 10)
+	}
+
 	return &State{
 		c:              conf,
+		serverRoot:     d,
 		activeSessions: make(map[uint64]*Session),
 		closedSessions: make(map[uint64]*time.Timer),
 	}
@@ -173,7 +189,7 @@ func (s *State) SessionUpdate(id uint64, state int) {
 	}
 }
 
-func AuthenticateRequest(r *http.Request, key string) *Error {
+func (s *State) AuthenticateRequest(r *http.Request, key string) *Error {
 
 	// parse token from HTTP request Authorization header
 	t, err := auth.NewTokenFromHttpRequest(r)
@@ -185,8 +201,15 @@ func AuthenticateRequest(r *http.Request, key string) *Error {
 		}
 	}
 
+	// assemble URL (r.URL.String() fails when no hostname is set for server)
+	var url string
+	if r.URL.Scheme != "" {
+		url += r.URL.Scheme + "://"
+	}
+	url += s.serverRoot + r.URL.Path
+
 	// tokens issued for a resource are valid for all sub-resources
-	if !strings.HasPrefix(r.URL.String(), t.Resource) {
+	if !strings.HasPrefix(url, t.Resource) {
 		return ErrorAuthUrlMismatch
 	}
 
