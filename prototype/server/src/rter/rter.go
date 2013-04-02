@@ -200,7 +200,7 @@ func setupLogger() {
 	}
 
 	if *logfile != "" {
-		file, err := os.Create(*logfile)
+		file, err := os.OpenFile(*logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 
 		if err == nil {
 			log.SetOutput(file)

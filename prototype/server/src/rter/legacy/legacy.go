@@ -39,7 +39,7 @@ func MultiUploadHandler(rterDir string, uploadPath string, w http.ResponseWriter
 		return
 	}
 
-	os.Mkdir(filepath.Join(uploadPath, user.Username), os.ModeDir|0755)
+	os.Mkdir(filepath.Join(uploadPath, user.Username), os.ModeDir|0775)
 
 	matchingItems := make([]*data.Item, 0)
 	err = storage.SelectWhere(&matchingItems, "WHERE Type=\"streaming-video-v0\" AND Author=?", user.Username)
@@ -94,7 +94,8 @@ func MultiUploadHandler(rterDir string, uploadPath string, w http.ResponseWriter
 		path = filepath.Join(path, fmt.Sprintf("%v/%v.jpg", user.Username, item.StopTime.UnixNano()))
 	}
 
-	outputFile, err := os.Create(path)
+	outputFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0664)
+
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Error, likely due to malformed request.", http.StatusInternalServerError)
