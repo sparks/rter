@@ -46,6 +46,6 @@
 - (IBAction)clickedBack:(id)sender;
 
 - (void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection;
-
+- (void) startRecording;
 
 @end

@@ -240,12 +240,14 @@
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
 		
+        sendingData = YES;
+        
 		// get token for video streaming
 		[self getStreamingToken];
 		
         // start recording
-        sendingData = YES;
-        [self startRecording];
+//        
+//        [self startRecording];
 		
         
         [(UIBarButtonItem *) sender setTitle:@"stop"];
@@ -352,15 +354,24 @@
         [postRequest setHTTPBody:[NSData dataWithBytes:pkt.data length:pkt.size]];
 		[postRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
 		[postRequest setValue:authString forHTTPHeaderField:@"Authorization"];
+        
+        dispatch_async(postQueue, ^{
+            NSHTTPURLResponse *response;
+            NSError *err;
+            NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
+            //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
+            NSDictionary *dictionary = [response allHeaderFields];
+            NSLog( @"%@", [dictionary description]);
+        });
 		
-        [NSURLConnection sendAsynchronousRequest:postRequest
-                                           queue:postOpQueue
-                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
-        {
-            
-            NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
-        }];
+//        [NSURLConnection sendAsynchronousRequest:postRequest
+//                                           queue:postOpQueue
+//                               completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
+//        {
+//            
+//            NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
+//            NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
+//        }];
         
         [encoder freePacket:&pkt];
     

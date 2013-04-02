@@ -141,6 +141,8 @@ RTERPreviewController *preview;
 								[[jsonDict objectForKey:@"Token"] objectForKey:@"rter_valid_until"]];
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
+        
+        [preview startRecording];
 	}
 }
 
