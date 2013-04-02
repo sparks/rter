@@ -211,7 +211,7 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 
 	if C.Auth.Enabled {
 		// confirm validity and freshness of request
-		if err = server.AuthenticateRequest(r, C.Auth.Token_secret); err != nil {
+		if err = S.AuthenticateRequest(r, C.Auth.Token_secret); err != nil {
 			// return error response in httpcode
 			server.ServeError(w, err.JSONError(), err.Status())
 			return
