@@ -75,8 +75,8 @@ var (
 	ErrorEOS               = NewError(5, http.StatusForbidden, "already at end-of-stream state")
 	ErrorIO                = NewError(6, http.StatusForbidden, "storage failed")
 	ErrorWrongEndpointType = NewError(7, http.StatusUnsupportedMediaType, "type mismatch between open session and ingest endpoint")
-	ErrorRequestInProgress = NewError(7, http.StatusForbidden, "a request for this session is already in progress")
-	ErrorInvalidClient     = NewError(7, http.StatusForbidden, "endpoint is already locked to another consumer")
+	ErrorRequestInProgress = NewError(8, http.StatusForbidden, "a request for this session is already in progress")
+	ErrorInvalidClient     = NewError(9, http.StatusForbidden, "endpoint is already locked to another consumer")
 
 	ErrorAuthTokenRequired = NewError(100, http.StatusUnauthorized, "authorization token required for this endpoint")
 	ErrorAuthTokenExpired  = NewError(101, http.StatusUnauthorized, "authorization token expired")

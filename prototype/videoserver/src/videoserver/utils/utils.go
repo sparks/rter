@@ -10,6 +10,6 @@ import (
 
 // file permissions
 const (
-	PERM_FILE os.FileMode = 0600
-	PERM_DIR  os.FileMode = 0700
+	PERM_FILE os.FileMode = 0664
+	PERM_DIR  os.FileMode = 0775
 )

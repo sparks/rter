@@ -7,7 +7,8 @@
 		"cert_file": "",
 		"key_file": "",
 		"session_timeout": 10,
-		"session_maxage": 30
+		"session_maxage": 30,
+		"logfile": ""
 	},
 	"limits": {
 		"max_cpu": 1,
