@@ -19,7 +19,7 @@ start() {
 }
 
 stop() {
-	start-stop-daemon --stop --exec /usr/local/share/rter/rter --pidfile /var/run/rter.pid
+	start-stop-daemon --stop --pidfile /var/run/rter.pid --exec /usr/local/share/rter/rter
 }
 
 case "$1" in 
