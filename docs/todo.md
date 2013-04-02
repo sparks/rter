@@ -15,6 +15,7 @@
 * Validate stream doesn already exist in the server before handing out a token
 * Don't return target heading if it's too old
 * Minimize call to db for auth
+* Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
 * Tile view improvements

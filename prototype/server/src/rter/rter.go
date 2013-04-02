@@ -125,7 +125,7 @@ func main() {
 	var rootHandler http.Handler = r
 
 	if *gzipFlag { // Wrap rootHandler with on the fly gzip compressor
-		log.Print("\t-GZIP Enabled")
+		log.Print("\t-GZIP Enabled. Warning Websockets are flaky with gzip")
 		rootHandler = compressor.GzipHandler(rootHandler)
 	}
 

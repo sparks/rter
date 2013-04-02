@@ -1,3 +1,4 @@
+// BUG(sparky) When using GZIP session hijacking doesn't work and this breaks websockets a lot.
 // BUG(sparky) When using GZIP browsers are much more difficult about the Content-Type headers. If improperly set the file will often download instead of loading properly.
 
 // Provides a way to wrap handlers with on the fly GZIP compression
