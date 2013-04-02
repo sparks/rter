@@ -30,6 +30,9 @@ type ServerConfig struct {
 		Session_maxage  uint64 `json:"session_maxage"`
 		Logfile         string `json:"logfile"`
 	}
+	Hack struct {
+		Disable_port_check bool `json:"disable_port_check"`
+	}
 	// limits
 	Limits struct {
 		Max_cpu                                int    `json:"max_cpu"`
@@ -105,6 +108,7 @@ func (c *ServerConfig) ParseConfig() {
 	c.Server.Session_timeout = 10                           // close after 10 seconds inactivity
 	c.Server.Session_maxage = 3600                          // keep state for at most 1 hour
 	c.Server.Logfile = ""                                   // logfile, console if empty
+	c.Hack.Disable_port_check = false                       // don't check port when validating injest request
 	c.Limits.Max_cpu = 1                                    // max number of CPUs used
 	c.Limits.Max_memory_mbytes = 128                        // max amount of memory used
 	c.Limits.Max_ingest_sessions = 10                       // max active sessions
