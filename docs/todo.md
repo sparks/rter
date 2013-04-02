@@ -2,8 +2,17 @@
 
 ##Server
 ###Must
+* append logfile
+* Hijack bug
+
+* Detect EOS in app
+* Permissions on made dir (rw group x for dirs)
+* Ability to read main log from Videoserver
+
 * single tweet type lower case
 * Set start-stop time and other fields for tweets
+
+* Validate stream doesn already exist
 * Config new system
 
 * Update tag-cloud on the fly
