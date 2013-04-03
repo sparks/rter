@@ -1,6 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
+* Naming of taxonomy/tag/tabs
 * Sort for both StartTime and StopTime (e.g. for Live it
 * Twitter items
 	* Single tweet type should be lower case
@@ -17,6 +18,9 @@
 * Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
+* Sexy graphs
+* Anonymous sumissions
+* Perma link to content (location)
 * Permissions on tags
 * How will we do different universes/instances?
 * Tile view improvements

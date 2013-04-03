@@ -28,28 +28,34 @@ Of course in this context the data would have been most useful for the McGill co
 * Server infratructure
 	* The new videoserver outline by alex
 	* New rtER Server
-		* RESTful, documented api for handling our data. This means everything that goes in our system is easily accessibile in a standardized API format. Could be reused within other frameworks or applications. Similarly we could easily take in data from anywhere
-		* Designed around our core features so that queries are fast/natural. Support Taxonomy, Users, Ranking within taxonmoies
+		* RESTful, documented api for handling our data. This means everything that goes in our system is easily accessible in a standardized API format. Could be reused within other frameworks or applications. Similarly we could easily take in data from anywhere
+		* Designed around our core features so that queries are fast/natural. Support Taxonomy, Users, Ranking within taxonomies
 * Web client
 	* Built top to bottom in HTML5 components (angularjs, html5 video, google maps v3 with HTML5 canvas/drawing)
 	* User accounts. We can log actions by user. Who did what when. This is important since trust and confidence in sources is key. Understanding who's taking an action or submitting information implies a level of trust. 
-	* Everything you submit is an Item. A generic container. As of now an item can be a webpage, twitter search/post, a youtube video, a live image stream (old android app), a live video stream (new iphone app).
+	* Everything you submit is an Item. A generic container. As of now an item can be a web page, twitter search/post, a youtube video, a live image stream (old android app), a live video stream (new iphone app).
 	* Taxonomy as a first class object
 		* Items can be tagged
 		* Tags can be automated: by content type, by trust level, be location, etc
-		* Each tag has it's own view/workspace. e.g. each tag has ranking for all the items it contains which users can collabortively work with. 
+		* Each tag has it's own view/workspace. e.g. each tag has ranking for all the items it contains which users can collaboratively work with. 
 		* Thus tags are much more powerful tools than normal:
-			* Tag with your username or group name to create a personal or shared workspace
-			* Tag with your colleague's username or group to send to their workspace
-			* Enable auto taggin by area, content type to create a realtime feed for certain condition
+			* Tag with your user name or group name to create a personal or shared workspace
+			* Tag with your colleague's user name or group to send to their workspace
+			* Enable auto tagging by area, content type to create a real time feed for certain condition
 			* Permission can be applied to a tag to prevent external interference in your workspace.
 		* Web client now supports more filtering techniques: fuzzy searching, map filtering, filtering by user trust level, filter by user, filter by user role
-		* Alpha support for HTML5 livestream video with the same interactive control of the remote user (directing the remote user) using a map.
-		* Twitter intergration
+		* Alpha support for HTML5 live stream video with the same interactive control of the remote user (directing the remote user) using a map.
+		* Twitter integration
 		* Various UI improvement (new interactive map elements, intelligent tag fields, global alerts, improved drag and drop grid)
 
 
 ## Scenario and Pitch
+
+In round three of development on the rtER project, we began with a proof of concept and finished with an alpha product. Key in this round was building up the system so that it was viable for in the field testing by partner emergency response groups: Quebec City (...) and Red Wing (...). From the get go we knew some of features that we would need. Integration with twitter and YouTube were added. We continued our work improving real-time video streaming from mobile device. However early feedback from both groups guided many new key developments. 
+
+In Red Wing responders were concerned about creating group and individual workspaces so responders at different hierarchical levels could interact without interfering with each other. In Quebec City they asked about having multiple filtered information streams for parallel events of unequal importance. We attacked both these by making Taxonomy a first class citizen. An items - a video stream, a twitter search, a youtube video - can be tagged either by through the web interface or by automated filters configured on the server. Each tag has it's own workspace. This means that each tag has a grid view which can be opened. This grid view can be sorted collaboratively by drag and drop. As a result items can also be sent and shared between tag workspaces by adding and removing tags from items. With this system
+
+## Dump from e-mails
 
 "Try to tell us the story."
 
