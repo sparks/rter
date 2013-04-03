@@ -192,11 +192,9 @@ label {
 	max-height: 140px;
 }
 
-.term-view .grid-view .tile-item .author-badge {
+.term-view .grid-view .tile-item .author-badge, .term-view .grid-view .tile-item .type-badge {
 	position: absolute;
 	z-index: 10;
-
-	top: 0;
 
 	height: 14pt;
 	padding-left: 5px;
@@ -209,11 +207,19 @@ label {
 	color: white;
 	line-height: 14pt;
 
-	max-width: 60px;
+	max-width: 75px;
 	overflow-x: hidden;
 	overflow-y: visible;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+
+.term-view .grid-view .tile-item .author-badge {
+	top: 0;
+}
+
+.term-view .grid-view .tile-item .type-badge {
+	top: 14pt;
 }
 
 /* -- TermView List -- */
