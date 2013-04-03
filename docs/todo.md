@@ -1,6 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
+* Remove from map event in blur mode
 * Naming of taxonomy/tag/tabs
 * Sort for both StartTime and StopTime (e.g. for Live it
 * Twitter items
