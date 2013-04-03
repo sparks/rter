@@ -117,17 +117,39 @@ label {
 	margin: 0 auto 15px auto;
 }
 
-.term-view .grid-view .right .map-filter-en,
-.term-view .list-view .right .map-filter-en,
-.term-view .grid-view .right .filter-mode ,
-.term-view .list-view .right .filter-mode  {
+.term-view .grid-view .right .filter, .term-view .list-view .right .filter  {
+	padding-top: 10px;
+	padding-bottom: 10px;
+
+	margin-bottom: 20px;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+
+	border: 1px solid rgb(208, 208, 208);
+
 	text-align: center;
-	margin-bottom: 15px;
 }
 
-.term-view .map-view .right .map-filter-en,
-.term-view .map-view .right .filter-mode {
+.term-view .grid-view .filter header, .term-view .list-view .filter header {
+	margin-bottom: 10px;
+}
+
+.term-view .grid-view .filter header label, .term-view .list-view .filter header label {
+	display: inline-block;
+}
+
+.term-view .grid-view .filter header .btn-group, .term-view .list-view .filter header .btn-group {
+	margin-left: 10px;
+}
+
+.term-view .map-view .right .filter-map header {
 	display: none;
+}
+
+.term-view .map-view .filter {
+	margin-bottom: 15px;
 }
 
 .term-view .grid-view .filter-search, .term-view .list-view .filter-search {
@@ -170,11 +192,9 @@ label {
 	max-height: 140px;
 }
 
-.term-view .grid-view .tile-item .author-badge {
+.term-view .grid-view .tile-item .author-badge, .term-view .grid-view .tile-item .type-badge {
 	position: absolute;
 	z-index: 10;
-
-	top: 0;
 
 	height: 14pt;
 	padding-left: 5px;
@@ -187,11 +207,20 @@ label {
 	color: white;
 	line-height: 14pt;
 
-	max-width: 60px;
 	overflow-x: hidden;
 	overflow-y: visible;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+
+.term-view .grid-view .tile-item .author-badge {
+	top: 0;
+	max-width: 75px;
+}
+
+.term-view .grid-view .tile-item .type-badge {
+	top: 14pt;
+	max-width: 120px;
 }
 
 /* -- TermView List -- */
@@ -251,16 +280,6 @@ label {
 
 .term-view .map-view .right  {
 	padding-top: 15px;
-}
-
-.term-view .map-view .right hr {
-	display: none;
-}
-
-.term-view .map-view .text-search {
-	margin-top: 25px;
-	position: relative;
-	left: 100%;
 }
 
 .term-view .map-view .right .map {

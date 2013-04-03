@@ -22,8 +22,11 @@ angular.module('comments', [
 		Body: ""
 	};
 
+	$scope.inProgress = false;
+
 	$scope.createComment = function() {
 		if($scope.newComment.Body === undefined || $scope.newComment.Body === "") return;
+		$scope.inProgress = true;
 		CommentResource.save(
 			$scope.newComment,
 			function(c) {
@@ -32,9 +35,11 @@ angular.module('comments', [
 					ID: $scope.id,
 					Body: ""
 				};
+				$scope.inProgress = false;
 			},
 			function(e) {
 				console.log(e);
+				$scope.inProgress = false;
 			}
 		);
 	};

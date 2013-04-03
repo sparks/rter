@@ -38,7 +38,7 @@
 		
 		<hr>
 		
-		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid">Save</button>
+		<button class="btn btn-primary" ng-click="createItem()" ng-disabled="createItemForm.$invalid || inProgress">Save</button>
 	</div>
 
 </form>
