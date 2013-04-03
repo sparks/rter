@@ -9,7 +9,7 @@ angular.module('streamingVideoV1Item', [
 
 	$scope.livethumbConfig = {
 		showtitle: false,
-		autoplay: $scope.Live,
+		autoplay: true,
 		selectable: true,
 		skimmable: true,
 		clickable: true,
