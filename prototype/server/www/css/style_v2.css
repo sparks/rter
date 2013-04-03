@@ -117,7 +117,7 @@ label {
 	margin: 0 auto 15px auto;
 }
 
-.term-view .filter {
+.term-view .grid-view .right .filter, .term-view .list-view .right .filter  {
 	padding-top: 10px;
 	padding-bottom: 10px;
 
@@ -132,21 +132,24 @@ label {
 	text-align: center;
 }
 
-.term-view .filter header {
+.term-view .grid-view .filter header, .term-view .list-view .filter header {
 	margin-bottom: 10px;
 }
 
-.term-view .filter header label {
+.term-view .grid-view .filter header label, .term-view .list-view .filter header label {
 	display: inline-block;
 }
 
-.term-view .filter header .btn-group {
+.term-view .grid-view .filter header .btn-group, .term-view .list-view .filter header .btn-group {
 	margin-left: 10px;
 }
 
-.term-view .map-view .right .filter-map-en,
-.term-view .map-view .right .filter-mode {
+.term-view .map-view .right .filter-map header {
 	display: none;
+}
+
+.term-view .map-view .filter {
+	margin-bottom: 15px;
 }
 
 .term-view .grid-view .filter-search, .term-view .list-view .filter-search {
@@ -270,10 +273,6 @@ label {
 
 .term-view .map-view .right  {
 	padding-top: 15px;
-}
-
-.term-view .map-view .right hr {
-	display: none;
 }
 
 .term-view .map-view .right .map {
