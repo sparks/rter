@@ -1,6 +1,6 @@
 <div class="term-view">
 	<div class="control-bar row-fluid">
-		<div class="span6">
+		<div class="span4">
 			<b>View:</b>
 			<div class="btn-group" data-toggle="buttons-checkbox">
 			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'grid-view'">Grid</button>
@@ -8,7 +8,14 @@
 			    <button type="button" class="btn btn-primary" ng-model="viewmode" btn-radio="'map-view'">Map</button>
 			</div>
 		</div>
-		<div class="span6 right-align">
+		<div class="span6">
+			<b>Filtering:</b>
+			<div class="btn-group" data-toggle="buttons-checkbox">
+			    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'blur'">Blur</button>
+			    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'remove'">Remove</button>
+			</div>
+		</div>
+		<div class="span2 right-align">
 			<button class="btn btn-danger" ng-click="close()">Close View</button>
 		</div>
 	</div>
@@ -33,40 +40,29 @@
 			</div>
 
 			<div class="right span4">
-				<div class="filter-mode">
-					<label for="filterMode">Filtering</label>
-					<div class="btn-group" name="filterMode" data-toggle="buttons-checkbox">
-					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'blur'">Blur</button>
-					    <button type="button" class="btn btn-primary" ng-model="filterMode" btn-radio="'remove'">Remove</button>
-					</div>
-				</div>
-
-				<hr>
-
-				<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
-				  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
-				</div>
-				<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-dragend': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
-
-				<!-- 'bounds_changed center_changed click dblclick drag dragend dragstart heading_changed idle maptypeid_changed mousemove mouseout mouseover projection_changed resize rightclick tilesloaded tilt_changed zoom_changed' -->
-
-				<div class="map-filter-en">
-					<label for="mapFitlerEnable">Use Map as Filter</label>
-					<div class="btn-group" name="mapFilterEnable" data-toggle="buttons-checkbox">
-					    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="true">On</button>
-					    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="false">Off</button>
-					</div>
-				</div>
-
-				<hr>
-
-				<form name="termViewTextSerach" class="text-search">
-					<label for="textQuery">Filter Results</label>
-
+				<div class="filter filter-text">	
+					<header>
+						<label for="textQuery">Text Filter</label>
+					</header>
 					<input type="text" class="search-query" name="textQuery" ng-model="textQuery" placeholder="Search">
-				</form>
+				</div>
 
-				<hr>
+				<div class="filter filter-map">
+					<header>
+						<label for="mapFitlerEnable">Map Filter</label>
+						<div class="btn-group" name="mapFilterEnable" data-toggle="buttons-checkbox">
+						    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="true">On</button>
+						    <button type="button" class="btn btn-primary" ng-model="mapFilterEnable" btn-radio="false">Off</button>
+						</div>
+					</header>
+
+					<div ng-repeat="bundle in markerBundles" ui-map-marker="bundle.marker"
+					  ui-event="{'map-click': 'closeupItemDialog(bundle.item)'}">
+					</div>
+					<div id="map_canvas" class="map" ui-map="map" ui-options="mapOptions" ui-event="{'map-dragend': 'boundsChanged()', 'map-zoom_changed': 'boundsChanged()'}"></div>
+	
+					<!-- 'bounds_changed center_changed click dblclick drag dragend dragstart heading_changed idle maptypeid_changed mousemove mouseout mouseover projection_changed resize rightclick tilesloaded tilt_changed zoom_changed' -->	
+				</div>
 			</div>
 		</div>
 	</div>

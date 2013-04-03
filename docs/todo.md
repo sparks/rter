@@ -6,7 +6,6 @@
 * Lagging tab switch
 * New a map resize/fix
 * Naming of taxonomy/tag/tabs
-* Sort for both StartTime and StopTime (e.g. for Live it)
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
@@ -22,11 +21,11 @@
 * Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
-* Distance bluring
-* Sexy graphs
-* Anonymous sumissions
 * Perma link to content (location)
 * Permissions on tags
+* Distance bluring
+* Sexy graphs
+* Anonymous submissions
 * How will we do different universes/instances?
 * Tile view improvements
 	* Live badge
