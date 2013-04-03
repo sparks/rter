@@ -184,7 +184,7 @@
     c->rc_max_rate = c->bit_rate;
     c->rc_min_rate = 0; //not necessary
     
-    c->thread_count = 2;  // 2 threads
+    c->thread_count = 1;  // 2 threads
     
     c->trellis = 0; // try 1 later
     
@@ -339,6 +339,7 @@
         fprintf(stderr, "Error encoding frame\n");
         exit(1);
     }
+        
     
 //    if (got_output) {
 //        NSLog(@"encoded frame");
@@ -357,6 +358,13 @@
     av_free_packet(pkt);
 }
 
+/* frees the memory allocated to encoding; call when done encoding a stream */
+-(void) freeEncoder {
+    avcodec_close(c);
+    av_free(c);
+    av_freep(&frame->data[0]);
+    avcodec_free_frame(&frame);
+}
 
 
 @end

@@ -36,6 +36,10 @@
     
     GLKView* _glkView;
     RTERGLKViewController* _glkVC;
+    
+    int capturedFrameCount;
+    int encodedFrameCount;
+    int sentFrameCount;
 }
 
 @end
@@ -65,7 +69,7 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
         
         // init dispatch queues
-        encoderQueue = dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
+        encoderQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0); //dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
         postQueue = dispatch_queue_create("com.rterCamera.postQueue", DISPATCH_QUEUE_SERIAL);
         
         postOpQueue = [[NSOperationQueue alloc] init];
@@ -260,9 +264,7 @@
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
         sendingData = YES;
-        
-        [self initEncoder];
-        
+                
 		// get token for video streaming
 		[self getStreamingToken];
 		
@@ -281,6 +283,11 @@
 }
 
 - (void) startRecording {
+    [self initEncoder];
+
+    capturedFrameCount = 0;
+    encodedFrameCount = 0;
+    sentFrameCount = 0;
     
     [captureSession addOutput:outputDevice];
     
@@ -307,6 +314,8 @@
 
 - (void) stopRecording {
     [captureSession removeOutput:outputDevice];
+    
+    [encoder freeEncoder];
     
     /* restore to default frame rate when not "recording"
      * for some reason have to set both the max and the min for it to work properly */
@@ -400,10 +409,13 @@
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
+    NSLog(@"captured frame %d", capturedFrameCount);
+    capturedFrameCount++;
         
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
-        NSLog(@"encoded frame");
+        NSLog(@"encoded frame %d", encodedFrameCount);
+        encodedFrameCount++;
         
         // copy pkt to nsdata object which will be sent
         NSData *frameData = [NSData dataWithBytes:pkt.data length:pkt.size];
@@ -427,7 +439,9 @@
             NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
             //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
             NSDictionary *dictionary = [response allHeaderFields];
-            NSLog( @"%@", [dictionary description]);
+            //NSLog( @"%@", [dictionary description]);
+            NSLog(@"sent frame %d", sentFrameCount);
+            sentFrameCount++;
         });
 		
 //        [NSURLConnection sendAsynchronousRequest:postRequest
