@@ -1,6 +1,8 @@
 # ToDos
 ## Server
 ### FixMe
+* Future comments
+* Prevent double posts (comments, probably others)
 * Remove from map event in blur mode
 * Naming of taxonomy/tag/tabs
 * Sort for both StartTime and StopTime (e.g. for Live it
