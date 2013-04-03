@@ -68,7 +68,6 @@ Of course in this context the data would have been most useful for the McGill co
 for example, "Red Wing has a nuclear power plant 5 miles out of town and everybody's worried about what could happen if the plant melts down... Our system can cut the response time down from 7 minutes to 5..."  (well, that's probably not the way we'd go in a pitch, but it helps give the idea of what Will's suggesting).
 
 What does rtER bring that is really new, vs. existing mapping and information filtering tools like those based on Ushahidi? First, it makes real-time video a first class citizen for emergency response. Second, it offers real-time interaction with the people contributing video content from mobile devices. Last, it provides a novel UI for managing content while collaborating with others to analyze and organize it.
-===
 
 The third point probably needs help from Sparky. For me, the main problem is that I'm not confident enough in my knowledge of how it is different from something like SwiftRiver. It doesn't help that their website demo doesn't work for me at all:
 
