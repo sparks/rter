@@ -1,11 +1,10 @@
 # ToDos
 ## Server
 ### FixMe
-* Future comments
-* Prevent double posts (comments, probably others)
-* Remove from map event in blur mode
+* Send alex rter server instructions
+* Lagging tab switch (due to opening sockets etc?)
+* New a map resize/fix (currently can switch to map mode to resize)
 * Naming of taxonomy/tag/tabs
-* Sort for both StartTime and StopTime (e.g. for Live it
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
@@ -21,10 +20,11 @@
 * Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
-* Sexy graphs
-* Anonymous sumissions
 * Perma link to content (location)
 * Permissions on tags
+* Distance bluring
+* Sexy graphs
+* Anonymous submissions
 * How will we do different universes/instances?
 * Tile view improvements
 	* Live badge
@@ -40,6 +40,7 @@
 * Self rebooting server
 
 ### Long Term Wish List
+* Send messages to the phone user
 * Timeline with scrubber
 * Logging
 * More filters for the sidebar
