@@ -258,14 +258,22 @@ angular.module('items', [
 	var defaultType = "";
 	$scope.item = {Type: defaultType};
 
+	$scope.inProgress = false;
+
 	$scope.createItem = function() {
 		if($scope.item.StartTime !== undefined) $scope.item.StartTime = new Date($scope.item.StartTime);
 		if($scope.item.StopTime !== undefined) $scope.item.StopTime = new Date($scope.item.StopTime);
+
+		$scope.inProgress = true;
 
 		ItemCache.create(
 			$scope.item,
 			function() {
 				$scope.item = {Type: defaultType};
+				$scope.inProgress = false;
+			},
+			function() {
+				$scope.inProgress = false;
 			}
 		);
 	};
@@ -284,19 +292,25 @@ angular.module('items', [
 })
 
 .controller('UpdateItemCtrl', function($scope, Alerter, ItemCache) {
+	$scope.inProgress = false;
+
 	$scope.updateItem = function() {
 		if($scope.itemCopy.StartTime !== undefined) $scope.itemCopy.StartTime = new Date($scope.itemCopy.StartTime);
 		if($scope.itemCopy.StopTime !== undefined) $scope.itemCopy.StopTime = new Date($scope.itemCopy.StopTime);
+
+		$scope.inProgress = true;
 
 		ItemCache.update(
 			$scope.itemCopy,
 			function() {
 				$scope.cancel();
+				$scope.inProgress = false;
 			},
 			function(e) {
 				if(e.status == 304) {
 					$scope.cancel();
 				}
+				$scope.inProgress = false;
 			}
 		);
 	};

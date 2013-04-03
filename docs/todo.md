@@ -1,12 +1,9 @@
 # ToDos
 ## Server
 ### FixMe
-* Discussion with end users?
+* Send alex rter server instructions
 * Clearer filter UI on right (boxes, disable)
 * Lagging tab switch
-* laggy drag warning
-* Future comments?
-* Prevent double posts (comments, probably others)
 * New a map resize/fix
 * Remove from map even in blur mode
 * Naming of taxonomy/tag/tabs
@@ -26,6 +23,7 @@
 * Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
+* Distance bluring
 * Sexy graphs
 * Anonymous sumissions
 * Perma link to content (location)
@@ -45,7 +43,7 @@
 * Self rebooting server
 
 ### Long Term Wish List
-* Distance bluring
+* Send messages to the phone user
 * Timeline with scrubber
 * Logging
 * More filters for the sidebar

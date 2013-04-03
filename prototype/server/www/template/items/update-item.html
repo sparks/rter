@@ -26,7 +26,7 @@
 	
 	<div class="row-fluid">
 		<div class="span6">
-			<button class="btn btn-primary" ng-click="updateItem()" ng-disabled="updateItemForm.$invalid">Save</button>
+			<button class="btn btn-primary" ng-click="updateItem()" ng-disabled="updateItemForm.$invalid || inProgress">Save</button>
 			<button class="btn btn-danger" ng-click="cancel()" ng-hide="!dialog">Cancel</button>
 		</div>
 		<div class="span6 right-align">
