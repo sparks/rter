@@ -207,7 +207,6 @@ label {
 	color: white;
 	line-height: 14pt;
 
-	max-width: 75px;
 	overflow-x: hidden;
 	overflow-y: visible;
 	white-space: nowrap;
@@ -216,10 +215,12 @@ label {
 
 .term-view .grid-view .tile-item .author-badge {
 	top: 0;
+	max-width: 75px;
 }
 
 .term-view .grid-view .tile-item .type-badge {
 	top: 14pt;
+	max-width: 120px;
 }
 
 /* -- TermView List -- */
