@@ -1,11 +1,16 @@
 # ToDos
 ## Server
 ### FixMe
-* Future comments
+* Discussion with end users?
+* Clearer filter UI on right (boxes, disable)
+* Lagging tab switch
+* laggy drag warning
+* Future comments?
 * Prevent double posts (comments, probably others)
-* Remove from map event in blur mode
+* New a map resize/fix
+* Remove from map even in blur mode
 * Naming of taxonomy/tag/tabs
-* Sort for both StartTime and StopTime (e.g. for Live it
+* Sort for both StartTime and StopTime (e.g. for Live it)
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
@@ -40,6 +45,7 @@
 * Self rebooting server
 
 ### Long Term Wish List
+* Distance bluring
 * Timeline with scrubber
 * Logging
 * More filters for the sidebar
