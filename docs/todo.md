@@ -1,8 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
-* Append logfile don't overwrite (this should be a flag option)
-* Hijack bug (don't crash the whole server when websockets are hijacked)
+* Sort for both StartTime and StopTime (e.g. for Live items)
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
@@ -57,7 +56,6 @@
 
 ### iOS
 * Port needs to remain constant throughout stream
-* Stream doesnt work a second time without logout
 * Orientation bug
 
 ### Android

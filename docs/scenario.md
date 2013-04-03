@@ -1,6 +1,5 @@
-# McGill Water Scenario
-
-## Scenario (Round 2)
+# Round 2
+## Scenario
 In this short scenario we are going to present a scenario based loosely on real events that occured at McGill. We want to use this scenario to help us think together about the features of our system and how they could be used in an emergency. In particular our data filtering system and how it can be used collaboratively.
 
 Last month, a 48-inch water main broke at the top of the hill that descends into downtown Montreal, right through the main McGill campus. There was massive flooding through all of the streets and into many of the buildings on surrounding campus, with black ice underneath, making it practically impassable in many spots. The campus was almost completely surrounded by water making it challenging to find a way off campus.
@@ -17,7 +16,10 @@ Also since we are trying to build our system with collaboration in mind, repetio
 
 Of course in this context the data would have been most useful for the McGill comunity, and we are not a group trained responders. However we think it provides a simple illustration of how a group of people in an emergency could be using our system to share and manage information to help acheive a common goal: finding safe routes off campus. We could imagine replacing the McGill members with emergency responders are looking for safe staging areas, clear routes to move injured people in and out, maybe looking for vantage point access the broken water main, etc. Collaborating using information both from the responders and from outside source to answer a common question or understand a situation better.
 
-## Scenario (Round 3)
+# Round 3
+## What's New
+
+## Scenario
 
 [VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]
 Here in Quebec, as well as places like Red Wing, Minnesota, floods are a major problem, impacting the lives of thousands of people at a time. Closer to home for our Mozilla Ignite development team, earlier this year our campus here at McGill University was inundated with water, resulting in millions of dollars in damages, when a construction crew broke a 48-inch water main directly connected to a major reservoir on a hill over the main campus. As water coursed through the streets and flooded buildings, information was scattered, stale and hard to come by. Some of the best and most current information came from social media. Videos of the damage and dangerous areas were circulated widely, eventually ending up in media reports.
