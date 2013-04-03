@@ -267,12 +267,13 @@ angular.module('tsunamijs.livethumbnail', [])
 
                 // set initial image to the first (timeRange=0) or last (timeRange=1)
                 // available image
-                lastUrl = makeUrl(timeRange, 0); //Length sometimes load wrong, last is safer for now
+                lastUrl = makeUrl(timeRange, 0); //HACK: Length sometimes load wrong, last is safer for now
 
                 // play state
                 if (scope.c.autoplay) {
                     play();
                 } else {
+                    play(); //HACK: Load initial image
                     if (scope.c.skimmable) { skim(); } else { pause(); }
                 }
 
@@ -381,7 +382,7 @@ angular.module('tsunamijs.livethumbnail', [])
                         scope.bgimageurl = img.src;
                     },
                     function() {
-                        timeRange = reachTime; //Truncate down if length is off w/r/thumbs
+                        timeRange = reachTime; //HACK: Truncate down if length is off w/r/thumbs
                     });
             };
 
