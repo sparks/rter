@@ -2,9 +2,8 @@
 ## Server
 ### FixMe
 * Send alex rter server instructions
-* Clearer filter UI on right (boxes, disable)
-* Lagging tab switch
-* New a map resize/fix
+* Lagging tab switch (due to opening sockets etc?)
+* New a map resize/fix (currently can switch to map mode to resize)
 * Naming of taxonomy/tag/tabs
 * Twitter items
 	* Single tweet type should be lower case
