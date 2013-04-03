@@ -212,6 +212,14 @@ angular.module('twitterItem',  [
 			var newItem = {} ;
 			newItem.Type = "SingleTweet";
 			newItem.ContentURI = "http://twitter.com/"+tweet.from_user+"/status/"+tweet.id_str;
+			newItem.StartTime = new Date();
+			newItem.StopTime = newItem.StartTime;
+
+			newItem.HasHeading = false;
+			newItem.HasGeo = false;
+			newItem.Live = false;
+
+			
 			console.log("it worked",$event );
 			if(tweet.geo != null)
 			{
