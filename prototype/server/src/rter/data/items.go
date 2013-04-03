@@ -17,14 +17,14 @@ type Item struct {
 	ContentURI   string `json:",omitempty"` //URI for Content to be displayed online
 	UploadURI    string `json:",omitempty"` //URI for where Content will be uploaded by the Author (often provided by the server)
 
-	HasHeading bool    `json:",omitempty"` //Marks if Heading data is valid
+	HasHeading bool    //Marks if Heading data is valid
 	Heading    float64 `json:",omitempty"`
 
-	HasGeo bool    `json:",omitempty"` //Marks if location data is valid
+	HasGeo bool    //Marks if location data is valid
 	Lat    float64 `json:",omitempty"`
 	Lng    float64 `json:",omitempty"`
 
-	Live      bool      `json:",omitempty"` //Marks if this Item's content is 'live'
+	Live      bool      //Marks if this Item's content is 'live'
 	StartTime time.Time `json:",omitempty"`
 	StopTime  time.Time `json:",omitempty"` //Should be set before StartTime for 'live' data when the StopTime is unknown
 
