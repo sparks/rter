@@ -1,7 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
-* Sort for both StartTime and StopTime (e.g. for Live items)
+* Sort for both StartTime and StopTime (e.g. for Live it
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
@@ -17,6 +17,8 @@
 * Note: GZIP + Websocket + Hijack = fail
 
 ### Short Term Wish List
+* Permissions on tags
+* How will we do different universes/instances?
 * Tile view improvements
 	* Live badge
 	* Content type badge

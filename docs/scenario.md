@@ -19,7 +19,64 @@ Of course in this context the data would have been most useful for the McGill co
 # Round 3
 ## What's New
 
-## Scenario
+* Mobile App
+	* Moved to iPhone to match the reality of emergency responders
+	* Now includes real low latency streaming including meta data (Lat, Lng, Heading)
+	* Still includes interaction with the web user (can be directed, etc)
+	* Users now log in on their phones with a personal account, this is reflected web interface
+	* Fixed many UI issues (more informative of state, error messages etc)
+* Server infratructure
+	* The new videoserver outline by alex
+	* New rtER Server
+		* RESTful, documented api for handling our data. This means everything that goes in our system is easily accessibile in a standardized API format. Could be reused within other frameworks or applications. Similarly we could easily take in data from anywhere
+		* Designed around our core features so that queries are fast/natural. Support Taxonomy, Users, Ranking within taxonmoies
+* Web client
+	* Built top to bottom in HTML5 components (angularjs, html5 video, google maps v3 with HTML5 canvas/drawing)
+	* User accounts. We can log actions by user. Who did what when. This is important since trust and confidence in sources is key. Understanding who's taking an action or submitting information implies a level of trust. 
+	* Everything you submit is an Item. A generic container. As of now an item can be a webpage, twitter search/post, a youtube video, a live image stream (old android app), a live video stream (new iphone app).
+	* Taxonomy as a first class object
+		* Items can be tagged
+		* Tags can be automated: by content type, by trust level, be location, etc
+		* Each tag has it's own view/workspace. e.g. each tag has ranking for all the items it contains which users can collabortively work with. 
+		* Thus tags are much more powerful tools than normal:
+			* Tag with your username or group name to create a personal or shared workspace
+			* Tag with your colleague's username or group to send to their workspace
+			* Enable auto taggin by area, content type to create a realtime feed for certain condition
+			* Permission can be applied to a tag to prevent external interference in your workspace.
+		* Web client now supports more filtering techniques: fuzzy searching, map filtering, filtering by user trust level, filter by user, filter by user role
+		* Alpha support for HTML5 livestream video with the same interactive control of the remote user (directing the remote user) using a map.
+		* Twitter intergration
+		* Various UI improvement (new interactive map elements, intelligent tag fields, global alerts, improved drag and drop grid)
+
+
+## Scenario and Pitch
+
+"Try to tell us the story."
+
+"Tell us what you can't do now (without the technology you're building)..."
+
+"It's not technology focused... lead with the use (case)."
+
+"What are you going to show in Chicago June 24-26 (approx) to the folks in the broader US Ignite community?  Are you going to have a prototype that works and how are you getting to that point?"
+
+"What is the simplest question you can answer with this tool that is still interesting?"
+
+"It's easier for us (the developers on a particular project) to understand things at the 30,000 foot level, but talking about all the cool tech doesn't register to people listening... "
+
+"It makes more sense to start with a scenario..." (hey, isn't that what we did? ;-)
+
+for example, "Red Wing has a nuclear power plant 5 miles out of town and everybody's worried about what could happen if the plant melts down... Our system can cut the response time down from 7 minutes to 5..."  (well, that's probably not the way we'd go in a pitch, but it helps give the idea of what Will's suggesting).
+
+What does rtER bring that is really new, vs. existing mapping and information filtering tools like those based on Ushahidi? First, it makes real-time video a first class citizen for emergency response. Second, it offers real-time interaction with the people contributing video content from mobile devices. Last, it provides a novel UI for managing content while collaborating with others to analyze and organize it.
+===
+
+The third point probably needs help from Sparky. For me, the main problem is that I'm not confident enough in my knowledge of how it is different from something like SwiftRiver. It doesn't help that their website demo doesn't work for me at all:
+
+http://swiftly.org
+
+Anyway, text like this could possibly serve as the transition into the demonstration, where we show all three of these things and talk about our progress in making them real, and how they were elicited by requests from real potential users, who know emergency management.
+
+
 
 [VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]
 Here in Quebec, as well as places like Red Wing, Minnesota, floods are a major problem, impacting the lives of thousands of people at a time. Closer to home for our Mozilla Ignite development team, earlier this year our campus here at McGill University was inundated with water, resulting in millions of dollars in damages, when a construction crew broke a 48-inch water main directly connected to a major reservoir on a hill over the main campus. As water coursed through the streets and flooded buildings, information was scattered, stale and hard to come by. Some of the best and most current information came from social media. Videos of the damage and dangerous areas were circulated widely, eventually ending up in media reports.
