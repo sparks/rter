@@ -21,6 +21,7 @@
     
     float latitude;
     float longitude;
+    float headingAccuracy;
 }
 @end
 
@@ -44,7 +45,7 @@
         _glkView = view;
         _glkView.delegate = self;
         [_glkView setNeedsDisplay];
-        self.preferredFramesPerSecond = 60;
+        self.preferredFramesPerSecond = OPENGL_FPS;
 
         self.view = _glkView;
         self.view.opaque = NO;
@@ -105,18 +106,25 @@
         
         [self.view addSubview:debugScreen];
         
-        getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:4 target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
-        [getHeadingTimer fire];
+        
         
     }
     return self;
 }
 
+-(void)startGetPutTimer {
+    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:4 target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    [getHeadingTimer fire];
+}
+
+-(void)stopGetPutTimer {
+    [getHeadingTimer invalidate];
+}
 
 -(void)getHeadingPutCoordindates {
     
     
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca/1.0/users/%@/direction",[[previewController delegate]userName]]];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
     if (!currentGetConnection) {
         currentGetConnection = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self startImmediately:YES];
@@ -127,7 +135,7 @@
        
     
     ////PUT REQUEST
-    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca/1.0/items/%@",[previewController itemID]]]];
+    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[previewController itemID]]]];
     
     
     // the json string to post
@@ -334,7 +342,8 @@
 }
 
 -(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
-
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 - (void)gluPerspective:(double)fovy :(double)aspec :(double)zNear :(double)zFar
@@ -402,6 +411,7 @@
         currentOrientation = [self fixAngle:[self addAngleOffset:newHeading.trueHeading positive:NO]];
     }
     
+    headingAccuracy = newHeading.headingAccuracy;
     
     
     
@@ -445,8 +455,8 @@
         }
         
         // flip arrow incase device is flipped
-        if (rightSideUp) {
-            rightArrow = !rightArrow;
+        if (!rightSideUp) {
+            //rightArrow = !rightArrow;
         }
         
         if (rightArrow) {
@@ -496,6 +506,8 @@
 -(void)dealloc {
     [getHeadingTimer invalidate];
 }
+
+
 
 - (void)didReceiveMemoryWarning
 {

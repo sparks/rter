@@ -7,6 +7,7 @@
 //
 
 #import "RTERViewController.h"
+#import "Config.h"
 
 @interface RTERViewController ()
 
@@ -39,14 +40,17 @@ RTERPreviewController *preview;
 
 - (IBAction)startCamera:(id)sender {
     //if (![cookieString isEqualToString: @""]) {
-		preview = [[RTERPreviewController alloc] init];
+    preview = [[RTERPreviewController alloc] init];
 		
-		preview.delegate = self;
-		preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-		
-		[self presentViewController:preview
-						   animated:YES
-						 completion:nil];
+    preview.delegate = self;
+    preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+
+    userName = userField.text;
+    
+    [self presentViewController:preview
+                       animated:YES
+                     completion:nil];
+    
 	//}
     
 }
@@ -66,7 +70,7 @@ RTERPreviewController *preview;
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/auth"]];
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/auth",SERVER]]];
 	
 	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/auth"]];
 	[request setHTTPMethod:@"POST"];
@@ -146,11 +150,7 @@ RTERPreviewController *preview;
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
         [preview setItemID:[jsonDict objectForKey:@"ID"]];
-        NSLog(@"\n\nITEMID: %@\n\n",preview.itemID);
-        
-        
-        // ready to start sending frames
-        [preview startRecording];
+        NSLog(@"\n\nITEMID: %@\n\n\n",preview.itemID);
 	}
 }
 
