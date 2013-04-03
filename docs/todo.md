@@ -5,7 +5,6 @@
 * Clearer filter UI on right (boxes, disable)
 * Lagging tab switch
 * New a map resize/fix
-* Remove from map even in blur mode
 * Naming of taxonomy/tag/tabs
 * Sort for both StartTime and StopTime (e.g. for Live it)
 * Twitter items

@@ -86,9 +86,9 @@ angular.module('termview', [
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
-	$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
+	$scope.orderedByTime = $filter('orderBy')($scope.orderedByID, 'StartTime', true);
 
-	$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
+	$scope.rankedItems = $filter('orderByRanking')($scope.orderedByTime, $scope.ranking);
 
 	$scope.finalMapItems = $scope.rankedItems;
 	$scope.finalFilteredItems = $scope.rankedItems;
@@ -99,11 +99,11 @@ angular.module('termview', [
 	$scope.$watch('items', function() {
 		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 		$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
-		$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
+		$scope.orderedByTime = $filter('orderBy')($scope.orderedByID, 'StartTime', true);
 	}, true);
 
-	$scope.$watch('[ranking, orderedByStopTime]', function() {
-		$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
+	$scope.$watch('[ranking, orderedByTime]', function() {
+		$scope.rankedItems = $filter('orderByRanking')($scope.orderedByTime, $scope.ranking);
 	}, true);
 
 	$scope.$watch('[rankedItems, filterMode]', function() {
