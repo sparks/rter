@@ -9,7 +9,7 @@ angular.module('streamingVideoV1Item', [
 
 	$scope.livethumbConfig = {
 		showtitle: false,
-		autoplay: true,
+		autoplay: $scope.Live,
 		selectable: true,
 		skimmable: true,
 		clickable: true,
@@ -23,7 +23,7 @@ angular.module('streamingVideoV1Item', [
 		if(!$scope.item) return;
 
 		$scope.video.title = "";
-		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI;
+		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI+"/";
 		$scope.video.StartTime = $scope.item.StartTime;
 		$scope.video.StopTime = $scope.item.StopTime;
 	}, true);
