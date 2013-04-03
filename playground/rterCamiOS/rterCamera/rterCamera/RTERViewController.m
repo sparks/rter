@@ -7,6 +7,7 @@
 //
 
 #import "RTERViewController.h"
+#import "Config.h"
 
 @interface RTERViewController ()
 
@@ -17,6 +18,7 @@
 @synthesize userField;
 @synthesize passField;
 @synthesize cookieString;
+@synthesize userName;
 
 RTERPreviewController *preview;
 
@@ -38,14 +40,17 @@ RTERPreviewController *preview;
 
 - (IBAction)startCamera:(id)sender {
     //if (![cookieString isEqualToString: @""]) {
-		preview = [[RTERPreviewController alloc] init];
+    preview = [[RTERPreviewController alloc] init];
 		
-		preview.delegate = self;
-		preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-		
-		[self presentViewController:preview
-						   animated:YES
-						 completion:nil];
+    preview.delegate = self;
+    preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+
+    userName = userField.text;
+    
+    [self presentViewController:preview
+                       animated:YES
+                     completion:nil];
+    
 	//}
     
 }
@@ -57,12 +62,15 @@ RTERPreviewController *preview;
 	
 	NSLog(@"Attempting auth:\n\t%@\n\t%@", self.userField.text, self.passField.text);
 	
+    
+    userName = userField.text;
+    
 	// the json string to post
 	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [self.userField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [self.passField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/auth"]];
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/auth",SERVER]]];
 	
 	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/auth"]];
 	[request setHTTPMethod:@"POST"];
@@ -142,6 +150,7 @@ RTERPreviewController *preview;
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
         [preview setItemID:[jsonDict objectForKey:@"ID"]];
+        NSLog(@"\n\nITEMID: %@\n\n\n",preview.itemID);
 	}
 }
 

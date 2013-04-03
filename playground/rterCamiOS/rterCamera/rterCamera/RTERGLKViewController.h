@@ -76,4 +76,6 @@ typedef NS_ENUM(NSInteger, Indicate) {
 -(void)indicateTurnToDirection:(Indicate) direction withPercentage:(float) percentage;
 -(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation;
 -(void)setDesiredOrientation:(float)dO;
+-(void)startGetPutTimer;
+-(void)stopGetPutTimer;
 @end

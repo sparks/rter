@@ -13,6 +13,15 @@
 		7E442787170B6225005D76B4 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E442786170B6225005D76B4 /* GLKit.framework */; };
 		7E442789170B622F005D76B4 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E442788170B622F005D76B4 /* OpenGLES.framework */; };
 		7E44278B170B6243005D76B4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E44278A170B6243005D76B4 /* CoreLocation.framework */; };
+		7E4427B1170CC57F005D76B4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427A7170CC57F005D76B4 /* libavcodec.a */; };
+		7E4427B2170CC57F005D76B4 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427A8170CC57F005D76B4 /* libavfilter.a */; };
+		7E4427B3170CC57F005D76B4 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427A9170CC57F005D76B4 /* libpostproc.a */; };
+		7E4427B4170CC57F005D76B4 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AA170CC57F005D76B4 /* libswresample.a */; };
+		7E4427B5170CC57F005D76B4 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AB170CC57F005D76B4 /* libx264.a */; };
+		7E4427B7170CC57F005D76B4 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AD170CC57F005D76B4 /* libavdevice.a */; };
+		7E4427B8170CC57F005D76B4 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AE170CC57F005D76B4 /* libavformat.a */; };
+		7E4427B9170CC57F005D76B4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AF170CC57F005D76B4 /* libavutil.a */; };
+		7E4427BA170CC57F005D76B4 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427B0170CC57F005D76B4 /* libswscale.a */; };
 		FD51069B16EFED9B009E30B7 /* RTERVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */; };
 		FD55AB21170CC2B4000B7483 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB19170CC2B4000B7483 /* libavcodec.a */; };
 		FD55AB22170CC2B4000B7483 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1A170CC2B4000B7483 /* libavdevice.a */; };
@@ -55,6 +64,15 @@
 		7E442786170B6225005D76B4 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		7E442788170B622F005D76B4 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		7E44278A170B6243005D76B4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		7E4427A7170CC57F005D76B4 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
+		7E4427A8170CC57F005D76B4 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavfilter.a; sourceTree = "<group>"; };
+		7E4427A9170CC57F005D76B4 /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
+		7E4427AA170CC57F005D76B4 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
+		7E4427AB170CC57F005D76B4 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		7E4427AD170CC57F005D76B4 /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavdevice.a; sourceTree = "<group>"; };
+		7E4427AE170CC57F005D76B4 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
+		7E4427AF170CC57F005D76B4 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
+		7E4427B0170CC57F005D76B4 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
 		FD51069916EFED9B009E30B7 /* RTERVideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTERVideoEncoder.h; sourceTree = "<group>"; };
 		FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTERVideoEncoder.m; sourceTree = "<group>"; };
 		FD51077116F2A859009E30B7 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
@@ -184,15 +202,16 @@
 				FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */,
 				FDE531BD16E6B20D0086FA53 /* Foundation.framework in Frameworks */,
 				FDE531BF16E6B20D0086FA53 /* CoreGraphics.framework in Frameworks */,
-				FD55AB21170CC2B4000B7483 /* libavcodec.a in Frameworks */,
-				FD55AB22170CC2B4000B7483 /* libavdevice.a in Frameworks */,
-				FD55AB23170CC2B4000B7483 /* libavfilter.a in Frameworks */,
-				FD55AB24170CC2B4000B7483 /* libavformat.a in Frameworks */,
-				FD55AB25170CC2B4000B7483 /* libavutil.a in Frameworks */,
-				FD55AB26170CC2B4000B7483 /* libpostproc.a in Frameworks */,
-				FD55AB27170CC2B4000B7483 /* libswresample.a in Frameworks */,
-				FD55AB28170CC2B4000B7483 /* libswscale.a in Frameworks */,
-				FD55AB2A170CC2E1000B7483 /* libx264.a in Frameworks */,
+
+				7E4427B1170CC57F005D76B4 /* libavcodec.a in Frameworks */,
+				7E4427B2170CC57F005D76B4 /* libavfilter.a in Frameworks */,
+				7E4427B3170CC57F005D76B4 /* libpostproc.a in Frameworks */,
+				7E4427B4170CC57F005D76B4 /* libswresample.a in Frameworks */,
+				7E4427B5170CC57F005D76B4 /* libx264.a in Frameworks */,
+				7E4427B7170CC57F005D76B4 /* libavdevice.a in Frameworks */,
+				7E4427B8170CC57F005D76B4 /* libavformat.a in Frameworks */,
+				7E4427B9170CC57F005D76B4 /* libavutil.a in Frameworks */,
+				7E4427BA170CC57F005D76B4 /* libswscale.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,6 +383,15 @@
 				FDE7177516E86823007B619F /* CoreVideo.framework */,
 				FDC9A02816EA611C00632CBE /* libz.dylib */,
 				FDC9A02616EA611100632CBE /* libbz2.dylib */,
+				7E4427A7170CC57F005D76B4 /* libavcodec.a */,
+				7E4427A8170CC57F005D76B4 /* libavfilter.a */,
+				7E4427A9170CC57F005D76B4 /* libpostproc.a */,
+				7E4427AA170CC57F005D76B4 /* libswresample.a */,
+				7E4427AB170CC57F005D76B4 /* libx264.a */,
+				7E4427AD170CC57F005D76B4 /* libavdevice.a */,
+				7E4427AE170CC57F005D76B4 /* libavformat.a */,
+				7E4427AF170CC57F005D76B4 /* libavutil.a */,
+				7E4427B0170CC57F005D76B4 /* libswscale.a */,
 				FDE7177316E86634007B619F /* QuartzCore.framework */,
 				FDE7177116E7F64B007B619F /* CoreMedia.framework */,
 				FDE7176F16E7F63E007B619F /* AVFoundation.framework */,
@@ -588,7 +616,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -600,7 +628,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -610,7 +638,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -622,7 +650,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};

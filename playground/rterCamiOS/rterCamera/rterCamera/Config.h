@@ -9,6 +9,14 @@
 #ifndef rterCamera_Config_h
 #define rterCamera_Config_h
 
+#define SERVER @"rter.cim.mcgill.ca"
+//@"142.157.58.153:8080"
+//
+
+//Camera FPS
+#define DESIRED_FPS 15
+
+#define OPENGL_FPS 5
 
 typedef NS_ENUM(NSInteger,Colour) {
     RED,
