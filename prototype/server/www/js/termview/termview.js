@@ -109,20 +109,20 @@ angular.module('termview', [
 	$scope.$watch('[rankedItems, filterMode]', function() {
 		if($scope.filterMode == 'blur') {
 			$scope.finalFilteredItems = $scope.rankedItems;
-			$scope.finalMapItems = $scope.rankedItems;
+			// $scope.finalMapItems = $scope.rankedItems;
 		}
 	}, true);
 
 	$scope.$watch('[rankedItems, textQuery, filterMode]', function() {
-		if($scope.filterMode == 'remove') {
+		// if($scope.filterMode == 'remove') {
 			$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.textQuery);
-		}
+		// }
 	}, true);
 
 	$scope.$watch('[textSearchedItems, filterMode]', function() {
-		if($scope.filterMode == 'remove') {
+		// if($scope.filterMode == 'remove') {
 			$scope.finalMapItems = $scope.textSearchedItems;
-		}
+		// }
 	}, true);
 
 	$scope.$watch('finalMapItems', function() {
