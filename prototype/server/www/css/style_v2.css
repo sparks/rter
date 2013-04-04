@@ -71,6 +71,18 @@ label {
 	line-height: 17px;
 }
 
+/* -- Login Control -- */
+
+.login-control {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.login-control button {
+	line-height: 10pt;
+}
+
 /* -- Tag Cloud -- */
 
 .tag-cloud .cloud {
@@ -219,7 +231,7 @@ label {
 }
 
 .term-view .grid-view .tile-item .type-badge {
-	top: 14pt;
+	bottom: 0;
 	max-width: 120px;
 }
 
@@ -326,6 +338,12 @@ label {
 
 	height: 380px;
 	width: 380px;
+}
+
+/* -- Tileviews -- */
+
+.tile-streamingVideoV1-item {
+	padding-top: 25px;
 }
 
 /* -- Closeups -- */

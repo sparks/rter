@@ -27,13 +27,13 @@
 				<div ng-switch on="term.Term">
 					<div ng-switch-when="">
 						<ul class="item-list">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="" ng-dblclick="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 
 					<div ng-switch-default>
 						<ul class="item-list" ui-sortable="{stop: dragCallback, enable: false}" ng-model="rankedItems">		
-							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="#"><tile-item item="item"></tile-item></a></li>
+							<li ng-class="'blur' | if:isFiltered(item)" ng-repeat="item in finalFilteredItems"><a href="" ng-dblclick="closeupItemDialog(item)"><tile-item item="item"></tile-item></a></li>
 						</ul>
 					</div>
 				</div>

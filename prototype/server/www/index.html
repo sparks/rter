@@ -25,6 +25,7 @@
 
 	<script src="/vendor/angular/angular.js"></script>
 	<script src="/vendor/angular/angular-resource.js"></script>
+	<script src="/vendor/angular/angular-cookies.js"></script>
 
 	<script src="/vendor/angular/angular-ui.js"></script>
 	<script src="https://raw.github.com/angular-ui/angular-ui/master/modules/directives/sortable/sortable.js"></script>
@@ -84,6 +85,11 @@
 			<h2>A project for the Mozilla <a target="_blank" href="https://mozillaignite.org/">Ignite Challenge</a></h2>
 		</hgroup>
 	</header>
+
+	<div class="login-control" ng-switch on="loggedIn">
+		<button class="btn btn-success" ng-switch-when="false" ng-click="login()">Login</button>
+		<button class="btn btn-danger" ng-switch-when="true" ng-click="logout()">Logout</button>
+	</div>
 
 	<div ng-controller="TabsCtrl" id="maintabber">
 		<tabs>

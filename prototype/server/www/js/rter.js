@@ -4,6 +4,7 @@ angular.module('rter', [
 	'taxonomy',              //Taxonomy for tag-cloud
 	'termview',              //term-view directives and TermViewRemote
 	'http-auth-interceptor', //401 catcher
+	'ngCookies',             //Cookie for login/logout
 	'auth'                   //Login system
 ])
 
@@ -16,15 +17,32 @@ angular.module('rter', [
 	};
 })
 
-.controller('RterCtrl', function($scope, LoginDialog) {
+.controller('RterCtrl', function($scope, LoginDialog, $cookies, $cookieStore) {
+	if($cookies['rter-credentials'] !== undefined) {
+		$scope.loggedIn = true;
+	} else {
+		$scope.loggedIn = false;
+	}
+
 	$scope.loginDialogOpen = false;
-	$scope.$on('event:auth-loginRequired', function() {
+
+	$scope.login = function() {
 		if(!$scope.loginDialogOpen) {
 			$scope.loginDialogOpen = true;
 			LoginDialog.open().then(function() {
 				$scope.loginDialogOpen = false;
+				$scope.loggedIn = true;
 			});
 		}
+	};
+
+	$scope.logout = function() {
+		$cookieStore.remove('rter-credentials');
+		$scope.loggedIn = false;
+	};
+
+	$scope.$on('event:auth-loginRequired', function() {
+		$scope.login();
 	});
 })
 
