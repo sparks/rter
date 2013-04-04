@@ -7,7 +7,26 @@ import (
 	"strings"
 )
 
-func StreamingRouter() *mux.Router {
+type Debugable interface {
+	Debug(bool)
+}
+
+type StreamingRouter struct {
+	*mux.Router
+
+	debug     bool
+	streamers []Debugable
+}
+
+func (sr *StreamingRouter) Debug(en bool) {
+	sr.debug = en
+
+	for _, s := range sr.streamers {
+		s.Debug(en)
+	}
+}
+
+func NewStreamingRouter() *StreamingRouter {
 	r := mux.NewRouter().StrictSlash(true)
 
 	genericStreamer := NewGenericStreamer() //TODO: This is never closed
@@ -25,7 +44,13 @@ func StreamingRouter() *mux.Router {
 		},
 	)
 
-	return r
+	sr := new(StreamingRouter)
+	sr.Router = r
+	sr.streamers = []Debugable{
+		genericStreamer,
+	}
+
+	return sr
 }
 
 func GenericStreamingHandler(g *GenericStreamer, w http.ResponseWriter, r *http.Request) {

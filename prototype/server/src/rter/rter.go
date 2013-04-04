@@ -37,15 +37,16 @@ import (
 // TODO: Make a flag for the cookie signing (auth)
 // TODO: Make a flag for the video server URI
 var (
-	probeLevel   = flag.Int("probe", 0, "perform logging on requests")
-	httpsFlag    = flag.Bool("https", false, "enable https")
-	httpFlag     = flag.Bool("http", true, "enable http")
-	gzipFlag     = flag.Bool("gzip", false, "enable gzip compression")
-	logfile      = flag.String("log-file", "", "set server logfile")
-	serveLogFlag = flag.Bool("serve-log-file", true, "serve logfile over http")
-	httpPort     = flag.Int("http-port", 8080, "set the http port to use")
-	httpsPort    = flag.Int("https-port", 10433, "set the https port to use")
-	rterDir      = flag.String("rter-dir", "", "sets the dir 'www' and 'uploads' will be")
+	probeLevel    = flag.Int("probe", 0, "perform logging on requests")
+	httpsFlag     = flag.Bool("https", false, "enable https")
+	httpFlag      = flag.Bool("http", true, "enable http")
+	gzipFlag      = flag.Bool("gzip", false, "enable gzip compression")
+	logfile       = flag.String("log-file", "", "set server logfile")
+	serveLogFlag  = flag.Bool("serve-log-file", true, "serve logfile over http")
+	httpPort      = flag.Int("http-port", 8080, "set the http port to use")
+	httpsPort     = flag.Int("https-port", 10433, "set the https port to use")
+	rterDir       = flag.String("rter-dir", "", "sets the dir 'www' and 'uploads' will be")
+	sockDebugFlag = flag.Bool("sock-debug", false, "debug the websocket connections")
 )
 
 func main() {
@@ -70,7 +71,9 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 
-	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", streaming.StreamingRouter())) // Must register more specific paths first
+	sr := streaming.NewStreamingRouter()
+	sr.Debug(*sockDebugFlag)
+	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", sr)) // Must register more specific paths first
 
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", rest.CRUDRouter())) // Less specific paths later
 

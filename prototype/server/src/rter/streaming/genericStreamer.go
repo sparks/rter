@@ -15,6 +15,7 @@ type Bundle struct {
 
 type GenericStreamer struct {
 	bundleChannels []chan *Bundle
+	debug          bool
 }
 
 func NewGenericStreamer() *GenericStreamer {
@@ -24,6 +25,10 @@ func NewGenericStreamer() *GenericStreamer {
 	storage.AddListener(s)
 
 	return s
+}
+
+func (s *GenericStreamer) Debug(en bool) {
+	s.debug = en
 }
 
 func (s *GenericStreamer) InsertEvent(val interface{}) {
@@ -81,9 +86,11 @@ func (s *GenericStreamer) Close() {
 func (s *GenericStreamer) SockJSHandler(crudpath string, session sockjs.Conn) {
 	localChan := make(chan *Bundle)
 
-	log.Println("Open stream for ", crudpath)
-
 	s.bundleChannels = append(s.bundleChannels, localChan)
+
+	if s.debug {
+		log.Println("Streams:", len(s.bundleChannels), "- open", crudpath)
+	}
 
 	go func() {
 		for {
@@ -124,6 +131,9 @@ func (s *GenericStreamer) SockJSHandler(crudpath string, session sockjs.Conn) {
 		}
 	}
 
-	log.Println("closed", crudpath)
+	if s.debug {
+		log.Println("Streams:", len(s.bundleChannels), "- close", crudpath)
+	}
+
 	close(localChan)
 }
