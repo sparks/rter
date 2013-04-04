@@ -196,6 +196,7 @@ angular.module('twitterItem',  [
 	          console.log(data.html, status);
 	          console.log($scope);
 	        $scope.displayTweet =  data.html;
+	        var TweetCardHtml = angular.elemen(data.html);
 	        console.log($scope.displayTweet);
 
 	      }).
@@ -210,8 +211,9 @@ angular.module('twitterItem',  [
 	$scope.test = function(tweet, $event) {
 			
 			var newItem = {} ;
-			newItem.Type = "SingleTweet";
-			newItem.ContentURI = "http://twitter.com/"+tweet.from_user+"/status/"+tweet.id_str;
+			newItem.Type = "singletweet";
+			newItem.ContentURI = 'http://api.twitter.com/1/statuses/oembed.json?id='+tweet.id_str
+								+'&align=center&callback=JSON_CALLBACK';
 			newItem.StartTime = new Date();
 			newItem.StopTime = newItem.StartTime;
 
@@ -231,13 +233,13 @@ angular.module('twitterItem',  [
 			ItemCache.create(
 			newItem,
 			function() {
-			if($scope.dialog !== undefined) {
-			$scope.dialog.close();
-			}
-		},
-		function(e) {
-			console.log(e);
-		});
+				if($scope.dialog !== undefined) {
+					$scope.dialog.close();
+				}
+			},
+			function(e) {
+				console.log(e);
+			});
 	};  
 })
 
