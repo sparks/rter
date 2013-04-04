@@ -4,11 +4,18 @@ angular.module('disp-map', [
 	'auth' //UserDirectionResource
 ])
 
-.controller('DispMapCtrl', function($scope, $timeout, UserDirectionResource) {
+.controller('DispMapCtrl', function($scope, $timeout, UserDirectionCache) {
 	$scope.mapOptions = {
 		zoom: 16,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
+
+	$scope.directionCache = new UserDirectionCache($scope.item.Author);
+	$scope.userDir = $scope.directionCache.direction;
+
+	$scope.$on("$destroy", function() {
+		$scope.directionCache.close();
+	});
 
 	$scope.setCenter = function(latLng) {
 		$timeout(function() {
@@ -65,16 +72,6 @@ angular.module('disp-map', [
 
 	$scope.rebuildDir = function() {
 		if($scope.enableDir === undefined) return;
-		if($scope.userDir === undefined) {
-			$scope.userDir = UserDirectionResource.get(
-				{Username: $scope.item.Author},
-				function() {
-					if($scope.userDir.Heading === undefined) $scope.userDir.Heading = 0;
-					$scope.rebuildDir();
-				}
-			);
-			return;
-		}
 		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var arrow = {
@@ -108,7 +105,7 @@ angular.module('disp-map', [
 		$scope.userDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
 		$scope.rebuildDir();
 
-		UserDirectionResource.update($scope.userDir);
+		$scope.directionCache.update($scope.userDir);
 	};
 
 	$scope.$watch('[item.Lat, item.Lng]', function() {

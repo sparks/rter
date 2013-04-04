@@ -1,7 +1,10 @@
 angular.module('auth', [
 	'ng',                    //$http
 	'ui.bootstrap',          //dialog
-	'http-auth-interceptor', //$resource for taxonomoy
+	'http-auth-interceptor', //401 capture
+	'ngResource',            //$resource
+	'cache',                 //CacheBuilder
+	'sockjs',                //sock for comment cache
 	'alerts'                 //Alerter
 ])
 
@@ -24,13 +27,89 @@ angular.module('auth', [
 .factory('UserDirectionResource', function ($resource) {
 	var UserDirectionResource = $resource(
 		'/1.0/users/:Username/direction',
-		{Username: '@Username'},
+		{ Username: '@Username' },
 		{
 			update: { method: 'PUT' }
 		}
 	);
 
 	return UserDirectionResource;
+})
+
+.factory('UserDirectionCache', function($rootScope, SockJS, UserDirectionResource) {
+	function UserDirectionCache(username) {
+		var self = this;
+
+		this.direction = {
+			Username: username,
+			Heading: 0
+		};
+
+		this.stream = new SockJS('/1.0/streaming/users/'+this.direction.Username+'/direction');
+
+		function updateDirection(newDirection) {
+			for(var key in newDirection) {
+				self.direction[key] = newDirection[key];
+			}
+		}
+
+		this.stream.onopen = function() {
+
+		};
+
+		this.stream.onmessage = function(e) {
+			var bundle = e.data;
+
+			if(bundle.Action == "update") {
+				//Often if the user created the item, it will already be in place so treat as an update
+				updateDirection(bundle.Val);
+			}
+
+			$rootScope.$digest();
+		};
+
+		this.stream.onclose = function() {
+
+		};
+
+		this.init = function() {
+			UserDirectionResource.get(
+				this.direction,
+				function(direction) {
+					updateDirection(direction);
+				},
+				function(e) {
+					console.log(e);
+				}
+			);
+		};
+
+		this.close = function() {
+			this.stream.close();
+		}
+
+		this.init();
+
+		this.update = function(direction, sucess, failure) {
+			UserDirectionResource.update(
+				direction,
+				function() {
+					//Success do nothing!
+					if(angular.isFunction(sucess)) sucess();
+				},
+				function(e) {
+					if(e.status != 304) {
+						Alerter.error("There was a problem updating the ranking. "+"Status:"+e.status+". Reply Body:"+e.data);
+						console.log(e);
+					}
+
+					if(angular.isFunction(failure)) failure(e);
+				}
+			);
+		};
+	}
+
+	return UserDirectionCache;
 })
 
 .controller('LoginPanelCtrl', function($scope, $http, authService, UserResource, Alerter) {
