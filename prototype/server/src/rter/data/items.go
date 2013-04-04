@@ -4,6 +4,7 @@
 package data
 
 import (
+	"strconv"
 	"time"
 	token "videoserver/auth"
 )
@@ -16,6 +17,8 @@ type Item struct {
 	ThumbnailURI string `json:",omitempty"` //URI for Thumbnail to be shown online
 	ContentURI   string `json:",omitempty"` //URI for Content to be displayed online
 	UploadURI    string `json:",omitempty"` //URI for where Content will be uploaded by the Author (often provided by the server)
+
+	ContentToken string `json:",omitempty"` //Field for storing token/api information for remote services
 
 	HasHeading bool    //Marks if Heading data is valid
 	Heading    float64 `json:",omitempty"`
@@ -33,6 +36,24 @@ type Item struct {
 	Token *token.Token `json:",omitempty"` //Note this field isn't available in the DB, only for convenience
 }
 
+//A convenience method to add a Term to an item
+func (i *Item) AddTerm(term string, author string) {
+	newTerm := new(Term)
+
+	newTerm.Term = term
+	newTerm.Author = author
+
+	i.Terms = append(i.Terms, newTerm)
+}
+
+func (i *Item) CRUDPrefix() string {
+	return "items"
+}
+
+func (i *Item) CRUDPath() string {
+	return i.CRUDPrefix() + "/" + strconv.FormatInt(i.ID, 10)
+}
+
 type ItemComment struct {
 	ID     int64  //Unique identifier
 	ItemID int64  //Unique of the associated Item. Tied to Item.ID in DB
@@ -43,12 +64,10 @@ type ItemComment struct {
 	UpdateTime time.Time `json:",omitempty"`
 }
 
-//A convenience method to add a Term to an item
-func (i *Item) AddTerm(term string, author string) {
-	newTerm := new(Term)
+func (c *ItemComment) CRUDPrefix() string {
+	return "items/" + strconv.FormatInt(c.ItemID, 10) + "/comments"
+}
 
-	newTerm.Term = term
-	newTerm.Author = author
-
-	i.Terms = append(i.Terms, newTerm)
+func (c *ItemComment) CRUDPath() string {
+	return c.CRUDPrefix()
 }

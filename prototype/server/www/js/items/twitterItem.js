@@ -6,6 +6,14 @@ angular.module('twitterItem',  [
 
 .controller('FormTwitterItemCtrl', function($scope, $resource) {
 
+	//Setting defaults
+	$scope.item.StartTime = new Date();
+	$scope.item.StopTime = $scope.item.StartTime;
+
+	$scope.item.HasHeading = false;
+	$scope.item.Live = false;
+
+
 	$scope.extra = {};
 	$scope.extra.ResultType = "recent";
 	
@@ -62,10 +70,7 @@ angular.module('twitterItem',  [
 
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
-	};
-
-
-	
+	};	
 })
                                                                                                                                      
 .directive('formTwitterItem', function($timeout) {
@@ -98,7 +103,7 @@ angular.module('twitterItem',  [
 						console.log("Error:  Search Query not set");
 					}
 						
-					var searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK"	
+					var searchURL = "http://search.twitter.com/search.json?page=1&rpp=40&callback=JSON_CALLBACK&include_entities=1"	
 										+ "&q=" + scope.extra.SearchTerm 
 										+ "&result_type=" + scope.extra.ResultType
 
@@ -185,27 +190,7 @@ angular.module('twitterItem',  [
         $scope.status = status;
     });
     
-    /*
-    $scope.showTweetCard = function(id, $event){
-		// alert(id, $event.target);
-		console.log(id, $event, $event.target);
-		var urlVar = 'http://api.twitter.com/1/statuses/oembed.json?id='+id
-					+'&align=center&omit_script=true&hide_thread=true&hide_media=true&callback=JSON_CALLBACK'
-		$http({method: 'jsonp', url: urlVar, cache: false}).
-	      success(function(data, status) {
-	          console.log(data.html, status);
-	          console.log($scope);
-	        $scope.displayTweet =  data.html;
-	        var TweetCardHtml = angular.elemen(data.html);
-	        console.log($scope.displayTweet);
-
-	      }).
-	      error(function(data, status) {
-	         console.log(data, status);
-	        $scope.data = data || "Request failed";
-	        $scope.status = status;
-	    });
-	};*/
+    
 
 
 	$scope.test = function(tweet, $event) {
@@ -230,6 +215,24 @@ angular.module('twitterItem',  [
 			}
 			console.log(newItem);
 			
+			if(tweet.entities.media !== undefined)
+			{
+					console.log(tweet.entities.media[0].media_url);
+					newItem.ThumbnailURI = tweet.entities.media[0].media_url;
+			}
+			else if(tweet.entities.urls.length > 0)
+			{
+				if(!(tweet.entities.urls[0].expanded_url.search("instagram")< 0))
+				{
+					console.log(tweet.entities.urls[0].expanded_url);
+					newItem.ThumbnailURI = tweet.entities.urls[0].expanded_url;
+				}
+			}
+				
+
+
+
+
 			ItemCache.create(
 			newItem,
 			function() {

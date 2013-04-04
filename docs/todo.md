@@ -1,6 +1,10 @@
 # ToDos
 ## Server
 ### FixMe
+* Bootstrap / angular ui doesn't destroy controllers in closed dialogs, this leave my websockets open after closing dialog, currently hacking the bootstrap
+* Dragging live tiles is very power hungry and lags
+* marker flickr continues
+* Maintenance for expired feeds
 * Send alex rter server instructions
 * Lagging tab switch (due to opening sockets etc?)
 * New a map resize/fix (currently can switch to map mode to resize)
@@ -8,7 +12,6 @@
 * Twitter items
 	* Single tweet type should be lower case
 	* Set start-stop time and other fields for tweets
-* Finish videoStreamingV1 item implemenation (use tiles from alex)
 * Caching services
 	* Update tag-cloud on the fly
 	* Update Map-Dir on the fly (Userdirection)

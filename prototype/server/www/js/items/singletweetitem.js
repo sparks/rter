@@ -5,11 +5,11 @@ angular.module('singleItem', [
 ])
 
 
-.controller('TileSingleTweetItemCtrl', function($scope) {
+.controller('TileSingleTweeItemCtrl', function($scope) {
 
 })
 
-.directive('tileSingleTweetItem', function() {
+.directive('tileSingletweetItem', function() {
 	return {
 		restrict: 'E',
 		scope: {

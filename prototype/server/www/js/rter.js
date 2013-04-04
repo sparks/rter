@@ -48,22 +48,19 @@ angular.module('rter', [
 
 .controller('TabsCtrl', function($scope, TermViewRemote) {
 	$scope.termViews = TermViewRemote.termViews;
-	TermViewRemote.addTermView({Term: ""});
+	TermViewRemote.addTermView({Term: "all"});
 })
 
-.controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
-	$scope.terms = TaxonomyResource.query(
-		function() {
-			$scope.countMax = 0;
+.controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyCache) {
+	$scope.terms = TaxonomyCache.contents //TODO: Make me dynamic
 
-			angular.forEach($scope.terms, function(val) {
-				if($scope.countMax < val.Count) $scope.countMax = val.Count;
-			});
-		},
-		function(e) {
-			console.log("Couldn't load tags", e);
-		}
-	); //TODO: Make me dynamic
+	$scope.$watch('terms', function() {
+		$scope.countMax = 0;
+
+		angular.forEach($scope.terms, function(val) {
+			if($scope.countMax < val.Count) $scope.countMax = val.Count;
+		});
+	}, true);
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);

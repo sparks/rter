@@ -10,6 +10,8 @@ angular.module('genericItem', [
 	$scope.item.HasHeading = false;
 	$scope.item.HasGeo = false;
 	$scope.item.Live = false;
+
+	$scope.item.ContentToken = "fishfish";
 })
 
 .directive('formGenericItem', function() {
@@ -45,7 +47,7 @@ angular.module('genericItem', [
 	};
 })
 
-.controller('CloseupGenericItemCtrl', function($scope, ItemCache, CloseupItemDialog) {
+.controller('CloseupGenericItemCtrl', function($scope) {
 
 })
 

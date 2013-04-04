@@ -62,13 +62,17 @@ angular.module('termview', [
 
 	$scope.rankingCache = new TaxonomyRankingCache($scope.term.Term);
 
+	$scope.$on("$destroy", function() {
+		if($scope.rankingCache.close !== undefined) $scope.rankingCache.close();
+	});
+
 	if($scope.term.Term === "" || $scope.term.Term === undefined) {
 		$scope.ranking = [];
 	} else {
 		$scope.ranking = $scope.rankingCache.ranking;
 	}
 
-	$scope.items = ItemCache.items;
+	$scope.items = ItemCache.contents;
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);

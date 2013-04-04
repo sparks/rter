@@ -3,39 +3,48 @@ package streaming
 import (
 	"github.com/gorilla/mux"
 	"github.com/igm/sockjs-go/sockjs"
-	"log"
 	"net/http"
+	"strings"
 )
 
 func StreamingRouter() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 
-	itemStreamer := NewItemStreamer()
-	itemSockHandler := sockjs.NewRouter("/", func(session sockjs.Conn) { itemStreamer.SockJSHandler(session) }, sockjs.DefaultConfig)
-	r.PathPrefix("/items").Handler(http.StripPrefix("/items", itemSockHandler))
-
-	termRankingStreamer := NewTermRankingStreamer()
-	r.PathPrefix("/taxonomy/{term}/ranking").HandlerFunc( // TODO: Is there a better less weird way of doing this dynamic binding of the websockets
+	genericStreamer := NewGenericStreamer() //TODO: This is never closed
+	r.PathPrefix("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments|ranking|direction}").HandlerFunc(
+		// TODO: Is there a better less weird way of doing this dynamic binding of the websockets
 		func(w http.ResponseWriter, r *http.Request) {
-			HandleTermRanking(termRankingStreamer, w, r)
+			GenericStreamingHandler(genericStreamer, w, r)
+		},
+	)
+
+	r.PathPrefix("/{datatype:items|users|roles|taxonomy}").HandlerFunc(
+		// TODO: Is there a better less weird way of doing this dynamic binding of the websockets
+		func(w http.ResponseWriter, r *http.Request) {
+			GenericStreamingHandler(genericStreamer, w, r)
 		},
 	)
 
 	return r
 }
 
-func HandleTermRanking(termRankingStreamer *TermRankingStreamer, w http.ResponseWriter, r *http.Request) {
+func GenericStreamingHandler(g *GenericStreamer, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	sockHandler := sockjs.NewRouter("/", func(session sockjs.Conn) { termRankingStreamer.SockJSHandler(vars["term"], session) }, sockjs.DefaultConfig)
-	(http.StripPrefix("/taxonomy/"+vars["term"]+"/ranking", sockHandler)).ServeHTTP(w, r)
-}
+	// Build a URI like representation of the datatype
+	types := []string{vars["datatype"]}
 
-func probe(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+	if key, ok := vars["key"]; ok {
+		types = append(types, key)
+	}
 
-	log.Println("Tax")
-	log.Println(vars)
+	if childtype, ok := vars["childtype"]; ok {
+		types = append(types, childtype)
+	}
 
-	log.Println(r.Method, r.URL)
+	crudstring := strings.Join(types, "/")
+
+	sockHandler := sockjs.NewRouter("/", func(session sockjs.Conn) { g.SockJSHandler(crudstring, session) }, sockjs.DefaultConfig)
+	(http.StripPrefix("/"+crudstring, sockHandler)).ServeHTTP(w, r)
+
 }
