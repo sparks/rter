@@ -110,7 +110,7 @@ angular.module('twitterItem',  [
 					if(!(scope.item.Lat == undefined)){
 						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+(scope.extra.radius/1000)+"km";		
 					}
-										
+					scope.item.ContentToken = scope.extra.SearchTerm; 				
 					scope.item.ContentURI = encodeURI(searchURL);
 					console.log("Built ContentURI " + scope.item.ContentURI);
 				};
@@ -199,6 +199,7 @@ angular.module('twitterItem',  [
 			newItem.Type = "singletweet";
 			newItem.ContentURI = 'http://api.twitter.com/1/statuses/oembed.json?id='+tweet.id_str
 								+'&align=center&callback=JSON_CALLBACK';
+			newItem.ContentToken = tweet.text;
 			newItem.StartTime = new Date();
 			newItem.StopTime = newItem.StartTime;
 
@@ -228,11 +229,6 @@ angular.module('twitterItem',  [
 					newItem.ThumbnailURI = tweet.entities.urls[0].expanded_url;
 				}
 			}
-				
-
-
-
-
 			ItemCache.create(
 			newItem,
 			function() {
