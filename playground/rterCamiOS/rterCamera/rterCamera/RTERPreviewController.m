@@ -10,7 +10,7 @@
 #import <math.h>
 #import "RTERVideoEncoder.h"
 #import "RTERGLKViewController.h"
-#define DESIRED_FPS 15
+#import "Config.h"
 
 @interface RTERPreviewController ()
 {
@@ -59,6 +59,9 @@
         
         // desired FPS
         desiredFrameDuration = CMTimeMake(1, DESIRED_FPS);
+        
+        //set GLKView hidden
+        [_glkView setHidden:YES];
         
         // listen for notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
@@ -191,6 +194,9 @@
     //initialize View Controller for the GLKView
     _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView previewController:self];
 
+    //hide glk view
+    [_glkView setHidden:YES];
+    
     
 }
 
@@ -300,6 +306,10 @@
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
     
+    //set glkview visible
+    [_glkView setHidden:NO];
+    [_glkVC startGetPutTimer];
+    
 //    for (NSString *codec in [outputDevice availableVideoCodecTypes]) {
 //        NSLog(@"%@", codec);
 //    }
@@ -322,19 +332,47 @@
     
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
+    
+    //hide glk view
+    [_glkView setHidden:YES];
+    [_glkVC stopGetPutTimer];
+    
+    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[self itemID]]]];
+    //142.157.58.153:8080
+    NSString *jsonString = [NSString stringWithFormat:@"{\"StopTime\":\"%@\",\"Live\":false}",[self getUTCFormateDate:[NSDate date]]];
+	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    
+    [putRequest setHTTPMethod:@"PUT"];
+    [putRequest setHTTPBody:postData];
+    [putRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+    
+    NSURLConnection *finalPut = [[NSURLConnection alloc]initWithRequest:putRequest delegate:self startImmediately:YES];
+    
 }
 
+-(NSString *)getUTCFormateDate:(NSDate *)localDate
+{
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeZone:timeZone];
+    [dateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+    NSString *dateString = [dateFormatter stringFromDate:localDate];
+    return dateString;
+}
 
 -(void) getStreamingToken {
 	NSLog(@"Attempting to get Streaming token:");
     dispatch_async(postQueue, ^{
 	
         // the json string to post
-        NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
+        
+        
+        NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"%@\",\"Live\":true,\"HasGeo\":true,\"HasHeading\":true}",[self getUTCFormateDate:[NSDate date]]];
         NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
         // setup the request
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/1.0/items"]];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items",SERVER]]];
 	
         //NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/1.0/items"]];
 	

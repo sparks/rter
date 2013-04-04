@@ -18,6 +18,7 @@
 @required
 - (void)back;
 - (NSString*)cookieString;
+- (NSString *)userName;
 
 @end
 

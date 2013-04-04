@@ -14,6 +14,7 @@
 @property(nonatomic, strong) IBOutlet UITextField *userField;
 @property(nonatomic, strong) IBOutlet UITextField *passField;
 @property(nonatomic, retain) NSString *cookieString;
+@property(nonatomic, retain) NSString *userName;
 
 - (IBAction)startCamera:(id)sender;
 - (IBAction)login:(id)sender;

@@ -8,6 +8,7 @@ angular.module('items', [
 	'rawItem',              //raw item implementation
 	'twitterItem',          //twitter item implementation
 	'youtubeItem',          //YouTube item implementation
+	'singleItem',          //SingleTweet item implementation
 	'streamingVideoV1Item', //Streaming Video V1 item implementation
 	'comments'              //Comments dialog
 ])
