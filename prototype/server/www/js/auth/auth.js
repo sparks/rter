@@ -62,6 +62,7 @@ angular.module('auth', [
 
 			if(bundle.Action == "update") {
 				//Often if the user created the item, it will already be in place so treat as an update
+
 				updateDirection(bundle.Val);
 			}
 
