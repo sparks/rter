@@ -47,6 +47,7 @@ var (
 	httpsPort     = flag.Int("https-port", 10433, "set the https port to use")
 	rterDir       = flag.String("rter-dir", "", "sets the dir 'www' and 'uploads' will be")
 	sockDebugFlag = flag.Bool("sock-debug", false, "debug the websocket connections")
+	clearLog      = flag.Bool("clear-log", false, "do not append to logfile, overwrite instead")
 )
 
 func main() {
@@ -209,7 +210,17 @@ func setupLogger() {
 	}
 
 	if *logfile != "" {
-		file, err := os.OpenFile(*logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+		var (
+			file *os.File
+			err  error
+		)
+
+		if *clearLog {
+			fmt.Println("Log Cleared")
+			file, err = os.OpenFile(*logfile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0664)
+		} else {
+			file, err = os.OpenFile(*logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+		}
 
 		if err == nil {
 			log.SetOutput(file)
