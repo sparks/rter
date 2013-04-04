@@ -26,6 +26,8 @@ angular.module('streamingVideoV1Item', [
 		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI;
 		$scope.video.StartTime = $scope.item.StartTime;
 		$scope.video.StopTime = $scope.item.StopTime;
+		
+		$scope.livethumbConfig.autoplay = $scope.item.Live;
 	}, true);
 
 	$scope.$on("clicked", function(e, video) {

@@ -195,6 +195,7 @@ angular.module('tsunamijs.livethumbnail', [])
             }
 
             function updateConfig(newVal, oldVal) {
+                console.log(newVal);
                 if (newVal === undefined) { return; }
 
                 // save some state
@@ -311,11 +312,13 @@ angular.module('tsunamijs.livethumbnail', [])
                 // toggle selection
                 toggleSelect();
 
-                // toggle play state
-                if (scope.c.skimmable) {
-                    if (!scope.isSkimming()) { skim(); } else { play(); }
-                } else {
-                    if (!scope.isPaused()) { pause(); } else { play(); }
+                if(scope.c.clickable) { //HACK: Click tmp click solution
+                    // toggle play state
+                    if (scope.c.skimmable) {
+                        if (!scope.isSkimming()) { skim(); } else { play(); }
+                    } else {
+                        if (!scope.isPaused()) { pause(); } else { play(); }
+                    }
                 }
             };
 
