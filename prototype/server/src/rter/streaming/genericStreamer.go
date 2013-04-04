@@ -8,69 +8,78 @@ import (
 	"rter/storage"
 )
 
-type ItemBundle struct {
+type Bundle struct {
 	Action string
-	Item   *data.Item
+	Val    data.CRUDable
 }
 
-type ItemStreamer struct {
-	bundleChannels []chan *ItemBundle
+type GenericStreamer struct {
+	bundleChannels []chan *Bundle
 }
 
-func NewItemStreamer() *ItemStreamer {
-	s := new(ItemStreamer)
-	s.bundleChannels = make([]chan *ItemBundle, 0)
+func NewGenericStreamer() *GenericStreamer {
+	s := new(GenericStreamer)
+	s.bundleChannels = make([]chan *Bundle, 0)
 
 	storage.AddListener(s)
 
 	return s
 }
 
-func (s *ItemStreamer) InsertEvent(val interface{}) {
-	switch v := val.(type) {
-	case *data.Item:
-		b := new(ItemBundle)
-		b.Action = "create"
-		b.Item = v
+func (s *GenericStreamer) InsertEvent(val interface{}) {
+	c, ok := val.(data.CRUDable)
 
-		s.Dispatch(b)
+	if !ok {
+		return
 	}
+
+	b := new(Bundle)
+	b.Action = "create"
+	b.Val = c
+
+	s.Dispatch(b)
 }
 
-func (s *ItemStreamer) UpdateEvent(val interface{}) {
-	switch v := val.(type) {
-	case *data.Item:
-		b := new(ItemBundle)
-		b.Action = "update"
-		b.Item = v
+func (s *GenericStreamer) UpdateEvent(val interface{}) {
+	c, ok := val.(data.CRUDable)
 
-		s.Dispatch(b)
+	if !ok {
+		return
 	}
+
+	b := new(Bundle)
+	b.Action = "update"
+	b.Val = c
+
+	s.Dispatch(b)
 }
 
-func (s *ItemStreamer) DeleteEvent(val interface{}) {
-	switch v := val.(type) {
-	case *data.Item:
-		b := new(ItemBundle)
-		b.Action = "delete"
-		b.Item = v
+func (s *GenericStreamer) DeleteEvent(val interface{}) {
+	c, ok := val.(data.CRUDable)
 
-		s.Dispatch(b)
+	if !ok {
+		return
 	}
+
+	b := new(Bundle)
+	b.Action = "delete"
+	b.Val = c
+
+	s.Dispatch(b)
 }
 
-func (s *ItemStreamer) Dispatch(b *ItemBundle) {
+func (s *GenericStreamer) Dispatch(b *Bundle) {
 	for _, l := range s.bundleChannels {
 		l <- b
 	}
 }
 
-func (s *ItemStreamer) Close() {
+func (s *GenericStreamer) Close() {
 	storage.RemoveListener(s)
 }
 
-func (s *ItemStreamer) SockJSHandler(session sockjs.Conn) {
-	localChan := make(chan *ItemBundle)
+func (s *GenericStreamer) SockJSHandler(crudpath string, session sockjs.Conn) {
+	localChan := make(chan *Bundle)
 
 	s.bundleChannels = append(s.bundleChannels, localChan)
 
@@ -80,6 +89,11 @@ func (s *ItemStreamer) SockJSHandler(session sockjs.Conn) {
 			if !ok { // Chanel was closed
 				break
 			}
+
+			if crudpath != bundle.Val.CRUDPrefix() {
+				continue
+			}
+
 			json, err := json.Marshal(bundle)
 
 			if err != nil {

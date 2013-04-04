@@ -17,21 +17,12 @@ type User struct {
 	CreateTime time.Time `json:",omitempty"`
 }
 
-type UserDirection struct {
-	Username     string //Tied to User.Username in DB
-	LockUsername string `json:",omitempty"` //User current controlling this User
-	Command      string `json:",omitempty"`
-
-	Heading float64 `json:",omitempty"`
-	Lat     float64 `json:",omitempty"`
-	Lng     float64 `json:",omitempty"`
-
-	UpdateTime time.Time `json:",omitempty"`
+func (u *User) CRUDPrefix() string {
+	return "users"
 }
 
-type Role struct {
-	Title       string
-	Permissions int
+func (u *User) CRUDPath() string {
+	return u.CRUDPrefix() + "/" + u.Username
 }
 
 // Generates first a Salt for the user, then using that Salt generates a hash of the Password. The Password field should be set on the User when the func is called. The function will then replace the Password field with the hash and populate the Salt field.
@@ -62,4 +53,37 @@ func (user *User) Auth(p string) bool {
 	}
 
 	return false
+}
+
+type UserDirection struct {
+	Username     string //Tied to User.Username in DB
+	LockUsername string `json:",omitempty"` //User current controlling this User
+	Command      string `json:",omitempty"`
+
+	Heading float64 `json:",omitempty"`
+	Lat     float64 `json:",omitempty"`
+	Lng     float64 `json:",omitempty"`
+
+	UpdateTime time.Time `json:",omitempty"`
+}
+
+func (d *UserDirection) CRUDPrefix() string {
+	return "users/" + d.Username + "/direction"
+}
+
+func (d *UserDirection) CRUDPath() string {
+	return d.CRUDPrefix()
+}
+
+type Role struct {
+	Title       string
+	Permissions int
+}
+
+func (o *Role) CRUDPrefix() string {
+	return "roles"
+}
+
+func (o *Role) CRUDPath() string {
+	return o.CRUDPrefix() + "/" + o.Title
 }

@@ -8,7 +8,7 @@ angular.module('items', [
 	'rawItem',              //raw item implementation
 	'twitterItem',          //twitter item implementation
 	'youtubeItem',          //YouTube item implementation
-	'singleItem',          //SingleTweet item implementation
+	'singleItem',           //SingleTweet item implementation
 	'streamingVideoV1Item', //Streaming Video V1 item implementation
 	'comments'              //Comments dialog
 ])
@@ -70,9 +70,9 @@ angular.module('items', [
 
 			if(bundle.Action == "create" || bundle.Action == "update") {
 				//Often if the user created the item, it will already be in place so treat as an update
-				addUpdateItem(bundle.Item);
+				addUpdateItem(bundle.Val);
 			} else if(bundle.Action == "delete") {
-				removeItem(bundle.Item);
+				removeItem(bundle.Val);
 			} else {
 				console.log("Malformed message in Item Stream");
 				console.log(e);

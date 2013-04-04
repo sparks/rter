@@ -26,7 +26,10 @@ angular.module('taxonomy', [
 		this.stream = new SockJS('/1.0/streaming/taxonomy/'+term+'/ranking');
 
 		function parseTermRanking(termRanking) {
-			if(termRanking.Ranking === "" || termRanking.Ranking === undefined) return;
+			if(termRanking.Ranking === "" || termRanking.Ranking === undefined) {
+				console.log("Nothing in ranking");
+			 	return;
+			 }
 
 			var newRanking;
 			try {
@@ -35,6 +38,8 @@ angular.module('taxonomy', [
 				console.log("Receive invalid JSON ranking form server", e);
 				return;
 			}
+
+			console.log(newRanking);
 
 			replaceRanking(newRanking);
 		}
@@ -49,7 +54,14 @@ angular.module('taxonomy', [
 		};
 
 		this.stream.onmessage = function(e) {
-			parseTermRanking(e.data);
+			var bundle = e.data;
+
+			if(bundle.Action == "update") {
+				//Often if the user created the item, it will already be in place so treat as an update
+				parseTermRanking(bundle.Val);
+				console.log(bundle);
+			}
+
 			$rootScope.$digest();
 		};
 
