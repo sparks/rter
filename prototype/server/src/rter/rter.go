@@ -72,7 +72,13 @@ func main() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	sr := streaming.NewStreamingRouter()
+
 	sr.Debug(*sockDebugFlag)
+
+	if *sockDebugFlag { // Should be run after setupLogger() since it depends on setting up logfile
+		log.Println("\t-Sock Debug Flag Set")
+	}
+
 	r.PathPrefix("/1.0/streaming").Handler(http.StripPrefix("/1.0/streaming", sr)) // Must register more specific paths first
 
 	r.PathPrefix("/1.0").Handler(http.StripPrefix("/1.0", rest.CRUDRouter())) // Less specific paths later
