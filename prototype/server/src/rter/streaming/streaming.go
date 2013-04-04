@@ -11,7 +11,7 @@ func StreamingRouter() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 
 	genericStreamer := NewGenericStreamer() //TODO: This is never closed
-	r.PathPrefix("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:ranking|direction}").HandlerFunc(
+	r.PathPrefix("/{datatype:items|users|roles|taxonomy}/{key}/{childtype:comments|ranking|direction}").HandlerFunc(
 		// TODO: Is there a better less weird way of doing this dynamic binding of the websockets
 		func(w http.ResponseWriter, r *http.Request) {
 			GenericStreamingHandler(genericStreamer, w, r)
