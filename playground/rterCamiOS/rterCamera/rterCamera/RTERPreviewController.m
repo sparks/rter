@@ -47,6 +47,8 @@
     
     double currentTime;
     double timeDiff;
+    
+    AVCaptureVideoOrientation videoOrientation;
 }
 
 @end
@@ -199,19 +201,24 @@
     NSLog(@"bounds: %f x %f", previewView.bounds.size.width, previewView.bounds.size.height);
     switch (currentOrientation) {
         case UIInterfaceOrientationLandscapeLeft:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+            videoOrientation = AVCaptureVideoOrientationLandscapeLeft;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
             break;
         case UIInterfaceOrientationLandscapeRight:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+            videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
             break;
         case UIInterfaceOrientationPortraitUpsideDown:
             // not supporting this orientation
             break;
         default:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+            videoOrientation = AVCaptureVideoOrientationPortrait;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
             break;
     }
     
+    [[previewLayer connection] setVideoOrientation:videoOrientation];
+
     
     // set the location and size of teh preview layer to that of the preview view
     [previewLayer setFrame:previewView.bounds];
@@ -241,22 +248,27 @@
     
     switch (toInterfaceOrientation) {
         case UIInterfaceOrientationLandscapeLeft:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
-            NSLog(@"bounds: %f x %f", previewView.bounds.size.width, previewView.bounds.size.height);
+            videoOrientation = AVCaptureVideoOrientationLandscapeLeft;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
             break;
         case UIInterfaceOrientationLandscapeRight:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+            videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
             break;
         case UIInterfaceOrientationPortraitUpsideDown:
             // not supporting this orientation
             break;
         default:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+            videoOrientation = AVCaptureVideoOrientationPortrait;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
             break;
     }
-
+    
+    [[previewLayer connection] setVideoOrientation:videoOrientation];
     // the bounds have changed
     [previewLayer setFrame: [previewView bounds]];
+    
+    [_glkVC onSurfaceChangedWidth:previewView.bounds.size.width Height:previewView.bounds.size.height];
 }
 
 - (void)appWillResignActive {
@@ -476,7 +488,9 @@
 /* process the frames here */
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
-{    
+{
+    [connection setVideoOrientation:videoOrientation];
+    
     timeDiff = CACurrentMediaTime() - currentTime;
     currentTime = CACurrentMediaTime();
     actualFPS = 1.0/timeDiff;
@@ -529,7 +543,7 @@
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
+//    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
 }
 
 - (IBAction)clickedBack:(id)sender {
@@ -542,13 +556,13 @@
     [encoder setupEncoderWithDimesions:dimensions];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
-}
-
--(NSUInteger)supportedInterfaceOrientations
-{
-    return UIInterfaceOrientationMaskLandscape | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
-}
+//- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+//{
+//    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+//}
+//
+//-(NSUInteger)supportedInterfaceOrientations
+//{
+//    return UIInterfaceOrientationMaskLandscape | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
+//}
 @end

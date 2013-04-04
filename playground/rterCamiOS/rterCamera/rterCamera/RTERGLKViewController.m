@@ -247,7 +247,10 @@
 }
 
 -(void)onSurfaceChangedWidth:(float)width Height:(float)height
-{    
+{
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     if (height == 0) height = 1; // To prevent divide by zero
     aspect = (float) width / (float) height;
     
@@ -384,11 +387,17 @@
     
 }
 
--(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
-}
+//-(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
+//    glClearColor(0.0, 0.0, 0.0, 0.0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
+//}
+
+//-(void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+//    glClearColor(0.0, 0.0, 0.0, 0.0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    [self onSurfaceChangedWidth:self.view.bounds.size.height Height:self.view.bounds.size.width];
+//}
 
 - (void)gluPerspective:(double)fovy :(double)aspec :(double)zNear :(double)zFar
 {
