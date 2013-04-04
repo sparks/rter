@@ -722,6 +722,13 @@ dialogModule.provider("$dialog", function(){
       this._unbindEvents();
 
       this.deferred.resolve(result);
+
+      //FIXME: Hack to bix bootstrap bug
+      if(this.scopeFromLocals){
+        this.$scope.$$watchers = [];
+      }else{
+        this.$scope.$destroy();
+      }
     };
 
     Dialog.prototype._addElementsToDom = function(){

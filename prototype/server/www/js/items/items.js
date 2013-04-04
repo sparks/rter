@@ -10,7 +10,8 @@ angular.module('items', [
 	'youtubeItem',          //YouTube item implementation
 	'singleItem',          	//SingleTweet item implementation
 	'streamingVideoV1Item', //Streaming Video V1 item implementation
-	'comments'              //Comments dialog
+	'comments',             //Comments dialog
+	'cache'                 //CacheBuilder service
 ])
 
 .factory('ItemResource', function ($resource) {
@@ -29,162 +30,17 @@ angular.module('items', [
 	return new SockJS('/1.0/streaming/items');
 })
 
-.factory('ItemCache', function ($rootScope, ItemResource, ItemStream, Alerter) {
-	function ItemCache() {
-		var self = this;
-
-		this.items = [];
-		this.stream = ItemStream;
-
-		function addUpdateItem(item) {
-			var found = false;
-
-			for(var i = 0;i < self.items.length;i++) {
-				if(self.items[i].ID == item.ID) {
-					for (var key in item) {
-						self.items[i][key] = item[key];
-					}
-					found = true;
-					break;
-				}
-			}
-
-			if(!found) self.items.push(item);
+.factory('ItemCache', function (CacheBuilder, ItemResource, ItemStream) {
+	return new CacheBuilder(
+		"Item",
+		ItemResource,
+		ItemStream,
+		function(a, b) {
+			if(a.ID === undefined || b.ID === undefined) return false;
+			if(a.ID == b.ID) return true;
+			return false;
 		}
-
-		function removeItem(item) {
-			for(var i = 0;i < self.items.length;i++) {
-				if(self.items[i].ID == item.ID) {
-					self.items.remove(i);
-					break;
-				}
-			}
-		}
-
-		this.stream.onopen = function() {
-
-		};
-
-		this.stream.onmessage = function(e) {
-			var bundle = e.data;
-
-			if(bundle.Action == "create" || bundle.Action == "update") {
-				//Often if the user created the item, it will already be in place so treat as an update
-				addUpdateItem(bundle.Val);
-			} else if(bundle.Action == "delete") {
-				removeItem(bundle.Val);
-			} else {
-				console.log("Malformed message in Item Stream");
-				console.log(e);
-			}
-
-			$rootScope.$digest();
-		};
-
-		this.stream.onclose = function() {
-
-		};
-
-		this.init = function() {
-			ItemResource.query(
-				function(newItems) {
-					self.items.length = 0;
-					for(var i = 0;i < newItems.length;i++) {
-						addUpdateItem(newItems[i]);
-					}
-				},
-				function(e) {
-					console.log("Couldn't load items");
-					console.log(e);
-				}
-			);
-		};
-
-		this.init();
-
-		this.create = function(item, sucess, failure) {
-			ItemResource.save(
-				item,
-				function(data) {
-					//Do not add the item here since it has no ID, it will be added by the websocket callback
-					Alerter.success("Item Created", 2000);
-					if(angular.isFunction(sucess)) sucess();
-				},
-				function(e) {
-					Alerter.error("There was a problem creating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
-					console.log(e);
-					if(angular.isFunction(failure)) failure(e);
-				}
-			);
-		};
-
-		this.update = function(item, sucess, failure) {
-			//If the item instanct is already in the array, I assume that you will externally handle 
-			//rollback if the update fails. If the item instance is not in the array, this function
-			//provides rollback if the update fails
-			var handleRollback = this.items.indexOf(item) == -1 ? true : false;
-			var present = false;
-			var oldItem;
-
-			if(handleRollback) {
-				for(var i = 0;i < this.items.length;i++) {
-					if(this.items[i].ID == item.ID) {
-						oldItem = this.items[i];
-						this.items[i] = item;
-						present = true;
-						break;
-					}
-				}
-				if(!present) { //Odd, I guess we'll add as a new item
-					this.items.push(item);
-				}
-			}
-
-			ItemResource.update(
-				item,
-				function() {
-					Alerter.success("Item Updated", 2000);
-					if(angular.isFunction(sucess)) sucess();
-					//TODO: Make a revert mechanism here?
-				},
-				function(e) {
-					if(e.status == 304) {
-						Alerter.warn("Nothing was changed.", 2000);
-					} else {
-						Alerter.error("There was a problem updating the item. "+"Status:"+e.status+". Reply Body:"+e.data);
-						if(handleRollback && present) {
-							for(var i = 0;i < self.items.length;i++) {
-								if(self.items[i].ID == oldItem.ID) {
-									self.items[i] = oldItem;
-									break;
-								}
-							}
-						}
-						console.log(e);
-					}
-					if(angular.isFunction(failure)) failure(e);
-				}
-			);
-		};
-
-		this.remove = function(item, sucess, failure) {
-			ItemResource.remove(
-				item,
-				function() {
-					Alerter.success("Item Deleted", 2000);
-					removeItem(item);
-					if(angular.isFunction(sucess)) sucess();
-				},
-				function(e) {
-					Alerter.error("There was a problem deleting the item. "+"Status:"+e.status+". Reply Body:"+e.data);
-					console.log(e);
-					if(angular.isFunction(failure)) failure();
-				}
-			);
-		};
-	}
-
-	return new ItemCache();
+	);
 })
 
 .filter('filterbyBounds', function() {

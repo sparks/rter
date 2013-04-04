@@ -77,6 +77,10 @@ angular.module('taxonomy', [
 			);
 		};
 
+		this.close = function() {
+			this.stream.close();
+		}
+
 		this.init();
 
 		this.update = function(newRanking, sucess, failure) {
@@ -119,6 +123,23 @@ angular.module('taxonomy', [
 	);
 
 	return TaxonomyResource;
+})
+
+.factory('TaxonomyStream', function(SockJS) {
+	return new SockJS('/1.0/streaming/taxonomy');
+})
+
+.factory('TaxonomyCache', function (CacheBuilder, TaxonomyResource, TaxonomyStream) {
+	return new CacheBuilder(
+		"Term",
+		TaxonomyResource,
+		TaxonomyStream,
+		function(a, b) {
+			if(a.Term === undefined || b.Term === undefined) return false;
+			if(a.Term == b.Term) return true;
+			return false;
+		}
+	);
 })
 
 .controller('TagSelectorCtrl', function($scope, TaxonomyResource) {

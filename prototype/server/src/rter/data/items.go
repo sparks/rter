@@ -18,6 +18,8 @@ type Item struct {
 	ContentURI   string `json:",omitempty"` //URI for Content to be displayed online
 	UploadURI    string `json:",omitempty"` //URI for where Content will be uploaded by the Author (often provided by the server)
 
+	ContentToken string `json:",omitempty"` //Field for storing token/api information for remote services
+
 	HasHeading bool    //Marks if Heading data is valid
 	Heading    float64 `json:",omitempty"`
 
