@@ -29,6 +29,8 @@
     dispatch_queue_t postQueue;
     dispatch_queue_t encoderQueue;
     NSOperationQueue *postOpQueue;
+    
+    float actualFPS; //the current FPS rate
 }
 
 @property (nonatomic, retain) NSObject<RTERPreviewControllerDelegate> *delegate;

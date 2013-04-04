@@ -15,6 +15,7 @@
 
 //Camera FPS
 #define DESIRED_FPS 7
+#define DESIRED_FPS_IPHONE5 15
 
 #define OPENGL_FPS 60
 
@@ -23,5 +24,10 @@ typedef NS_ENUM(NSInteger,Colour) {
     GREEN,
     BLUE
 };
+
+// for checking if we have an iPhone 5
+#define HEIGHT_IPHONE_5 568
+#define IS_IPHONE_5 ([[UIScreen mainScreen] bounds ].size.height == HEIGHT_IPHONE_5 )
+
 
 #endif

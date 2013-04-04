@@ -22,6 +22,8 @@
     float latitude;
     float longitude;
     float headingAccuracy;
+    
+    float fps;
 }
 @end
 
@@ -459,7 +461,7 @@
     
     //Log heading
     //NSLog(@"currentOrientation: %f",currentOrientation);
-    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %0.1f \nDesired Orientation: %0.1f",currentOrientation,desiredOrientation]];
+    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %0.1f \nDesired Orientation: %0.1f\nFPS: %0.1f",currentOrientation,desiredOrientation, fps]];
     
     
     
@@ -556,5 +558,10 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+-(void)currentFPS:(float)currentFPS {
+    fps = currentFPS;
+}
+
 
 @end

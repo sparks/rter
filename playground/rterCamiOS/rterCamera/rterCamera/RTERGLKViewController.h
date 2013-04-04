@@ -79,4 +79,6 @@ typedef NS_ENUM(NSInteger, Indicate) {
 -(void)startGetPutTimer;
 -(void)stopGetPutTimer;
 -(void)onSurfaceChange;
+
+-(void)currentFPS:(float)currentFPS;
 @end

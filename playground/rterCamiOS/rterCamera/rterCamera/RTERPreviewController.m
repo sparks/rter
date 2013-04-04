@@ -25,7 +25,10 @@
     CMTime defaultMinFrameDuration;
     
     // desired frame rate
+    float setFPS;   // the fps we try to set for encoding and sending
     CMTime desiredFrameDuration;
+    NSString *sessionPreset;
+    
     
     // encoder
     RTERVideoEncoder *encoder;
@@ -44,8 +47,6 @@
     
     double currentTime;
     double timeDiff;
-    
-    BOOL firstPost;
 }
 
 @end
@@ -67,6 +68,30 @@
         // init stuff
         sendingData = NO;
         
+        /* possible resolution settings:
+         AVCaptureSessionPresetPhoto;
+         AVCaptureSessionPresetHigh;
+         AVCaptureSessionPresetMedium;
+         AVCaptureSessionPresetLow;
+         AVCaptureSessionPreset320x240;
+         AVCaptureSessionPreset352x288;
+         AVCaptureSessionPreset640x480;
+         AVCaptureSessionPreset960x540;
+         AVCaptureSessionPreset1280x720;
+         */
+        if (IS_IPHONE_5) {
+            sessionPreset = AVCaptureSessionPreset352x288;
+            dimensions.width = 352;
+            dimensions.height = 288;
+            setFPS = DESIRED_FPS_IPHONE5;
+        } else {
+            sessionPreset = AVCaptureSessionPresetLow;
+            dimensions.width = 192;
+            dimensions.height = 144;
+            setFPS = DESIRED_FPS;
+        }
+
+        
         // desired FPS
         desiredFrameDuration = CMTimeMake(1, DESIRED_FPS);
         
@@ -82,61 +107,6 @@
         postQueue = dispatch_queue_create("com.rterCamera.postQueue", DISPATCH_QUEUE_SERIAL);
         
         postOpQueue = [[NSOperationQueue alloc] init];
-                
-//        // capture session
-//        captureSession = [[AVCaptureSession alloc] init];
-//        
-//        // encoder
-//        //    encoder = [[RTERVideoEncoder alloc] init];
-//        
-//        // video session settings
-//        
-//        /* possible resolution settings:
-//         AVCaptureSessionPresetPhoto;
-//         AVCaptureSessionPresetHigh;
-//         AVCaptureSessionPresetMedium;
-//         AVCaptureSessionPresetLow; // 192x144
-//         AVCaptureSessionPreset320x240;
-//         AVCaptureSessionPreset352x288;
-//         AVCaptureSessionPreset640x480;
-//         AVCaptureSessionPreset960x540;
-//         AVCaptureSessionPreset1280x720;
-//         */
-////        if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
-////            captureSession.sessionPreset = AVCaptureSessionPreset352x288;
-////            NSLog(@"352x288");
-////            
-////            //        CMVideoDimensions dimensions;
-////            dimensions.width = 352;
-////            dimensions.height = 288;
-////            
-////            //        [encoder setupEncoderWithDimesions:dimensions];
-////        }
-//        if ([captureSession canSetSessionPreset:AVCaptureSessionPresetLow]) {
-//            captureSession.sessionPreset = AVCaptureSessionPresetLow;
-//            NSLog(@"192x144");
-//            
-//            //        CMVideoDimensions dimensions;
-//            dimensions.width = 192;
-//            dimensions.height = 144;
-//            
-//            //        [encoder setupEncoderWithDimesions:dimensions];
-//        }
-//        //    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-//        //        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-//        //        NSLog(@"640x480");
-//        //
-//        //        CMVideoDimensions dimensions;
-//        //        dimensions.width = 640;
-//        //        dimensions.height = 480;
-//        //
-//        //        [encoder setupEncoderWithDimesions:dimensions];
-//        //    }
-//        else {
-//            // Handle the failure.
-//        }
-//        
-//        previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
         
     }
     return self;
@@ -151,53 +121,11 @@
 	
 	// capture session
     captureSession = [[AVCaptureSession alloc] init];
-    
-    // encoder
-//    encoder = [[RTERVideoEncoder alloc] init];
 
     // video session settings
-    
-    /* possible resolution settings:
-     AVCaptureSessionPresetPhoto;
-     AVCaptureSessionPresetHigh;
-     AVCaptureSessionPresetMedium;
-     AVCaptureSessionPresetLow;
-     AVCaptureSessionPreset320x240;
-     AVCaptureSessionPreset352x288;
-     AVCaptureSessionPreset640x480;
-     AVCaptureSessionPreset960x540;
-     AVCaptureSessionPreset1280x720;
-     */
-//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
-//        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
-//        NSLog(@"352x288");
-//        
-////        CMVideoDimensions dimensions;
-//        dimensions.width = 352;
-//        dimensions.height = 288;
-//                
-////        [encoder setupEncoderWithDimesions:dimensions];
-//    }
-    if ([captureSession canSetSessionPreset:AVCaptureSessionPresetLow]) {
-        captureSession.sessionPreset = AVCaptureSessionPresetLow;
-        NSLog(@"192x144");
-
-        dimensions.width = 192;
-        dimensions.height = 144;
-    }
-    
-//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-//        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-//        NSLog(@"640x480");
-//        
-//        CMVideoDimensions dimensions;
-//        dimensions.width = 640;
-//        dimensions.height = 480;
-//        
-//        [encoder setupEncoderWithDimesions:dimensions];
-//    }
-    else {
-        // Handle the failure.
+    if ([captureSession canSetSessionPreset:sessionPreset]) {
+        captureSession.sessionPreset = sessionPreset;
+        NSLog(@"video resolution: %dx%d", dimensions.width, dimensions.height);
     }
     
     previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];    
@@ -393,8 +321,6 @@
 - (void) startRecording {
     [self initEncoder];
     
-    firstPost = YES;
-
     capturedFrameCount = 0;
     encodedFrameCount = 0;
     sentFrameCount = 0;
@@ -550,18 +476,17 @@
 /* process the frames here */
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
-{
-//    NSLog(@"captured frame %d", capturedFrameCount);
-    capturedFrameCount++;
-    
+{    
     timeDiff = CACurrentMediaTime() - currentTime;
     currentTime = CACurrentMediaTime();
+    actualFPS = 1.0/timeDiff;
+    
+    [_glkVC currentFPS:actualFPS];
     
 //    NSLog(@"fps: %f", 1.0/timeDiff);
     
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
-//        NSLog(@"encoded frame %d", encodedFrameCount);
         encodedFrameCount++;
         
         // copy pkt to nsdata object which will be sent
@@ -587,8 +512,6 @@
             //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
             NSDictionary *dictionary = [response allHeaderFields];
             //NSLog( @"%@", [dictionary description]);
-//            NSLog(@"sent frame %d", sentFrameCount);
-            sentFrameCount++;
         });
 		
 //        [NSURLConnection sendAsynchronousRequest:postRequest
