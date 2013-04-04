@@ -1,6 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
+* Bootstrap / angular ui doesn't destroy controllers in closed dialogs, this leave my websockets open after closing dialog, currently hacking the bootstrap
 * Dragging live tiles is very power hungry and lags
 * marker flickr continues
 * Maintenance for expired feeds

@@ -81,8 +81,6 @@ func (s *GenericStreamer) Close() {
 func (s *GenericStreamer) SockJSHandler(crudpath string, session sockjs.Conn) {
 	localChan := make(chan *Bundle)
 
-	log.Println("Open stream for ", crudpath)
-
 	s.bundleChannels = append(s.bundleChannels, localChan)
 
 	go func() {
@@ -124,6 +122,5 @@ func (s *GenericStreamer) SockJSHandler(crudpath string, session sockjs.Conn) {
 		}
 	}
 
-	log.Println("closed", crudpath)
 	close(localChan)
 }

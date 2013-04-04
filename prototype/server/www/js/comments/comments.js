@@ -38,6 +38,10 @@ angular.module('comments', [
 	$scope.commentCache = CommentCacheBuilder($scope.itemId);
 	$scope.comments = $scope.commentCache.contents;
 
+	$scope.$on("$destroy", function() { //FIXME: Currently broken in core bootstrap, have a patch for this in my local bootstrap
+		$scope.commentCache.close();
+	});
+
 	$scope.newComment = {
 		Body: ""
 	};
@@ -61,10 +65,6 @@ angular.module('comments', [
 			}
 		);
 	};
-
-	$scope.$on("$destroy", function() {
-		$scope.commentCache.close();
-	});
 })
 
 .directive('commentsDialog', function() {
