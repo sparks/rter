@@ -9,6 +9,7 @@
 //  by Christopher Ballinger
 
 #import "RTERVideoEncoder.h"
+#import "Config.h"
 
 @implementation RTERVideoEncoder
 
@@ -169,7 +170,7 @@
     c->height = outputSize.height;
     c->max_b_frames=0;
     c->pix_fmt = PIX_FMT_YUV420P;
-    c->time_base= (AVRational){1,15};
+    c->time_base= (AVRational){1,DESIRED_FPS};
     
     // not sure about these
     c->refs = 1; //ref = 1
@@ -184,7 +185,7 @@
     c->rc_max_rate = c->bit_rate;
     c->rc_min_rate = 0; //not necessary
     
-    c->thread_count = 2;  // 2 threads
+    c->thread_count = 1;  // 2 threads
     
     c->trellis = 0; // try 1 later
     
@@ -339,6 +340,7 @@
         fprintf(stderr, "Error encoding frame\n");
         exit(1);
     }
+        
     
 //    if (got_output) {
 //        NSLog(@"encoded frame");
@@ -357,6 +359,13 @@
     av_free_packet(pkt);
 }
 
+/* frees the memory allocated to encoding; call when done encoding a stream */
+-(void) freeEncoder {
+    avcodec_close(c);
+    av_free(c);
+    av_freep(&frame->data[0]);
+    avcodec_free_frame(&frame);
+}
 
 
 @end

@@ -22,5 +22,6 @@
 -(void)drawInView:(GLKView *)view;
 -(id)initIndicatorFrame;
 -(void)setColour:(NSInteger)colour;
+-(void)resizeWithX:(float)xTotal Y:(float)yTotal distance:(float)distance;
 
 @end

@@ -140,6 +140,15 @@
 		FD5107BE16F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		FD5107C016F2A859009E30B7 /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		FD5107C116F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
+		FD55AB19170CC2B4000B7483 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
+		FD55AB1A170CC2B4000B7483 /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavdevice.a; sourceTree = "<group>"; };
+		FD55AB1B170CC2B4000B7483 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavfilter.a; sourceTree = "<group>"; };
+		FD55AB1C170CC2B4000B7483 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
+		FD55AB1D170CC2B4000B7483 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
+		FD55AB1E170CC2B4000B7483 /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
+		FD55AB1F170CC2B4000B7483 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
+		FD55AB20170CC2B4000B7483 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		FD55AB29170CC2E1000B7483 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
 		FDC9A02616EA611100632CBE /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		FDC9A02816EA611C00632CBE /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		FDE531B716E6B20D0086FA53 /* rterCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rterCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -349,6 +358,15 @@
 		FDE531B916E6B20D0086FA53 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FD55AB29170CC2E1000B7483 /* libx264.a */,
+				FD55AB19170CC2B4000B7483 /* libavcodec.a */,
+				FD55AB1A170CC2B4000B7483 /* libavdevice.a */,
+				FD55AB1B170CC2B4000B7483 /* libavfilter.a */,
+				FD55AB1C170CC2B4000B7483 /* libavformat.a */,
+				FD55AB1D170CC2B4000B7483 /* libavutil.a */,
+				FD55AB1E170CC2B4000B7483 /* libpostproc.a */,
+				FD55AB1F170CC2B4000B7483 /* libswresample.a */,
+				FD55AB20170CC2B4000B7483 /* libswscale.a */,
 				7E44278A170B6243005D76B4 /* CoreLocation.framework */,
 				7E442788170B622F005D76B4 /* OpenGLES.framework */,
 				7E442786170B6225005D76B4 /* GLKit.framework */,
@@ -588,7 +606,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -600,7 +618,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -610,7 +628,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -622,7 +640,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
