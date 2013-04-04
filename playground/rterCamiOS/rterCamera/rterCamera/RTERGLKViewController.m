@@ -531,8 +531,6 @@
     //graphics logic
     BOOL rightArrow = YES;
     float differenceAngle = [self fixAngle:desiredOrientation - currentOrientation];
-    differenceAngle = abs(differenceAngle);
-    if (differenceAngle > 180.0f) differenceAngle = 180.0f;
     if (abs(differenceAngle) > orientationTolerance) {
         if (differenceAngle > 0) {
             // turn right
@@ -546,6 +544,10 @@
         if (!rightSideUp) {
             //rightArrow = !rightArrow;
         }
+        
+        // make sure diff isn't bigger than 180
+        differenceAngle = abs(differenceAngle);
+        if (differenceAngle > 180.0f) differenceAngle = 180.0f;
         
         if (rightArrow) {
             [self indicateTurnToDirection:RIGHT withPercentage:abs(differenceAngle)/180.0f];
