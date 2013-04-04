@@ -204,7 +204,7 @@ label {
 	max-height: 140px;
 }
 
-.term-view .grid-view .tile-item .author-badge, .term-view .grid-view .tile-item .type-badge {
+.term-view .grid-view .tile-item .author-badge, .term-view .grid-view .tile-item .type-badge{
 	position: absolute;
 	z-index: 10;
 
@@ -223,6 +223,33 @@ label {
 	overflow-y: visible;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+.term-view .grid-view .tile-item .tile-summary-badge {
+	position: absolute;
+	z-index: 10;
+
+	max-height: 140pt;
+	padding-left: 5px;
+	padding-right: 5px;
+	
+	background-color: rgb(0, 0, 0);
+	background-color: rgba(0, 0, 0, 0.5);
+
+	font-size: 10pt;
+	color: white;
+	line-height: 14pt;
+
+	overflow-x: hidden;
+	overflow-y: visible;
+	
+	text-overflow: ellipsis;
+	top: 20px;
+	left: 5px;
+	width: 85%;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+
 }
 
 .term-view .grid-view .tile-item .author-badge {
@@ -493,7 +520,9 @@ label {
 	font-style: italic;
 	color: #6E7980;
 }
-
+.tile-singletweet-item img{
+	opacity: 0.5;
+}
 
 /* -- Modal -- */
 
