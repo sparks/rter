@@ -4,7 +4,7 @@ angular.module('cache', [
 ])
 
 .factory('CacheBuilder', function ($rootScope, Alerter) {
-	function CacheBuilder(name, resource, stream, matchFn) {
+	function CacheBuilder(name, resource, stream, matchFn, uncloseable) {
 		var self = this;
 
 		this.name = name;
@@ -13,6 +13,8 @@ angular.module('cache', [
 		this.resource = resource;
 
 		this.matchFn = matchFn;
+
+		this.uncloseable = uncloseable;
 
 		this.contents = [];
 
@@ -63,6 +65,11 @@ angular.module('cache', [
 		this.stream.onclose = function() {
 
 		};
+
+		this.close = function() {
+			if(this.uncloseable) return;
+			this.stream.close();
+		}
 
 		this.init = function() {
 			self.resource.query(

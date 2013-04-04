@@ -77,6 +77,10 @@ angular.module('taxonomy', [
 			);
 		};
 
+		this.close = function() {
+			this.stream.close();
+		}
+
 		this.init();
 
 		this.update = function(newRanking, sucess, failure) {
