@@ -45,7 +45,7 @@ angular.module('genericItem', [
 	};
 })
 
-.controller('CloseupGenericItemCtrl', function($scope, ItemCache, CloseupItemDialog) {
+.controller('CloseupGenericItemCtrl', function($scope) {
 
 })
 

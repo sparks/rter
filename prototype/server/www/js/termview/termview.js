@@ -68,7 +68,7 @@ angular.module('termview', [
 		$scope.ranking = $scope.rankingCache.ranking;
 	}
 
-	$scope.items = ItemCache.items;
+	$scope.items = ItemCache.contents;
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);

@@ -48,7 +48,7 @@ angular.module('rter', [
 
 .controller('TabsCtrl', function($scope, TermViewRemote) {
 	$scope.termViews = TermViewRemote.termViews;
-	TermViewRemote.addTermView({Term: ""});
+	TermViewRemote.addTermView({Term: "all"});
 })
 
 .controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
