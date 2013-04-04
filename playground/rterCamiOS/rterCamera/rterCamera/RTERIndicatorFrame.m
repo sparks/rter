@@ -48,7 +48,7 @@ static const GLfloat vertices[48] = {
 //            NSLog(@"Vert: %f",vertices[i]);
 //        }
        
-        currentColour = BLUE;
+        currentColour = CLEAR;
 
     }
     
@@ -81,6 +81,9 @@ static const GLfloat vertices[48] = {
 				break;
 			case GREEN:
                 glColor4f(0.0f, 0.9f, 0.0f, 1.0f); //0.8f);
+				break;
+            default:
+                glColor4f(0.0f, 0.0f, 0.0f, 0.0f); //0.8f);
 				break;
         }
         

@@ -16,7 +16,8 @@
     NSNumber *lock;
     RTERPreviewController *previewController;
     
-    NSOperationQueue *getQueue;
+//    NSOperationQueue *getQueue;
+    dispatch_queue_t getQueue;
     NSOperationQueue *putQueue;
     
     float latitude;
@@ -24,6 +25,9 @@
     float headingAccuracy;
     
     float fps;
+    
+    BOOL updatedHeading;
+    BOOL updatedLocation;
 }
 @end
 
@@ -38,8 +42,10 @@
         //reference to previewController to get authString - not sure if authString is dynamic
         previewController = prev;
         
-        getQueue = [[NSOperationQueue alloc]init];
+        getQueue = dispatch_queue_create("com.rterCamera.getQueue", DISPATCH_QUEUE_SERIAL); //[[NSOperationQueue alloc]init];
         putQueue = [[NSOperationQueue alloc]init];
+        
+//        headingData = [[NSMutableData alloc]init];
         
         _curRed = 0.0;
         _increasing = YES;
@@ -80,7 +86,7 @@
         displayLeft = false;
         displayRight = false;
         
-        [self indicateTurnToDirection:RIGHT withPercentage:10.0];
+        //[self indicateTurnToDirection:RIGHT withPercentage:10.0];
 
         [self initializeGLView:_glkView];
         
@@ -119,16 +125,28 @@
 }
 
 -(void)startGetPutTimer {
-    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:4 target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    // also start location updates
+    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+    {
+        updatedHeading = NO;  // because update might not be instant
+        updatedLocation = NO;
+        locationManager.headingFilter = 5;
+        [locationManager startUpdatingHeading];
+        [locationManager startUpdatingLocation];
+    }
+    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
     [getHeadingTimer fire];
 }
 
 -(void)stopGetPutTimer {
     [getHeadingTimer invalidate];
+    
+    // stop location updates
+    [locationManager stopUpdatingHeading];
+    [locationManager stopUpdatingLocation];
 }
 
 -(void)getHeadingPutCoordindates {
-    
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
@@ -136,11 +154,18 @@
         currentGetConnection = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self startImmediately:YES];
         headingData = [[NSMutableData alloc]init];
         [currentGetConnection start];
-        NSLog(@"GetConnectionDidStart");
+//        NSLog(@"GetConnectionDidStart");
     }
-       
+    
+//    dispatch_async(getQueue, ^{
+//        [NSURLConnection connectionWithRequest:urlRequest delegate:self];
+//    });
+    
     
     ////PUT REQUEST
+    if (updatedHeading && updatedLocation) {
+        //once we get an update
+        
     NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[previewController itemID]]]];
     
     
@@ -159,8 +184,9 @@
      {
          
          NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-         NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
+//         NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
      }];
+    }
     
 
 
@@ -217,9 +243,11 @@
 								  NSJSONReadingMutableContainers error:&error];
        
         NSString *desiredOrientationString = [jsonDict objectForKey:@"Heading"];
-        NSLog(@"%@",desiredOrientationString);
+//        NSLog(@"%@",desiredOrientationString);
         desiredOrientation = [desiredOrientationString floatValue];
         
+        // make sure to update the UI incase the desired orientation changed but not the actual
+        [self updateArrows];
         
     }
     
@@ -428,20 +456,22 @@
     locationManager.delegate= self;
     locationManager.desiredAccuracy=kCLLocationAccuracyBestForNavigation;
     // Start heading updates.
-    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
-    {
-        locationManager.headingFilter = 5;
-        [locationManager startUpdatingHeading];
-        [locationManager startUpdatingLocation];
-    }
+//    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+//    {
+//        locationManager.headingFilter = 5;
+//        [locationManager startUpdatingHeading];
+//        [locationManager startUpdatingLocation];
+//    }
 
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     latitude = newLocation.coordinate.latitude;
     longitude = newLocation.coordinate.longitude;
+    updatedLocation = YES;
 }
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
+    updatedHeading = YES;
     
     assert([self fixAngle:270] == -90);
     assert([self fixAngle:181] == -179);
@@ -466,8 +496,11 @@
     
     headingAccuracy = newHeading.headingAccuracy;
     
-    
-    
+    [self updateArrows];
+};
+
+-(void) updateArrows {
+
     //Log heading
     //NSLog(@"currentOrientation: %f",currentOrientation);
     [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %0.1f \nDesired Orientation: %0.1f\nFPS: %0.1f",currentOrientation,desiredOrientation, fps]];
@@ -498,6 +531,8 @@
     //graphics logic
     BOOL rightArrow = YES;
     float differenceAngle = [self fixAngle:desiredOrientation - currentOrientation];
+    differenceAngle = abs(differenceAngle);
+    if (differenceAngle > 180.0f) differenceAngle = 180.0f;
     if (abs(differenceAngle) > orientationTolerance) {
         if (differenceAngle > 0) {
             // turn right
@@ -513,7 +548,7 @@
         }
         
         if (rightArrow) {
-            [self indicateTurnToDirection:RIGHT withPercentage:abs(differenceAngle)/180.f];
+            [self indicateTurnToDirection:RIGHT withPercentage:abs(differenceAngle)/180.0f];
         } else {
             [self indicateTurnToDirection:LEFT withPercentage:abs(differenceAngle)/180.0f];
         }

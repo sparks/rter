@@ -235,7 +235,7 @@
     // start the capture session so that the preview shows up
     [captureSession startRunning];
     
-    [_glkVC onSurfaceChange];
+    [_glkVC onSurfaceChangedWidth:self.previewView.bounds.size.width Height:self.previewView.bounds.size.height];
     
 }
 
@@ -286,6 +286,9 @@
 - (void)onExit {
     // stop listening for notifications
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    // stop timer
+    [_glkVC stopGetPutTimer];
     
     if (captureSession && [captureSession isRunning]) {
         if(sendingData) {
