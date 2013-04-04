@@ -9,10 +9,10 @@ angular.module('streamingVideoV1Item', [
 
 	$scope.livethumbConfig = {
 		showtitle: false,
-		autoplay: true,
-		selectable: true,
+		autoplay: $scope.item.Live,
+		selectable: false,
 		skimmable: true,
-		clickable: true,
+		clickable: false,
 		interval: 2,
 		debuglive: false,
 		width: 140,
@@ -26,7 +26,13 @@ angular.module('streamingVideoV1Item', [
 		$scope.video.thumbnailUrl = $scope.item.ThumbnailURI;
 		$scope.video.StartTime = $scope.item.StartTime;
 		$scope.video.StopTime = $scope.item.StopTime;
+
+		$scope.livethumbConfig.autoplay = $scope.item.Live;
 	}, true);
+
+	$scope.$on("clicked", function(e, video) {
+
+	});
 })
 
 .directive('tileStreamingVideoV1Item', function() {
