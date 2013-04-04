@@ -3,7 +3,6 @@ package streaming
 import (
 	"github.com/gorilla/mux"
 	"github.com/igm/sockjs-go/sockjs"
-	"log"
 	"net/http"
 	"strings"
 )
