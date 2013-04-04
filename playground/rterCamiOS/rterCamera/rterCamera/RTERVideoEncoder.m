@@ -9,6 +9,7 @@
 //  by Christopher Ballinger
 
 #import "RTERVideoEncoder.h"
+#import "Config.h"
 
 @implementation RTERVideoEncoder
 
@@ -169,7 +170,7 @@
     c->height = outputSize.height;
     c->max_b_frames=0;
     c->pix_fmt = PIX_FMT_YUV420P;
-    c->time_base= (AVRational){1,15};
+    c->time_base= (AVRational){1,DESIRED_FPS};
     
     // not sure about these
     c->refs = 1; //ref = 1

@@ -78,4 +78,5 @@ typedef NS_ENUM(NSInteger, Indicate) {
 -(void)setDesiredOrientation:(float)dO;
 -(void)startGetPutTimer;
 -(void)stopGetPutTimer;
+-(void)onSurfaceChange;
 @end

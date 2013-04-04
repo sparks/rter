@@ -10,7 +10,18 @@
 
 #define f(X) [NSNumber numberWithFloat:X]
 
+@interface RTERArrow () {
+
+}
+@end
+
 @implementation RTERArrow
+
+static const GLfloat triangle[12] = {
+    -0.5f, -1.0f, 0.0f, // 0. left-bottom
+    0.5f, 0.0f, 0.0f, // 1. right-bottom
+    -0.5f, 1.0f, 0.0f // 2. left-top
+};
 
 
 -(id)initArrow {
@@ -21,6 +32,8 @@
         Vertex3D    vertex2 = Vertex3DMake(0.85, 0.0, 0.0);
         Vertex3D    vertex3 = Vertex3DMake(0.7, 0.2, 0.0);
         _triangle = Triangle3DMake(vertex1, vertex2, vertex3);
+        
+        
         
         
         
@@ -60,10 +73,10 @@ static inline Triangle3D Triangle3DMake(Vertex3D inX, Vertex3D inY, Vertex3D inZ
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnableClientState(GL_VERTEX_ARRAY);
     glColor4f(1.0, 0.0, 0.0, 1.0);
-    glVertexPointer(3, GL_FLOAT, 0, &_triangle);
+    glVertexPointer(3, GL_FLOAT, 0, triangle); //&_triangle);
     //glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
     //glScalef(1.0f, arrowScale_tmp, 1.0f);
-    glDrawArrays(GL_TRIANGLES, 0, 9);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     glDisableClientState(GL_VERTEX_ARRAY);
     
 }

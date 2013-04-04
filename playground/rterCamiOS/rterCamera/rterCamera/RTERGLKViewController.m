@@ -10,7 +10,7 @@
 
 
 
-#define rad(X) X*180/M_PI
+#define rad(X) X*M_PI/180.0
 
 @interface RTERGLKViewController () {
     NSNumber *lock;
@@ -59,7 +59,7 @@
         
         freeRoam = NO;
         rightSideUp = TRUE;
-        orientationTolerance = 30;
+        orientationTolerance = 20;
         currentOrientation = 0;
         desiredOrientation = 0;
         
@@ -69,7 +69,7 @@
 
         // pulsating variables
         arrowPulsateScale = 1.0f;
-        arrowPulsateSpeed = 0.1f;
+        arrowPulsateSpeed = 0.15f;
         arrowPulsateSpeedMin = 0.01f;
         arrowPulsateMax = 1.2f;
         arrowPulsateMin = 0.9f;
@@ -81,6 +81,10 @@
         [self indicateTurnToDirection:RIGHT withPercentage:10.0];
 
         [self initializeGLView:_glkView];
+        
+        
+        
+        [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
         
         /*float width = _glkView.frame.size.width;
         float height = _glkView.frame.size.height;
@@ -95,11 +99,11 @@
         yTotal = (float) (tanf(rad(45.0/2))*distance *2);
         */
         
-        distance = -0.0f;
+        //distance = -0.0f;
         
         [self setUpLocationManager];
         
-        debugScreen = [[UITextView alloc]initWithFrame:CGRectMake(50, 50, 250, 50)];
+        debugScreen = [[UITextView alloc]initWithFrame:CGRectMake(10, 10, 250, 50)];
         [debugScreen setText:@"Debug Screen"];
         [debugScreen setTextColor:[UIColor redColor]];
         [debugScreen setBackgroundColor:[UIColor clearColor]];
@@ -240,6 +244,41 @@
     
 }
 
+-(void)onSurfaceChangedWidth:(float)width Height:(float)height
+{    
+    if (height == 0) height = 1; // To prevent divide by zero
+    aspect = (float) width / (float) height;
+    
+    // get the total x and y at distance
+    distance = 6.0f;
+    
+    xTotal = (float) (aspect * tan(rad(45.0 / 2))
+                      * distance * 2);
+    yTotal = (float) (tan(rad(45.0 / 2)) * distance * 2);
+        
+    [indicatorFrame resizeWithX:xTotal Y:yTotal distance:distance];
+    
+    // Set the viewport (display area) to cover the entire window
+    glViewport(0, 0, width, height);
+    
+    // Setup perspective projection, with aspect ratio matches viewport
+    glMatrixMode(GL_PROJECTION); // Select projection matrix
+    glLoadIdentity(); // Reset projection matrix
+    // Use perspective projection
+    [self gluPerspective:45.0 :aspect :0.1f :100.0];// (45, aspect, 0.1f, 100.f);
+    
+    glMatrixMode(GL_MODELVIEW); // Select model-view matrix
+    glLoadIdentity(); // Reset
+    
+    // You OpenGL|ES display re-sizing code here
+    // ......
+    
+}
+
+-(void)onSurfaceChange {
+    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
+}
+
 -(void)setDesiredOrientation:(float)dO {
     desiredOrientation = dO;
 }
@@ -321,7 +360,8 @@
         // RIGHT ARROW
         if(displayRight) {
             glLoadIdentity(); // Reset model-view matrix ( NEW )
-            glTranslatef(-0.3f/*xTotal / 2.0f - 0.1f*xTotal*/, 0.0f, -distance);
+//            glTranslatef(-0.3f/*xTotal / 2.0f - 0.1f*xTotal*/, 0.0f, -distance);
+            glTranslatef(xTotal / 2.0f - 0.1f*xTotal, 0.0f, -distance);
             glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
             [arrowRight drawInView:view]; // Draw triangle ( NEW )
         }
@@ -329,7 +369,8 @@
         // LEFT
         if(displayLeft) {
             glLoadIdentity();
-            glTranslatef(0.3f/*-xTotal / 2.0f + 0.1f*xTotal*/, 0.0f, -distance);
+//            glTranslatef(0.3f/*-xTotal / 2.0f + 0.1f*xTotal*/, 0.0f, -distance);
+            glTranslatef(-xTotal / 2.0f + 0.1f*xTotal, 0.0f, -distance);
             glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
             glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
             [arrowLeft drawInView:view]; // Draw quad ( NEW )
@@ -344,13 +385,14 @@
 -(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
 }
 
 - (void)gluPerspective:(double)fovy :(double)aspec :(double)zNear :(double)zFar
 {
     // Start in projection mode.
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
     double xmin, xmax, ymin, ymax;
     ymax = zNear * tan(fovy * M_PI / 360.0);
     ymin = -ymax;
@@ -417,7 +459,7 @@
     
     //Log heading
     //NSLog(@"currentOrientation: %f",currentOrientation);
-    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %f \nDesired Orientation:%f",currentOrientation,desiredOrientation]];
+    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %0.1f \nDesired Orientation: %0.1f",currentOrientation,desiredOrientation]];
     
     
     

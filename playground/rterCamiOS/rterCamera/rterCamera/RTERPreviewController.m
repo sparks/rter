@@ -33,6 +33,7 @@
 	
 	NSURLConnection *streamingAuthConnection;
 	NSString *authString; //If authString doesn't have to be private it should be a property CB
+    NSURLConnection *streamConnection;
     
     GLKView* _glkView;
     RTERGLKViewController* _glkVC;
@@ -40,6 +41,11 @@
     int capturedFrameCount;
     int encodedFrameCount;
     int sentFrameCount;
+    
+    double currentTime;
+    double timeDiff;
+    
+    BOOL firstPost;
 }
 
 @end
@@ -72,10 +78,65 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
         
         // init dispatch queues
-        encoderQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0); //dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
+        encoderQueue = dispatch_queue_create("com.rterCamera.encoderQueue", DISPATCH_QUEUE_SERIAL);
         postQueue = dispatch_queue_create("com.rterCamera.postQueue", DISPATCH_QUEUE_SERIAL);
         
         postOpQueue = [[NSOperationQueue alloc] init];
+                
+//        // capture session
+//        captureSession = [[AVCaptureSession alloc] init];
+//        
+//        // encoder
+//        //    encoder = [[RTERVideoEncoder alloc] init];
+//        
+//        // video session settings
+//        
+//        /* possible resolution settings:
+//         AVCaptureSessionPresetPhoto;
+//         AVCaptureSessionPresetHigh;
+//         AVCaptureSessionPresetMedium;
+//         AVCaptureSessionPresetLow; // 192x144
+//         AVCaptureSessionPreset320x240;
+//         AVCaptureSessionPreset352x288;
+//         AVCaptureSessionPreset640x480;
+//         AVCaptureSessionPreset960x540;
+//         AVCaptureSessionPreset1280x720;
+//         */
+////        if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
+////            captureSession.sessionPreset = AVCaptureSessionPreset352x288;
+////            NSLog(@"352x288");
+////            
+////            //        CMVideoDimensions dimensions;
+////            dimensions.width = 352;
+////            dimensions.height = 288;
+////            
+////            //        [encoder setupEncoderWithDimesions:dimensions];
+////        }
+//        if ([captureSession canSetSessionPreset:AVCaptureSessionPresetLow]) {
+//            captureSession.sessionPreset = AVCaptureSessionPresetLow;
+//            NSLog(@"192x144");
+//            
+//            //        CMVideoDimensions dimensions;
+//            dimensions.width = 192;
+//            dimensions.height = 144;
+//            
+//            //        [encoder setupEncoderWithDimesions:dimensions];
+//        }
+//        //    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
+//        //        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+//        //        NSLog(@"640x480");
+//        //
+//        //        CMVideoDimensions dimensions;
+//        //        dimensions.width = 640;
+//        //        dimensions.height = 480;
+//        //
+//        //        [encoder setupEncoderWithDimesions:dimensions];
+//        //    }
+//        else {
+//            // Handle the failure.
+//        }
+//        
+//        previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
         
     }
     return self;
@@ -86,6 +147,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     streamingToken = @"";
+    
 	
 	// capture session
     captureSession = [[AVCaptureSession alloc] init];
@@ -106,16 +168,24 @@
      AVCaptureSessionPreset960x540;
      AVCaptureSessionPreset1280x720;
      */
-    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
-        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
-        NSLog(@"352x288");
-        
-//        CMVideoDimensions dimensions;
-        dimensions.width = 352;
-        dimensions.height = 288;
-                
-//        [encoder setupEncoderWithDimesions:dimensions];
+//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
+//        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
+//        NSLog(@"352x288");
+//        
+////        CMVideoDimensions dimensions;
+//        dimensions.width = 352;
+//        dimensions.height = 288;
+//                
+////        [encoder setupEncoderWithDimesions:dimensions];
+//    }
+    if ([captureSession canSetSessionPreset:AVCaptureSessionPresetLow]) {
+        captureSession.sessionPreset = AVCaptureSessionPresetLow;
+        NSLog(@"192x144");
+
+        dimensions.width = 192;
+        dimensions.height = 144;
     }
+    
 //    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
 //        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
 //        NSLog(@"640x480");
@@ -130,8 +200,7 @@
         // Handle the failure.
     }
     
-    previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
-    
+    previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];    
     
     AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (videoDevice) {
@@ -167,24 +236,16 @@
     [outputDevice setSampleBufferDelegate:self queue:encoderQueue];
     
     // add preview layer to preview view
-    [previewView.layer addSublayer:previewLayer];
+//    [previewView.layer addSublayer:previewLayer];
     
     // set the location and size of teh preview layer to that of the preview view
-    [previewLayer setFrame:previewView.bounds];
-
+   // [previewLayer setFrame:previewView.bounds];
+    
     // resize preview to fit within the view, but retain its original aspect ration
     [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     
-    // make sure the preview stays within the bounds
-    // (otherwise it will take up the whole screen)
-    previewView.clipsToBounds = YES;
-    
-    // get the default FPS
-    defaultMaxFrameDuration = previewLayer.connection.videoMaxFrameDuration;
-    defaultMinFrameDuration = previewLayer.connection.videoMinFrameDuration;
-    
-    // start the capture session so that the preview shows up
-    [captureSession startRunning];
+    // add preview layer to preview view
+    [previewView.layer addSublayer:previewLayer];
     
     //Create OpenGL Layer
     
@@ -197,10 +258,49 @@
     
     //initialize View Controller for the GLKView
     _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView previewController:self];
-
+    
     //hide glk view
     [_glkView setHidden:YES];
     
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    UIInterfaceOrientation currentOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    // rotate the video
+    NSLog(@"bounds: %f x %f", previewView.bounds.size.width, previewView.bounds.size.height);
+    switch (currentOrientation) {
+        case UIInterfaceOrientationLandscapeLeft:
+            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+            break;
+        case UIInterfaceOrientationLandscapeRight:
+            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+            break;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            // not supporting this orientation
+            break;
+        default:
+            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+            break;
+    }
+    
+    
+    // set the location and size of teh preview layer to that of the preview view
+    [previewLayer setFrame:previewView.bounds];
+    
+    
+    // make sure the preview stays within the bounds
+    // (otherwise it will take up the whole screen)
+    previewView.clipsToBounds = YES;
+    
+    // get the default FPS
+    defaultMaxFrameDuration = previewLayer.connection.videoMaxFrameDuration;
+    defaultMinFrameDuration = previewLayer.connection.videoMinFrameDuration;
+    
+    // start the capture session so that the preview shows up
+    [captureSession startRunning];
+    
+    [_glkVC onSurfaceChange];
     
 }
 
@@ -210,9 +310,11 @@
     // the bounds of all the auto rotated views have already been set
     
     // rotate the video
+    
     switch (toInterfaceOrientation) {
         case UIInterfaceOrientationLandscapeLeft:
             [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+            NSLog(@"bounds: %f x %f", previewView.bounds.size.width, previewView.bounds.size.height);
             break;
         case UIInterfaceOrientationLandscapeRight:
             [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
@@ -290,6 +392,8 @@
 
 - (void) startRecording {
     [self initEncoder];
+    
+    firstPost = YES;
 
     capturedFrameCount = 0;
     encodedFrameCount = 0;
@@ -447,12 +551,17 @@
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    NSLog(@"captured frame %d", capturedFrameCount);
+//    NSLog(@"captured frame %d", capturedFrameCount);
     capturedFrameCount++;
-        
+    
+    timeDiff = CACurrentMediaTime() - currentTime;
+    currentTime = CACurrentMediaTime();
+    
+//    NSLog(@"fps: %f", 1.0/timeDiff);
+    
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
-        NSLog(@"encoded frame %d", encodedFrameCount);
+//        NSLog(@"encoded frame %d", encodedFrameCount);
         encodedFrameCount++;
         
         // copy pkt to nsdata object which will be sent
@@ -478,7 +587,7 @@
             //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
             NSDictionary *dictionary = [response allHeaderFields];
             //NSLog( @"%@", [dictionary description]);
-            NSLog(@"sent frame %d", sentFrameCount);
+//            NSLog(@"sent frame %d", sentFrameCount);
             sentFrameCount++;
         });
 		
@@ -508,5 +617,15 @@
     // encoder
     encoder = [[RTERVideoEncoder alloc] init];
     [encoder setupEncoderWithDimesions:dimensions];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+-(NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskLandscape | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
 }
 @end

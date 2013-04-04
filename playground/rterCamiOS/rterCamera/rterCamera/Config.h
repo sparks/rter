@@ -14,9 +14,9 @@
 //
 
 //Camera FPS
-#define DESIRED_FPS 15
+#define DESIRED_FPS 7
 
-#define OPENGL_FPS 5
+#define OPENGL_FPS 60
 
 typedef NS_ENUM(NSInteger,Colour) {
     RED,

@@ -23,15 +23,6 @@
 		7E4427B9170CC57F005D76B4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AF170CC57F005D76B4 /* libavutil.a */; };
 		7E4427BA170CC57F005D76B4 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427B0170CC57F005D76B4 /* libswscale.a */; };
 		FD51069B16EFED9B009E30B7 /* RTERVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */; };
-		FD55AB21170CC2B4000B7483 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB19170CC2B4000B7483 /* libavcodec.a */; };
-		FD55AB22170CC2B4000B7483 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1A170CC2B4000B7483 /* libavdevice.a */; };
-		FD55AB23170CC2B4000B7483 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1B170CC2B4000B7483 /* libavfilter.a */; };
-		FD55AB24170CC2B4000B7483 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1C170CC2B4000B7483 /* libavformat.a */; };
-		FD55AB25170CC2B4000B7483 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1D170CC2B4000B7483 /* libavutil.a */; };
-		FD55AB26170CC2B4000B7483 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1E170CC2B4000B7483 /* libpostproc.a */; };
-		FD55AB27170CC2B4000B7483 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB1F170CC2B4000B7483 /* libswresample.a */; };
-		FD55AB28170CC2B4000B7483 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB20170CC2B4000B7483 /* libswscale.a */; };
-		FD55AB2A170CC2E1000B7483 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD55AB29170CC2E1000B7483 /* libx264.a */; };
 		FDC9A02716EA611100632CBE /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02616EA611100632CBE /* libbz2.dylib */; };
 		FDC9A02916EA611C00632CBE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02816EA611C00632CBE /* libz.dylib */; };
 		FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE531BA16E6B20D0086FA53 /* UIKit.framework */; };
@@ -202,7 +193,6 @@
 				FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */,
 				FDE531BD16E6B20D0086FA53 /* Foundation.framework in Frameworks */,
 				FDE531BF16E6B20D0086FA53 /* CoreGraphics.framework in Frameworks */,
-
 				7E4427B1170CC57F005D76B4 /* libavcodec.a in Frameworks */,
 				7E4427B2170CC57F005D76B4 /* libavfilter.a in Frameworks */,
 				7E4427B3170CC57F005D76B4 /* libpostproc.a in Frameworks */,
@@ -616,7 +606,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -628,7 +618,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -638,7 +628,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Cameron Addison (F2GQ63UM77)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Stepan Salenikovich (UAZP894F3R)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "rterCamera/rterCamera-Prefix.pch";
 				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/**";
@@ -650,7 +640,7 @@
 					"\"$(SRCROOT)/rterCamera\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "9B202CC0-CEBB-4146-91A2-5D7694B124E4";
+				PROVISIONING_PROFILE = "D87060FE-1A7C-4721-9AC8-F992EDD00E0F";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
