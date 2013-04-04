@@ -195,7 +195,6 @@ angular.module('tsunamijs.livethumbnail', [])
             }
 
             function updateConfig(newVal, oldVal) {
-                console.log(newVal);
                 if (newVal === undefined) { return; }
 
                 // save some state
