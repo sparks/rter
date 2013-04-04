@@ -80,8 +80,10 @@ angular.module('cache', [
 					}
 				},
 				function(e) {
-					console.log("Couldn't load init for "+self.name);
-					console.log(e);
+					if(e.status != 404) {
+						console.log("Couldn't load init for "+self.name);
+						console.log(e);
+					}
 				}
 			);
 		};
