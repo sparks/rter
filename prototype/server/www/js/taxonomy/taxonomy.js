@@ -27,7 +27,6 @@ angular.module('taxonomy', [
 
 		function parseTermRanking(termRanking) {
 			if(termRanking.Ranking === "" || termRanking.Ranking === undefined) {
-				console.log("Nothing in ranking");
 			 	return;
 			 }
 
@@ -38,8 +37,6 @@ angular.module('taxonomy', [
 				console.log("Receive invalid JSON ranking form server", e);
 				return;
 			}
-
-			console.log(newRanking);
 
 			replaceRanking(newRanking);
 		}
@@ -59,7 +56,6 @@ angular.module('taxonomy', [
 			if(bundle.Action == "update") {
 				//Often if the user created the item, it will already be in place so treat as an update
 				parseTermRanking(bundle.Val);
-				console.log(bundle);
 			}
 
 			$rootScope.$digest();
