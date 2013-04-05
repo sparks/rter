@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "RTERPreviewController.h"
+#import "SSKeychain.h"
+#import "SSKeychainQuery.h"
 
 @interface RTERViewController : UIViewController<RTERPreviewControllerDelegate,NSURLConnectionDataDelegate,UITextFieldDelegate>
 

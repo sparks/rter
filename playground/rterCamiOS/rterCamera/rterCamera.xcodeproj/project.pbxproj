@@ -23,6 +23,10 @@
 		7E4427B9170CC57F005D76B4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427AF170CC57F005D76B4 /* libavutil.a */; };
 		7E4427BA170CC57F005D76B4 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E4427B0170CC57F005D76B4 /* libswscale.a */; };
 		FD51069B16EFED9B009E30B7 /* RTERVideoEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD51069A16EFED9B009E30B7 /* RTERVideoEncoder.m */; };
+		FDAD238A170F4E8C00E9EA38 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDAD2389170F4E8C00E9EA38 /* Security.framework */; };
+		FDAD2394170F540E00E9EA38 /* SSKeychain-LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = FDAD238D170F540E00E9EA38 /* SSKeychain-LICENSE */; };
+		FDAD2395170F540E00E9EA38 /* SSKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = FDAD238F170F540E00E9EA38 /* SSKeychain.m */; };
+		FDAD2396170F540E00E9EA38 /* SSKeychainQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = FDAD2391170F540E00E9EA38 /* SSKeychainQuery.m */; };
 		FDC9A02716EA611100632CBE /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02616EA611100632CBE /* libbz2.dylib */; };
 		FDC9A02916EA611C00632CBE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FDC9A02816EA611C00632CBE /* libz.dylib */; };
 		FDE531BB16E6B20D0086FA53 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDE531BA16E6B20D0086FA53 /* UIKit.framework */; };
@@ -140,15 +144,12 @@
 		FD5107BE16F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		FD5107C016F2A859009E30B7 /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		FD5107C116F2A859009E30B7 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
-		FD55AB19170CC2B4000B7483 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
-		FD55AB1A170CC2B4000B7483 /* libavdevice.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavdevice.a; sourceTree = "<group>"; };
-		FD55AB1B170CC2B4000B7483 /* libavfilter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavfilter.a; sourceTree = "<group>"; };
-		FD55AB1C170CC2B4000B7483 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
-		FD55AB1D170CC2B4000B7483 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
-		FD55AB1E170CC2B4000B7483 /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
-		FD55AB1F170CC2B4000B7483 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
-		FD55AB20170CC2B4000B7483 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
-		FD55AB29170CC2E1000B7483 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		FDAD2389170F4E8C00E9EA38 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		FDAD238D170F540E00E9EA38 /* SSKeychain-LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSKeychain-LICENSE"; sourceTree = "<group>"; };
+		FDAD238E170F540E00E9EA38 /* SSKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSKeychain.h; sourceTree = "<group>"; };
+		FDAD238F170F540E00E9EA38 /* SSKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSKeychain.m; sourceTree = "<group>"; };
+		FDAD2390170F540E00E9EA38 /* SSKeychainQuery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSKeychainQuery.h; sourceTree = "<group>"; };
+		FDAD2391170F540E00E9EA38 /* SSKeychainQuery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSKeychainQuery.m; sourceTree = "<group>"; };
 		FDC9A02616EA611100632CBE /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		FDC9A02816EA611C00632CBE /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		FDE531B716E6B20D0086FA53 /* rterCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rterCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -181,6 +182,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDAD238A170F4E8C00E9EA38 /* Security.framework in Frameworks */,
 				7E44278B170B6243005D76B4 /* CoreLocation.framework in Frameworks */,
 				7E442789170B622F005D76B4 /* OpenGLES.framework in Frameworks */,
 				7E442787170B6225005D76B4 /* GLKit.framework in Frameworks */,
@@ -338,6 +340,18 @@
 			path = libswscale;
 			sourceTree = "<group>";
 		};
+		FDAD238B170F540E00E9EA38 /* SSKeychain */ = {
+			isa = PBXGroup;
+			children = (
+				FDAD238D170F540E00E9EA38 /* SSKeychain-LICENSE */,
+				FDAD238E170F540E00E9EA38 /* SSKeychain.h */,
+				FDAD238F170F540E00E9EA38 /* SSKeychain.m */,
+				FDAD2390170F540E00E9EA38 /* SSKeychainQuery.h */,
+				FDAD2391170F540E00E9EA38 /* SSKeychainQuery.m */,
+			);
+			path = SSKeychain;
+			sourceTree = "<group>";
+		};
 		FDE531AE16E6B20D0086FA53 = {
 			isa = PBXGroup;
 			children = (
@@ -358,15 +372,7 @@
 		FDE531B916E6B20D0086FA53 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FD55AB29170CC2E1000B7483 /* libx264.a */,
-				FD55AB19170CC2B4000B7483 /* libavcodec.a */,
-				FD55AB1A170CC2B4000B7483 /* libavdevice.a */,
-				FD55AB1B170CC2B4000B7483 /* libavfilter.a */,
-				FD55AB1C170CC2B4000B7483 /* libavformat.a */,
-				FD55AB1D170CC2B4000B7483 /* libavutil.a */,
-				FD55AB1E170CC2B4000B7483 /* libpostproc.a */,
-				FD55AB1F170CC2B4000B7483 /* libswresample.a */,
-				FD55AB20170CC2B4000B7483 /* libswscale.a */,
+				FDAD2389170F4E8C00E9EA38 /* Security.framework */,
 				7E44278A170B6243005D76B4 /* CoreLocation.framework */,
 				7E442788170B622F005D76B4 /* OpenGLES.framework */,
 				7E442786170B6225005D76B4 /* GLKit.framework */,
@@ -395,6 +401,7 @@
 		FDE531C016E6B20D0086FA53 /* rterCamera */ = {
 			isa = PBXGroup;
 			children = (
+				FDAD238B170F540E00E9EA38 /* SSKeychain */,
 				7E442785170B613E005D76B4 /* Config.h */,
 				FDE531C916E6B20D0086FA53 /* RTERAppDelegate.h */,
 				FDE531CA16E6B20D0086FA53 /* RTERAppDelegate.m */,
@@ -497,6 +504,7 @@
 				FDE531D116E6B20D0086FA53 /* Default-568h@2x.png in Resources */,
 				FDE531D716E6B20D0086FA53 /* RTERViewController.xib in Resources */,
 				FDE531E616E7944B0086FA53 /* RTERPreviewController.xib in Resources */,
+				FDAD2394170F540E00E9EA38 /* SSKeychain-LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +523,8 @@
 				7E442782170B5CD4005D76B4 /* RTERArrow.m in Sources */,
 				7E442783170B5CD6005D76B4 /* RTERGLKViewController.m in Sources */,
 				7E442784170B5CD9005D76B4 /* RTERIndicatorFrame.m in Sources */,
+				FDAD2395170F540E00E9EA38 /* SSKeychain.m in Sources */,
+				FDAD2396170F540E00E9EA38 /* SSKeychainQuery.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
