@@ -115,12 +115,14 @@ angular.module('auth', [
 
 .controller('LoginPanelCtrl', function($scope, $http, authService, UserResource, Alerter) {
 	$scope.login = function() {
+		console.log("asdf");
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
 			$scope.cancel('success');
 			authService.loginConfirmed();
 		})
 		.error(function(data, status, headers) {
+			$scope.failedLogin = true;
 			console.log("Login Problem", data, status);
 			Alerter.error("Invalid login credentials.", 2000);
 		});
@@ -133,6 +135,7 @@ angular.module('auth', [
 				Alerter.success("User "+$scope.username+" created!", 2000);
 			},
 			function(e) {
+				Alerter.error("Couldn't signup, Username already taken.", 2000);
 				console.log(e);
 			}
 		);

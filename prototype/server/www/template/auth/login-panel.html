@@ -8,11 +8,12 @@
 		<div class="row-fluid">
 			<div class="span8">
 				<button class="btn btn-primary" ng-click="login()" ng-disabled="loginForm.$invalid">Login</button>
-				<button class="btn btn-success" ng-click="signup()" ng-disabled="loginForm.$invalid">Sign up</button>
+				<button class="btn btn-success" ng-click="signup()" ng-disabled="loginForm.$invalid" type='button'>Sign up</button>
 			</div>
 			<div class="span4 right-align">
-				<button class="btn btn-danger" ng-click="cancel('cancel')">Cancel</button>
+				<button class="btn btn-danger" ng-click="cancel('cancel')" type='button'>Cancel</button>
 			</div>
 		</div>
+		<span ng-show="failedLogin" class="error">Click "Sign up" if it's your first time</span>
 	</form>
 </div>
