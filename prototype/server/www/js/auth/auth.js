@@ -117,7 +117,7 @@ angular.module('auth', [
 	$scope.login = function() {
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
-			$scope.cancel();
+			$scope.cancel('success');
 			authService.loginConfirmed();
 		})
 		.error(function(data, status, headers) {
@@ -138,9 +138,9 @@ angular.module('auth', [
 		);
 	};
 
-	$scope.cancel = function() {
+	$scope.cancel = function(result) {
 		if($scope.dialog !== undefined) {
-			$scope.dialog.close();
+			$scope.dialog.close(result);
 		}
 	};
 })
