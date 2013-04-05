@@ -520,7 +520,7 @@ label {
 	font-style: italic;
 	color: #6E7980;
 }
-.tile-singletweet-item img{
+.tile-singletweet-item img, .tile-twitter-item img{
 	opacity: 0.5;
 }
 
