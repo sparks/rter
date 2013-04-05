@@ -79,7 +79,11 @@ While we can now boast subsecond end-to end latency for location and heading dat
 
 ### 3
 
-RESTful?
+For rtER to be an effective tool for responders it must be part of an ecosystem of other tools used for responders. the rtER infrastructure is now built around a RESTful API, the same type of API used by twitter or youtube. This means that importing or receiving data from external source is easy and simple.
+
+ For example rtER now supports integration with Twitter, via real-time geographical search, and embedded youtube content. This in addition to our live video streaming. It also means that data in our system, the collaboratively filter data, is available for reuse by third-party service. 
+
+We hope that this infrastructure can means our system will cohabitate with other tools already in used by responders in the field.
 
 ## Dump from e-mails
 
