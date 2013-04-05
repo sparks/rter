@@ -199,7 +199,11 @@ angular.module('twitterItem',  [
 			newItem.Type = "singletweet";
 			newItem.ContentURI = 'http://api.twitter.com/1/statuses/oembed.json?id='+tweet.id_str
 								+'&align=center&callback=JSON_CALLBACK';
-			newItem.ContentToken = tweet.text;
+			
+			var tokenText = tweet.text;
+			var urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+			console.log(tokenText.replace(urlRegex, "'url'"));
+			newItem.ContentToken = tokenText.replace(urlRegex, "&ldquo;url&rdquo;");
 			newItem.StartTime = new Date();
 			newItem.StopTime = newItem.StartTime;
 
