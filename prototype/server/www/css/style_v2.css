@@ -228,7 +228,7 @@ label {
 	position: absolute;
 	z-index: 10;
 
-	max-height: 140pt;
+	max-height: 70pt;
 	padding-left: 5px;
 	padding-right: 5px;
 	
@@ -251,7 +251,11 @@ label {
 	border-radius: 2px;
 
 }
-
+.term-view .grid-view .tile-item .tile-summary-badge p{
+	overflow-x: hidden;
+	overflow-y: visible;
+	margin: 0 0 0 0;
+}
 .term-view .grid-view .tile-item .author-badge {
 	top: 0;
 	max-width: 75px;
