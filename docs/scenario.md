@@ -59,6 +59,10 @@ The Quebec city responders who have spent more time in the field with our system
 
 Finally we want to ensure going forward that we can easily not only bring data into our system but also make our data available to other services making us part of the emergency response ecosystem. To this end our data is available through a standard RESTful API. This means data aggregations tools can be extended to leverage our filtering tools and our live streaming platform.
 
+## Video Pitch
+
+The rtER web client is built around collaborative filtering and organization of information. Drag key information up to instantly promote it for all your collaborator. However, in Red Wing emergency responders often perform join operation with local and state emergency response groups. How can different groups share information and collaborate while retaining control over their workspace. In the new alpha release of rtER we address this issue with tags. Like in traditional systems content can be tagged, either by users or automatically, providing meta data. However in rtER each tag has it's own workspace in which content is independatly organized and ranked. This makes it easy create independant workspace and transfer information between then. In red wing local responders are tag their content as "redwing-eoc", meanwhile state responders tag their content "minn-state-eoc". Transfering content from the redwing workspace to the state workspace is as easy as tagging it with the "minn-state-eoc" tag. Additionally with auto-tagging content matching certain criteria, geolocation, trustworthiness, etc can be automatically added to active workspaces. For example video stream from within the Red Wing municipality area and streamed from trusted volunteers might be autotagged as "redwing-eoc" such that they automatically appear in th redwing workspace.
+
 ## Dump from e-mails
 
 "Try to tell us the story."
@@ -84,7 +88,6 @@ The third point probably needs help from Sparky. For me, the main problem is tha
 http://swiftly.org
 
 Anyway, text like this could possibly serve as the transition into the demonstration, where we show all three of these things and talk about our progress in making them real, and how they were elicited by requests from real potential users, who know emergency management.
-
 
 
 [VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]
