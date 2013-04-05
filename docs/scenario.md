@@ -59,6 +59,28 @@ The Quebec city responders who have spent more time in the field with our system
 
 Finally we want to ensure going forward that we can easily not only bring data into our system but also make our data available to other services making us part of the emergency response ecosystem. To this end our data is available through a standard RESTful API. This means data aggregations tools can be extended to leverage our filtering tools and our live streaming platform.
 
+## Video Pitch
+
+### 1
+
+The rtER web client is allows collaborative filtering and organization of information. Drag key information up and it's instantly promoted for all your collaborator. However, in Red Wing emergency responders often perform join operation with local and state emergency response groups. They asked us, how multiple groups share and collaborate while loosing control of their workspace. 
+
+In the new alpha release of rtER we tackle this problem with our taxonomy system. Like in a traditional taxonomy system content can be tagged, by users or automatically, providing searchable meta data. However, in rtER each tag is a workspace in which content is independently organized and ranked. 
+
+This makes it easy create independent workspace and transfer information between then. In red wing local responders are tag their content as "redwing-eoc", meanwhile state responders tag their content "minn-state-eoc". Transfering content from the redwing workspace to the state workspace is as easy as tagging it with the "minn-state-eoc" tag. Additionally with auto-tagging content matching certain criteria, geolocation, trustworthiness, etc can be automatically added to active workspaces. For example video stream from within the Red Wing municipality area and streamed from trusted volunteers might be autotagged as "redwing-eoc" such that they automatically appear in th redwing workspace.
+
+### 2
+
+rtER we are making interactive live video a first class citizen. In the rtER web interface, not only can you view live video from mobile users, you can also interactively direct their gaze to points of interest in the field. Emergency responders in Quebec City performed in the field testing with the prototype mobile app. In addition to suggesting many UI improvements, they underscored the need for lower latency to create a more responsive interactions. To this end the new version of our mobile app for iOS provides much higher framerate video delivered to the servers, along with location and heading information, at very low latency. 
+
+While we can now boast subsecond end-to end latency for location and heading data, some challenges still remains for video data. Streaming video arrives at our servers with subsecond latency but no native streaming video players support such low latency. As a result one of goals in the next round is to develop an ultra low latency HTML5 video player.
+
+(Blurb about bandwidth an power limits?)
+
+### 3
+
+RESTful?
+
 ## Dump from e-mails
 
 "Try to tell us the story."
@@ -84,7 +106,6 @@ The third point probably needs help from Sparky. For me, the main problem is tha
 http://swiftly.org
 
 Anyway, text like this could possibly serve as the transition into the demonstration, where we show all three of these things and talk about our progress in making them real, and how they were elicited by requests from real potential users, who know emergency management.
-
 
 
 [VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]

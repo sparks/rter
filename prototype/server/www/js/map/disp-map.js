@@ -102,10 +102,20 @@ angular.module('disp-map', [
 	$scope.mapClick = function($event) {
 		if($scope.enableDir === undefined) return;
 
-		$scope.userDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
-		$scope.rebuildDir();
+		var newDir = angular.copy($scope.userDir);
 
-		$scope.directionCache.update($scope.userDir);
+		newDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
+
+		$scope.directionCache.update(
+			newDir,
+			function() {
+				$scope.userDir.Heading = newDir.Heading;
+				$scope.rebuildDir();
+			}, 
+			function() {
+
+			}
+		);
 	};
 
 	$scope.$watch('[item.Lat, item.Lng]', function() {

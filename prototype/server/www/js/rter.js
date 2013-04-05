@@ -29,9 +29,11 @@ angular.module('rter', [
 	$scope.login = function() {
 		if(!$scope.loginDialogOpen) {
 			$scope.loginDialogOpen = true;
-			LoginDialog.open().then(function() {
+			LoginDialog.open().then(function(result) {
+				if(result == 'success') {
+					$scope.loggedIn = true;
+				}
 				$scope.loginDialogOpen = false;
-				$scope.loggedIn = true;
 			});
 		}
 	};
