@@ -63,15 +63,49 @@ Finally we want to ensure going forward that we can easily not only bring data i
 
 ### 1
 
-The rtER web client is allows collaborative filtering and organization of information. Drag key information up and it's instantly promoted for all your collaborator. However, in Red Wing emergency responders often perform join operation with local and state emergency response groups. They asked us, how multiple groups share and collaborate while loosing control of their workspace. 
+`Show the filtering/drag interface being used.`
+
+`New items popup automatically`
+
+The rtER web client is allows collaborative filtering and organization of real-time information.
+Drag key information up and it's instantly promoted for all your collaborator.
+
+However, in Red Wing emergency responders often perform join operation with local and state emergency response groups. 
+They asked us, how multiple groups share and collaborate while loosing control of their workspace. 
+
+`open a item and tag it`
+
+`go into tag cloud and open the tag just made`
 
 In the new alpha release of rtER we tackle this problem with our taxonomy system. Like in a traditional taxonomy system content can be tagged, by users or automatically, providing searchable meta data. However, in rtER each tag is a workspace in which content is independently organized and ranked. 
 
-This makes it easy create independent workspace and transfer information between then. In red wing local responders are tag their content as "redwing-eoc", meanwhile state responders tag their content "minn-state-eoc". Transfering content from the redwing workspace to the state workspace is as easy as tagging it with the "minn-state-eoc" tag. Additionally with auto-tagging content matching certain criteria, geolocation, trustworthiness, etc can be automatically added to active workspaces. For example video stream from within the Red Wing municipality area and streamed from trusted volunteers might be autotagged as "redwing-eoc" such that they automatically appear in th redwing workspace.
+`open a tab for redwing-eoc and minn-state-eoc in side by side views`
+
+`different content appears automatically in each`
+
+This makes it easy create independent workspace and transfer information between then. In red wing local responders are tag their content as "redwing-eoc", meanwhile state responders tag their content "minn-state-eoc".
+
+`content stops appearing`
+
+`a video item on the redwing-eoc side and tagged with minn-state-eoc thus sending it accross`
+
+Transfering content from the redwing workspace to the state workspace is as easy as tagging it with the "minn-state-eoc" tag. Additionally with auto-tagging content matching certain criteria, geolocation, trustworthiness, etc can be automatically added to active workspaces. For example video stream from within the Red Wing municipality area and streamed from trusted volunteers might be autotagged as "redwing-eoc" such that they automatically appear in th redwing workspace.
 
 ### 2
 
-rtER we are making interactive live video a first class citizen. In the rtER web interface, not only can you view live video from mobile users, you can also interactively direct their gaze to points of interest in the field. Emergency responders in Quebec City performed in the field testing with the prototype mobile app. In addition to suggesting many UI improvements, they underscored the need for lower latency to create a more responsive interactions. To this end the new version of our mobile app for iOS provides much higher framerate video delivered to the servers, along with location and heading information, at very low latency. 
+`show the interface with live thumbnail`
+
+rtER we are making interactive live video a first class citizen. 
+
+`open a closeup view for an item`
+
+In the rtER web interface, not only can you view live video from mobile users, you can also interactively direct their gaze to points of interest in the field. Emergency responders in Quebec City performed in the field testing with the prototype mobile app. In addition to suggesting many UI improvements, they underscored the need for lower latency to create a more responsive interactions. 
+
+`show a view of the iphone app? if possible`
+
+To this end the new version of our mobile app for iOS provides much higher framerate video delivered to the servers, along with location and heading information, at very low latency. 
+
+`system diagram?`
 
 While we can now boast subsecond end-to end latency for location and heading data, some challenges still remains for video data. Streaming video arrives at our servers with subsecond latency but no native streaming video players support such low latency. As a result one of goals in the next round is to develop an ultra low latency HTML5 video player.
 
@@ -79,11 +113,16 @@ While we can now boast subsecond end-to end latency for location and heading dat
 
 ### 3
 
+`show twitter live search, promote tweet and view`
+
+`show embedded youtube`
+
+
 For rtER to be an effective tool for responders it must be part of an ecosystem of other tools used for responders. the rtER infrastructure is now built around a RESTful API, the same type of API used by twitter or youtube. This means that importing or receiving data from external source is easy and simple.
 
- For example rtER now supports integration with Twitter, via real-time geographical search, and embedded youtube content. This in addition to our live video streaming. It also means that data in our system, the collaboratively filter data, is available for reuse by third-party service. 
+For example rtER now supports integration with Twitter, via real-time geographical search, and embedded youtube content. This in addition to our live video streaming. It also means that data in our system, the collaboratively filter data, is available for reuse by third-party service. 
 
-We hope that this infrastructure can means our system will cohabitate with other tools already in used by responders in the field.
+We hope that this infrastructure can means our system will cohabitate with other tools already in used by responders in the field. (Talk about Ushahadi)
 
 ## Dump from e-mails
 
