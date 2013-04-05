@@ -42,9 +42,6 @@
         //reference to previewController to get authString - not sure if authString is dynamic
         previewController = prev;
         
-        getQueue = dispatch_queue_create("com.rterCamera.getQueue", DISPATCH_QUEUE_SERIAL); //[[NSOperationQueue alloc]init];
-        putQueue = [[NSOperationQueue alloc]init];
-        
 //        headingData = [[NSMutableData alloc]init];
         
         _curRed = 0.0;
@@ -134,19 +131,25 @@
         [locationManager startUpdatingHeading];
         [locationManager startUpdatingLocation];
     }
-    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+//    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    
+    getHeadingTimer = [NSTimer timerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:getHeadingTimer forMode:NSRunLoopCommonModes];
+    
     [getHeadingTimer fire];
 }
 
 -(void)stopGetPutTimer {
     [getHeadingTimer invalidate];
-    
+        
     // stop location updates
     [locationManager stopUpdatingHeading];
     [locationManager stopUpdatingLocation];
 }
 
 -(void)getHeadingPutCoordindates {
+    
+    NSLog(@"getting corrds");
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];

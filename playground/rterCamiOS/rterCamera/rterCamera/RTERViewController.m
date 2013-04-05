@@ -61,12 +61,23 @@ RTERPreviewController *preview;
 	// NSOperationQueue *opQueue = [[NSOperationQueue alloc] init];
 	
 	NSLog(@"Attempting auth:\n\t%@\n\t%@", self.userField.text, self.passField.text);
-	
     
-    userName = userField.text;
+    [self loginWithUser:self.userField.text Password:self.passField.text];
+}
+
+- (IBAction)anonymousLogin:(id)sender {
+    NSLog(@"Attempting anonymous login");
+    
+    [self loginWithUser:@"anonymous" Password:@"anonymous"];
+
+}
+
+- (void)loginWithUser:(NSString *)user Password:(NSString *)password {
+    
+    userName = user;
     
 	// the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [self.userField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [self.passField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request

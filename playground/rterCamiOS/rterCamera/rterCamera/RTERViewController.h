@@ -18,5 +18,6 @@
 
 - (IBAction)startCamera:(id)sender;
 - (IBAction)login:(id)sender;
+- (IBAction)anonymousLogin:(id)sender;
 
 @end
