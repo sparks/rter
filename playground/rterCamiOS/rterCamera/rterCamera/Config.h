@@ -17,9 +17,9 @@
 #define DESIRED_FPS 7
 #define DESIRED_FPS_IPHONE5 15
 
-#define OPENGL_FPS 60
+#define OPENGL_FPS 30
 
-#define SERVER_GEO_UPDATE_PERIOD 1 //in seconds, period at which we will poll the server and send our heading
+#define SERVER_GEO_UPDATE_PERIOD 1 //in seconds, period at which we will poll the server and send our heading; can be a fraction
 
 typedef NS_ENUM(NSInteger,Colour) {
     RED,

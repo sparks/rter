@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "RTERPreviewController.h"
+#import "SSKeychain.h"
+#import "SSKeychainQuery.h"
 
 @interface RTERViewController : UIViewController<RTERPreviewControllerDelegate,NSURLConnectionDataDelegate,UITextFieldDelegate>
 
@@ -18,5 +20,6 @@
 
 - (IBAction)startCamera:(id)sender;
 - (IBAction)login:(id)sender;
+- (IBAction)anonymousLogin:(id)sender;
 
 @end
