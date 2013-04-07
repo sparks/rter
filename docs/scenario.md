@@ -61,68 +61,73 @@ Finally we want to ensure going forward that we can easily not only bring data i
 
 ## Video Pitch
 
-### 1
+`Show the rtER page: the map and text filer are being used`
 
-`Show the filtering/drag interface being used.`
+The rtER web client allows collaborative filtering and organization of real-time information, including video, Twitter feeds, and other social media. 
 
-`New items popup automatically`
+`Within the filtered information, on item is dragged up`
 
-The rtER web client is allows collaborative filtering and organization of real-time information.
-Drag key information up and it's instantly promoted for all your collaborator.
+Dragging key information up instantly promotes it
 
-However, in Red Wing emergency responders often perform join operation with local and state emergency response groups. 
-They asked us, how multiple groups share and collaborate while loosing control of their workspace. 
+`A split view appears (another user) and the item moves up there automatically`
+
+for all your collaborators.
+
+`Cut to outside, a user pulls out his phone`
+
+Importantly, rtER makes live, interactive video from mobile users available to emergency response personnel.
+
+`closeup of the streaming starting, some landmark is visible`
+
+Because emergency response personnel in Red Wing are already equipped with iPhones, an iOS version of mobile app is now available.
+
+`back to the rtER page, video appears and is opened, same landmark is visible`
+
+We've also responded to the needs of public safety officers in Quebec City who performed field testing with our system. We've met their requirement for higher frame rate with an HTML5 video streaming pipeline from the phone to the browser.
+
+`target heading is changed in web interface`
+
+The web client also allows emergency personnel to direct the viewpoint from mobile users in the field.
+
+`Short clip of the user in the field reponding to change`
+
+helping obtain more valuable information to inform their decision-making.
+
+`Show someone working with the interface like in the begining`
+
+`Promote an item propagate to another user`
+
+Individuals who need to monitor information do so as part of a team. When they move an item it needs to show up instantly on the screens of other team members.
+
+However, emergency responders, for example, in the city of Red Wing often perform joint operations with local and state emergency response groups. They need the ability to share and collaborate with each other without losing control of their workspaces.
 
 `open a item and tag it`
 
 `go into tag cloud and open the tag just made`
 
-In the new alpha release of rtER we tackle this problem with our taxonomy system. Like in a traditional taxonomy system content can be tagged, by users or automatically, providing searchable meta data. However, in rtER each tag is a workspace in which content is independently organized and ranked. 
+In our latest release of rtER, we tackle this problem with "tags" that can be added directly by users or by the system, automatically, and searched as metadata. However, in rtER each tag is a workspace in which content is independently organized and ranked.
 
 `open a tab for redwing-eoc and minn-state-eoc in side by side views`
 
-`different content appears automatically in each`
+Here we have a tag for RedWing reponders `highligh redwing tag` and for state responder `highligh state tag`. Thus, safety officials in the city of Red Wing can manage their information independantly from the state level, 
 
-This makes it easy create independent workspace and transfer information between then. In red wing local responders are tag their content as "redwing-eoc", meanwhile state responders tag their content "minn-state-eoc".
+`open some particular item and tag it`
 
-`content stops appearing`
+but when they notice something relevant to emergency response personnel at the state level, they can tag the data with the MN state tag.
 
-`a video item on the redwing-eoc side and tagged with minn-state-eoc thus sending it accross`
+`item appears in MN-state-eoc workspace`
 
-Transfering content from the redwing workspace to the state workspace is as easy as tagging it with the "minn-state-eoc" tag. Additionally with auto-tagging content matching certain criteria, geolocation, trustworthiness, etc can be automatically added to active workspaces. For example video stream from within the Red Wing municipality area and streamed from trusted volunteers might be autotagged as "redwing-eoc" such that they automatically appear in th redwing workspace.
+The associated contents then show up right away on the screens of state responders.
 
-### 2
+`show a second tag transfer example and maybe some auto tags`
 
-`show the interface with live thumbnail`
+Transferring content between workspaces is as easy as adding the appropriate tags.  Furthermore, auto-tagging could include labels such as the trustworthiness of the source, helping automatically seperate contents submitted by a trained volunteer versus a member of the general public.
 
-rtER we are making interactive live video a first class citizen. 
+'show twitter live search, promote tweet and view'
 
-`open a closeup view for an item`
+'show embedded youtube'
 
-In the rtER web interface, not only can you view live video from mobile users, you can also interactively direct their gaze to points of interest in the field. Emergency responders in Quebec City performed in the field testing with the prototype mobile app. In addition to suggesting many UI improvements, they underscored the need for lower latency to create a more responsive interactions. 
-
-`show a view of the iphone app? if possible`
-
-To this end the new version of our mobile app for iOS provides much higher framerate video delivered to the servers, along with location and heading information, at very low latency. 
-
-`system diagram?`
-
-While we can now boast subsecond end-to end latency for location and heading data, some challenges still remains for video data. Streaming video arrives at our servers with subsecond latency but no native streaming video players support such low latency. As a result one of goals in the next round is to develop an ultra low latency HTML5 video player.
-
-(Blurb about bandwidth an power limits?)
-
-### 3
-
-`show twitter live search, promote tweet and view`
-
-`show embedded youtube`
-
-
-For rtER to be an effective tool for responders it must be part of an ecosystem of other tools used for responders. the rtER infrastructure is now built around a RESTful API, the same type of API used by twitter or youtube. This means that importing or receiving data from external source is easy and simple.
-
-For example rtER now supports integration with Twitter, via real-time geographical search, and embedded youtube content. This in addition to our live video streaming. It also means that data in our system, the collaboratively filter data, is available for reuse by third-party service. 
-
-We hope that this infrastructure can means our system will cohabitate with other tools already in used by responders in the field. (Talk about Ushahadi)
+Finally, we realized that to be most effective, rtER  must be part of an ecosystem of other tools used for responders. The rtER infrastructure is now built around a RESTful API, just as used by twitter and youtube. This means that rtER can easily access data from such external sources.  Moreover, the collaboratively filtered data from rtER is available for reuse by third-party services.
 
 ## Dump from e-mails
 
