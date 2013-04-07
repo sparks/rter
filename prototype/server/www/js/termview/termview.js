@@ -148,7 +148,7 @@ angular.module('termview', [
 		else return false;
 	};
 
-	$scope.dragCallback = function(a, b) {
+	$scope.dragCallback = function(e) {		
 		if($scope.filterMode == 'remove' && ($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== ''))) { //TODO: This should have a blur options instead maybe?
 			Alerter.warn("You cannot reorder items while your filters are enabled", 2000);
 			return;
@@ -164,11 +164,11 @@ angular.module('termview', [
 		}
 	};
 
-	$scope.closeupItemDialog = function(item){
+	$scope.closeupItemDialog = function(item) {
 		CloseupItemDialog.open(item);
 	};
 
-	$scope.updateItemDialog = function(item){
+	$scope.updateItemDialog = function(item) {
 		UpdateItemDialog.open(item).then(function() {
 			$scope.updateMarkers();
 		});

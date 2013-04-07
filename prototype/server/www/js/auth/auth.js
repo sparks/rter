@@ -115,7 +115,6 @@ angular.module('auth', [
 
 .controller('LoginPanelCtrl', function($scope, $http, authService, UserResource, Alerter) {
 	$scope.login = function() {
-		console.log("asdf");
 		$http.post("/auth", {Username: $scope.username, Password: $scope.password})
 		.success(function(data, status, headers) {
 			$scope.cancel('success');
