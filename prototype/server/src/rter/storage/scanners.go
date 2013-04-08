@@ -50,6 +50,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 		&item.HasGeo,
 		&item.Lat,
 		&item.Lng,
+		&item.Radius,
 		&item.Live,
 		&startTimeString,
 		&stopTimeString,

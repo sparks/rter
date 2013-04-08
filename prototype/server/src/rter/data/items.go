@@ -26,6 +26,7 @@ type Item struct {
 	HasGeo bool    //Marks if location data is valid
 	Lat    float64 `json:",omitempty"`
 	Lng    float64 `json:",omitempty"`
+	Radius float64 `json:",omitempty"`
 
 	Live      bool      //Marks if this Item's content is 'live'
 	StartTime time.Time `json:",omitempty"`

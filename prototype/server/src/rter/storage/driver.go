@@ -17,7 +17,7 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, ContentToken, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, ContentToken, HasHeading, Heading, HasGeo, Lat, Lng, Radius, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
 			v.Author,
 			v.ThumbnailURI,
@@ -29,6 +29,7 @@ func Insert(val interface{}) error {
 			v.HasGeo,
 			v.Lat,
 			v.Lng,
+			v.Radius,
 			v.Live,
 			v.StartTime.UTC(),
 			v.StopTime.UTC(),
@@ -165,7 +166,7 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, ContentToken=?, HasHeading=?, Heading=?, HasGeo=?, Lat=?, Lng=?, Live=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, ContentToken=?, HasHeading=?, Heading=?, HasGeo=?, Lat=?, Lng=?, Radius=?, Live=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
 			v.ThumbnailURI,
 			v.ContentURI,
@@ -176,6 +177,7 @@ func Update(val interface{}) error {
 			v.HasGeo,
 			v.Lat,
 			v.Lng,
+			v.Radius,
 			v.Live,
 			v.StartTime.UTC(),
 			v.StopTime.UTC(),
