@@ -3,6 +3,7 @@
 		"addr": "",
 		"port": 8080,
 		"production_mode": false,
+		"access_control_allow_origin": "http://localhost:8000",
 		"secure_mode": false,
 		"cert_file": "",
 		"key_file": "",

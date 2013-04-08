@@ -62,7 +62,7 @@ const (
 	TC_ARG_DASH   string = " "
 	TC_ARG_MP4    string = " -codec copy video.mp4 "
 	TC_ARG_OGG    string = " -codec:v libtheora -b:v 600k -codec:a vorbis -b:a 128k video.ogv "
-	TC_ARG_WBEM   string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
+	TC_ARG_WBEM   string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -minrate 600k -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
 	TC_ARG_THUMB  string = " -f image2 {{.Thumb_size}} -vsync 1 -vf fps=fps=1/{{.Thumb_rate}} thumb/%09d.jpg "
 	TC_ARG_POSTER string = " -f image2 {{.Poster_size}} -vsync 1 -vf fps=fps=1/{{.Poster_rate}} {{.Poster_skip}} -vframes {{.Poster_corrected_count}} poster/%09d.jpg "
 )
