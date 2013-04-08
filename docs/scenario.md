@@ -59,6 +59,22 @@ The Quebec city responders who have spent more time in the field with our system
 
 Finally we want to ensure going forward that we can easily not only bring data into our system but also make our data available to other services making us part of the emergency response ecosystem. To this end our data is available through a standard RESTful API. This means data aggregations tools can be extended to leverage our filtering tools and our live streaming platform.
 
+## Video shots
+### Screencap
+* Interface being used with filter and dragging
+* Item being dragged in one window. Item auto moving in another
+* Video item pops up and is opened. Same video stream. Direction is changed.
+* Item being tagged, tag appears in tag cloud.
+* Open tag 
+* OPen tag for mn-eoc state-eoc
+* Transfer tag
+* Youtub Twitter
+
+### Video
+* User gets out phone to stream
+* Views of user interacting with UI and starts stream
+* User recieves direction cues
+
 ## Video Pitch
 
 `Show the rtER page: the map and text filer are being used`
@@ -123,9 +139,9 @@ The associated contents then show up right away on the screens of state responde
 
 Transferring content between workspaces is as easy as adding the appropriate tags.  Furthermore, auto-tagging could include labels such as the trustworthiness of the source, helping automatically seperate contents submitted by a trained volunteer versus a member of the general public.
 
-'show twitter live search, promote tweet and view'
+`show twitter live search, promote tweet and view`
 
-'show embedded youtube'
+`show embedded youtube`
 
 Finally, we realized that to be most effective, rtER  must be part of an ecosystem of other tools used for responders. The rtER infrastructure is now built around a RESTful API, just as used by twitter and youtube. This means that rtER can easily access data from such external sources.  Moreover, the collaboratively filtered data from rtER is available for reuse by third-party services.
 

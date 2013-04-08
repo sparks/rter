@@ -1,6 +1,8 @@
 # ToDos
 ## Server
 ### FixMe
+* MySQL seems to timeout eventually and return driver bad conn. We should provide to reconnect without rebooting the server.
+* Firefox has a click/drag bug. Current dragging causes a click. It should be fixed soon. Workaround?
 * Bootstrap / angular ui doesn't destroy controllers in closed dialogs, this leave my websockets open after closing dialog, currently hacking the bootstrap
 * Dragging live tiles is very power hungry and lags
 * marker flickr continues
