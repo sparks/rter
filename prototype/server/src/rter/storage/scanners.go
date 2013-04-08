@@ -44,6 +44,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 		&item.ThumbnailURI,
 		&item.ContentURI,
 		&item.UploadURI,
+		&item.ContentToken,
 		&item.HasHeading,
 		&item.Heading,
 		&item.HasGeo,

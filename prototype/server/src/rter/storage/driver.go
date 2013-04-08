@@ -17,12 +17,13 @@ func Insert(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO Items (Type, Author, ThumbnailURI, ContentURI, UploadURI, ContentToken, HasHeading, Heading, HasGeo, Lat, Lng, Live, StartTime, StopTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			v.Type,
 			v.Author,
 			v.ThumbnailURI,
 			v.ContentURI,
 			v.UploadURI,
+			v.ContentToken,
 			v.HasHeading,
 			v.Heading,
 			v.HasGeo,
@@ -164,10 +165,11 @@ func Update(val interface{}) error {
 	switch v := val.(type) {
 	case *data.Item:
 		res, err = Exec(
-			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, HasHeading=?, Heading=?, HasGeo=?, Lat=?, Lng=?, Live=?, StartTime=?, StopTime=? WHERE ID=?",
+			"UPDATE Items SET Type=?, ThumbnailURI=?, ContentURI=?, UploadURI=?, ContentToken=?, HasHeading=?, Heading=?, HasGeo=?, Lat=?, Lng=?, Live=?, StartTime=?, StopTime=? WHERE ID=?",
 			v.Type,
 			v.ThumbnailURI,
 			v.ContentURI,
+			v.ContentToken,
 			v.UploadURI,
 			v.HasHeading,
 			v.Heading,

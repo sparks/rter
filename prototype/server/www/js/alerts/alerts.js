@@ -3,7 +3,7 @@ angular.module('alerts', [
 	'ng'            //Timeout mechanism
 ])
 
-.factory('Alerter', function ($timeout) {
+.factory('Alerter', function ($timeout, $rootScope) {
 	function Alerter() {
 		this.alerts = [];
 		var self = this;
@@ -11,6 +11,7 @@ angular.module('alerts', [
 		this.warn = function(msg, timeout) {
 			var alert = {msg: msg};
 			this.alerts.push(alert);
+			if(!$rootScope.$$phase) $rootScope.$digest();
 			if(timeout !== undefined) {
 				$timeout(function() {
 					self.alerts.remove(self.alerts.indexOf(alert));
@@ -21,6 +22,7 @@ angular.module('alerts', [
 		this.error = function(msg, timeout) {
 			var alert = {type: 'error', msg: msg};
 			this.alerts.push(alert);
+			if(!$rootScope.$$phase) $rootScope.$digest();
 			if(timeout !== undefined) {
 				$timeout(function() {
 					self.alerts.remove(self.alerts.indexOf(alert));
@@ -31,6 +33,7 @@ angular.module('alerts', [
 		this.success = function(msg, timeout) {
 			var alert = {type: 'success', msg: msg};
 			this.alerts.push(alert);
+			if(!$rootScope.$$phase) $rootScope.$digest();
 			if(timeout !== undefined) {
 				$timeout(function() {
 					self.alerts.remove(self.alerts.indexOf(alert));
@@ -40,6 +43,7 @@ angular.module('alerts', [
 
 		this.alert = function(alert, timeout) {
 			this.alerts.push(alert);
+			if(!$rootScope.$$phase) $rootScope.$digest();
 			if(timeout !== undefined) {
 				$timeout(function() {
 					self.alerts.remove(self.alerts.indexOf(alert));

@@ -44,7 +44,6 @@ angular.module('termview', [
 
 	$scope.viewmode = "grid-view";
 	$scope.filterMode = "blur";
-	$scope.prevFilterMode = "blur";
 	$scope.mapFilterEnable = false;
 
 	$scope.$watch('mapFilterEnable', function() {
@@ -53,19 +52,6 @@ angular.module('termview', [
 
 	$scope.$watch('viewmode', function(newVal, oldVal) {
 		$scope.mapCenter = $scope.map.getCenter();
-
-		if($scope.viewmode == 'map-view') {
-			$scope.mapFilterEnable = false;
-		}
-
-		if(oldVal != "map-view" && newVal == "map-view") {
-			$scope.prevFilterMode = $scope.filterMode;
-			$scope.filterMode = "remove";
-		}
-
-		if(oldVal == "map-view" && newVal != "map-view") {
-			$scope.filterMode = $scope.prevFilterMode;
-		}
 
 		$timeout(function() {
 			$scope.resizeMap();
@@ -76,19 +62,23 @@ angular.module('termview', [
 
 	$scope.rankingCache = new TaxonomyRankingCache($scope.term.Term);
 
+	$scope.$on("$destroy", function() {
+		if($scope.rankingCache.close !== undefined) $scope.rankingCache.close();
+	});
+
 	if($scope.term.Term === "" || $scope.term.Term === undefined) {
 		$scope.ranking = [];
 	} else {
 		$scope.ranking = $scope.rankingCache.ranking;
 	}
 
-	$scope.items = ItemCache.items;
+	$scope.items = ItemCache.contents;
 
 	$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 	$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
-	$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
+	$scope.orderedByTime = $filter('orderBy')($scope.orderedByID, 'StartTime', true);
 
-	$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
+	$scope.rankedItems = $filter('orderByRanking')($scope.orderedByTime, $scope.ranking);
 
 	$scope.finalMapItems = $scope.rankedItems;
 	$scope.finalFilteredItems = $scope.rankedItems;
@@ -99,30 +89,30 @@ angular.module('termview', [
 	$scope.$watch('items', function() {
 		$scope.filteredItems = $filter('filterByTerm')($scope.items, $scope.term.Term);
 		$scope.orderedByID = $filter('orderBy')($scope.filteredItems, 'ID', true);
-		$scope.orderedByStopTime = $filter('orderBy')($scope.orderedByID, 'StopTime', true);
+		$scope.orderedByTime = $filter('orderBy')($scope.orderedByID, 'StartTime', true);
 	}, true);
 
-	$scope.$watch('[ranking, orderedByStopTime]', function() {
-		$scope.rankedItems = $filter('orderByRanking')($scope.orderedByStopTime, $scope.ranking);
+	$scope.$watch('[ranking, orderedByTime]', function() {
+		$scope.rankedItems = $filter('orderByRanking')($scope.orderedByTime, $scope.ranking);
 	}, true);
 
 	$scope.$watch('[rankedItems, filterMode]', function() {
 		if($scope.filterMode == 'blur') {
 			$scope.finalFilteredItems = $scope.rankedItems;
-			$scope.finalMapItems = $scope.rankedItems;
+			// $scope.finalMapItems = $scope.rankedItems;
 		}
 	}, true);
 
 	$scope.$watch('[rankedItems, textQuery, filterMode]', function() {
-		if($scope.filterMode == 'remove') {
+		// if($scope.filterMode == 'remove') {
 			$scope.textSearchedItems = $filter('filter')($scope.rankedItems, $scope.textQuery);
-		}
+		// }
 	}, true);
 
 	$scope.$watch('[textSearchedItems, filterMode]', function() {
-		if($scope.filterMode == 'remove') {
+		// if($scope.filterMode == 'remove') {
 			$scope.finalMapItems = $scope.textSearchedItems;
-		}
+		// }
 	}, true);
 
 	$scope.$watch('finalMapItems', function() {

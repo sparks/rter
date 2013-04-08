@@ -267,12 +267,13 @@ angular.module('tsunamijs.livethumbnail', [])
 
                 // set initial image to the first (timeRange=0) or last (timeRange=1)
                 // available image
-                lastUrl = makeUrl(timeRange, 1);
+                lastUrl = makeUrl(timeRange, 0); //HACK: Length sometimes load wrong, last is safer for now
 
                 // play state
                 if (scope.c.autoplay) {
                     play();
                 } else {
+                    play(); //HACK: Load initial image
                     if (scope.c.skimmable) { skim(); } else { pause(); }
                 }
 
@@ -310,11 +311,13 @@ angular.module('tsunamijs.livethumbnail', [])
                 // toggle selection
                 toggleSelect();
 
-                // toggle play state
-                if (scope.c.skimmable) {
-                    if (!scope.isSkimming()) { skim(); } else { play(); }
-                } else {
-                    if (!scope.isPaused()) { pause(); } else { play(); }
+                if(scope.c.clickable) { //HACK: Click tmp click solution
+                    // toggle play state
+                    if (scope.c.skimmable) {
+                        if (!scope.isSkimming()) { skim(); } else { play(); }
+                    } else {
+                        if (!scope.isPaused()) { pause(); } else { play(); }
+                    }
                 }
             };
 
@@ -326,6 +329,7 @@ angular.module('tsunamijs.livethumbnail', [])
                     scope.$emit("playing", scope.c.video);
                 }
                 setDisplayState(DisplayState.playing);
+
                 if (lastUrl !== "") { scope.bgimageurl = lastUrl; }
                 else { scheduleUpdate(); }
             }
@@ -367,16 +371,20 @@ angular.module('tsunamijs.livethumbnail', [])
 
                 // clamp and normalise to available number of pixels
                 // requires jQuery for .position()
-                playhead = Math.max(0, Math.min(~~(e.clientX - thumb.position().left), scope.c.width));
+                playhead = Math.max(0, Math.min(~~(e.offsetX - thumb.position().left), scope.c.width));
 
                 // propagate to DOM
                 scope.skimmerWidth = playhead / scope.c.width * 100;
 
                 // pick the image and display it
+                var reachTime = timeRange * playhead / scope.c.width;
                 fetchImageAsync(makeUrl(timeRange, playhead / scope.c.width),
                     function() {
                         // set the fetched image as new background on success
                         scope.bgimageurl = img.src;
+                    },
+                    function() {
+                        timeRange = reachTime; //HACK: Truncate down if length is off w/r/thumbs
                     });
             };
 

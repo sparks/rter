@@ -28,28 +28,108 @@ Of course in this context the data would have been most useful for the McGill co
 * Server infratructure
 	* The new videoserver outline by alex
 	* New rtER Server
-		* RESTful, documented api for handling our data. This means everything that goes in our system is easily accessibile in a standardized API format. Could be reused within other frameworks or applications. Similarly we could easily take in data from anywhere
-		* Designed around our core features so that queries are fast/natural. Support Taxonomy, Users, Ranking within taxonmoies
+		* RESTful, documented api for handling our data. This means everything that goes in our system is easily accessible in a standardized API format. Could be reused within other frameworks or applications. Similarly we could easily take in data from anywhere
+		* Designed around our core features so that queries are fast/natural. Support Taxonomy, Users, Ranking within taxonomies
 * Web client
 	* Built top to bottom in HTML5 components (angularjs, html5 video, google maps v3 with HTML5 canvas/drawing)
 	* User accounts. We can log actions by user. Who did what when. This is important since trust and confidence in sources is key. Understanding who's taking an action or submitting information implies a level of trust. 
-	* Everything you submit is an Item. A generic container. As of now an item can be a webpage, twitter search/post, a youtube video, a live image stream (old android app), a live video stream (new iphone app).
+	* Everything you submit is an Item. A generic container. As of now an item can be a web page, twitter search/post, a youtube video, a live image stream (old android app), a live video stream (new iphone app).
 	* Taxonomy as a first class object
 		* Items can be tagged
 		* Tags can be automated: by content type, by trust level, be location, etc
-		* Each tag has it's own view/workspace. e.g. each tag has ranking for all the items it contains which users can collabortively work with. 
+		* Each tag has it's own view/workspace. e.g. each tag has ranking for all the items it contains which users can collaboratively work with. 
 		* Thus tags are much more powerful tools than normal:
-			* Tag with your username or group name to create a personal or shared workspace
-			* Tag with your colleague's username or group to send to their workspace
-			* Enable auto taggin by area, content type to create a realtime feed for certain condition
+			* Tag with your user name or group name to create a personal or shared workspace
+			* Tag with your colleague's user name or group to send to their workspace
+			* Enable auto tagging by area, content type to create a real time feed for certain condition
 			* Permission can be applied to a tag to prevent external interference in your workspace.
 		* Web client now supports more filtering techniques: fuzzy searching, map filtering, filtering by user trust level, filter by user, filter by user role
-		* Alpha support for HTML5 livestream video with the same interactive control of the remote user (directing the remote user) using a map.
-		* Twitter intergration
+		* Alpha support for HTML5 live stream video with the same interactive control of the remote user (directing the remote user) using a map.
+		* Twitter integration
 		* Various UI improvement (new interactive map elements, intelligent tag fields, global alerts, improved drag and drop grid)
 
 
 ## Scenario and Pitch
+
+In round three of development on the rtER project, we began with a proof of concept and finished with an alpha product. Key in this round was building up the system so that it was viable for in the field testing by partner emergency response groups: Quebec City (...) and Red Wing (...). From the get go we knew some of features that we would need. Integration with twitter and YouTube were added. We continued our work improving real-time video streaming from mobile device. However early feedback from both groups guided many new key developments. 
+
+In Red Wing responders were concerned about creating group and individual workspaces so responders at different hierarchical levels could interact without interfering with each other. In Quebec City they asked about having multiple filtered information streams for parallel events of unequal importance. We attacked both these by making Taxonomy a first class citizen. An items - a video stream, a twitter search, a youtube video - can be tagged either by through the web interface or by automated filters configured on the server. Each tag has it's own workspace. This means that each tag has a grid view which can be opened. This grid view can be sorted collaboratively by drag and drop. As a result items can also be sent and shared between tag workspaces by adding and removing tags from items. (List example here? Red Wing make a "city EOC" and "state EOC" tags during a major crisis to share back and forth. Quebec has a general feed via the "quebec all" tag, but during a flood an auto tag for live video in a certain area "video-zone1" is created giving only video for the affected area).
+
+The Quebec city responders who have spent more time in the field with our system made numerous user interface suggestions and bug reports that were brought to on the design. In particular their field work underlined the necessity of low latency video streaming. They experienced difficulty interacting with remote users due to both low frame rate of the prototype and the latency, as much as 10 seconds, between action and response. The alpha prototype brings high frame rate and truly low latency streaming to mobile devices, effectively address these issues. Only in browser playback remains a challenge at very low latency.
+
+Finally we want to ensure going forward that we can easily not only bring data into our system but also make our data available to other services making us part of the emergency response ecosystem. To this end our data is available through a standard RESTful API. This means data aggregations tools can be extended to leverage our filtering tools and our live streaming platform.
+
+## Video Pitch
+
+`Show the rtER page: the map and text filer are being used`
+
+The rtER web client allows collaborative filtering and organization of real-time information, including video, Twitter feeds, and other social media. 
+
+`Within the filtered information, on item is dragged up`
+
+Dragging key information up instantly promotes it
+
+`A split view appears (another user) and the item moves up there automatically`
+
+for all your collaborators.
+
+`Cut to outside, a user pulls out his phone`
+
+Importantly, rtER makes live, interactive video from mobile users available to emergency response personnel.
+
+`closeup of the streaming starting, some landmark is visible`
+
+Because emergency response personnel in Red Wing are already equipped with iPhones, an iOS version of mobile app is now available.
+
+`back to the rtER page, video appears and is opened, same landmark is visible`
+
+We've also responded to the needs of public safety officers in Quebec City who performed field testing with our system. We've met their requirement for higher frame rate with an HTML5 video streaming pipeline from the phone to the browser.
+
+`target heading is changed in web interface`
+
+The web client also allows emergency personnel to direct the viewpoint from mobile users in the field.
+
+`Short clip of the user in the field reponding to change`
+
+helping obtain more valuable information to inform their decision-making.
+
+`Show someone working with the interface like in the begining`
+
+`Promote an item propagate to another user`
+
+Individuals who need to monitor information do so as part of a team. When they move an item it needs to show up instantly on the screens of other team members.
+
+However, emergency responders, for example, in the city of Red Wing often perform joint operations with local and state emergency response groups. They need the ability to share and collaborate with each other without losing control of their workspaces.
+
+`open a item and tag it`
+
+`go into tag cloud and open the tag just made`
+
+In our latest release of rtER, we tackle this problem with "tags" that can be added directly by users or by the system, automatically, and searched as metadata. However, in rtER each tag is a workspace in which content is independently organized and ranked.
+
+`open a tab for redwing-eoc and minn-state-eoc in side by side views`
+
+Here we have a tag for RedWing reponders `highligh redwing tag` and for state responder `highligh state tag`. Thus, safety officials in the city of Red Wing can manage their information independantly from the state level, 
+
+`open some particular item and tag it`
+
+but when they notice something relevant to emergency response personnel at the state level, they can tag the data with the MN state tag.
+
+`item appears in MN-state-eoc workspace`
+
+The associated contents then show up right away on the screens of state responders.
+
+`show a second tag transfer example and maybe some auto tags`
+
+Transferring content between workspaces is as easy as adding the appropriate tags.  Furthermore, auto-tagging could include labels such as the trustworthiness of the source, helping automatically seperate contents submitted by a trained volunteer versus a member of the general public.
+
+'show twitter live search, promote tweet and view'
+
+'show embedded youtube'
+
+Finally, we realized that to be most effective, rtER  must be part of an ecosystem of other tools used for responders. The rtER infrastructure is now built around a RESTful API, just as used by twitter and youtube. This means that rtER can easily access data from such external sources.  Moreover, the collaboratively filtered data from rtER is available for reuse by third-party services.
+
+## Dump from e-mails
 
 "Try to tell us the story."
 
@@ -74,7 +154,6 @@ The third point probably needs help from Sparky. For me, the main problem is tha
 http://swiftly.org
 
 Anyway, text like this could possibly serve as the transition into the demonstration, where we show all three of these things and talk about our progress in making them real, and how they were elicited by requests from real potential users, who know emergency management.
-
 
 
 [VISUALS: IMAGES OF FLOOD AT MCGILL + BIGGER FLOODS, maybe under Jeremy talking?]

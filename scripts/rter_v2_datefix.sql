@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS Items (
 	ContentURI VARCHAR(2048) NOT NULL DEFAULT "",
 	UploadURI VARCHAR(2048) NOT NULL DEFAULT "",
 
+	ContentToken VARCHAR(2048) NOT NULL DEFAULT "",
+
 	HasHeading TINYINT(1) NOT NULL DEFAULT 0,
 	Heading DECIMAL(9, 6) NOT NULL DEFAULT 0,
 
@@ -120,7 +122,7 @@ CREATE TABLE IF NOT EXISTS TermRankings (
 INSERT INTO Roles (Title, Permissions) VALUES ("public", 1), ("observer", 1), ("responder", 3), ("editor", 7), ("admin", 15);
 
 INSERT INTO Users (Username, Password, Salt, Role, TrustLevel, CreateTime) VALUES 
-	("anonymous", "", "", "public", 0, "2013-03-19 00:00:00"), 
+	("anonymous", "a6269c1a0f852712b92066279e45aa25", "216394505bee32c7356b30a9c631ac9c", "public", 0, "2013-03-19 00:00:00"), 
 	("admin", "", "", "admin", 0, "2013-03-19 00:00:00")
 ;
 INSERT INTO UserDirections (Username, UpdateTime) VALUES 

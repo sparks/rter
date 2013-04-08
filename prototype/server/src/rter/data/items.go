@@ -4,6 +4,7 @@
 package data
 
 import (
+	"strconv"
 	"time"
 	token "videoserver/auth"
 )
@@ -17,20 +18,40 @@ type Item struct {
 	ContentURI   string `json:",omitempty"` //URI for Content to be displayed online
 	UploadURI    string `json:",omitempty"` //URI for where Content will be uploaded by the Author (often provided by the server)
 
-	HasHeading bool    `json:",omitempty"` //Marks if Heading data is valid
+	ContentToken string `json:",omitempty"` //Field for storing token/api information for remote services
+
+	HasHeading bool    //Marks if Heading data is valid
 	Heading    float64 `json:",omitempty"`
 
-	HasGeo bool    `json:",omitempty"` //Marks if location data is valid
+	HasGeo bool    //Marks if location data is valid
 	Lat    float64 `json:",omitempty"`
 	Lng    float64 `json:",omitempty"`
 
-	Live      bool      `json:",omitempty"` //Marks if this Item's content is 'live'
+	Live      bool      //Marks if this Item's content is 'live'
 	StartTime time.Time `json:",omitempty"`
 	StopTime  time.Time `json:",omitempty"` //Should be set before StartTime for 'live' data when the StopTime is unknown
 
 	Terms []*Term `json:",omitempty"` //Note this field isn't available in the DB, only for convenience
 
 	Token *token.Token `json:",omitempty"` //Note this field isn't available in the DB, only for convenience
+}
+
+//A convenience method to add a Term to an item
+func (i *Item) AddTerm(term string, author string) {
+	newTerm := new(Term)
+
+	newTerm.Term = term
+	newTerm.Author = author
+
+	i.Terms = append(i.Terms, newTerm)
+}
+
+func (i *Item) CRUDPrefix() string {
+	return "items"
+}
+
+func (i *Item) CRUDPath() string {
+	return i.CRUDPrefix() + "/" + strconv.FormatInt(i.ID, 10)
 }
 
 type ItemComment struct {
@@ -43,12 +64,10 @@ type ItemComment struct {
 	UpdateTime time.Time `json:",omitempty"`
 }
 
-//A convenience method to add a Term to an item
-func (i *Item) AddTerm(term string, author string) {
-	newTerm := new(Term)
+func (c *ItemComment) CRUDPrefix() string {
+	return "items/" + strconv.FormatInt(c.ItemID, 10) + "/comments"
+}
 
-	newTerm.Term = term
-	newTerm.Author = author
-
-	i.Terms = append(i.Terms, newTerm)
+func (c *ItemComment) CRUDPath() string {
+	return c.CRUDPrefix()
 }

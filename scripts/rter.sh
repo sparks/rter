@@ -15,7 +15,7 @@ start() {
 	export RTER_DIR='/usr/local/share/rter/'
 	export RTER_LOGFILE='/var/log/rter.log'
 	setcap 'cap_net_bind_service=+ep' /usr/local/share/rter/rter
-	start-stop-daemon --start --background --make-pidfile --pidfile /var/run/rter.pid --chuid rter --exec /usr/local/share/rter/rter -- --gzip --http-port 80 --serve-log-file
+	start-stop-daemon --start --background --make-pidfile --pidfile /var/run/rter.pid --chuid rter --exec /usr/local/share/rter/rter -- --http-port 80 $*
 }
 
 stop() {
@@ -24,7 +24,8 @@ stop() {
 
 case "$1" in 
 	start)
-		start
+		shift
+		start $*
 	;;
 	
 	stop)
@@ -33,7 +34,8 @@ case "$1" in
 
 	restart)
 		stop
-		start
+		shift
+		start $*
 	;;
 
 	*)

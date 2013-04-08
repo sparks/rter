@@ -10,7 +10,7 @@
 #import <math.h>
 #import "RTERVideoEncoder.h"
 #import "RTERGLKViewController.h"
-#define DESIRED_FPS 15
+#import "Config.h"
 
 @interface RTERPreviewController ()
 {
@@ -25,7 +25,10 @@
     CMTime defaultMinFrameDuration;
     
     // desired frame rate
+    float setFPS;   // the fps we try to set for encoding and sending
     CMTime desiredFrameDuration;
+    NSString *sessionPreset;
+    
     
     // encoder
     RTERVideoEncoder *encoder;
@@ -33,9 +36,19 @@
 	
 	NSURLConnection *streamingAuthConnection;
 	NSString *authString; //If authString doesn't have to be private it should be a property CB
+    NSURLConnection *streamConnection;
     
     GLKView* _glkView;
     RTERGLKViewController* _glkVC;
+    
+    int capturedFrameCount;
+    int encodedFrameCount;
+    int sentFrameCount;
+    
+    double currentTime;
+    double timeDiff;
+    
+    AVCaptureVideoOrientation videoOrientation;
 }
 
 @end
@@ -57,8 +70,35 @@
         // init stuff
         sendingData = NO;
         
+        /* possible resolution settings:
+         AVCaptureSessionPresetPhoto;
+         AVCaptureSessionPresetHigh;
+         AVCaptureSessionPresetMedium;
+         AVCaptureSessionPresetLow;
+         AVCaptureSessionPreset320x240;
+         AVCaptureSessionPreset352x288;
+         AVCaptureSessionPreset640x480;
+         AVCaptureSessionPreset960x540;
+         AVCaptureSessionPreset1280x720;
+         */
+        if (IS_IPHONE_5) {
+            sessionPreset = AVCaptureSessionPreset352x288;
+            dimensions.width = 352;
+            dimensions.height = 288;
+            setFPS = DESIRED_FPS_IPHONE5;
+        } else {
+            sessionPreset = AVCaptureSessionPresetLow;
+            dimensions.width = 192;
+            dimensions.height = 144;
+            setFPS = DESIRED_FPS;
+        }
+
+        
         // desired FPS
         desiredFrameDuration = CMTimeMake(1, DESIRED_FPS);
+        
+        //set GLKView hidden
+        [_glkView setHidden:YES];
         
         // listen for notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
@@ -79,52 +119,18 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     streamingToken = @"";
+    
 	
 	// capture session
     captureSession = [[AVCaptureSession alloc] init];
-    
-    // encoder
-//    encoder = [[RTERVideoEncoder alloc] init];
 
     // video session settings
-    
-    /* possible resolution settings:
-     AVCaptureSessionPresetPhoto;
-     AVCaptureSessionPresetHigh;
-     AVCaptureSessionPresetMedium;
-     AVCaptureSessionPresetLow;
-     AVCaptureSessionPreset320x240;
-     AVCaptureSessionPreset352x288;
-     AVCaptureSessionPreset640x480;
-     AVCaptureSessionPreset960x540;
-     AVCaptureSessionPreset1280x720;
-     */
-    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset352x288]) {
-        captureSession.sessionPreset = AVCaptureSessionPreset352x288;
-        NSLog(@"352x288");
-        
-//        CMVideoDimensions dimensions;
-        dimensions.width = 352;
-        dimensions.height = 288;
-                
-//        [encoder setupEncoderWithDimesions:dimensions];
-    }
-//    if ([captureSession canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-//        captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-//        NSLog(@"640x480");
-//        
-//        CMVideoDimensions dimensions;
-//        dimensions.width = 640;
-//        dimensions.height = 480;
-//        
-//        [encoder setupEncoderWithDimesions:dimensions];
-//    }
-    else {
-        // Handle the failure.
+    if ([captureSession canSetSessionPreset:sessionPreset]) {
+        captureSession.sessionPreset = sessionPreset;
+        NSLog(@"video resolution: %dx%d", dimensions.width, dimensions.height);
     }
     
-    previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
-    
+    previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];    
     
     AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (videoDevice) {
@@ -160,24 +166,16 @@
     [outputDevice setSampleBufferDelegate:self queue:encoderQueue];
     
     // add preview layer to preview view
-    [previewView.layer addSublayer:previewLayer];
+//    [previewView.layer addSublayer:previewLayer];
     
     // set the location and size of teh preview layer to that of the preview view
-    [previewLayer setFrame:previewView.bounds];
-
+   // [previewLayer setFrame:previewView.bounds];
+    
     // resize preview to fit within the view, but retain its original aspect ration
     [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     
-    // make sure the preview stays within the bounds
-    // (otherwise it will take up the whole screen)
-    previewView.clipsToBounds = YES;
-    
-    // get the default FPS
-    defaultMaxFrameDuration = previewLayer.connection.videoMaxFrameDuration;
-    defaultMinFrameDuration = previewLayer.connection.videoMinFrameDuration;
-    
-    // start the capture session so that the preview shows up
-    [captureSession startRunning];
+    // add preview layer to preview view
+    [previewView.layer addSublayer:previewLayer];
     
     //Create OpenGL Layer
     
@@ -190,7 +188,54 @@
     
     //initialize View Controller for the GLKView
     _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView previewController:self];
+    
+    //hide glk view
+    [_glkView setHidden:YES];
+    
+}
 
+-(void)viewDidAppear:(BOOL)animated {
+    UIInterfaceOrientation currentOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    // rotate the video
+    NSLog(@"bounds: %f x %f", previewView.bounds.size.width, previewView.bounds.size.height);
+    switch (currentOrientation) {
+        case UIInterfaceOrientationLandscapeLeft:
+            videoOrientation = AVCaptureVideoOrientationLandscapeLeft;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+            break;
+        case UIInterfaceOrientationLandscapeRight:
+            videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+            break;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            // not supporting this orientation
+            break;
+        default:
+            videoOrientation = AVCaptureVideoOrientationPortrait;
+//            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+            break;
+    }
+    
+    [[previewLayer connection] setVideoOrientation:videoOrientation];
+
+    
+    // set the location and size of teh preview layer to that of the preview view
+    [previewLayer setFrame:previewView.bounds];
+    
+    
+    // make sure the preview stays within the bounds
+    // (otherwise it will take up the whole screen)
+    previewView.clipsToBounds = YES;
+    
+    // get the default FPS
+    defaultMaxFrameDuration = previewLayer.connection.videoMaxFrameDuration;
+    defaultMinFrameDuration = previewLayer.connection.videoMinFrameDuration;
+    
+    // start the capture session so that the preview shows up
+    [captureSession startRunning];
+    
+    [_glkVC onSurfaceChangedWidth:self.previewView.bounds.size.width Height:self.previewView.bounds.size.height];
     
 }
 
@@ -200,23 +245,30 @@
     // the bounds of all the auto rotated views have already been set
     
     // rotate the video
+    
     switch (toInterfaceOrientation) {
         case UIInterfaceOrientationLandscapeLeft:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+            videoOrientation = AVCaptureVideoOrientationLandscapeLeft;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
             break;
         case UIInterfaceOrientationLandscapeRight:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+            videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
             break;
         case UIInterfaceOrientationPortraitUpsideDown:
             // not supporting this orientation
             break;
         default:
-            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
+            videoOrientation = AVCaptureVideoOrientationPortrait;
+            //            [[previewLayer connection] setVideoOrientation:AVCaptureVideoOrientationPortrait];
             break;
     }
-
+    
+    [[previewLayer connection] setVideoOrientation:videoOrientation];
     // the bounds have changed
     [previewLayer setFrame: [previewView bounds]];
+    
+    [_glkVC onSurfaceChangedWidth:previewView.bounds.size.width Height:previewView.bounds.size.height];
 }
 
 - (void)appWillResignActive {
@@ -234,6 +286,9 @@
 - (void)onExit {
     // stop listening for notifications
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    // stop timer
+    [_glkVC stopGetPutTimer];
     
     if (captureSession && [captureSession isRunning]) {
         if(sendingData) {
@@ -260,9 +315,7 @@
 - (IBAction)clickedStart:(id)sender {
     if(!sendingData) {
         sendingData = YES;
-        
-        [self initEncoder];
-        
+                
 		// get token for video streaming
 		[self getStreamingToken];
 		
@@ -281,6 +334,11 @@
 }
 
 - (void) startRecording {
+    [self initEncoder];
+    
+    capturedFrameCount = 0;
+    encodedFrameCount = 0;
+    sentFrameCount = 0;
     
     [captureSession addOutput:outputDevice];
     
@@ -300,6 +358,10 @@
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
     
+    //set glkview visible
+    [_glkView setHidden:NO];
+    [_glkVC startGetPutTimer];
+    
 //    for (NSString *codec in [outputDevice availableVideoCodecTypes]) {
 //        NSLog(@"%@", codec);
 //    }
@@ -307,6 +369,8 @@
 
 - (void) stopRecording {
     [captureSession removeOutput:outputDevice];
+    
+    [encoder freeEncoder];
     
     /* restore to default frame rate when not "recording"
      * for some reason have to set both the max and the min for it to work properly */
@@ -322,19 +386,47 @@
     
     CMTimeShow(conn.videoMinFrameDuration);
     CMTimeShow(conn.videoMaxFrameDuration);
+    
+    //hide glk view
+    [_glkView setHidden:YES];
+    [_glkVC stopGetPutTimer];
+    
+    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[self itemID]]]];
+    //142.157.58.153:8080
+    NSString *jsonString = [NSString stringWithFormat:@"{\"StopTime\":\"%@\",\"Live\":false}",[self getUTCFormateDate:[NSDate date]]];
+	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    
+    [putRequest setHTTPMethod:@"PUT"];
+    [putRequest setHTTPBody:postData];
+    [putRequest setValue:[[self delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
+    
+    NSURLConnection *finalPut = [[NSURLConnection alloc]initWithRequest:putRequest delegate:self startImmediately:YES];
+    
 }
 
+-(NSString *)getUTCFormateDate:(NSDate *)localDate
+{
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeZone:timeZone];
+    [dateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
+    NSString *dateString = [dateFormatter stringFromDate:localDate];
+    return dateString;
+}
 
 -(void) getStreamingToken {
 	NSLog(@"Attempting to get Streaming token:");
     dispatch_async(postQueue, ^{
 	
         // the json string to post
-        NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"0001-01-01T00:00:00Z\"}"];
+        
+        
+        NSString *jsonString = [NSString stringWithFormat:@"{\"Type\":\"streaming-video-v1\",\"StartTime\":\"%@\",\"Live\":true,\"HasGeo\":true,\"HasHeading\":true}",[self getUTCFormateDate:[NSDate date]]];
         NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
         // setup the request
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/1.0/items"]];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items",SERVER]]];
 	
         //NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/1.0/items"]];
 	
@@ -400,10 +492,19 @@
 
 -(void) captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-        
+    [connection setVideoOrientation:videoOrientation];
+    
+    timeDiff = CACurrentMediaTime() - currentTime;
+    currentTime = CACurrentMediaTime();
+    actualFPS = 1.0/timeDiff;
+    
+    [_glkVC currentFPS:actualFPS];
+    
+//    NSLog(@"fps: %f", 1.0/timeDiff);
+    
     AVPacket pkt;   // encoder output
     if([encoder encodeSampleBuffer:sampleBuffer output:&pkt]) {
-        NSLog(@"encoded frame");
+        encodedFrameCount++;
         
         // copy pkt to nsdata object which will be sent
         NSData *frameData = [NSData dataWithBytes:pkt.data length:pkt.size];
@@ -427,7 +528,7 @@
             NSData *responseData = [NSURLConnection sendSynchronousRequest:postRequest returningResponse:&response error:&err];
             //        if ([response respondsToSelector:@selector(allHeaderFields)]) {
             NSDictionary *dictionary = [response allHeaderFields];
-            NSLog( @"%@", [dictionary description]);
+            //NSLog( @"%@", [dictionary description]);
         });
 		
 //        [NSURLConnection sendAsynchronousRequest:postRequest
@@ -445,7 +546,7 @@
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
+//    [_glkVC interfaceOrientationDidChange:toInterfaceOrientation];
 }
 
 - (IBAction)clickedBack:(id)sender {
@@ -457,4 +558,14 @@
     encoder = [[RTERVideoEncoder alloc] init];
     [encoder setupEncoderWithDimesions:dimensions];
 }
+
+//- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+//{
+//    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+//}
+//
+//-(NSUInteger)supportedInterfaceOrientations
+//{
+//    return UIInterfaceOrientationMaskLandscape | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
+//}
 @end

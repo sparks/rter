@@ -10,17 +10,24 @@
 
 
 
-#define rad(X) X*180/M_PI
+#define rad(X) X*M_PI/180.0
 
 @interface RTERGLKViewController () {
     NSNumber *lock;
     RTERPreviewController *previewController;
     
-    NSOperationQueue *getQueue;
+//    NSOperationQueue *getQueue;
+    dispatch_queue_t getQueue;
     NSOperationQueue *putQueue;
     
     float latitude;
     float longitude;
+    float headingAccuracy;
+    
+    float fps;
+    
+    BOOL updatedHeading;
+    BOOL updatedLocation;
 }
 @end
 
@@ -35,8 +42,7 @@
         //reference to previewController to get authString - not sure if authString is dynamic
         previewController = prev;
         
-        getQueue = [[NSOperationQueue alloc]init];
-        putQueue = [[NSOperationQueue alloc]init];
+//        headingData = [[NSMutableData alloc]init];
         
         _curRed = 0.0;
         _increasing = YES;
@@ -44,7 +50,7 @@
         _glkView = view;
         _glkView.delegate = self;
         [_glkView setNeedsDisplay];
-        self.preferredFramesPerSecond = 60;
+        self.preferredFramesPerSecond = OPENGL_FPS;
 
         self.view = _glkView;
         self.view.opaque = NO;
@@ -58,7 +64,7 @@
         
         freeRoam = NO;
         rightSideUp = TRUE;
-        orientationTolerance = 30;
+        orientationTolerance = 20;
         currentOrientation = 0;
         desiredOrientation = 0;
         
@@ -68,7 +74,7 @@
 
         // pulsating variables
         arrowPulsateScale = 1.0f;
-        arrowPulsateSpeed = 0.1f;
+        arrowPulsateSpeed = 0.15f;
         arrowPulsateSpeedMin = 0.01f;
         arrowPulsateMax = 1.2f;
         arrowPulsateMin = 0.9f;
@@ -77,9 +83,13 @@
         displayLeft = false;
         displayRight = false;
         
-        [self indicateTurnToDirection:RIGHT withPercentage:10.0];
+        //[self indicateTurnToDirection:RIGHT withPercentage:10.0];
 
         [self initializeGLView:_glkView];
+        
+        
+        
+        [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
         
         /*float width = _glkView.frame.size.width;
         float height = _glkView.frame.size.height;
@@ -94,68 +104,82 @@
         yTotal = (float) (tanf(rad(45.0/2))*distance *2);
         */
         
-        distance = -0.0f;
+        //distance = -0.0f;
         
         [self setUpLocationManager];
         
-        debugScreen = [[UITextView alloc]initWithFrame:CGRectMake(50, 50, 250, 50)];
+        debugScreen = [[UITextView alloc]initWithFrame:CGRectMake(10, 10, 250, 50)];
         [debugScreen setText:@"Debug Screen"];
         [debugScreen setTextColor:[UIColor redColor]];
         [debugScreen setBackgroundColor:[UIColor clearColor]];
         
         [self.view addSubview:debugScreen];
         
-        getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:4 target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
-        [getHeadingTimer fire];
+        
         
     }
     return self;
 }
 
+-(void)startGetPutTimer {
+    // also start location updates
+    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+    {
+        updatedHeading = NO;  // because update might not be instant
+        updatedLocation = NO;
+        locationManager.headingFilter = 5;
+        [locationManager startUpdatingHeading];
+        [locationManager startUpdatingLocation];
+    }
+//    getHeadingTimer = [NSTimer scheduledTimerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    
+    getHeadingTimer = [NSTimer timerWithTimeInterval:SERVER_GEO_UPDATE_PERIOD target:self selector:@selector(getHeadingPutCoordindates) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:getHeadingTimer forMode:NSRunLoopCommonModes];
+    
+    [getHeadingTimer fire];
+}
+
+-(void)stopGetPutTimer {
+    [getHeadingTimer invalidate];
+        
+    // stop location updates
+    [locationManager stopUpdatingHeading];
+    [locationManager stopUpdatingLocation];
+}
 
 -(void)getHeadingPutCoordindates {
     
+    NSLog(@"getting corrds");
     
-    NSURL *url = [NSURL URLWithString:@"http://rter.cim.mcgill.ca/1.0/users/sparky/direction"];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
-    //[urlRequest setHTTPMethod:@"GET"];
-    //[urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     if (!currentGetConnection) {
         currentGetConnection = [[NSURLConnection alloc]initWithRequest:urlRequest delegate:self startImmediately:YES];
         headingData = [[NSMutableData alloc]init];
         [currentGetConnection start];
-        NSLog(@"GetConnectionDidStart");
+//        NSLog(@"GetConnectionDidStart");
     }
-    //put the id of the item in here
-   /* NSURL *putUrl = [NSURL URLWithString:@"http://rter.cim.mcgill.ca:8080/1.0/items/<id of item>"];
-    //NSMutableURLRequest *putUrlRequest = [[NSMutableURLRequest alloc]initWithURL:url];
-    [urlRequest setHTTPMethod:@"PUT"];
-    [urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    if (!currentPutConnection) {
-        currentPutConnection = [[NSURLConnection alloc]initWithRequest:putUrlRequest delegate:self startImmediately:YES];
-        //headingData = [[NSMutableData alloc]init];
-        [currentPutConnection start];
-        NSLog(@"PutConnectionDidStart");
-    }*/
+    
+//    dispatch_async(getQueue, ^{
+//        [NSURLConnection connectionWithRequest:urlRequest delegate:self];
+//    });
     
     
     ////PUT REQUEST
-    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://rter.cim.mcgill.ca:8080/1.0/items/%@",[previewController itemID]]]];
+    if (updatedHeading && updatedLocation) {
+        //once we get an update
+        
+    NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[previewController itemID]]]];
     
     
     // the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Lat\":\"%f\",\"Lng\":\"%f\",\"Heading\":\"%f\"}",latitude,longitude,currentOrientation];
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Lat\":%f,\"Lng\":%f,\"Heading\":%f}",latitude,longitude,currentOrientation];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 
     
     [putRequest setHTTPMethod:@"PUT"];
     [putRequest setHTTPBody:postData];
     [putRequest setValue:[[previewController delegate] cookieString] forHTTPHeaderField:@"Set-Cookie"];
-
-    
-    
-
-    //[putRequest setValue:[previewController getAuthString] forHTTPHeaderField:@"Authorization"];
     
     [NSURLConnection sendAsynchronousRequest:putRequest
                                        queue:putQueue
@@ -163,8 +187,9 @@
      {
          
          NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
-         NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
+//         NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
      }];
+    }
     
 
 
@@ -221,9 +246,11 @@
 								  NSJSONReadingMutableContainers error:&error];
        
         NSString *desiredOrientationString = [jsonDict objectForKey:@"Heading"];
-        NSLog(@"%@",desiredOrientationString);
+//        NSLog(@"%@",desiredOrientationString);
         desiredOrientation = [desiredOrientationString floatValue];
         
+        // make sure to update the UI incase the desired orientation changed but not the actual
+        [self updateArrows];
         
     }
     
@@ -248,6 +275,44 @@
     glShadeModel(GL_SMOOTH); // Enable smooth shading of color
     glDisable(GL_DITHER); // Disable dithering for better performance
     
+}
+
+-(void)onSurfaceChangedWidth:(float)width Height:(float)height
+{
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    if (height == 0) height = 1; // To prevent divide by zero
+    aspect = (float) width / (float) height;
+    
+    // get the total x and y at distance
+    distance = 6.0f;
+    
+    xTotal = (float) (aspect * tan(rad(45.0 / 2))
+                      * distance * 2);
+    yTotal = (float) (tan(rad(45.0 / 2)) * distance * 2);
+        
+    [indicatorFrame resizeWithX:xTotal Y:yTotal distance:distance];
+    
+    // Set the viewport (display area) to cover the entire window
+    glViewport(0, 0, width, height);
+    
+    // Setup perspective projection, with aspect ratio matches viewport
+    glMatrixMode(GL_PROJECTION); // Select projection matrix
+    glLoadIdentity(); // Reset projection matrix
+    // Use perspective projection
+    [self gluPerspective:45.0 :aspect :0.1f :100.0];// (45, aspect, 0.1f, 100.f);
+    
+    glMatrixMode(GL_MODELVIEW); // Select model-view matrix
+    glLoadIdentity(); // Reset
+    
+    // You OpenGL|ES display re-sizing code here
+    // ......
+    
+}
+
+-(void)onSurfaceChange {
+    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
 }
 
 -(void)setDesiredOrientation:(float)dO {
@@ -331,7 +396,8 @@
         // RIGHT ARROW
         if(displayRight) {
             glLoadIdentity(); // Reset model-view matrix ( NEW )
-            glTranslatef(-0.3f/*xTotal / 2.0f - 0.1f*xTotal*/, 0.0f, -distance);
+//            glTranslatef(-0.3f/*xTotal / 2.0f - 0.1f*xTotal*/, 0.0f, -distance);
+            glTranslatef(xTotal / 2.0f - 0.1f*xTotal, 0.0f, -distance);
             glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
             [arrowRight drawInView:view]; // Draw triangle ( NEW )
         }
@@ -339,7 +405,8 @@
         // LEFT
         if(displayLeft) {
             glLoadIdentity();
-            glTranslatef(0.3f/*-xTotal / 2.0f + 0.1f*xTotal*/, 0.0f, -distance);
+//            glTranslatef(0.3f/*-xTotal / 2.0f + 0.1f*xTotal*/, 0.0f, -distance);
+            glTranslatef(-xTotal / 2.0f + 0.1f*xTotal, 0.0f, -distance);
             glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
             glScalef(arrowScale_tmp, arrowScale_tmp, 1.0f);
             [arrowLeft drawInView:view]; // Draw quad ( NEW )
@@ -351,15 +418,23 @@
     
 }
 
--(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
+//-(void)interfaceOrientationDidChange:(UIInterfaceOrientation)orientation {
+//    glClearColor(0.0, 0.0, 0.0, 0.0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    [self onSurfaceChangedWidth:self.view.bounds.size.width Height:self.view.bounds.size.height];
+//}
 
-}
+//-(void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+//    glClearColor(0.0, 0.0, 0.0, 0.0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    [self onSurfaceChangedWidth:self.view.bounds.size.height Height:self.view.bounds.size.width];
+//}
 
 - (void)gluPerspective:(double)fovy :(double)aspec :(double)zNear :(double)zFar
 {
     // Start in projection mode.
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
     double xmin, xmax, ymin, ymax;
     ymax = zNear * tan(fovy * M_PI / 360.0);
     ymin = -ymax;
@@ -384,20 +459,22 @@
     locationManager.delegate= self;
     locationManager.desiredAccuracy=kCLLocationAccuracyBestForNavigation;
     // Start heading updates.
-    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
-    {
-        locationManager.headingFilter = 5;
-        [locationManager startUpdatingHeading];
-        [locationManager startUpdatingLocation];
-    }
+//    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+//    {
+//        locationManager.headingFilter = 5;
+//        [locationManager startUpdatingHeading];
+//        [locationManager startUpdatingLocation];
+//    }
 
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     latitude = newLocation.coordinate.latitude;
     longitude = newLocation.coordinate.longitude;
+    updatedLocation = YES;
 }
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
+    updatedHeading = YES;
     
     assert([self fixAngle:270] == -90);
     assert([self fixAngle:181] == -179);
@@ -420,12 +497,16 @@
         currentOrientation = [self fixAngle:[self addAngleOffset:newHeading.trueHeading positive:NO]];
     }
     
+    headingAccuracy = newHeading.headingAccuracy;
     
-    
-    
+    [self updateArrows];
+};
+
+-(void) updateArrows {
+
     //Log heading
     //NSLog(@"currentOrientation: %f",currentOrientation);
-    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %f \nDesired Orientation:%f",currentOrientation,desiredOrientation]];
+    [debugScreen setText:[NSString stringWithFormat:@"CurrentOrientation: %0.1f \nDesired Orientation: %0.1f\nFPS: %0.1f",currentOrientation,desiredOrientation, fps]];
     
     
     
@@ -463,12 +544,16 @@
         }
         
         // flip arrow incase device is flipped
-        if (rightSideUp) {
-            rightArrow = !rightArrow;
+        if (!rightSideUp) {
+            //rightArrow = !rightArrow;
         }
         
+        // make sure diff isn't bigger than 180
+        differenceAngle = abs(differenceAngle);
+        if (differenceAngle > 180.0f) differenceAngle = 180.0f;
+        
         if (rightArrow) {
-            [self indicateTurnToDirection:RIGHT withPercentage:abs(differenceAngle)/180.f];
+            [self indicateTurnToDirection:RIGHT withPercentage:abs(differenceAngle)/180.0f];
         } else {
             [self indicateTurnToDirection:LEFT withPercentage:abs(differenceAngle)/180.0f];
         }
@@ -511,6 +596,10 @@
 -(NSUInteger)supportedInterfaceOrientations{
     return UIInterfaceOrientationMaskLandscapeRight;
 }*/
+-(void)dealloc {
+    [getHeadingTimer invalidate];
+}
+
 
 
 - (void)didReceiveMemoryWarning
@@ -518,5 +607,10 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+-(void)currentFPS:(float)currentFPS {
+    fps = currentFPS;
+}
+
 
 @end

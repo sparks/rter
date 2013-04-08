@@ -71,6 +71,18 @@ label {
 	line-height: 17px;
 }
 
+/* -- Login Control -- */
+
+.login-control {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.login-control button {
+	line-height: 10pt;
+}
+
 /* -- Tag Cloud -- */
 
 .tag-cloud .cloud {
@@ -117,17 +129,39 @@ label {
 	margin: 0 auto 15px auto;
 }
 
-.term-view .grid-view .right .map-filter-en,
-.term-view .list-view .right .map-filter-en,
-.term-view .grid-view .right .filter-mode ,
-.term-view .list-view .right .filter-mode  {
+.term-view .grid-view .right .filter, .term-view .list-view .right .filter  {
+	padding-top: 10px;
+	padding-bottom: 10px;
+
+	margin-bottom: 20px;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+
+	border: 1px solid rgb(208, 208, 208);
+
 	text-align: center;
-	margin-bottom: 15px;
 }
 
-.term-view .map-view .right .map-filter-en,
-.term-view .map-view .right .filter-mode {
+.term-view .grid-view .filter header, .term-view .list-view .filter header {
+	margin-bottom: 10px;
+}
+
+.term-view .grid-view .filter header label, .term-view .list-view .filter header label {
+	display: inline-block;
+}
+
+.term-view .grid-view .filter header .btn-group, .term-view .list-view .filter header .btn-group {
+	margin-left: 10px;
+}
+
+.term-view .map-view .right .filter-map header {
 	display: none;
+}
+
+.term-view .map-view .filter {
+	margin-bottom: 15px;
 }
 
 .term-view .grid-view .filter-search, .term-view .list-view .filter-search {
@@ -170,11 +204,9 @@ label {
 	max-height: 140px;
 }
 
-.term-view .grid-view .tile-item .author-badge {
+.term-view .grid-view .tile-item .author-badge, .term-view .grid-view .tile-item .type-badge{
 	position: absolute;
 	z-index: 10;
-
-	top: 0;
 
 	height: 14pt;
 	padding-left: 5px;
@@ -187,11 +219,51 @@ label {
 	color: white;
 	line-height: 14pt;
 
-	max-width: 60px;
 	overflow-x: hidden;
 	overflow-y: visible;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+.term-view .grid-view .tile-item .tile-summary-badge {
+	position: absolute;
+	z-index: 10;
+
+	max-height: 70pt;
+	padding-left: 5px;
+	padding-right: 5px;
+	
+	background-color: rgb(0, 0, 0);
+	background-color: rgba(0, 0, 0, 0.5);
+
+	font-size: 10pt;
+	color: white;
+	line-height: 14pt;
+
+	overflow-x: hidden;
+	overflow-y: visible;
+	
+	text-overflow: ellipsis;
+	top: 20px;
+	left: 5px;
+	width: 85%;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+
+}
+.term-view .grid-view .tile-item .tile-summary-badge p{
+	overflow-x: hidden;
+	overflow-y: visible;
+	margin: 0 0 0 0;
+}
+.term-view .grid-view .tile-item .author-badge {
+	top: 0;
+	max-width: 75px;
+}
+
+.term-view .grid-view .tile-item .type-badge {
+	bottom: 0;
+	max-width: 120px;
 }
 
 /* -- TermView List -- */
@@ -253,16 +325,6 @@ label {
 	padding-top: 15px;
 }
 
-.term-view .map-view .right hr {
-	display: none;
-}
-
-.term-view .map-view .text-search {
-	margin-top: 25px;
-	position: relative;
-	left: 100%;
-}
-
 .term-view .map-view .right .map {
 	position: absolute;
 	top: 0;
@@ -307,6 +369,12 @@ label {
 
 	height: 380px;
 	width: 380px;
+}
+
+/* -- Tileviews -- */
+
+.tile-streamingVideoV1-item {
+	padding-top: 25px;
 }
 
 /* -- Closeups -- */
@@ -456,7 +524,9 @@ label {
 	font-style: italic;
 	color: #6E7980;
 }
-
+.tile-singletweet-item img, .tile-twitter-item img{
+	opacity: 0.5;
+}
 
 /* -- Modal -- */
 

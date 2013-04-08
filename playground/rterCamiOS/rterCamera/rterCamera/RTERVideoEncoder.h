@@ -41,6 +41,7 @@
 - (int) encodeSampleBuffer:(CMSampleBufferRef)sampleBuffer
                     output:(AVPacket *)pkt;
 -(void) freePacket:(AVPacket *)pkt;
+-(void) freeEncoder;
 
 
 @property (nonatomic) BOOL readyToEncode;

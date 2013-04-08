@@ -4,6 +4,7 @@ angular.module('rter', [
 	'taxonomy',              //Taxonomy for tag-cloud
 	'termview',              //term-view directives and TermViewRemote
 	'http-auth-interceptor', //401 catcher
+	'ngCookies',             //Cookie for login/logout
 	'auth'                   //Login system
 ])
 
@@ -16,15 +17,34 @@ angular.module('rter', [
 	};
 })
 
-.controller('RterCtrl', function($scope, LoginDialog) {
+.controller('RterCtrl', function($scope, LoginDialog, $cookies, $cookieStore) {
+	if($cookies['rter-credentials'] !== undefined) {
+		$scope.loggedIn = true;
+	} else {
+		$scope.loggedIn = false;
+	}
+
 	$scope.loginDialogOpen = false;
-	$scope.$on('event:auth-loginRequired', function() {
+
+	$scope.login = function() {
 		if(!$scope.loginDialogOpen) {
 			$scope.loginDialogOpen = true;
-			LoginDialog.open().then(function() {
+			LoginDialog.open().then(function(result) {
+				if(result == 'success') {
+					$scope.loggedIn = true;
+				}
 				$scope.loginDialogOpen = false;
 			});
 		}
+	};
+
+	$scope.logout = function() {
+		$cookieStore.remove('rter-credentials');
+		$scope.loggedIn = false;
+	};
+
+	$scope.$on('event:auth-loginRequired', function() {
+		$scope.login();
 	});
 })
 
@@ -33,19 +53,16 @@ angular.module('rter', [
 	TermViewRemote.addTermView({Term: ""});
 })
 
-.controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyResource) {
-	$scope.terms = TaxonomyResource.query(
-		function() {
-			$scope.countMax = 0;
+.controller('TagCloudCtrl', function($scope, TermViewRemote, TaxonomyCache) {
+	$scope.terms = TaxonomyCache.contents //TODO: Make me dynamic
 
-			angular.forEach($scope.terms, function(val) {
-				if($scope.countMax < val.Count) $scope.countMax = val.Count;
-			});
-		},
-		function(e) {
-			console.log("Couldn't load tags", e);
-		}
-	); //TODO: Make me dynamic
+	$scope.$watch('terms', function() {
+		$scope.countMax = 0;
+
+		angular.forEach($scope.terms, function(val) {
+			if($scope.countMax < val.Count) $scope.countMax = val.Count;
+		});
+	}, true);
 
 	$scope.addTermView = function(term) {
 		TermViewRemote.addTermView(term);

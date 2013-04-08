@@ -4,11 +4,18 @@ angular.module('disp-map', [
 	'auth' //UserDirectionResource
 ])
 
-.controller('DispMapCtrl', function($scope, $timeout, UserDirectionResource) {
+.controller('DispMapCtrl', function($scope, $timeout, UserDirectionCache) {
 	$scope.mapOptions = {
 		zoom: 16,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
+
+	$scope.directionCache = new UserDirectionCache($scope.item.Author);
+	$scope.userDir = $scope.directionCache.direction;
+
+	$scope.$on("$destroy", function() {
+		$scope.directionCache.close();
+	});
 
 	$scope.setCenter = function(latLng) {
 		$timeout(function() {
@@ -65,16 +72,6 @@ angular.module('disp-map', [
 
 	$scope.rebuildDir = function() {
 		if($scope.enableDir === undefined) return;
-		if($scope.userDir === undefined) {
-			$scope.userDir = UserDirectionResource.get(
-				{Username: $scope.item.Author},
-				function() {
-					if($scope.userDir.Heading === undefined) $scope.userDir.Heading = 0;
-					$scope.rebuildDir();
-				}
-			);
-			return;
-		}
 		if($scope.item.Lat === undefined || $scope.item.Lng === undefined) return;
 
 		var arrow = {
@@ -105,10 +102,20 @@ angular.module('disp-map', [
 	$scope.mapClick = function($event) {
 		if($scope.enableDir === undefined) return;
 
-		$scope.userDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
-		$scope.rebuildDir();
+		var newDir = angular.copy($scope.userDir);
 
-		UserDirectionResource.update($scope.userDir);
+		newDir.Heading = google.maps.geometry.spherical.computeHeading($scope.map.getCenter(), $event.latLng);
+
+		$scope.directionCache.update(
+			newDir,
+			function() {
+				$scope.userDir.Heading = newDir.Heading;
+				$scope.rebuildDir();
+			}, 
+			function() {
+
+			}
+		);
 	};
 
 	$scope.$watch('[item.Lat, item.Lng]', function() {
@@ -120,6 +127,10 @@ angular.module('disp-map', [
 
 	$scope.$watch('item.Heading', function() {
 		$scope.rebuildFov();
+	});
+
+	$scope.$watch('userDir.Heading', function() {
+		$scope.rebuildDir();
 	});
 
 	$scope.$watch('[enableFov, enableDir, enableMarker]', function() {

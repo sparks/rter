@@ -1,10 +1,18 @@
 <div class="tile-twitter-item">
 	<div ng-switch on="item.ThumbnailURI">
 		<div ng-switch-when="undefined">
-			<img ng-src="https://twitter.com/images/resources/twitter-bird-white-on-blue.png" alt="Twitter Logo">
+			<img ng-src="/asset/twitter-search-logo.png" alt="Twitter Search Logo">
+			<div class="tile-summary-badge" ng-show="item.ContentToken">
+				<p><strong>Search Term:</strong></p>
+				<p>{{item.ContentToken}}</p>
+			</div>
 		</div>
 		<div ng-switch-when="">
-			<img ng-src="https://twitter.com/images/resources/twitter-bird-white-on-blue.png" alt="Twitter Logo">
+			<img ng-src="/asset/twitter-search-logo.png" alt="Twitter Search Logo">
+			<div class="tile-summary-badge" ng-show="item.ContentToken">
+				<p><strong>Search Term:</strong></p>
+				<p>{{item.ContentToken}}</p>
+			</div>
 		</div>
 		<div ng-switch-default>
 			<img ng-src="{{item.ThumbnailURI}}" alt="Item {{item.ID}} Thumbnail">

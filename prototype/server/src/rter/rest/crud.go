@@ -150,8 +150,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	case *data.Item:
 		if v.Type == "streaming-video-v1" {
 			v.UploadURI = "http://rter.cim.mcgill.ca:8080/v1/ingest/" + strconv.FormatInt(v.ID, 10)
-			v.ThumbnailURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb/"
-			v.ContentURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/"
+			v.ThumbnailURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb/000000001.jpg"
+			v.ContentURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10)
 
 			host, _, err := net.SplitHostPort(r.RemoteAddr)
 

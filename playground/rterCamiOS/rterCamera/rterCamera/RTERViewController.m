@@ -7,8 +7,12 @@
 //
 
 #import "RTERViewController.h"
+#import "Config.h"
 
-@interface RTERViewController ()
+@interface RTERViewController () {
+    NSUserDefaults *defaults;
+    SSKeychainQuery *query;
+}
 
 @end
 
@@ -17,6 +21,7 @@
 @synthesize userField;
 @synthesize passField;
 @synthesize cookieString;
+@synthesize userName;
 
 RTERPreviewController *preview;
 
@@ -26,8 +31,35 @@ RTERPreviewController *preview;
 	// Do any additional setup after loading the view, typically from a nib.
 	userField.delegate = self;
 	passField.delegate = self;
-	cookieString = @"";
 	preview = nil;
+    
+    // user and password stuff
+    defaults = [NSUserDefaults standardUserDefaults];
+    query = [[SSKeychainQuery alloc] init];
+    
+    // check to see if a user name is stored
+    NSString *username = [defaults objectForKey:@"username"];
+    
+    NSLog(@"username %@", username);
+    
+    if(username) {        
+        self.userField.text = username;
+        
+        // now check if password is stored for this user name
+        NSString *password = [SSKeychain passwordForService:@"login" account:username];
+        if (password) {
+            [self.passField setText:password];
+        } else {
+            NSLog(@"can't find password");
+        }
+        
+    }
+
+}
+
+- (void) viewDidAppear:(BOOL)animated {
+
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -38,14 +70,17 @@ RTERPreviewController *preview;
 
 - (IBAction)startCamera:(id)sender {
     //if (![cookieString isEqualToString: @""]) {
-		preview = [[RTERPreviewController alloc] init];
+    preview = [[RTERPreviewController alloc] init];
 		
-		preview.delegate = self;
-		preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-		
-		[self presentViewController:preview
-						   animated:YES
-						 completion:nil];
+    preview.delegate = self;
+    preview.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+
+    userName = userField.text;
+    
+    [self presentViewController:preview
+                       animated:YES
+                     completion:nil];
+    
 	//}
     
 }
@@ -56,13 +91,41 @@ RTERPreviewController *preview;
 	// NSOperationQueue *opQueue = [[NSOperationQueue alloc] init];
 	
 	NSLog(@"Attempting auth:\n\t%@\n\t%@", self.userField.text, self.passField.text);
-	
+    
+    [defaults setObject:self.userField.text forKey:@"username"];
+    
+    // forget old passwords for now, ie: ones not used with the current attempted username
+    NSArray *accounts = [query fetchAll:nil];
+    if (accounts) {
+        [query delete:nil];
+    }
+    // save current password
+    [SSKeychain setPassword:self.passField.text forService:@"login" account:self.userField.text];
+    
+    NSString *password = [SSKeychain passwordForService:@"login" account:self.userField.text];
+    
+    NSLog(@"saved password %@", password);
+
+    [self loginWithUser:self.userField.text Password:self.passField.text];
+}
+
+- (IBAction)anonymousLogin:(id)sender {
+    NSLog(@"Attempting anonymous login");
+    
+    [self loginWithUser:@"anonymous" Password:@"anonymous"];
+
+}
+
+- (void)loginWithUser:(NSString *)user Password:(NSString *)password {
+    
+    userName = user;
+    
 	// the json string to post
-	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [self.userField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [self.passField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	NSString *jsonString = [NSString stringWithFormat:@"{\"Username\": \"%@\", \"Password\":\"%@\"}", [user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], [password stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 	NSData *postData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
 	
 	// setup the request
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://rter.cim.mcgill.ca:80/auth"]];
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/auth",SERVER]]];
 	
 	//NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://142.157.58.36:8080/auth"]];
 	[request setHTTPMethod:@"POST"];
@@ -142,6 +205,7 @@ RTERPreviewController *preview;
 		[preview setAuthString:authString];
 		preview.streamingEndpoint = [jsonDict objectForKey:@"UploadURI"];
         [preview setItemID:[jsonDict objectForKey:@"ID"]];
+        NSLog(@"\n\nITEMID: %@\n\n\n",preview.itemID);
 	}
 }
 
