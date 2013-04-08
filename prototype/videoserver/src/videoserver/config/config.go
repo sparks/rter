@@ -20,15 +20,16 @@ var configfile = flag.String("config", "config.json", "server config file")
 type ServerConfig struct {
 	// server
 	Server struct {
-		Addr            string `json:"addr"`
-		Port            uint64 `json:"port"`
-		Production_mode bool   `json:"production_mode"`
-		Secure_mode     bool   `json:"secure_mode"`
-		Cert_file       string `json:"cert_file"`
-		Key_file        string `json:"key_file"`
-		Session_timeout uint64 `json:"session_timeout"`
-		Session_maxage  uint64 `json:"session_maxage"`
-		Logfile         string `json:"logfile"`
+		Addr                        string `json:"addr"`
+		Port                        uint64 `json:"port"`
+		Production_mode             bool   `json:"production_mode"`
+		Access_control_allow_origin string `json:"access_control_allow_origin"`
+		Secure_mode                 bool   `json:"secure_mode"`
+		Cert_file                   string `json:"cert_file"`
+		Key_file                    string `json:"key_file"`
+		Session_timeout             uint64 `json:"session_timeout"`
+		Session_maxage              uint64 `json:"session_maxage"`
+		Logfile                     string `json:"logfile"`
 	}
 	Hack struct {
 		Disable_port_check bool `json:"disable_port_check"`
@@ -102,6 +103,7 @@ func (c *ServerConfig) ParseConfig() {
 	c.Server.Addr = "127.0.0.1"                             // bind server to IP address
 	c.Server.Port = 8080                                    // bind server to http port
 	c.Server.Production_mode = false                        // run in production or develop mode
+	c.Server.Access_control_allow_origin = "*"              // allow all cross-domain calls
 	c.Server.Secure_mode = false                            // use SSL mode
 	c.Server.Cert_file = ""                                 // SSL CA certificate
 	c.Server.Key_file = ""                                  // SSL private key
@@ -188,6 +190,10 @@ func (c *ServerConfig) SanityCheck() {
 		log.Printf("Warning: HTTPS is strongly recommended for production mode!")
 	}
 
+	// origin warning
+	if c.Server.Production_mode && c.Server.Access_control_allow_origin == "*" {
+		log.Printf("Warning: allowing CORS for all '*' may be dangerous for client security.")
+	}
 	// secure mode requires cert and key files
 	if c.Server.Secure_mode &&
 		(c.Server.Cert_file == "" || c.Server.Key_file == "") {

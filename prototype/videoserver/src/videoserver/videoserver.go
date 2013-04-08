@@ -64,6 +64,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"videoserver/config"
 	"videoserver/server"
 	"videoserver/utils"
@@ -140,8 +141,8 @@ func main() {
 	r.HandleFunc("/", IndexHandler)
 
 	if !C.Server.Production_mode {
-		s.PathPrefix("/videos/").Handler(http.StripPrefix("/v1/videos/",
-			http.FileServer(http.Dir(C.Transcode.Output_path))))
+		s.PathPrefix("/videos/").Handler(FileHandler(http.StripPrefix("/v1/videos/",
+			http.FileServer(http.Dir(C.Transcode.Output_path)))))
 	}
 
 	// catch all (redirect non-registered routes to index '/')
@@ -164,11 +165,38 @@ func main() {
 	}
 }
 
+func FileHandler(h http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// disable directory listing
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		// set response headers
+		w.Header().Set("Access-Control-Allow-Origin", C.Server.Access_control_allow_origin)
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+
+		// for m3u8 and mpd index files set cache policy
+		if strings.HasSuffix(r.URL.Path, "m3u8") || strings.HasSuffix(r.URL.Path, "mpd") {
+			w.Header().Set("Cache-Control", "max-age=2, no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
 func RedirectHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", C.Server.Access_control_allow_origin)
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("This is the rtER video server.\n"))
 }
