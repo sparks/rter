@@ -1,4 +1,7 @@
 <div class="closeup-twitter-item">
+	<div class="alert alert-error" ng-hide="searchResult.results.length">
+  		<span>No tweets from Twitter search, right now!</span>
+	</div>
 	<ul class="twitter-list">
 		<li ng-repeat = "tweet in searchResult.results" class="twitter" >			
 			<header>

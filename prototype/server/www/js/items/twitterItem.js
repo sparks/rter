@@ -12,11 +12,16 @@ angular.module('twitterItem',  [
 
 	$scope.item.HasHeading = false;
 	$scope.item.Live = false;
-
+	
 
 	$scope.extra = {};
 	$scope.extra.ResultType = "recent";
 	
+	if($scope.item.ContentToken !== undefined){
+		$scope.extra.SearchTerm = $scope.item.ContentToken; 
+	}	
+
+
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
 	$scope.mapOptions = {
@@ -70,6 +75,8 @@ angular.module('twitterItem',  [
 
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
+
+		console.log($scope.item);
 	};	
 })
                                                                                                                                      
@@ -108,7 +115,13 @@ angular.module('twitterItem',  [
 										+ "&result_type=" + scope.extra.ResultType
 
 					if(!(scope.item.Lat == undefined)){
-						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+(scope.extra.radius/1000)+"km";		
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","
+						if(!(isNaN(scope.extra.radius))){
+							+(scope.extra.radius/1000)+"km";
+						}else{
+							+"10km";
+						}
+								
 					}
 					scope.item.ContentToken = scope.extra.SearchTerm; 				
 					scope.item.ContentURI = encodeURI(searchURL);
@@ -179,15 +192,19 @@ angular.module('twitterItem',  [
 
 .controller('CloseupTwitterItemCtrl', function($scope, $http, ItemCache, CloseupItemDialog) {
 	 console.log($scope.item.ContentURI);
-	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
-      success(function(data, status) {
-          console.log(data, status);
+	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false})
+      .success(function(data, status) {
+        console.log(data, status);
+        
         $scope.searchResult = data;
-      }).
-      error(function(data, status) {
-         console.log(data, status);
+
+      })
+      .error(function(data, status, headers) {
+         alert("Error in Loading Tweets" + data, status, headers);
         $scope.data = data || "Request failed";
         $scope.status = status;
+
+
     });
     
     
