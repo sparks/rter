@@ -148,6 +148,8 @@ angular.module('termview', [
 		else return false;
 	};
 
+	$scope.dragFreeze = false; //FIXME: Hack to fix drag bug with firefox http://forum.jquery.com/topic/jquery-ui-sortable-triggers-a-click-in-firefox-15
+
 	$scope.dragCallback = function(e) {		
 		if($scope.filterMode == 'remove' && ($scope.mapFilterEnable || ($scope.textQuery !== undefined && $scope.textQuery !== ''))) { //TODO: This should have a blur options instead maybe?
 			Alerter.warn("You cannot reorder items while your filters are enabled", 2000);
@@ -162,13 +164,23 @@ angular.module('termview', [
 		if($scope.term.Term !== "" && $scope.term.Term !== undefined) {
 			$scope.rankingCache.update(newRanking);
 		}
+
+		$scope.dragFreeze = true; //FIXME: Hack to fix drag bug with firefox http://forum.jquery.com/topic/jquery-ui-sortable-triggers-a-click-in-firefox-15
+
+		$timeout(function() { //FIXME: Hack to fix drag bug with firefox http://forum.jquery.com/topic/jquery-ui-sortable-triggers-a-click-in-firefox-15
+			$scope.dragFreeze = false;
+		}, 50);
 	};
 
 	$scope.closeupItemDialog = function(item) {
+		if($scope.dragFreeze) return; //FIXME: Hack to fix drag bug with firefox http://forum.jquery.com/topic/jquery-ui-sortable-triggers-a-click-in-firefox-15
+
 		CloseupItemDialog.open(item);
 	};
 
 	$scope.updateItemDialog = function(item) {
+		if($scope.dragFreeze) return; //FIXME: Hack to fix drag bug with firefox http://forum.jquery.com/topic/jquery-ui-sortable-triggers-a-click-in-firefox-15
+
 		UpdateItemDialog.open(item).then(function() {
 			$scope.updateMarkers();
 		});
