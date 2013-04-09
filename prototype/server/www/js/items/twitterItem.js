@@ -12,16 +12,21 @@ angular.module('twitterItem',  [
 
 	$scope.item.HasHeading = false;
 	$scope.item.Live = false;
-
+	
 
 	$scope.extra = {};
 	$scope.extra.ResultType = "recent";
 	
+	if($scope.item.ContentToken !== undefined){
+		$scope.extra.SearchTerm = $scope.item.ContentToken; 
+	}	
+
+
 	$scope.mapCenter = new google.maps.LatLng(45.50745, -73.5793);
 
 	$scope.mapOptions = {
 		center: $scope.mapCenter,
-		zoom: 15,
+		zoom: 9,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 
@@ -39,11 +44,11 @@ angular.module('twitterItem',  [
 				position: $event.latLng
 			});
 			//making the circle
-			$scope.extra.radius = 10*1000; //10km in meters
+			$scope.item.Radius = 10*1000; //10km in meters
 			$scope.circle = new google.maps.Circle({
 				map: $scope.map,
 				center: $scope.marker.getPosition(),
-				radius: $scope.extra.radius,
+				radius: $scope.item.Radius,
 				editable: true,
 				draggable: false,
 				fillColor: "#FF0000",
@@ -54,7 +59,7 @@ angular.module('twitterItem',  [
 
 			});
 			google.maps.event.addListener($scope.circle, 'radius_changed', function() {
-				$scope.extra.radius = $scope.circle.getRadius();
+				$scope.item.Radius = $scope.circle.getRadius();
 				console.log("Radius changed and calling buildURl");
 				$scope.buildURL();
 			});
@@ -70,6 +75,8 @@ angular.module('twitterItem',  [
 
 		$scope.item.Lat = $event.latLng.lat();
 		$scope.item.Lng = $event.latLng.lng();
+
+		console.log($scope.item);
 	};	
 })
                                                                                                                                      
@@ -91,7 +98,23 @@ angular.module('twitterItem',  [
 						position: latLng
 					});
 					scope.mapCenter = latLng;
+					if(scope.item.Radius === undefined) {
+						console.log("radius Undefined and is being defaulted to 10km");
+						scope.item.Radius = 10*1000;
+					}
+					scope.circle = new google.maps.Circle({
+						map: scope.map,
+						center: scope.marker.getPosition(),
+						radius: scope.item.Radius,
+						editable: true,
+						draggable: false,
+						fillColor: "#FF0000",
+						fillOpacity: 0.3,
+						strokeColor: "#FF0000",
+					    strokeOpacity: 0.8,
+					    strokeWeight: 2
 
+					});
 				} else {
 					navigator.geolocation.getCurrentPosition(scope.centerAt);
 				}
@@ -108,7 +131,13 @@ angular.module('twitterItem',  [
 										+ "&result_type=" + scope.extra.ResultType
 
 					if(!(scope.item.Lat == undefined)){
-						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","+(scope.extra.radius/1000)+"km";		
+						searchURL = searchURL + "&geocode="+scope.item.Lat+","+scope.item.Lng+","
+						if(!(isNaN(scope.item.Radius))){
+							searchURL = searchURL +(scope.item.Radius/1000)+"km";
+						}else{
+							searchURL = searchURL +"10km";
+						}
+								
 					}
 					scope.item.ContentToken = scope.extra.SearchTerm; 				
 					scope.item.ContentURI = encodeURI(searchURL);
@@ -179,15 +208,19 @@ angular.module('twitterItem',  [
 
 .controller('CloseupTwitterItemCtrl', function($scope, $http, ItemCache, CloseupItemDialog) {
 	 console.log($scope.item.ContentURI);
-	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false}).
-      success(function(data, status) {
-          console.log(data, status);
+	 $http({method: 'jsonp', url:$scope.item.ContentURI, cache: false})
+      .success(function(data, status) {
+        console.log(data, status);
+        
         $scope.searchResult = data;
-      }).
-      error(function(data, status) {
-         console.log(data, status);
+
+      })
+      .error(function(data, status, headers) {
+         alert("Error in Loading Tweets" + data, status, headers);
         $scope.data = data || "Request failed";
         $scope.status = status;
+
+
     });
     
     
