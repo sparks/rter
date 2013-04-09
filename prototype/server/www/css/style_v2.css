@@ -359,6 +359,12 @@ label {
 	border-color: red;
 }
 
+.nodrag-warn {
+	text-align: center;
+	margin: 10px auto 10px auto;
+	background: rgb(255, 100, 100);
+}
+
 .form-generic-item, .form-raw-item, .form-youtube-item, .form-twitter-item {
 	margin: auto;
 	width: 800px;
