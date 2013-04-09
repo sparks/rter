@@ -2,22 +2,15 @@
 ## Server
 ### FixMe
 * MySQL seems to timeout eventually and return driver bad conn. We should provide to reconnect without rebooting the server.
-* Firefox has a click/drag bug. Current dragging causes a click. It should be fixed soon. Workaround?
+* Firefox has a click/drag bug. Current dragging causes a click. It should be fixed soon. Currently have ugly workaround with timeout.
 * Bootstrap / angular ui doesn't destroy controllers in closed dialogs, this leave my websockets open after closing dialog, currently hacking the bootstrap
 * Dragging live tiles is very power hungry and lags
 * marker flickr continues
-* Maintenance for expired feeds
+* Maintenance for expired live feeds
 * Send alex rter server instructions
 * Lagging tab switch (due to opening sockets etc?)
 * New a map resize/fix (currently can switch to map mode to resize)
 * Naming of taxonomy/tag/tabs
-* Twitter items
-	* Single tweet type should be lower case
-	* Set start-stop time and other fields for tweets
-* Caching services
-	* Update tag-cloud on the fly
-	* Update Map-Dir on the fly (Userdirection)
-	* Update comments on the fly (it's a chat system!)
 * Image upload, especially for user submitted generic content. 
 * Validate stream doesn already exist in the server before handing out a token
 * Don't return target heading if it's too old
