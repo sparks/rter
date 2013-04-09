@@ -21,7 +21,7 @@ angular.module('termview', [
 			if(term.Term !== "") {
 				this.termViews.push({term: term, heading: term.Term, active: true});
 			} else {
-				this.termViews.push({term: term, heading: "All Items", active: true});
+				this.termViews.push({term: term, heading: "Live Feed", active: true});
 			}
 		};
 
