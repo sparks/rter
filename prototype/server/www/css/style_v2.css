@@ -363,6 +363,10 @@ label {
 	text-align: center;
 	margin: 10px auto 10px auto;
 	background: rgb(255, 100, 100);
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
 
 .form-generic-item, .form-raw-item, .form-youtube-item, .form-twitter-item {
