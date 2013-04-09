@@ -1,6 +1,8 @@
 # ToDos
 ## Server
 ### FixMe
+* Detect server is down or unreachable
+* Socket reconnect in JS (us the close fn)
 * MySQL seems to timeout eventually and return driver bad conn. We should provide to reconnect without rebooting the server.
 * Firefox has a click/drag bug. Current dragging causes a click. It should be fixed soon. Currently have ugly workaround with timeout.
 * Bootstrap / angular ui doesn't destroy controllers in closed dialogs, this leave my websockets open after closing dialog, currently hacking the bootstrap
