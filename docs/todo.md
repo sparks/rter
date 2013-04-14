@@ -1,6 +1,7 @@
 # ToDos
 ## Server
 ### FixMe
+* Garbage collection for videos
 * Detect server is down or unreachable
 * Socket reconnect in JS (us the close fn)
 * MySQL seems to timeout eventually and return driver bad conn. We should provide to reconnect without rebooting the server.
