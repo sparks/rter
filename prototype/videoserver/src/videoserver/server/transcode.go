@@ -22,19 +22,21 @@ const (
 )
 
 const (
-	TC_TARGET_HLS    int = 0
-	TC_TARGET_DASH   int = 1
-	TC_TARGET_MP4    int = 3
-	TC_TARGET_OGG    int = 4
-	TC_TARGET_WBEM   int = 5
-	TC_TARGET_THUMB  int = 6
-	TC_TARGET_POSTER int = 7
+	TC_TARGET_HLS      int = 0 // original Apple HLS streaming (H264, MPEG2-TS)
+	TC_TARGET_DASH     int = 1 // DASH standard (not implemented yet)
+	TC_TARGET_MP4      int = 3 // MP4 (H264, AAC) files for download
+	TC_TARGET_OGG      int = 4 // OGG (Theora, Vorbis) files for download
+	TC_TARGET_WBEM     int = 5 // WebM (VP8, Vorbis) files for download
+	TC_TARGET_WEBM_HLS int = 6 // WebM (VP8, Vorbis) HLS streaming
+	TC_TARGET_THUMB    int = 7 // JPG thumbnail images
+	TC_TARGET_POSTER   int = 8 // JPG poster images
 )
 
 // mix server config and transcode session to make it accessible for template expansion
 type TemplateData struct {
 	C                      *config.ServerConfig
 	S                      *Session
+	Webm_gop_size          uint64
 	Thumb_size             string
 	Thumb_rate             uint64
 	Poster_size            string
@@ -58,13 +60,14 @@ type TemplateData struct {
 // brew install ffmpeg --with-theora --with-libogg --with-libvorbis --with-libvpx
 
 const (
-	TC_ARG_HLS    string = " -f segment -codec copy -map 0 -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format mpegts -segment_list_flags +live -segment_list_type hls -individual_header_trailer 1 -segment_list index.m3u8 hls/%09d.ts"
-	TC_ARG_DASH   string = " "
-	TC_ARG_MP4    string = " -codec copy video.mp4 "
-	TC_ARG_OGG    string = " -codec:v libtheora -b:v 600k -codec:a vorbis -b:a 128k video.ogv "
-	TC_ARG_WBEM   string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -minrate 600k -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
-	TC_ARG_THUMB  string = " -f image2 {{.Thumb_size}} -vsync 1 -vf fps=fps=1/{{.Thumb_rate}} thumb/%09d.jpg "
-	TC_ARG_POSTER string = " -f image2 {{.Poster_size}} -vsync 1 -vf fps=fps=1/{{.Poster_rate}} {{.Poster_skip}} -vframes {{.Poster_corrected_count}} poster/%09d.jpg "
+	TC_ARG_HLS      string = " -f segment -codec copy -map 0 -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format mpegts -segment_list_flags +live -segment_list_type m3u8 -individual_header_trailer 1 -segment_list index.m3u8 hls/%09d.ts"
+	TC_ARG_DASH     string = " "
+	TC_ARG_MP4      string = " -codec copy video.mp4 "
+	TC_ARG_OGG      string = " -codec:v libtheora -b:v 600k -codec:a vorbis -b:a 128k video.ogv "
+	TC_ARG_WEBM     string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -minrate 600k -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
+	TC_ARG_WEBM_HLS string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -keyint_min {{.Webm_gop_size}} -g {{.Webm_gop_size}} -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 500k -lag-in-frames 0 -rc_lookahead 0 -flags +global_header -codec:a libvorbis -b:a 128k -flags +global_header -map 0 -f segment -segment_list_flags +live -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format webm -flags +global_header -segment_list webm_index.m3u8 webm/%09d.webm "
+	TC_ARG_THUMB    string = " -f image2 {{.Thumb_size}} -vsync 1 -vf fps=fps=1/{{.Thumb_rate}} thumb/%09d.jpg "
+	TC_ARG_POSTER   string = " -f image2 {{.Poster_size}} -vsync 1 -vf fps=fps=1/{{.Poster_rate}} {{.Poster_skip}} -vframes {{.Poster_corrected_count}} poster/%09d.jpg "
 )
 
 // Used Ingest options
@@ -169,6 +172,15 @@ func (s *Session) createOutputDirectories() error {
 		}
 	}
 
+	// WEBM-HLS: <*-data-path>/<id>/webm
+	if s.c.Transcode.Webm_hls.Enabled {
+		p := s.c.Transcode.Output_path + "/" + s.idstr + "/webm"
+		if err := os.MkdirAll(p, utils.PERM_DIR); err != nil {
+			log.Printf("Error: cannot create directory %s: %s", p, err)
+			return err
+		}
+	}
+
 	// Thumb: <*-data-path>/<id>/thumb
 	if s.c.Transcode.Thumb.Enabled {
 		p := s.c.Transcode.Output_path + "/" + s.idstr + "/thumb"
@@ -217,6 +229,9 @@ func (s *Session) BuildTranscodeCommand() string {
 	if s.c.Transcode.Dash.Enabled {
 		cmd += TC_ARG_DASH
 	}
+	if s.c.Transcode.Webm_hls.Enabled {
+		cmd += TC_ARG_WEBM_HLS
+	}
 
 	// full file formats
 	if s.c.Transcode.Mp4.Enabled {
@@ -226,7 +241,7 @@ func (s *Session) BuildTranscodeCommand() string {
 		cmd += TC_ARG_OGG
 	}
 	if s.c.Transcode.Webm.Enabled {
-		cmd += TC_ARG_WBEM
+		cmd += TC_ARG_WEBM
 	}
 
 	// image formats
@@ -246,7 +261,7 @@ func (s *Session) BuildTranscodeCommand() string {
 
 	// combine session and server config for access by template matcher
 	var cmd_writer bytes.Buffer
-	var d = TemplateData{s.c, s, "", 1, "", 1, 1, ""}
+	var d = TemplateData{s.c, s, 0, "", 1, "", 1, 1, ""}
 
 	// Poster
 	if s.c.Transcode.Poster.Enabled {
@@ -290,6 +305,11 @@ func (s *Session) BuildTranscodeCommand() string {
 		if s.c.Transcode.Thumb.Step > 0 {
 			d.Thumb_rate = s.c.Transcode.Thumb.Step
 		}
+	}
+
+	// GOP size (25 fps is a guess)
+	if s.c.Transcode.Webm_hls.Enabled {
+		d.Webm_gop_size = s.c.Transcode.Webm_hls.Gop_size
 	}
 
 	// replace placeholders with config strings

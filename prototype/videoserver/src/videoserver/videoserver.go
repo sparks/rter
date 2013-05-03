@@ -7,12 +7,12 @@
 //
 // Test MPEG2TS stream to server
 // ffmpeg -v debug -y -re -i file.m4v -vsync 1 -map 0 -codec copy \
-//    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:6660/v1/ingest/1/ts
+//    -bsf h264_mp4toannexb -r 25 -f mpegts -copytb 0 http://localhost:8080/v1/ingest/1/ts
 //
 // Test Raw H264/AVC stream (also reencodes the file to adhere to our format specs)
 // ffmpeg -v debug -y -re -i file.m4v -f h264 -c:v libx264 -preset ultrafast \
 //    -tune zerolatency -crf 20 -x264opts keyint=50:bframes=0:ratetol=1.0:ref=1:repeat-headers=1 \
-//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:6660/v1/ingest/1/avc
+//    -profile baseline -maxrate 1200k -bufsize 1200k -an http://localhost:8080/v1/ingest/1/avc
 //
 // Todo/Implement: Features
 // - Common Server Management
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	// set up HTTP endpoints
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 	s := r.PathPrefix("/v1").Subrouter()
 
 	if C.Ingest.Enable_avc_ingest {
@@ -118,23 +118,16 @@ func main() {
 
 	// playback handler used for development only
 	if !C.Server.Production_mode {
+		// built-in player URL
 		s.HandleFunc("/videos/{id:[0-9]+}/play", PlaybackHandler).Methods("GET")
+		// serve 3rd party libraries
+		//r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(C.Server.Www_path, "vendor")))))
 	}
 
 	/*
 		if C.Ingest.Enable_chunk_ingest {
 			s.HandleFunc("/ingest/{id:[0-9]+}/chunk", ChunkIngestHandler).Methods("POST")
 		}
-
-		s.HandleFunc("/videos/{id:[0-9]+}/video.mp4", MP4FileHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/video.ogv", OGGFileHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/video.webm", WEBMFileHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/index.m3u8", M3U8FileHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/index.mpd", MPDFileHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/hls/{segment}.ts", HLSSegmentHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/dash/{segment}.ts", DASHSegmentHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/thumb/{thumbid:[0-9]+}.jpg", ThumbHandler).Methods("GET")
-		s.HandleFunc("/videos/{id:[0-9]+}/poster/{posterid:[0-9]+}.jpg", PosterHandler).Methods("GET")
 	*/
 
 	// have a single index handler at server URI root
@@ -181,7 +174,7 @@ func FileHandler(h http.Handler) http.HandlerFunc {
 
 		// for m3u8 and mpd index files set cache policy
 		if strings.HasSuffix(r.URL.Path, "m3u8") || strings.HasSuffix(r.URL.Path, "mpd") {
-			w.Header().Set("Cache-Control", "max-age=2, no-cache, no-store, must-revalidate")
+			w.Header().Set("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
 			w.Header().Set("Pragma", "no-cache")
 		}
 
@@ -268,12 +261,38 @@ func GenericIngestHandler(w http.ResponseWriter, r *http.Request, t int) {
 
 // generates and returns a simple HTML5 website containing a video element
 const (
-	PLAY_TMPL_BEGIN    string = `<!doctype html><html lang=en><head><meta charset=utf-8><title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title></head><body><video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">`
-	PLAY_TMPL_SRC_HLS  string = `<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL">`
-	PLAY_TMPL_SRC_MP4  string = `<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">`
-	PLAY_TMPL_SRC_WEBM string = `<source src="/v1/videos/{{.}}/video.webm" type="video/webm; codecs=vp8,vorbis">`
-	PLAY_TMPL_SRC_OGG  string = `<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
-	PLAY_TMPL_END      string = `</video></body></html>`
+	PLAY_TMPL_HEAD string = `
+<!doctype html><html lang=en><head><meta charset=utf-8>
+	<title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title>
+</head>`
+	PLAY_TMPL_NG_HEAD string = `
+<!doctype html><html lang=en ng-app="playerApp"><head><meta charset=utf-8>
+	<title>rtER Video Demo Stream {{.}} -- [Dev Mode]</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+	<script src="http://code.angularjs.org/1.1.4/angular.js"></script>
+		<script src="http://www.cim.mcgill.ca/~echa/tsunami-tpls-0.1.0.min.js"></script>
+	<script type="text/javascript">angular.module('playerApp', ['tsunami']);</script>
+</head>`
+	PLAY_TMPL_BEGIN string = `
+<body>
+	<video controls autoplay poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">
+`
+	PLAY_TMPL_NG_BEGIN string = `
+<body>
+	<video hls-video live controls poster="/v1/videos/{{.}}/poster/000000001.jpg" x-webkit-airplay="allow">
+`
+	PLAY_TMPL_SRC_HLS string = `		<source src="/v1/videos/{{.}}/index.m3u8" type="application/x-mpegURL;profile='video/mp2t'">
+`
+	PLAY_TMPL_SRC_WEBM_HLS string = `		<source src="/v1/videos/{{.}}/webm_index.m3u8" type="application/x-mpegURL;profile='video/webm; codecs=vp8'">
+`
+	PLAY_TMPL_SRC_MP4 string = `		<source src="/v1/videos/{{.}}/video.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">
+`
+	PLAY_TMPL_SRC_WEBM string = `		<source src="/v1/videos/{{.}}/video.webm" type="video/webm; codecs=vp8,vorbis">
+`
+	PLAY_TMPL_SRC_OGG string = `		<source src="/v1/videos/{{.}}/video.ogv" type="video/ogg; codecs=theora,vorbis">`
+	PLAY_TMPL_END     string = `
+</video></body></html>`
 )
 
 func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
@@ -282,9 +301,21 @@ func PlaybackHandler(w http.ResponseWriter, r *http.Request) {
 	uidstring := vars["id"]
 
 	// construct the template
-	tpl := PLAY_TMPL_BEGIN
+	var tpl string
+
+	if C.Transcode.Webm_hls.Enabled {
+		tpl += PLAY_TMPL_NG_HEAD
+		tpl += PLAY_TMPL_NG_BEGIN
+	} else {
+		tpl += PLAY_TMPL_HEAD
+		tpl += PLAY_TMPL_BEGIN
+	}
+
 	if C.Transcode.Hls.Enabled {
 		tpl += PLAY_TMPL_SRC_HLS
+	}
+	if C.Transcode.Webm_hls.Enabled {
+		tpl += PLAY_TMPL_SRC_WEBM_HLS
 	}
 	if C.Transcode.Mp4.Enabled {
 		tpl += PLAY_TMPL_SRC_MP4

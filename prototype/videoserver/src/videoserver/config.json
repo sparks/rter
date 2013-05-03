@@ -47,13 +47,18 @@
 			"segment_length": 2
 		},
 		"mp4": {
-			"enabled": true
+			"enabled": false
 		},
 		"ogg":  {
-			"enabled": true
+			"enabled": false
 		},
 		"webm":  {
 			"enabled": true
+		},
+		"webm_hls": {
+			"enabled": true,
+			"segment_length": 2,
+			"gop_size": 50
 		},
 		"thumb":  {
 			"enabled": true,
