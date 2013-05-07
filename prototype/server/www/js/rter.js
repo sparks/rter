@@ -5,7 +5,8 @@ angular.module('rter', [
 	'termview',              //term-view directives and TermViewRemote
 	'http-auth-interceptor', //401 catcher
 	'ngCookies',             //Cookie for login/logout
-	'auth'                   //Login system
+	'auth',                  //Login system
+	'tsunami'                //live video player
 ])
 
 .filter('if', function() {
