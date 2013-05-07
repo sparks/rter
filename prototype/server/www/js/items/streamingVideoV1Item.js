@@ -1,5 +1,5 @@
 angular.module('streamingVideoV1Item', [
-	'tsunamijs.livethumbnail', //Live Thumbnails
+	//'tsunamijs.livethumbnail', //Live Thumbnails
 	'edit-map',                //maps
 	'disp-map'                 //maps
 ])
