@@ -169,7 +169,7 @@ func FileHandler(h http.Handler) http.HandlerFunc {
 
 		// set response headers
 		w.Header().Set("Access-Control-Allow-Origin", C.Server.Access_control_allow_origin)
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-PINGOTHER")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 
 		// for m3u8 and mpd index files set cache policy

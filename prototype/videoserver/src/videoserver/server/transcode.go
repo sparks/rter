@@ -63,9 +63,9 @@ const (
 	TC_ARG_HLS      string = " -f segment -codec copy -map 0 -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format mpegts -segment_list_flags +live -segment_list_type m3u8 -individual_header_trailer 1 -segment_list index.m3u8 hls/%09d.ts"
 	TC_ARG_DASH     string = " "
 	TC_ARG_MP4      string = " -codec copy video.mp4 "
-	TC_ARG_OGG      string = " -codec:v libtheora -b:v 600k -codec:a vorbis -b:a 128k video.ogv "
-	TC_ARG_WEBM     string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 600k -qmin 10 -qmax 42 -minrate 600k -maxrate 600k -bufsize 1000k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
-	TC_ARG_WEBM_HLS string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -keyint_min {{.Webm_gop_size}} -g {{.Webm_gop_size}} -b:v 600k -qmin 10 -qmax 42 -maxrate 600k -bufsize 500k -lag-in-frames 0 -rc_lookahead 0 -flags +global_header -codec:a libvorbis -b:a 128k -flags +global_header -map 0 -f segment -segment_list_flags +live -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format webm -flags +global_header -segment_list webm_index.m3u8 webm/%09d.webm "
+	TC_ARG_OGG      string = " -codec:v libtheora -b:v 1200k -codec:a vorbis -b:a 128k video.ogv "
+	TC_ARG_WEBM     string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 1200k -qmin 10 -qmax 42 -minrate 1200k -maxrate 1200k -bufsize 1500k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
+	TC_ARG_WEBM_HLS string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -keyint_min {{.Webm_gop_size}} -g {{.Webm_gop_size}} -b:v 1200k -qmin 10 -qmax 42 -maxrate 1200k -bufsize 1500k -lag-in-frames 0 -rc_lookahead 0 -flags +global_header -codec:a libvorbis -b:a 128k -flags +global_header -map 0 -f segment -segment_list_flags +live -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format webm -flags +global_header -segment_list webm_index.m3u8 webm/%09d.webm "
 	TC_ARG_THUMB    string = " -f image2 {{.Thumb_size}} -vsync 1 -vf fps=fps=1/{{.Thumb_rate}} thumb/%09d.jpg "
 	TC_ARG_POSTER   string = " -f image2 {{.Poster_size}} -vsync 1 -vf fps=fps=1/{{.Poster_rate}} {{.Poster_skip}} -vframes {{.Poster_corrected_count}} poster/%09d.jpg "
 )
