@@ -9,7 +9,7 @@
 				</video>
 			</div>
 			<div ng-switch-default>
-				<video ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
+				<video live controls ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
 					<source ng-src="{{item.ContentURI}}/index.m3u8" type="application/x-mpegURL;profile='video/mp2t'">
 					<source ng-src="{{item.ContentURI}}/webm_index.m3u8" type="application/x-mpegURL;profile='video/webm; codecs=vp8'">
 					<source ng-src="{{item.ContentURI}}/video.webm" type="video/webm; codecs=vp8,vorbis">
@@ -41,7 +41,7 @@
 			</video>
 		</div>
 		<div ng-switch-default>
-			<video ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
+			<video live controls ng-poster="{{item.ContentURI}}/poster/000000001.jpg" x-webkit-airplay="allow">
 				<source ng-src="{{item.ContentURI}}/index.m3u8" type="application/x-mpegURL;profile='video/mp2t'">
 				<source ng-src="{{item.ContentURI}}/webm_index.m3u8" type="application/x-mpegURL;profile='video/webm; codecs=vp8'">
 				<source ng-src="{{item.ContentURI}}/video.webm" type="video/webm; codecs=vp8,vorbis">
