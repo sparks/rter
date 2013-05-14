@@ -17,7 +17,10 @@ public class WiFiScanReceiver extends BroadcastReceiver {
   CameraPreviewActivity wifiDemo;
   
   private String[][] wifiMap= {
-			{"00:1f:45:f3:1e:11","lat","lng"}	
+			{"00:1F:45:E3:E2:99","43.64419","-79.38684"},
+			{"20:B3:99:94:3B:08","43.64394","-79.38672"},
+			{"20:B3:99:A1:4D:88","43.64378","-79.38619"},
+			{"20:B3:99:A1:49:D8","43.64364","-79.38701"}
   };
   public WiFiScanReceiver(CameraPreviewActivity wifiDemo) {
     super();
@@ -36,20 +39,27 @@ public class WiFiScanReceiver extends BroadcastReceiver {
 
     String message = String.format("%s networks found. %s is the strongest. %s with access mac ",
         results.size(), bestSignal.SSID, bestSignal.BSSID);
-    
+    Toast.makeText(wifiDemo, message, Toast.LENGTH_LONG).show();
     Log.d(TAG, message);
-
+    String WifiID = bestSignal.BSSID.toUpperCase();
 	for(int i = 0;i <= wifiMap.length-1; i++){
-		if(wifiMap[i][0].matches(bestSignal.BSSID))
-		{
+		if(wifiMap[i][0].matches(WifiID) && bestSignal.SSID.matches("Canada 3.0"))
+		{	
 			wifiDemo.internalLat = wifiMap[i][1] ;
 			wifiDemo.internalLng = wifiMap[i][2] ;
+			wifiDemo.changeLocation();
+			Toast.makeText(wifiDemo, message, Toast.LENGTH_LONG).show();
+			Toast.makeText(wifiDemo, message, Toast.LENGTH_LONG).show();
+			
+		    Log.d(TAG, "onReceive() message: " + message);
 			Log.d("WIFI", "WIFI: lat= "+wifiMap[i][1] +" and lng= "+wifiMap[i][2]);
+		}else{
+			String internalLat="43.643886";
+			String internalLng="-79.386885";
 		}
 	}
 	
-    Toast.makeText(wifiDemo, message, Toast.LENGTH_LONG).show();
-    Log.d(TAG, "onReceive() message: " + message);
+    
   }
 
 }

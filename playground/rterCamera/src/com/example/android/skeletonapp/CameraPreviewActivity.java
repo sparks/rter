@@ -82,8 +82,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	private String provider;
 	
 	
-	String internalLat=null;
-	String internalLng=null;
+	String internalLat="43.643886";
+	String internalLng="-79.386885";
 	FrameInfo frameInfo;
 
 	// to prevent sleeping
@@ -220,7 +220,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		overlay.setDesiredOrientation(0.0f);
 		CharSequence text = "Tap to start..";
 		int duration = Toast.LENGTH_SHORT;
-
+		
 		Toast toast = Toast.makeText(this, text, duration);
 		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 		toast.show();
@@ -244,7 +244,8 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 
 				registerReceiver(receiver, new IntentFilter(
 						WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		
+				
+				myWifiManager.startScan();
 	}
 
 	@Override
@@ -396,6 +397,15 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		
 		
 
+	}
+	
+	
+	public void changeLocation(){
+		Log.d("Wifi","Location changed");
+		String lati = internalLat;
+		String longi = internalLng;
+		frameInfo.lat = convertStringToByteArray(lati);
+		frameInfo.lon = convertStringToByteArray(longi);
 	}
 
 	@Override

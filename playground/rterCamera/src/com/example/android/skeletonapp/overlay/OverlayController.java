@@ -161,10 +161,10 @@ public class OverlayController implements SensorEventListener, LocationListener 
 		// down
 		this.deviceOrientation = (float) Math.toDegrees(orientationValues[2]);
 
-		Log.d("orientation", "x: " + String.format("%.1f", Math.toDegrees(orientationValues[0]))
-				+ ", y: " + String.format("%.1f", Math.toDegrees(orientationValues[1]))
-				+ ", z: " + String.format("%.1f", Math.toDegrees(orientationValues[2])));
-		Log.d("reald orientation", "x: " + String.format("%.1f", this.currentOrientation));
+//		Log.d("orientation", "x: " + String.format("%.1f", Math.toDegrees(orientationValues[0]))
+//				+ ", y: " + String.format("%.1f", Math.toDegrees(orientationValues[1]))
+//				+ ", z: " + String.format("%.1f", Math.toDegrees(orientationValues[2])));
+//		Log.d("reald orientation", "x: " + String.format("%.1f", this.currentOrientation));
 
 		if (this.freeRoam) {
 			this.mGLRenderer.indicateTurn(Indicate.FREE, 0.0f);
