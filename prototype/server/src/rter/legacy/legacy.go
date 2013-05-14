@@ -30,9 +30,10 @@ func MultiUploadHandler(rterDir string, uploadPath string, w http.ResponseWriter
 	err = storage.Select(user)
 
 	if err == storage.ErrZeroAffected {
-		log.Println("upload failed, phone_id invalid:", user.Username)
-		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
-		return
+		storage.Insert(user)
+		// log.Println("upload failed, phone_id invalid:", user.Username)
+		// http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
+		// return
 	} else if err != nil {
 		log.Println(err)
 		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
