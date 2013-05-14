@@ -141,7 +141,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		http.Error(w, "Insert Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
@@ -149,9 +149,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	switch v := val.(type) {
 	case *data.Item:
 		if v.Type == "streaming-video-v1" {
-			v.UploadURI = "http://rter.cim.mcgill.ca:8080/v1/ingest/" + strconv.FormatInt(v.ID, 10)
-			v.ThumbnailURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb/000000001.jpg"
-			v.ContentURI = "http://rter.cim.mcgill.ca:8080/v1/videos/" + strconv.FormatInt(v.ID, 10)
+			v.UploadURI = "http://192.168.30.8:8080/v1/ingest/" + strconv.FormatInt(v.ID, 10)
+			v.ThumbnailURI = "http://192.168.30.8:8080/v1/videos/" + strconv.FormatInt(v.ID, 10) + "/thumb/000000001.jpg"
+			v.ContentURI = "http://192.168.30.8:8080/v1/videos/" + strconv.FormatInt(v.ID, 10)
 
 			host, _, err := net.SplitHostPort(r.RemoteAddr)
 
@@ -175,7 +175,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				log.Println(err)
-				http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+				http.Error(w, "Update Database error, likely due to malformed request.", http.StatusInternalServerError)
 				return
 			}
 		}
@@ -270,7 +270,7 @@ func Read(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request", http.StatusInternalServerError)
+		http.Error(w, "Select Database error, likely due to malformed request", http.StatusInternalServerError)
 		return
 	}
 
@@ -362,7 +362,7 @@ func ReadWhere(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request", http.StatusInternalServerError)
+		http.Error(w, "Select2 Database error, likely due to malformed request", http.StatusInternalServerError)
 		return
 	}
 
@@ -470,7 +470,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		http.Error(w, "Select3 Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
@@ -521,7 +521,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request.", http.StatusInternalServerError)
+		http.Error(w, "Update2 Database error, likely due to malformed request.", http.StatusInternalServerError)
 		return
 	}
 
@@ -612,7 +612,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		log.Println(err)
-		http.Error(w, "Database error, likely due to malformed request", http.StatusInternalServerError)
+		http.Error(w, "Delete Database error, likely due to malformed request", http.StatusInternalServerError)
 		return
 	}
 

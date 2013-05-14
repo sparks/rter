@@ -93,6 +93,7 @@ func main() {
 	r.PathPrefix("/vendor").Handler(http.StripPrefix("/vendor", http.FileServer(http.Dir(filepath.Join(wwwPath, "vendor")))))
 	r.PathPrefix("/asset").Handler(http.StripPrefix("/asset", http.FileServer(http.Dir(filepath.Join(wwwPath, "asset")))))
 	r.PathPrefix("/template").Handler(http.StripPrefix("/template", http.FileServer(http.Dir(filepath.Join(wwwPath, "template")))))
+	r.PathPrefix("/welcome").Handler(http.StripPrefix("/welcome", http.FileServer(http.Dir(filepath.Join(wwwPath, "welcome")))))
 
 	r.HandleFunc("/favicon.ico",
 		func(w http.ResponseWriter, r *http.Request) {

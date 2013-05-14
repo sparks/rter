@@ -25,7 +25,7 @@ func scanItemComment(comment *data.ItemComment, rows *sql.Rows) error {
 	updateTime, err := time.Parse("2006-01-02 15:04:05", updateTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		log.Println("ItemComment scanner failed to parse time.")
+		log.Println("ItemComment scanner failed to parse time. " + updateTimeString)
 		return err
 	}
 
@@ -63,7 +63,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	startTime, err := time.Parse("2006-01-02 15:04:05", startTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		log.Println("Item scanner failed to parse time.")
+		log.Println("Item scanner failed to parse time. " + startTimeString)
 		return err
 	}
 
@@ -72,7 +72,7 @@ func scanItem(item *data.Item, rows *sql.Rows) error {
 	stopTime, err := time.Parse("2006-01-02 15:04:05", stopTimeString) // this assumes UTC as timezone
 
 	if err != nil {
-		log.Println("Item scanner failed to parse time.")
+		log.Println("Item scanner failed to parse time. " + stopTimeString)
 		return err
 	}
 
