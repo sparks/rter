@@ -18,18 +18,24 @@ package com.example.android.skeletonapp;
 
 import java.util.Random;
 
+
+
 import com.example.android.skeletonapp.overlay.*;
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -75,6 +81,9 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	private LocationManager locationManager;
 	private String provider;
 	
+	
+	String internalLat=null;
+	String internalLng=null;
 	FrameInfo frameInfo;
 
 	// to prevent sleeping
@@ -83,6 +92,15 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 
 	private static final String TAG = "CameraPreview Activity";
 	protected static final String MEDIA_TYPE_IMAGE = null;
+	
+	
+
+	WifiManager myWifiManager;
+	WifiInfo myWifiInfo; 
+	BroadcastReceiver receiver;
+	
+	
+		
 	
 	@SuppressLint("ParserError")
 	@Override
@@ -140,7 +158,7 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		
 	    
 		
-		selected_uid = androidIds[rnd]; //AndroidId;
+		selected_uid = AndroidId; //AndroidId;
 		frameInfo.uid = selected_uid.getBytes();
 		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
 		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
@@ -163,7 +181,10 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 				defaultCameraId = i;
 			}
 		}
-
+		
+		Log.e("mac", "WIFI Requesting location");
+		this.wifiLocalization();
+		
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// Define the criteria how to select the location provider -> use
@@ -205,6 +226,24 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 		toast.show();
 		
 		
+		
+	}
+	
+	private void wifiLocalization() {
+		// TODO Auto-generated method stub
+	
+		
+		myWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+		myWifiInfo = myWifiManager.getConnectionInfo();
+		Log.d("mac address", "WIFI ="+myWifiInfo.getBSSID());
+		Log.d("mac address", "WIFI ="+myWifiInfo.getSSID());
+		Log.d("mac address", "WIFI ="+myWifiInfo.getMacAddress());
+		// Register Broadcast Receiver
+				if (receiver == null)
+					receiver = new WiFiScanReceiver(this);
+
+				registerReceiver(receiver, new IntentFilter(
+						WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
 	}
 
@@ -348,8 +387,10 @@ public class CameraPreviewActivity extends Activity implements OnClickListener,
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
 		Log.d(TAG, "Location Changed");
-		String lati = "" + (location.getLatitude());
-		String longi = "" + (location.getLongitude());
+//		String lati = "" + (location.getLatitude());
+//		String longi = "" + (location.getLongitude());
+		String lati = internalLat;
+		String longi = internalLng;
 		frameInfo.lat = convertStringToByteArray(lati);
 		frameInfo.lon = convertStringToByteArray(longi);
 		

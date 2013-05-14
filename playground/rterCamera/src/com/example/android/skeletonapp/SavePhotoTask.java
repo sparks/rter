@@ -104,7 +104,7 @@ class SavePhotoTask extends AsyncTask<byte[], String, String> {
 			fos.close();
 
 			HttpPost httppost = new HttpPost(
-					"http://rter.cim.mcgill.ca:80/multiup");
+					"http://192.168.30.8:8000/multiup");
 
 			MultipartEntity multipartEntity = new MultipartEntity(
 					HttpMultipartMode.BROWSER_COMPATIBLE);
