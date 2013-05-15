@@ -89,6 +89,7 @@ const (
 // -avioflags direct 						-- broke format detection
 // -f mpegtsraw -compute_pcr 0 				-- created an invalid MPEGTS bitstream
 // -use_wallclock_as_timestamps 1 [bool] 	-- broke TS timing
+// -fflags +nobuffer                        -- breaks SPS/PPS detection on some TS streams from Android ffmpeg
 
 // Unused Options
 //
@@ -97,7 +98,7 @@ const (
 // -fpsprobesize 2
 
 const (
-	TC_ARG_TSIN  string = " -fflags +genpts+igndts+nobuffer -err_detect compliant -avoid_negative_ts 1 -correct_ts_overflow 1 -max_delay 500000 -analyzeduration 500000 -f mpegts -c:0 h264 -vsync 0 -copyts -copytb 1 "
+	TC_ARG_TSIN  string = " -fflags +genpts+igndts -err_detect compliant -avoid_negative_ts 1 -correct_ts_overflow 1 -max_delay 500000 -analyzeduration 500000 -f mpegts -c:0 h264 -vsync 0 -copyts -copytb 1 "
 	TC_ARG_AVCIN string = " -fflags +genpts+igndts -max_delay 0 -analyzeduration 0 -f h264 -c:0 h264 -copytb 0 "
 )
 
