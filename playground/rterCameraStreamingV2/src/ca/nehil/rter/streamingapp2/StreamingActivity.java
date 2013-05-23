@@ -31,13 +31,17 @@ import ca.nehil.rter.streamingapp2.overlay.*;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -62,14 +66,17 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.provider.Settings;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 
 // ----------------------------------------------------------------------
 
-public class CameraPreviewActivity extends Activity implements 
+public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-	public static final int SERVERPORT = 9999;
-	public static String SERVERIP="10.105.62.156";
+	public static final int SERVERPORT = 1200;
+	public static String SERVERIP="192.168.30.8";
 	Socket clientSocket;
 	private Handler handler = new Handler();
 	ParcelFileDescriptor pfd=null;
@@ -93,8 +100,12 @@ public class CameraPreviewActivity extends Activity implements
 	static float justtesting;
 
 	private String AndroidId;
-	String selected_uid; // passed from other activity right now
+	private String selected_uid; // passed from other activity right now
 
+	
+	WifiManager myWifiManager;
+	WifiInfo myWifiInfo; 
+	BroadcastReceiver receiver;
 	private LocationManager locationManager;
 	private String provider;
 	
@@ -107,6 +118,9 @@ public class CameraPreviewActivity extends Activity implements
 	private static final String TAG = "CameraPreview Activity";
 	//protected static final String MEDIA_TYPE_IMAGE = null;
 	
+	private String[][] wifiMap= {
+			{"00:1f:45:f3:1e:11","lat","lng"}	
+	};
 	
 	
 	public class SendVideoThread implements Runnable{
@@ -126,17 +140,14 @@ public class CameraPreviewActivity extends Activity implements
 	                clientSocket = new Socket(SERVERIP,SERVERPORT);
 	                pfd  = ParcelFileDescriptor.fromSocket(clientSocket);
 	             // ok, got a connection.  Let's use java.io.* niceties to read and write from the connection.
-        			BufferedReader myInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        			
+	                //to send the android id uncomment below 3 line
         			PrintStream myOutput = new PrintStream(clientSocket.getOutputStream());	
                 
-        			// write something to the server.
-        			myOutput.print(AndroidId+";");
+//        			myOutput.print(AndroidId+";");
         			
         			// see if the server writes something back.
-        			String buf = myInput.readLine();
-        			if(buf != null) {
-        				System.out.println("Client received [" + buf + "] from the server!");	
-        			}
+        			
 	                
 	            }
 	        } catch (Exception e){
@@ -180,9 +191,16 @@ public class CameraPreviewActivity extends Activity implements
         }
         else if(item.getTitle().equals("Stop"))
         {
-            mrec.stop();
+            Log.e("Alert", "Stop mrec");
+        	mrec.stop();
             mrec.release();
             mrec = null;
+            try {
+				clientSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             item.setTitle("Start");
         }
 
@@ -191,7 +209,20 @@ public class CameraPreviewActivity extends Activity implements
 	
 	@Override
     protected void onDestroy() {
-        stopRecording();
+		if(mrec!=null)
+        {
+            mrec.stop();
+            mrec.release();
+            mCamera.release();
+            mCamera.lock();
+            try {
+				clientSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+		stopRecording();
         super.onDestroy();
     }
 	
@@ -200,9 +231,6 @@ public class CameraPreviewActivity extends Activity implements
         if(mCamera==null)
          mCamera = Camera.open();
         
-        
-       
-    	
         String filename;
         String root = (Environment.getExternalStorageDirectory()).toString();
  		File rootDir = new File(Environment.getExternalStorageDirectory()
@@ -219,6 +247,7 @@ public class CameraPreviewActivity extends Activity implements
         mCamera.lock();
         mCamera.unlock();
 
+        
         // Please maintain sequence of following code. 
 
         // If you change sequence it will not work
@@ -229,20 +258,16 @@ public class CameraPreviewActivity extends Activity implements
         mrec.setOutputFormat(8);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         //mrec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        mrec.setOutputFile(rootDir+filename);
-//        mrec.setOutputFile(pfd.getFileDescriptor());
+//        mrec.setOutputFile(rootDir+filename);
+        mrec.setOutputFile(pfd.getFileDescriptor());
         mrec.setVideoEncodingBitRate(600000);
         //mrec.setAudioEncodingBitRate(44100);
         mrec.setVideoFrameRate(15);
-        //mrec.setMaxDuration(2000);
+        mrec.setMaxDuration(-1);
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
         
         mrec.prepare();
         mrec.start();
-        
-       
-
-        
     }
 
     protected void stopRecording() {
@@ -302,34 +327,31 @@ public class CameraPreviewActivity extends Activity implements
 		// openGLview
 		mGLView = overlay.getGLView();
 
-		
-		
-		
 		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
-		String androidIds[] = {
-			"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
-			"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
-			"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
-			"852decd1fbc083cf6853e46feebb08622d653602",
-			"e1830fcefc3f47647ffa08350348d7e34b142b0b",
-			"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
-			"acb519f53a55d9dea06efbcc804eda79d305282e",
-			"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
-			"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
-			"952decd1fbc083cf6853e56f1ebb08622d653602",
-			"y1830fcefc3f47647ffa05351348d7e34b142b0b",
-			"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
-			"qcb519f53a55d9dea06ef5cc104eda79d305282e"
-		};
+//		String androidIds[] = {
+//			"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
+//			"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
+//			"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
+//			"852decd1fbc083cf6853e46feebb08622d653602",
+//			"e1830fcefc3f47647ffa08350348d7e34b142b0b",
+//			"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
+//			"acb519f53a55d9dea06efbcc804eda79d305282e",
+//			"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
+//			"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
+//			"952decd1fbc083cf6853e56f1ebb08622d653602",
+//			"y1830fcefc3f47647ffa05351348d7e34b142b0b",
+//			"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
+//			"qcb519f53a55d9dea06ef5cc104eda79d305282e"
+//		};
 		
-		int rnd = new Random().nextInt(androidIds.length);
-		
-	    
-		
-		selected_uid = androidIds[rnd]; //AndroidId;
-		frameInfo.uid = selected_uid.getBytes();
+//		int rnd = new Random().nextInt(androidIds.length);
+//		
+//	    
+//		
+//		selected_uid = androidIds[rnd]; //AndroidId;
+//		frameInfo.uid = selected_uid.getBytes();
 		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
-		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
+//		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
 		// add the two views to the frame
 		mFrame.addView(mPreview);
 		mFrame.addView(mGLView);
@@ -352,13 +374,15 @@ public class CameraPreviewActivity extends Activity implements
 				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
 				break;
 			}
-			else if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
-				Log.d(TAG, "Front facing camera chosen");
-				defaultCameraId = i;
-				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
-			}
+//			else if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
+//				Log.d(TAG, "Front facing camera chosen");
+//				defaultCameraId = i;
+//				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
+//			}
 		}
-
+		Log.e("mac", "WIFI Requesting location");
+//		this.wifiLocalization();
+		
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// Define the criteria how to select the location provider -> use
@@ -398,11 +422,45 @@ public class CameraPreviewActivity extends Activity implements
 		Toast toast = Toast.makeText(this, text, duration);
 		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 		toast.show();
-		
+	
 		
 		// Run new thread to handle socket communications
 	    Thread sendVideo = new Thread(new SendVideoThread());
 	    sendVideo.start();
+	}
+	
+	@Override
+	public void onStop() {
+		unregisterReceiver(receiver);
+	}
+	
+	private void wifiLocalization() {
+		// TODO Auto-generated method stub
+	
+		
+		myWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+		myWifiInfo = myWifiManager.getConnectionInfo();
+		Log.d("mac address", "WIFI ="+myWifiInfo.getBSSID());
+		Log.d("mac address", "WIFI ="+myWifiInfo.getSSID());
+		Log.d("mac address", "WIFI ="+myWifiInfo.getMacAddress());
+		// Register Broadcast Receiver
+				if (receiver == null)
+					receiver = new WiFiScanReceiver(this);
+
+				registerReceiver(receiver, new IntentFilter(
+						WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		
+		
+		
+		
+		for(int i = 0;i <= wifiMap.length-1; i++){
+			if(wifiMap[i][0].matches(myWifiInfo.getBSSID()))
+			{
+				Log.d("WIFI", "WIFI: lat= "+wifiMap[i][1] +" and lng= "+wifiMap[i][2]);
+			}
+		}
+		
+		
 	}
 
 	@Override
@@ -492,7 +550,7 @@ public class CameraPreviewActivity extends Activity implements
 //					runOnUiThread(new Runnable() {
 //		                 public void run() {
 //
-//		                     Toast toast = Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG);
+//		                     Toast toast = Toast.makeText(StreamingActivity.this,"Streaming..",Toast.LENGTH_LONG);
 //		                     toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 //		                     toast.show();
 //		                }
