@@ -1,13 +1,32 @@
 package ca.nehil.rter.streamingapp2;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -26,12 +45,14 @@ public class LoginActivity extends Activity {
 	 */
 	private static final String[] DUMMY_CREDENTIALS = new String[] {
 			"anonymous", "anonymous" };
-
+	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
 	/**
 	 * The default email to populate the email field with.
 	 */
 	public static final String EXTRA_USERNAME = "anonymous";
-
+	
+	private static final String TAG = "LOGIN ACTIVITY";
+	private String rterCreds=null;
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
@@ -47,19 +68,34 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-
+	private SharedPreferences cookies;
+	private SharedPreferences.Editor prefEditor;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
-
+		
+		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
+		prefEditor = cookies.edit();
+		
+		String setUsername = cookies.getString("Username", "not-set");
+		String setPassword = cookies.getString("Password", "not-set");
+		String setrter = cookies.getString("RterCreds", "not-set");
+		Log.d(TAG, "Prefs ==> Username:"+setUsername+" :: Password:" + setPassword +" :: rter cred:" + setrter);
 		// Set up the login form.
+		
 		mUsername = getIntent().getStringExtra(EXTRA_USERNAME);
+		if(!(setUsername.equalsIgnoreCase("not-set"))){
+			mUsername = setUsername;		
+				}
 		mUsernameView = (EditText) findViewById(R.id.username);
 		mUsernameView.setText(mUsername);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
+		if(!(setPassword.equalsIgnoreCase("not-set"))){
+			mUsername = setUsername;		
+				}
 		mPasswordView
 				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 					@Override
@@ -134,8 +170,9 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
+			Log.d(TAG, "Username:"+mUsername+" :: Password:" + mPassword);
 			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
+			mAuthTask.execute(mUsername, mPassword);
 		}
 	}
 
@@ -184,26 +221,79 @@ public class LoginActivity extends Activity {
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+	public class UserLoginTask extends AsyncTask<String, Void, Boolean> {
+		private static final String TAG = "LOGIN ASYNCTASK";
+		
 		@Override
-		protected Boolean doInBackground(Void... params) {
+		protected Boolean doInBackground(String... params) {
 			// TODO: attempt authentication against a network service.
-			
+			Log.d(TAG, "Username:"+params[0]+" :: Password:" + params[0]);
+			JSONObject jsonObjSend = new JSONObject();
+
+			int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+			HttpParams httpParams = new BasicHttpParams();
+			HttpConnectionParams.setConnectionTimeout(httpParams, TIMEOUT_MILLISEC);
+			HttpConnectionParams.setSoTimeout(httpParams, TIMEOUT_MILLISEC);
+			HttpClient client = new DefaultHttpClient(httpParams);
+			HttpPost post_request = new HttpPost(SERVER_URL+"/auth");
+			Header[] headers= null;
+			HttpResponse response = null;
 			try {
-				// Simulate network access.
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				return false;
-			}
-
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mUsername)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
+				jsonObjSend.put("Username", params[0]);
+				jsonObjSend.put("Password", params[1]);
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG, jsonObjSend.toString(2));
+				 
+				post_request.setEntity(new ByteArrayEntity(
+						jsonObjSend.toString().getBytes("UTF8")));
+				response = client.execute(post_request);
+				
+				headers = response.getAllHeaders();
+				Log.i(TAG, "response from "
+						+ SERVER_URL 
+						+" = status line : "+ response.getStatusLine().getStatusCode());
+				
+				
+				
+				if(response.getStatusLine().getStatusCode() == 200){
+					for (Header header : headers) {
+						if(header.getName().equalsIgnoreCase("Set-Cookie")){
+							String key = header.getName();
+							String value = header.getValue();
+							int indexOfEndOfCreds = header.getValue().indexOf(';');
+							rterCreds = value.substring(0, indexOfEndOfCreds);
+							String cookieName = rterCreds.substring(0, rterCreds.indexOf("="));
+						    String cookieValue = rterCreds.substring(rterCreds.indexOf("=") + 1, rterCreds.length());
+							
+							
+							Log.i(TAG,"Key : " + key 
+								      + " ,Value : " + value); 
+							
+							Log.i(TAG,"The value of rter-creds is" + rterCreds);
+							prefEditor.putString("Username", params[0]);  
+							prefEditor.putString("Password", params[1]); 
+							prefEditor.putString("RterCreds", rterCreds);
+							prefEditor.commit(); 
+						}								
+					}
+					return true; 
+				}else{
+					return false;
 				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
+			
 			// TODO: register the new account here.
 			return true;
 		}
@@ -213,8 +303,11 @@ public class LoginActivity extends Activity {
 			mAuthTask = null;
 			showProgress(false);
 
-			if (success) {
-				finish();
+			if (success) {				
+				Log.i(TAG, "Calling Intent to Streaming ACtivity");
+				Intent intent = new Intent(LoginActivity.this, GetTokenActivity.class);
+		        startActivity(intent);
+				
 			} else {
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));

@@ -35,6 +35,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -78,6 +79,10 @@ public class StreamingActivity extends Activity implements
 	public static final int SERVERPORT = 1200;
 	public static String SERVERIP="192.168.30.8";
 	Socket clientSocket;
+	private SharedPreferences cookies;
+	private SharedPreferences.Editor prefEditor;
+	private String setRterResource;
+	private String setRterSignature;
 	private Handler handler = new Handler();
 	ParcelFileDescriptor pfd=null;
 	
@@ -115,7 +120,7 @@ public class StreamingActivity extends Activity implements
 	PowerManager pm;
 	PowerManager.WakeLock wl;
 
-	private static final String TAG = "CameraPreview Activity";
+	private static final String TAG = "Streaming Activity";
 	//protected static final String MEDIA_TYPE_IMAGE = null;
 	
 	private String[][] wifiMap= {
@@ -131,12 +136,12 @@ public class StreamingActivity extends Activity implements
 	                handler.post(new Runnable() {
 	                    @Override
 	                    public void run() {
-	                        Log.d("Listening on IP: " , SERVERIP);
+	                        Log.d(TAG, "Listening on IP: " + SERVERIP);
 	                    }
 	                });
 //	                String host="132.206.74.113";
 //	                int port = 9999;
-	                Log.d("Android","Client will attempt connecting to server at host=" + SERVERIP + " port=" + SERVERPORT + ".");
+	                Log.d(TAG,"Client will attempt connecting to server at host=" + SERVERIP + " port=" + SERVERPORT + ".");
 	                clientSocket = new Socket(SERVERIP,SERVERPORT);
 	                pfd  = ParcelFileDescriptor.fromSocket(clientSocket);
 	             // ok, got a connection.  Let's use java.io.* niceties to read and write from the connection.
@@ -184,14 +189,14 @@ public class StreamingActivity extends Activity implements
             } catch (Exception e) {
 
                 String message = e.getMessage();
-                Log.e(null, "Problem " + message);
+                Log.e(TAG, "Problem " + message);
                 mrec.release();
             }
 
         }
         else if(item.getTitle().equals("Stop"))
         {
-            Log.e("Alert", "Stop mrec");
+            Log.e(TAG,"Alert Stop mrec");
         	mrec.stop();
             mrec.release();
             mrec = null;
@@ -328,30 +333,7 @@ public class StreamingActivity extends Activity implements
 		mGLView = overlay.getGLView();
 
 		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
-//		String androidIds[] = {
-//			"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
-//			"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
-//			"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
-//			"852decd1fbc083cf6853e46feebb08622d653602",
-//			"e1830fcefc3f47647ffa08350348d7e34b142b0b",
-//			"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
-//			"acb519f53a55d9dea06efbcc804eda79d305282e",
-//			"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
-//			"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
-//			"952decd1fbc083cf6853e56f1ebb08622d653602",
-//			"y1830fcefc3f47647ffa05351348d7e34b142b0b",
-//			"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
-//			"qcb519f53a55d9dea06ef5cc104eda79d305282e"
-//		};
-		
-//		int rnd = new Random().nextInt(androidIds.length);
-//		
-//	    
-//		
-//		selected_uid = androidIds[rnd]; //AndroidId;
-//		frameInfo.uid = selected_uid.getBytes();
-		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
-//		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
+
 		// add the two views to the frame
 		mFrame.addView(mPreview);
 		mFrame.addView(mGLView);
@@ -367,7 +349,7 @@ public class StreamingActivity extends Activity implements
 		CameraInfo cameraInfo = new CameraInfo();
 		for (int i = 0; i < numberOfCameras; i++) {
 			Camera.getCameraInfo(i, cameraInfo);
-			Log.d("Camera Id", "is " + i);
+			Log.d(TAG, "Camera Id is " + i);
 			if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
 				Log.d(TAG, "Back facing camera chosen");
 				defaultCameraId = i;
@@ -380,8 +362,14 @@ public class StreamingActivity extends Activity implements
 //				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
 //			}
 		}
-		Log.e("mac", "WIFI Requesting location");
-//		this.wifiLocalization();
+		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
+		prefEditor = cookies.edit();
+		
+		setRterResource = cookies.getString("rter_resource", "not-set");
+		setRterSignature = cookies.getString("rter_signature", "not-set");
+		
+		
+		Log.d(TAG, "Prefs ==> rter_resource:"+setRterResource+" :: rter_signature:" + setRterSignature );
 		
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
