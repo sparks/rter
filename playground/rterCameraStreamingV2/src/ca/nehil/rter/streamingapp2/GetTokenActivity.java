@@ -66,7 +66,7 @@ public class GetTokenActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_login);
+		setContentView(R.layout.activity_token);
 		
 		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
 		prefEditor = cookies.edit();

@@ -40,7 +40,8 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_login=0x7f030000;
-        public static final int skeleton_activity=0x7f030001;
+        public static final int activity_token=0x7f030001;
+        public static final int skeleton_activity=0x7f030002;
     }
     public static final class menu {
         public static final int login=0x7f080000;
