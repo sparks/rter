@@ -203,7 +203,7 @@ public class GetTokenActivity extends Activity {
 	                JSONObject jObject = new JSONObject(result);
 	                Log.i(TAG,"Response from connection " + jObject.toString(2));
 	                
-	                String id = jObject.getString("ID");
+	                String itemID = jObject.getString("ID");
 	                String uploadURI = jObject.getString("UploadURI");
 	                JSONObject token = jObject.getJSONObject("Token");
 	                String rter_resource = token.getString("rter_resource");
@@ -212,6 +212,7 @@ public class GetTokenActivity extends Activity {
 	                Log.i(TAG,"Response from connection rter_resource : " + rter_resource);
 	                Log.i(TAG,"Response from connection rter_signature : " + rter_signature);
 	                
+	                prefEditor.putString("ID", itemID); 
 	                prefEditor.putString("rter_resource", rter_resource);  
 					prefEditor.putString("rter_signature", rter_signature); 
 					prefEditor.putString("rter_valid_until", rter_valid_until); 

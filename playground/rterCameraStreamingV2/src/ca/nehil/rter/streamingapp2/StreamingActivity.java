@@ -24,12 +24,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ca.nehil.rter.streamingapp2.overlay.*;
 
@@ -84,10 +91,12 @@ import android.net.wifi.WifiConfiguration;
 public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-
+	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	private String setRterResource;
+	private String setRterCredentials;
+	private String setItemID;
 	private String setRterSignature;
 	private String setRterValidUntil;
 	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
@@ -173,14 +182,16 @@ public class StreamingActivity extends Activity implements
         
         @Override
         public void run() {
-            showMessage("DEMO: SocketListener started!");
+        	 showMessage("SocketListener started!");
             try {
                 LocalServerSocket server = new LocalServerSocket(SOCKET_ADDRESS);
+                Log.d(TAG, "LocalServerSocket running at"+SOCKET_ADDRESS);
                 while (true) {
                     LocalSocket receiver = server.accept();
                     if (receiver != null) {
+                    	Log.d(TAG, "LocalSocket reciever running");
                     	DataInputStream in = new DataInputStream (receiver.getInputStream());
-//                        FileOutputStream videoFile = new FileOutputStream(getOutputMediaFile());
+//                      FileOutputStream videoFile = new FileOutputStream(getOutputMediaFile());
                         // simply for java.util.ArrayList
                     	URL url = new URL(setRterResource+"/ts");
         				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
@@ -195,21 +206,20 @@ public class StreamingActivity extends Activity implements
 //        				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
 //        				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
         				httpcon.connect();
-        				
-        				
+        				Log.d(TAG, "HTTPConnection established");
+        				OutputStream os = httpcon.getOutputStream();
+        				Log.d(TAG, "OutputStream opened");
                         int len;
                         int capacity = 8192;
                         byte buffer[] = new byte[capacity];
-                        while((len = in.read(buffer)) != -1) {
-                        	OutputStream os = httpcon.getOutputStream();
-            				os.write(buffer);
-
-            				os.close();
-                            Log.v("videodata",""+buffer.toString());
+                        while((len = in.read(buffer)) != -1) {                        	
+                        	Log.v("videodata",""+buffer.toString());
+                        	os.write(buffer);   
                         }
-                        showMessage("Bufffer recieved!");
+                        Log.d(TAG, "OutputStream closing");
+                        os.close();
+                        Log.d(TAG, "Reciever closing");
                         receiver.close();
-                       
                     }
                 }
             } catch (IOException e) {
@@ -221,6 +231,7 @@ public class StreamingActivity extends Activity implements
     public static void writeSocket() throws IOException {
         sender = new LocalSocket();
         sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+        Log.d(TAG, "sender Opened");
         fd = sender.getFileDescriptor();
         //handle the closing 
 //        sender.getOutputStream().write(message.getBytes());
@@ -269,7 +280,8 @@ public class StreamingActivity extends Activity implements
         }
         else if(item.getTitle().equals("Stop"))
         {
-            mrec.stop();
+        	stopRecording();
+        	mrec.stop();
             mrec.release();
             mrec = null;
             item.setTitle("Start");
@@ -325,8 +337,7 @@ public class StreamingActivity extends Activity implements
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
         mrec.prepare();
         mrec.start();
-        
-       
+        Log.d(TAG, "MREC starting"); 
 
         
     }
@@ -337,15 +348,23 @@ public class StreamingActivity extends Activity implements
         {
         	
         	try {
-				sender.close();
+        		Log.d(TAG, "MREC stop");
+				mrec.stop();
+				Log.d(TAG, "MREC release");
+	            mrec.release();
+	            Log.d(TAG, "MCAMERA release");
+	            mCamera.release();
+	            Log.d(TAG, "sender getOutputStream close");
+        		sender.getOutputStream().close();
+        		Log.d(TAG, "sender close");
+        		sender.close();
+        		Thread closefeed = new CloseFeed(this.handler, this.notificationRunnable);
+        		closefeed.start();
+        		
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-        	mrec.stop();
-            mrec.release();
-            mCamera.release();
-            mCamera.lock();
+			}        	
         }
     }
 
@@ -426,11 +445,11 @@ public class StreamingActivity extends Activity implements
 		}
 		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
 		prefEditor = cookies.edit();
-		
+		setRterCredentials = cookies.getString("RterCreds", "not-set");
 		setRterResource = cookies.getString("rter_resource", "not-set");
 		setRterSignature = cookies.getString("rter_signature", "not-set");
 		setRterValidUntil = cookies.getString("rter_valid_until", "not-set");
-		
+		setItemID = cookies.getString("ID", "not-set");
 		Log.d(TAG, "Prefs ==> rter_resource:"+setRterResource+" :: rter_signature:" + setRterSignature );
 		
 		// Get the location manager
@@ -575,6 +594,96 @@ public class StreamingActivity extends Activity implements
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
 	}
+	
+	class CloseFeed extends Thread {
+	    private Handler handler = null;
+	    private NotificationRunnable runnable = null;
+	    
+	    public CloseFeed(Handler handler, NotificationRunnable runnable) {
+	        this.handler = handler;
+	        this.runnable = runnable;
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    /**
+	    * Show UI notification.
+	    * @param message
+	    */
+	    private void showMessage(String message) {
+	        this.runnable.setMessage(message);
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    @Override
+	    public void run() {
+	    	showMessage("Closing feed thread started");
+	    	
+	    	
+	    	JSONObject jsonObjSend = new JSONObject();
+			
+			
+			
+			Date date = new Date();
+			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+			String formattedDate = dateFormatUTC.format(date);
+			Log.i(TAG, "The StopTime stamp "+formattedDate);
+	
+			try {
+				
+				jsonObjSend.put("Live", false);
+				jsonObjSend.put("StoptTime", formattedDate);
+				
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));
+				
+				
+				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+//				httpcon.setDoOutput(true);
+//				httpcon.setRequestProperty("Content-Type", "application/json");
+//				httpcon.setRequestProperty("Accept", "application/json");
+				httpcon.setRequestProperty("Cookie", setRterCredentials );
+				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				httpcon.setRequestMethod("POST");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
+				OutputStream os = httpcon.getOutputStream();
+				os.write(outputBytes);
+
+				os.close();
+				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 201:
+	               Log.i(TAG,"Feed Close successful");              
+	                
+				}
+				 
+			
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+
+	
+	
 }
 
 class FrameInfo {
@@ -583,4 +692,3 @@ class FrameInfo {
 	public byte[] lon;
 	public byte[] orientation;
 }
-
