@@ -17,32 +17,39 @@
 package ca.nehil.rter.streamingapp2;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.URL;
 import java.util.Date;
 import java.util.Random;
-
 
 import ca.nehil.rter.streamingapp2.overlay.*;
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.PictureCallback;
+
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -55,6 +62,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -68,23 +77,24 @@ import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.provider.Settings;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+
 
 // ----------------------------------------------------------------------
 
 public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-	public static final int SERVERPORT = 1200;
-	public static String SERVERIP="192.168.30.8";
-	Socket clientSocket;
+
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	private String setRterResource;
 	private String setRterSignature;
+	private String setRterValidUntil;
+	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
 	private Handler handler = new Handler();
-	ParcelFileDescriptor pfd=null;
+	static ParcelFileDescriptor pfd=null;
+	static FileDescriptor  fd=null;
+
 	
 	private Preview mPreview;
 	public MediaRecorder mrec = new MediaRecorder();
@@ -97,20 +107,15 @@ public class StreamingActivity extends Activity implements
 	Camera mCamera;
 	int numberOfCameras;
 	int cameraCurrentlyLocked;
-	//PictureCallback mPicture = null;
-	// The first rear facing camera
+
 	int defaultCameraId;
 	static boolean isFPS = false;
-
-	static float justtesting;
 
 	private String AndroidId;
 	private String selected_uid; // passed from other activity right now
 
 	
-	WifiManager myWifiManager;
-	WifiInfo myWifiInfo; 
-	BroadcastReceiver receiver;
+	
 	private LocationManager locationManager;
 	private String provider;
 	
@@ -123,49 +128,113 @@ public class StreamingActivity extends Activity implements
 	private static final String TAG = "Streaming Activity";
 	//protected static final String MEDIA_TYPE_IMAGE = null;
 	
-	private String[][] wifiMap= {
-			{"00:1f:45:f3:1e:11","lat","lng"}	
-	};
+	public class NotificationRunnable implements Runnable {
+        private String message = null;
+        
+        public void run() {
+            if (message != null && message.length() > 0) {
+                showNotification(message);
+            }
+        }
+        
+        /**
+        * @param message the message to set
+        */
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+    
+    // post this to the Handler when the background thread notifies
+    private final NotificationRunnable notificationRunnable = new NotificationRunnable();
+    
+    public void showNotification(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    
+    class SocketListener extends Thread {
+        private Handler handler = null;
+        private NotificationRunnable runnable = null;
+        
+        public SocketListener(Handler handler, NotificationRunnable runnable) {
+            this.handler = handler;
+            this.runnable = runnable;
+            this.handler.post(this.runnable);
+        }
+        
+        /**
+        * Show UI notification.
+        * @param message
+        */
+        private void showMessage(String message) {
+            this.runnable.setMessage(message);
+            this.handler.post(this.runnable);
+        }
+        
+        @Override
+        public void run() {
+            showMessage("DEMO: SocketListener started!");
+            try {
+                LocalServerSocket server = new LocalServerSocket(SOCKET_ADDRESS);
+                while (true) {
+                    LocalSocket receiver = server.accept();
+                    if (receiver != null) {
+                    	DataInputStream in = new DataInputStream (receiver.getInputStream());
+//                        FileOutputStream videoFile = new FileOutputStream(getOutputMediaFile());
+                        // simply for java.util.ArrayList
+                    	URL url = new URL(setRterResource+"/ts");
+        				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+        				httpcon.setDoOutput(true);
+        				String auth = "rtER rter_resource="+setRterResource
+        						+", rter_valid_until="+setRterValidUntil
+        						+", rter_signature="+setRterSignature;
+        				httpcon.setRequestProperty("Authorization", auth);
+//        				httpcon.setRequestProperty("Accept", "application/json");
+        				
+        				httpcon.setRequestMethod("POST");
+//        				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+//        				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+        				httpcon.connect();
+        				
+        				
+                        int len;
+                        int capacity = 8192;
+                        byte buffer[] = new byte[capacity];
+                        while((len = in.read(buffer)) != -1) {
+                        	OutputStream os = httpcon.getOutputStream();
+            				os.write(buffer);
+
+            				os.close();
+                            Log.v("videodata",""+buffer.toString());
+                        }
+                        showMessage("Bufffer recieved!");
+                        receiver.close();
+                       
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(getClass().getName(), e.getMessage());
+            }
+        }
+    }
+    public static LocalSocket sender;
+    public static void writeSocket() throws IOException {
+        sender = new LocalSocket();
+        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+        fd = sender.getFileDescriptor();
+        //handle the closing 
+//        sender.getOutputStream().write(message.getBytes());
+//        sender.getOutputStream().close();
+    }
 	
 	
-	public class SendVideoThread implements Runnable{
-	    public void run(){
-	        // From Server.java
-	        try {
-	            if(SERVERIP!=null){
-	                handler.post(new Runnable() {
-	                    @Override
-	                    public void run() {
-	                        Log.d(TAG, "Listening on IP: " + SERVERIP);
-	                    }
-	                });
-//	                String host="132.206.74.113";
-//	                int port = 9999;
-	                Log.d(TAG,"Client will attempt connecting to server at host=" + SERVERIP + " port=" + SERVERPORT + ".");
-	                clientSocket = new Socket(SERVERIP,SERVERPORT);
-	                pfd  = ParcelFileDescriptor.fromSocket(clientSocket);
-	             // ok, got a connection.  Let's use java.io.* niceties to read and write from the connection.
-        			
-	                //to send the android id uncomment below 3 line
-        			PrintStream myOutput = new PrintStream(clientSocket.getOutputStream());	
-                
-//        			myOutput.print(AndroidId+";");
-        			
-        			// see if the server writes something back.
-        			
-	                
-	            }
-	        } catch (Exception e){
-	            
-	            e.printStackTrace();
-	            System.out.println("Whoops, something bad happened!  I'm outta here.");
-	        }
-	        // End from server.java
-	    }
-	}
+	@Override
+    protected void onDestroy() {
+        stopRecording();
+        super.onDestroy();
+    }
 	
-	
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -178,57 +247,35 @@ public class StreamingActivity extends Activity implements
     {
         if(item.getTitle().equals("Start"))
         {
-            try {
+            
+        	
+        	try {
                 long starttime =  System.currentTimeMillis();
             	startRecording();
                 item.setTitle("Stop");
-                
-                
-                
 
-            } catch (Exception e) {
-
-                String message = e.getMessage();
-                Log.e(TAG, "Problem " + message);
+            } 
+            catch(SocketException e){
+            	String message = e.getMessage();
+                Log.e(null, "Problem " + message);
+            	e.printStackTrace();
+            	mrec.release();
+            }catch (IOException e) {
+                Log.e(getClass().getName(), e.getMessage());
+                e.printStackTrace();
                 mrec.release();
             }
 
         }
         else if(item.getTitle().equals("Stop"))
         {
-            Log.e(TAG,"Alert Stop mrec");
-        	mrec.stop();
+            mrec.stop();
             mrec.release();
             mrec = null;
-            try {
-				clientSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
             item.setTitle("Start");
         }
 
         return super.onOptionsItemSelected(item);
-    }
-	
-	@Override
-    protected void onDestroy() {
-		if(mrec!=null)
-        {
-            mrec.stop();
-            mrec.release();
-            mCamera.release();
-            mCamera.lock();
-            try {
-				clientSocket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-		stopRecording();
-        super.onDestroy();
     }
 	
 	protected void startRecording() throws IOException
@@ -236,6 +283,12 @@ public class StreamingActivity extends Activity implements
         if(mCamera==null)
          mCamera = Camera.open();
         
+        
+        sender = new LocalSocket();
+        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+        fd = sender.getFileDescriptor();
+        
+    	
         String filename;
         String root = (Environment.getExternalStorageDirectory()).toString();
  		File rootDir = new File(Environment.getExternalStorageDirectory()
@@ -243,16 +296,16 @@ public class StreamingActivity extends Activity implements
  		rootDir.mkdirs();
         Date date=new Date();
         filename="/rec"+date.toString().replace(" ", "_").replace(":", "_")+".ts";
-         
         //create empty file it must use
         File file=new File(rootDir,filename);
-         
+        
+        
+        
         mrec = new MediaRecorder(); 
 
         mCamera.lock();
         mCamera.unlock();
 
-        
         // Please maintain sequence of following code. 
 
         // If you change sequence it will not work
@@ -263,23 +316,33 @@ public class StreamingActivity extends Activity implements
         mrec.setOutputFormat(8);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         //mrec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-//        mrec.setOutputFile(rootDir+filename);
-        mrec.setOutputFile(pfd.getFileDescriptor());
+//        mrec.setOutputFile(filename);
+        mrec.setOutputFile(fd);
         mrec.setVideoEncodingBitRate(600000);
         //mrec.setAudioEncodingBitRate(44100);
         mrec.setVideoFrameRate(15);
-        mrec.setMaxDuration(-1);
+        //mrec.setMaxDuration(2000);
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
-        
         mrec.prepare();
         mrec.start();
+        
+       
+
+        
     }
 
     protected void stopRecording() {
 
         if(mrec!=null)
         {
-            mrec.stop();
+        	
+        	try {
+				sender.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	mrec.stop();
             mrec.release();
             mCamera.release();
             mCamera.lock();
@@ -301,8 +364,7 @@ public class StreamingActivity extends Activity implements
         }
 
     }
-	
-	@SuppressLint("ParserError")
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -367,7 +429,7 @@ public class StreamingActivity extends Activity implements
 		
 		setRterResource = cookies.getString("rter_resource", "not-set");
 		setRterSignature = cookies.getString("rter_signature", "not-set");
-		
+		setRterValidUntil = cookies.getString("rter_valid_until", "not-set");
 		
 		Log.d(TAG, "Prefs ==> rter_resource:"+setRterResource+" :: rter_signature:" + setRterSignature );
 		
@@ -410,46 +472,20 @@ public class StreamingActivity extends Activity implements
 		Toast toast = Toast.makeText(this, text, duration);
 		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 		toast.show();
-	
-		
-		// Run new thread to handle socket communications
-	    Thread sendVideo = new Thread(new SendVideoThread());
+		/*surfaceHolder = surfaceView.getHolder();
+	    surfaceHolder.addCallback(this);
+	    surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
+	    // Run new thread to handle socket communications
+	    Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
 	    sendVideo.start();
 	}
 	
 	@Override
 	public void onStop() {
-		unregisterReceiver(receiver);
-	}
-	
-	private void wifiLocalization() {
-		// TODO Auto-generated method stub
-	
-		
-		myWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
-		myWifiInfo = myWifiManager.getConnectionInfo();
-		Log.d("mac address", "WIFI ="+myWifiInfo.getBSSID());
-		Log.d("mac address", "WIFI ="+myWifiInfo.getSSID());
-		Log.d("mac address", "WIFI ="+myWifiInfo.getMacAddress());
-		// Register Broadcast Receiver
-				if (receiver == null)
-					receiver = new WiFiScanReceiver(this);
-
-				registerReceiver(receiver, new IntentFilter(
-						WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		
-		
-		
-		
-		for(int i = 0;i <= wifiMap.length-1; i++){
-			if(wifiMap[i][0].matches(myWifiInfo.getBSSID()))
-			{
-				Log.d("WIFI", "WIFI: lat= "+wifiMap[i][1] +" and lng= "+wifiMap[i][2]);
-			}
-		}
-		
 		
 	}
+	
+	
 
 	@Override
 	protected void onResume() {
@@ -482,17 +518,7 @@ public class StreamingActivity extends Activity implements
 		// stop sensor updates
 		mSensorManager.unregisterListener(overlay);
 		
-		// end photo thread
-		//isFPS = false;
-//		if(photoThread.isAlive()) {
-//			photoThread.stopPhotos();
-//			try {
-//				photoThread.join();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
+
 		// Because the Camera object is a shared resource, it's very
 		// important to release it when the activity is paused.
 		if (mCamera != null) {
@@ -508,71 +534,7 @@ public class StreamingActivity extends Activity implements
 		wl.release();
 	}
 
-//	public void onClick(View v) {
-//		// TODO Auto-generated method stub
-//		Log.e(TAG, "onClick");
-//		isFPS = !isFPS;
-//		Log.e(TAG, "onClick changes isFPS : " + isFPS);
-//		if (isFPS) {
-//			//photoThread.start();
-//			CharSequence text = "Starting Photo Stream ..";
-//			int duration = Toast.LENGTH_SHORT;
-//
-//			Toast toast = Toast.makeText(this, text, duration);
-//			toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
-//			toast.show();
-////			mCamera.takePicture(null, null, photoCallback);
-//			Log.d(TAG, "starting picture thread");
-//			mPreview.inPreview = false;
-//		}
-//
-//	}
 
-//	Camera.PictureCallback photoCallback = new Camera.PictureCallback() {
-//		public void onPictureTaken(byte[] data, Camera camera) {
-//			final Camera tmpCamera = camera;
-//			final byte[] tmpData = data;
-//			(new Thread(new Runnable() {
-//				public void run() {
-//					Log.e(TAG, "Inside Picture Callback");
-//					runOnUiThread(new Runnable() {
-//		                 public void run() {
-//
-//		                     Toast toast = Toast.makeText(StreamingActivity.this,"Streaming..",Toast.LENGTH_LONG);
-//		                     toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
-//		                     toast.show();
-//		                }
-//		            });
-//					Looper.prepare();
-//					
-//					
-//					// get orientation
-//					frameInfo.orientation = convertStringToByteArray(""
-//							+ overlay.getCurrentOrientation());
-//					new SavePhotoTask(overlay).execute(tmpData, frameInfo.uid, frameInfo.lat, frameInfo.lon,
-//							frameInfo.orientation);
-//					if (isFPS) {
-//						tmpCamera.startPreview();
-//						mPreview.inPreview = true;
-//
-//					}
-//
-//					long start_time = System.currentTimeMillis();
-//					while (System.currentTimeMillis() < start_time + 5000 && isFPS) {
-//						Thread.yield();
-//					}
-//
-//					if (isFPS) {
-//						
-//						Log.d(TAG, "Picture taken");
-//						mCamera.takePicture(null, null, photoCallback);
-//					}
-//				}
-//			})).start();
-//
-//		}
-//
-//	};
 
 	public static byte[] convertStringToByteArray(String s) {
 
@@ -595,9 +557,6 @@ public class StreamingActivity extends Activity implements
 		String longi = "" + (location.getLongitude());
 		frameInfo.lat = convertStringToByteArray(lati);
 		frameInfo.lon = convertStringToByteArray(longi);
-		
-		
-
 	}
 
 	@Override
