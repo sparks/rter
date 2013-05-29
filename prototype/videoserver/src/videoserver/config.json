@@ -57,8 +57,7 @@
 		},
 		"webm_hls": {
 			"enabled": true,
-			"segment_length": 2,
-			"gop_size": 50
+			"segment_length": 2
 		},
 		"thumb":  {
 			"enabled": true,
