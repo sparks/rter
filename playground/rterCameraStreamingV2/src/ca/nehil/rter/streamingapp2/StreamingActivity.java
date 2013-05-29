@@ -17,27 +17,46 @@
 package ca.nehil.rter.streamingapp2;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ca.nehil.rter.streamingapp2.overlay.*;
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.PictureCallback;
+
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -50,6 +69,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -62,17 +83,27 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.provider.Settings;
+import android.net.wifi.WifiConfiguration;
+
 
 // ----------------------------------------------------------------------
 
-public class CameraPreviewActivity extends Activity implements 
+public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-	public static final int SERVERPORT = 9999;
-	public static String SERVERIP="10.105.62.156";
-	Socket clientSocket;
+	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
+	private SharedPreferences cookies;
+	private SharedPreferences.Editor prefEditor;
+	private String setRterResource;
+	private String setRterCredentials;
+	private String setItemID;
+	private String setRterSignature;
+	private String setRterValidUntil;
+	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
 	private Handler handler = new Handler();
-	ParcelFileDescriptor pfd=null;
+	static ParcelFileDescriptor pfd=null;
+	static FileDescriptor  fd=null;
+
 	
 	private Preview mPreview;
 	public MediaRecorder mrec = new MediaRecorder();
@@ -85,16 +116,15 @@ public class CameraPreviewActivity extends Activity implements
 	Camera mCamera;
 	int numberOfCameras;
 	int cameraCurrentlyLocked;
-	//PictureCallback mPicture = null;
-	// The first rear facing camera
+
 	int defaultCameraId;
 	static boolean isFPS = false;
 
-	static float justtesting;
-
 	private String AndroidId;
-	String selected_uid; // passed from other activity right now
+	private String selected_uid; // passed from other activity right now
 
+	
+	
 	private LocationManager locationManager;
 	private String provider;
 	
@@ -104,52 +134,118 @@ public class CameraPreviewActivity extends Activity implements
 	PowerManager pm;
 	PowerManager.WakeLock wl;
 
-	private static final String TAG = "CameraPreview Activity";
+	private static final String TAG = "Streaming Activity";
 	//protected static final String MEDIA_TYPE_IMAGE = null;
 	
+	public class NotificationRunnable implements Runnable {
+        private String message = null;
+        
+        public void run() {
+            if (message != null && message.length() > 0) {
+                showNotification(message);
+            }
+        }
+        
+        /**
+        * @param message the message to set
+        */
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+    
+    // post this to the Handler when the background thread notifies
+    private final NotificationRunnable notificationRunnable = new NotificationRunnable();
+    
+    public void showNotification(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    
+    class SocketListener extends Thread {
+        private Handler handler = null;
+        private NotificationRunnable runnable = null;
+        
+        public SocketListener(Handler handler, NotificationRunnable runnable) {
+            this.handler = handler;
+            this.runnable = runnable;
+            this.handler.post(this.runnable);
+        }
+        
+        /**
+        * Show UI notification.
+        * @param message
+        */
+        private void showMessage(String message) {
+            this.runnable.setMessage(message);
+            this.handler.post(this.runnable);
+        }
+        
+        @Override
+        public void run() {
+        	 showMessage("SocketListener started!");
+            try {
+                LocalServerSocket server = new LocalServerSocket(SOCKET_ADDRESS);
+                Log.d(TAG, "LocalServerSocket running at"+SOCKET_ADDRESS);
+                while (true) {
+                    LocalSocket receiver = server.accept();
+                    if (receiver != null) {
+                    	Log.d(TAG, "LocalSocket reciever running");
+                    	DataInputStream in = new DataInputStream (receiver.getInputStream());
+//                      FileOutputStream videoFile = new FileOutputStream(getOutputMediaFile());
+                        // simply for java.util.ArrayList
+                    	URL url = new URL(setRterResource+"/ts");
+        				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+        				httpcon.setDoOutput(true);
+        				String auth = "rtER rter_resource="+setRterResource
+        						+", rter_valid_until="+setRterValidUntil
+        						+", rter_signature="+setRterSignature;
+        				httpcon.setRequestProperty("Authorization", auth);
+//        				httpcon.setRequestProperty("Accept", "application/json");
+        				
+        				httpcon.setRequestMethod("POST");
+//        				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+//        				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+        				httpcon.connect();
+        				Log.d(TAG, "HTTPConnection established");
+        				OutputStream os = httpcon.getOutputStream();
+        				Log.d(TAG, "OutputStream opened");
+                        int len;
+                        int capacity = 8192;
+                        byte buffer[] = new byte[capacity];
+                        while((len = in.read(buffer)) != -1) {                        	
+                        	Log.v("videodata",""+buffer.toString());
+                        	os.write(buffer);   
+                        }
+                        Log.d(TAG, "OutputStream closing");
+                        os.close();
+                        Log.d(TAG, "Reciever closing");
+                        receiver.close();
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(getClass().getName(), e.getMessage());
+            }
+        }
+    }
+    public static LocalSocket sender;
+    public static void writeSocket() throws IOException {
+        sender = new LocalSocket();
+        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+        Log.d(TAG, "sender Opened");
+        fd = sender.getFileDescriptor();
+        //handle the closing 
+//        sender.getOutputStream().write(message.getBytes());
+//        sender.getOutputStream().close();
+    }
 	
 	
-	public class SendVideoThread implements Runnable{
-	    public void run(){
-	        // From Server.java
-	        try {
-	            if(SERVERIP!=null){
-	                handler.post(new Runnable() {
-	                    @Override
-	                    public void run() {
-	                        Log.d("Listening on IP: " , SERVERIP);
-	                    }
-	                });
-//	                String host="132.206.74.113";
-//	                int port = 9999;
-	                Log.d("Android","Client will attempt connecting to server at host=" + SERVERIP + " port=" + SERVERPORT + ".");
-	                clientSocket = new Socket(SERVERIP,SERVERPORT);
-	                pfd  = ParcelFileDescriptor.fromSocket(clientSocket);
-	             // ok, got a connection.  Let's use java.io.* niceties to read and write from the connection.
-        			BufferedReader myInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        			PrintStream myOutput = new PrintStream(clientSocket.getOutputStream());	
-                
-        			// write something to the server.
-        			myOutput.print(AndroidId+";");
-        			
-        			// see if the server writes something back.
-        			String buf = myInput.readLine();
-        			if(buf != null) {
-        				System.out.println("Client received [" + buf + "] from the server!");	
-        			}
-	                
-	            }
-	        } catch (Exception e){
-	            
-	            e.printStackTrace();
-	            System.out.println("Whoops, something bad happened!  I'm outta here.");
-	        }
-	        // End from server.java
-	    }
-	}
+	@Override
+    protected void onDestroy() {
+        stopRecording();
+        super.onDestroy();
+    }
 	
-	
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -162,25 +258,30 @@ public class CameraPreviewActivity extends Activity implements
     {
         if(item.getTitle().equals("Start"))
         {
-            try {
+            
+        	
+        	try {
                 long starttime =  System.currentTimeMillis();
             	startRecording();
                 item.setTitle("Stop");
-                
-                
-                
 
-            } catch (Exception e) {
-
-                String message = e.getMessage();
+            } 
+            catch(SocketException e){
+            	String message = e.getMessage();
                 Log.e(null, "Problem " + message);
+            	e.printStackTrace();
+            	mrec.release();
+            }catch (IOException e) {
+                Log.e(getClass().getName(), e.getMessage());
+                e.printStackTrace();
                 mrec.release();
             }
 
         }
         else if(item.getTitle().equals("Stop"))
         {
-            mrec.stop();
+        	stopRecording();
+        	mrec.stop();
             mrec.release();
             mrec = null;
             item.setTitle("Start");
@@ -189,19 +290,16 @@ public class CameraPreviewActivity extends Activity implements
         return super.onOptionsItemSelected(item);
     }
 	
-	@Override
-    protected void onDestroy() {
-        stopRecording();
-        super.onDestroy();
-    }
-	
 	protected void startRecording() throws IOException
     {
         if(mCamera==null)
          mCamera = Camera.open();
         
         
-       
+        sender = new LocalSocket();
+        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+        fd = sender.getFileDescriptor();
+        
     	
         String filename;
         String root = (Environment.getExternalStorageDirectory()).toString();
@@ -210,10 +308,11 @@ public class CameraPreviewActivity extends Activity implements
  		rootDir.mkdirs();
         Date date=new Date();
         filename="/rec"+date.toString().replace(" ", "_").replace(":", "_")+".ts";
-         
         //create empty file it must use
         File file=new File(rootDir,filename);
-         
+        
+        
+        
         mrec = new MediaRecorder(); 
 
         mCamera.lock();
@@ -229,18 +328,16 @@ public class CameraPreviewActivity extends Activity implements
         mrec.setOutputFormat(8);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         //mrec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        mrec.setOutputFile(rootDir+filename);
-//        mrec.setOutputFile(pfd.getFileDescriptor());
+//        mrec.setOutputFile(filename);
+        mrec.setOutputFile(fd);
         mrec.setVideoEncodingBitRate(600000);
         //mrec.setAudioEncodingBitRate(44100);
         mrec.setVideoFrameRate(15);
         //mrec.setMaxDuration(2000);
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
-        
         mrec.prepare();
         mrec.start();
-        
-       
+        Log.d(TAG, "MREC starting"); 
 
         
     }
@@ -249,10 +346,25 @@ public class CameraPreviewActivity extends Activity implements
 
         if(mrec!=null)
         {
-            mrec.stop();
-            mrec.release();
-            mCamera.release();
-            mCamera.lock();
+        	
+        	try {
+        		Log.d(TAG, "MREC stop");
+				mrec.stop();
+				Log.d(TAG, "MREC release");
+	            mrec.release();
+	            Log.d(TAG, "MCAMERA release");
+	            mCamera.release();
+	            Log.d(TAG, "sender getOutputStream close");
+        		sender.getOutputStream().close();
+        		Log.d(TAG, "sender close");
+        		sender.close();
+        		Thread closefeed = new CloseFeed(this.handler, this.notificationRunnable);
+        		closefeed.start();
+        		
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}        	
         }
     }
 
@@ -271,8 +383,7 @@ public class CameraPreviewActivity extends Activity implements
         }
 
     }
-	
-	@SuppressLint("ParserError")
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -302,34 +413,8 @@ public class CameraPreviewActivity extends Activity implements
 		// openGLview
 		mGLView = overlay.getGLView();
 
-		
-		
-		
 		Log.e(TAG, "Fileoutput in phone id " + AndroidId);
-		String androidIds[] = {
-			"1e7f033bfc7b3625fa07c9a3b6b54d2c81eeff98",
-			"fe7f033bfc7b3625fa06c9a3b6b54b2c81eeff98",
-			"b6200c5cc15cfbddde2874c40952a7aa25a869dd",
-			"852decd1fbc083cf6853e46feebb08622d653602",
-			"e1830fcefc3f47647ffa08350348d7e34b142b0b",
-			"48ad32292ff86b4148e0f754c2b9b55efad32d1e",
-			"acb519f53a55d9dea06efbcc804eda79d305282e",
-			"ze7f033bfc7b3625fa06c5a316b54b2c81eeff98",
-			"t6200c5cc15cfbddde2875c41952a7aa25a869dd",
-			"952decd1fbc083cf6853e56f1ebb08622d653602",
-			"y1830fcefc3f47647ffa05351348d7e34b142b0b",
-			"x8ad32292ff86b4148e0f55412b9b55efad32d1e",
-			"qcb519f53a55d9dea06ef5cc104eda79d305282e"
-		};
-		
-		int rnd = new Random().nextInt(androidIds.length);
-		
-	    
-		
-		selected_uid = androidIds[rnd]; //AndroidId;
-		frameInfo.uid = selected_uid.getBytes();
-		//Log.e(TAG, "selected_uid in phone id" + selected_uid);
-		Log.e(TAG, "selected_uid in phone id " + new String(frameInfo.uid));
+
 		// add the two views to the frame
 		mFrame.addView(mPreview);
 		mFrame.addView(mGLView);
@@ -345,20 +430,28 @@ public class CameraPreviewActivity extends Activity implements
 		CameraInfo cameraInfo = new CameraInfo();
 		for (int i = 0; i < numberOfCameras; i++) {
 			Camera.getCameraInfo(i, cameraInfo);
-			Log.d("Camera Id", "is " + i);
+			Log.d(TAG, "Camera Id is " + i);
 			if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
 				Log.d(TAG, "Back facing camera chosen");
 				defaultCameraId = i;
 				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
 				break;
 			}
-			else if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
-				Log.d(TAG, "Front facing camera chosen");
-				defaultCameraId = i;
-				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
-			}
+//			else if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
+//				Log.d(TAG, "Front facing camera chosen");
+//				defaultCameraId = i;
+//				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
+//			}
 		}
-
+		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
+		prefEditor = cookies.edit();
+		setRterCredentials = cookies.getString("RterCreds", "not-set");
+		setRterResource = cookies.getString("rter_resource", "not-set");
+		setRterSignature = cookies.getString("rter_signature", "not-set");
+		setRterValidUntil = cookies.getString("rter_valid_until", "not-set");
+		setItemID = cookies.getString("ID", "not-set");
+		Log.d(TAG, "Prefs ==> rter_resource:"+setRterResource+" :: rter_signature:" + setRterSignature );
+		
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// Define the criteria how to select the location provider -> use
@@ -398,12 +491,20 @@ public class CameraPreviewActivity extends Activity implements
 		Toast toast = Toast.makeText(this, text, duration);
 		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 		toast.show();
-		
-		
-		// Run new thread to handle socket communications
-	    Thread sendVideo = new Thread(new SendVideoThread());
+		/*surfaceHolder = surfaceView.getHolder();
+	    surfaceHolder.addCallback(this);
+	    surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
+	    // Run new thread to handle socket communications
+	    Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
 	    sendVideo.start();
 	}
+	
+	@Override
+	public void onStop() {
+		
+	}
+	
+	
 
 	@Override
 	protected void onResume() {
@@ -436,17 +537,7 @@ public class CameraPreviewActivity extends Activity implements
 		// stop sensor updates
 		mSensorManager.unregisterListener(overlay);
 		
-		// end photo thread
-		//isFPS = false;
-//		if(photoThread.isAlive()) {
-//			photoThread.stopPhotos();
-//			try {
-//				photoThread.join();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
+
 		// Because the Camera object is a shared resource, it's very
 		// important to release it when the activity is paused.
 		if (mCamera != null) {
@@ -462,71 +553,7 @@ public class CameraPreviewActivity extends Activity implements
 		wl.release();
 	}
 
-//	public void onClick(View v) {
-//		// TODO Auto-generated method stub
-//		Log.e(TAG, "onClick");
-//		isFPS = !isFPS;
-//		Log.e(TAG, "onClick changes isFPS : " + isFPS);
-//		if (isFPS) {
-//			//photoThread.start();
-//			CharSequence text = "Starting Photo Stream ..";
-//			int duration = Toast.LENGTH_SHORT;
-//
-//			Toast toast = Toast.makeText(this, text, duration);
-//			toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
-//			toast.show();
-////			mCamera.takePicture(null, null, photoCallback);
-//			Log.d(TAG, "starting picture thread");
-//			mPreview.inPreview = false;
-//		}
-//
-//	}
 
-//	Camera.PictureCallback photoCallback = new Camera.PictureCallback() {
-//		public void onPictureTaken(byte[] data, Camera camera) {
-//			final Camera tmpCamera = camera;
-//			final byte[] tmpData = data;
-//			(new Thread(new Runnable() {
-//				public void run() {
-//					Log.e(TAG, "Inside Picture Callback");
-//					runOnUiThread(new Runnable() {
-//		                 public void run() {
-//
-//		                     Toast toast = Toast.makeText(CameraPreviewActivity.this,"Streaming..",Toast.LENGTH_LONG);
-//		                     toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
-//		                     toast.show();
-//		                }
-//		            });
-//					Looper.prepare();
-//					
-//					
-//					// get orientation
-//					frameInfo.orientation = convertStringToByteArray(""
-//							+ overlay.getCurrentOrientation());
-//					new SavePhotoTask(overlay).execute(tmpData, frameInfo.uid, frameInfo.lat, frameInfo.lon,
-//							frameInfo.orientation);
-//					if (isFPS) {
-//						tmpCamera.startPreview();
-//						mPreview.inPreview = true;
-//
-//					}
-//
-//					long start_time = System.currentTimeMillis();
-//					while (System.currentTimeMillis() < start_time + 5000 && isFPS) {
-//						Thread.yield();
-//					}
-//
-//					if (isFPS) {
-//						
-//						Log.d(TAG, "Picture taken");
-//						mCamera.takePicture(null, null, photoCallback);
-//					}
-//				}
-//			})).start();
-//
-//		}
-//
-//	};
 
 	public static byte[] convertStringToByteArray(String s) {
 
@@ -549,9 +576,6 @@ public class CameraPreviewActivity extends Activity implements
 		String longi = "" + (location.getLongitude());
 		frameInfo.lat = convertStringToByteArray(lati);
 		frameInfo.lon = convertStringToByteArray(longi);
-		
-		
-
 	}
 
 	@Override
@@ -570,6 +594,96 @@ public class CameraPreviewActivity extends Activity implements
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
 	}
+	
+	class CloseFeed extends Thread {
+	    private Handler handler = null;
+	    private NotificationRunnable runnable = null;
+	    
+	    public CloseFeed(Handler handler, NotificationRunnable runnable) {
+	        this.handler = handler;
+	        this.runnable = runnable;
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    /**
+	    * Show UI notification.
+	    * @param message
+	    */
+	    private void showMessage(String message) {
+	        this.runnable.setMessage(message);
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    @Override
+	    public void run() {
+	    	showMessage("Closing feed thread started");
+	    	
+	    	
+	    	JSONObject jsonObjSend = new JSONObject();
+			
+			
+			
+			Date date = new Date();
+			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+			String formattedDate = dateFormatUTC.format(date);
+			Log.i(TAG, "The StopTime stamp "+formattedDate);
+	
+			try {
+				
+				jsonObjSend.put("Live", false);
+				jsonObjSend.put("StoptTime", formattedDate);
+				
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));
+				
+				
+				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+//				httpcon.setDoOutput(true);
+//				httpcon.setRequestProperty("Content-Type", "application/json");
+//				httpcon.setRequestProperty("Accept", "application/json");
+				httpcon.setRequestProperty("Cookie", setRterCredentials );
+				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				httpcon.setRequestMethod("POST");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
+				OutputStream os = httpcon.getOutputStream();
+				os.write(outputBytes);
+
+				os.close();
+				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 201:
+	               Log.i(TAG,"Feed Close successful");              
+	                
+				}
+				 
+			
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+
+	
+	
 }
 
 class FrameInfo {
@@ -578,4 +692,3 @@ class FrameInfo {
 	public byte[] lon;
 	public byte[] orientation;
 }
-
