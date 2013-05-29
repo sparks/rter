@@ -263,9 +263,6 @@ func (s *Session) Write(r *http.Request, t int) *Error {
 		return ErrorTranscodeFailed
 	}
 
-	// reset session close timeout (potential race condition with timeout handler)
-	s.Timer.Stop()
-
 	log.Printf("Writing data from client %s to session %d", r.RemoteAddr, s.UID)
 
 	// check request compatibility (mime type, content)
@@ -273,19 +270,22 @@ func (s *Session) Write(r *http.Request, t int) *Error {
 		return err
 	}
 
+	// reset session close timeout (potential race condition with timeout handler)
+	s.Timer.Stop()
+
 	// go live
 	s.live = true
 
 	// leave live state on exit
 	defer func() { s.live = false }()
 
-	// push data into pipe until body us empty or EOF (broken pipe)
+	// push data into pipe until body is empty or EOF (broken pipe)
 	written, err := io.Copy(s.Pipe, r.Body)
 	log.Printf("Written %d bytes to session %d", written, s.UID)
 
 	// collect session statistics
 	s.CallsIn++
-	s.BytesIn += written
+	s.BytesIn += r.ContentLength
 	s.BytesOut += written
 
 	// error handling
@@ -295,11 +295,14 @@ func (s *Session) Write(r *http.Request, t int) *Error {
 		// close the http session
 		r.Close = true
 		s.Close()
+		r.Body.Close()
+		return nil
 
 	} else if err != nil {
 		// session close due to broken pipe (transcoder)
 		log.Printf("Closing session %d on broken pipe.", s.UID)
 		s.Close()
+		r.Body.Close()
 		return ErrorTranscodeFailed
 	}
 
