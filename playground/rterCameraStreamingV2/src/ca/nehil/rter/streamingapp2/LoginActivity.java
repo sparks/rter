@@ -121,6 +121,7 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
+		startService(new Intent(LoginActivity.this, BackgroundService.class));
 	}
 
 	@Override

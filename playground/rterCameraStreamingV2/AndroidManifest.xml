@@ -99,6 +99,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <service android:name=".BackgroundService"> </service>
     </application>
 
 </manifest>

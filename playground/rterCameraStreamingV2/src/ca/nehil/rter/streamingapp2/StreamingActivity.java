@@ -1,4 +1,6 @@
 /*
+
+
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -479,6 +481,7 @@ public class StreamingActivity extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		stopService(new Intent(StreamingActivity.this, BackgroundService.class));
 		Log.e(TAG, "onCreate");
 		// Hide the window title.
 //		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -687,6 +690,96 @@ public class StreamingActivity extends Activity implements
 		// TODO Auto-generated method stub
 	}
 	
+	class UpdateOrientationFeed extends Thread {
+	    private Handler handler = null;
+	    private NotificationRunnable runnable = null;
+	    
+	    public UpdateOrientationFeed(Handler handler, NotificationRunnable runnable) {
+	        this.handler = handler;
+	        this.runnable = runnable;
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    /**
+	    * Show UI notification.
+	    * @param message
+	    */
+	    private void showMessage(String message) {
+	        this.runnable.setMessage(message);
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    @Override
+	    public void run() {
+	    	showMessage("Closing feed thread started");
+	    	
+	    	
+	    	JSONObject jsonObjSend = new JSONObject();
+			
+			
+			
+			Date date = new Date();
+			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+			String formattedDate = dateFormatUTC.format(date);
+			Log.i(TAG, "The Stop Timestamp "+formattedDate);
+	
+			try {
+				
+				jsonObjSend.put("Live", false);
+				jsonObjSend.put("StoptTime", formattedDate);
+				
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));
+				
+				
+				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+//				httpcon.setDoOutput(true);
+//				httpcon.setRequestProperty("Content-Type", "application/json");
+//				httpcon.setRequestProperty("Accept", "application/json");
+				httpcon.setRequestProperty("Cookie", setRterCredentials );
+				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				httpcon.setRequestMethod("PUT");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
+				OutputStream os = httpcon.getOutputStream();
+				os.write(outputBytes);
+
+				os.close();
+				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 201:
+	               Log.i(TAG,"Feed Close successful");              
+	                
+				}
+				 
+			
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+
+
+	
+	
 	class CloseFeed extends Thread {
 	    private Handler handler = null;
 	    private NotificationRunnable runnable = null;
@@ -774,8 +867,6 @@ public class StreamingActivity extends Activity implements
 	    }
 	}
 
-	
-	
 }
 
 class FrameInfo {
