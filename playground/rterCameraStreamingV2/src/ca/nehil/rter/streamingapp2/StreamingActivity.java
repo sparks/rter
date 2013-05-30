@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -35,6 +36,7 @@ import java.util.Random;
 import java.util.TimeZone;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.impl.io.ChunkedOutputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -92,6 +94,7 @@ public class StreamingActivity extends Activity implements
 		LocationListener {
 	
 	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
+//	private static final String SERVER_URL = "http://132.206.74.145:8000";
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	private String setRterResource;
@@ -180,6 +183,49 @@ public class StreamingActivity extends Activity implements
             this.handler.post(this.runnable);
         }
         
+        private void PostVideoData(byte[] buffer, int i, int l)
+        {
+        	try {
+        		int TIMEOUT_MILLISEC = 100000;  // = 100 seconds
+				URL url = new URL(setRterResource+"/ts");
+				Log.d(TAG, "The video packet url is ::"+ setRterResource+"/ts with Authorization " );
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+				httpcon.setDoOutput(true);
+				
+				
+				httpcon.setRequestMethod("POST");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				
+                OutputStream os = httpcon.getOutputStream(); 
+                 
+                os.write(buffer,i, l);
+                Log.d(TAG, "OutputStream closing");
+                os.close();
+                	
+                              				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Video File Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 201:
+	            			
+	            	Log.i(TAG,"Feed Close successful");              
+	                
+				}
+        		
+        	} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
         @Override
         public void run() {
         	 showMessage("SocketListener started!");
@@ -191,40 +237,86 @@ public class StreamingActivity extends Activity implements
                     if (receiver != null) {
                     	Log.d(TAG, "LocalSocket reciever running");
                     	DataInputStream in = new DataInputStream (receiver.getInputStream());
-//                      FileOutputStream videoFile = new FileOutputStream(getOutputMediaFile());
-                        // simply for java.util.ArrayList
-                    	URL url = new URL(setRterResource+"/ts");
-        				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-        				httpcon.setDoOutput(true);
-        				String auth = "rtER rter_resource="+setRterResource
-        						+", rter_valid_until="+setRterValidUntil
-        						+", rter_signature="+setRterSignature;
-        				httpcon.setRequestProperty("Authorization", auth);
-//        				httpcon.setRequestProperty("Accept", "application/json");
-        				
-        				httpcon.setRequestMethod("POST");
-//        				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
-//        				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
-        				httpcon.connect();
-        				Log.d(TAG, "HTTPConnection established");
-        				OutputStream os = httpcon.getOutputStream();
-        				Log.d(TAG, "OutputStream opened");
-                        int len;
-                        int capacity = 8192;
-                        byte buffer[] = new byte[capacity];
-                        while((len = in.read(buffer)) != -1) {                        	
-                        	Log.v("videodata",""+buffer.toString());
-                        	os.write(buffer);   
-                        }
-                        Log.d(TAG, "OutputStream closing");
-                        os.close();
-                        Log.d(TAG, "Reciever closing");
-                        receiver.close();
+                    	
+         			
+            			
+            			
+            		
+            			try { 
+            				String filename;
+                            String root = (Environment.getExternalStorageDirectory()).toString();
+                     		File rootDir = new File(Environment.getExternalStorageDirectory()
+                     				+ File.separator + "rter" + File.separator);
+                     		rootDir.mkdirs();
+                            Date date=new Date();
+                            filename="/rec"+date.toString().replace(" ", "_").replace(":", "_")+".ts";
+                            //create empty file it must use
+                            File file=new File(rootDir,filename);
+                            FileOutputStream videoFile = new FileOutputStream(file);
+            				
+            				
+            				
+//            				int TIMEOUT_MILLISEC = 100000;  // = 100 seconds
+//            				URL url = new URL(setRterResource+"/ts");
+//            				Log.d(TAG, "The video packet url is ::"+ setRterResource+"/ts with Authorization " );
+//            				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+////            				httpcon.setDoOutput(true);
+//            				
+//            				
+//            				httpcon.setRequestMethod("POST");
+//            				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+//            				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+//            				httpcon.connect();
+            				int len;
+                            int capacity = 1024;
+                            byte buffer[] = new byte[capacity];
+//                            OutputStream os = httpcon.getOutputStream(); 
+                            while((len = in.read(buffer)) > -1) {                        	
+                            	Log.v("videodata",""+buffer.toString());
+                            	videoFile.write(buffer, 0, len);
+                            	PostVideoData(buffer,0, len);
+                            	
+//                            	os.write(buffer,0, len);
+//                            	os.close();
+                            	
+                            }
+                            Log.d(TAG, "OutputStream closing");
+                            videoFile.close(); 
+//                            os.close();
+                            Log.d(TAG, "Reciever closing");
+                            receiver.close();
+            				
+            				
+//            				int status = httpcon.getResponseCode();
+//            				Log.i(TAG,"Video File Status of response " + status);
+//            				switch (status) {
+//            	            case 200:
+//            	            case 201:
+//            	            			Log.i(TAG,"Feed Close successful");              
+//            	                
+//            				}
+            			} catch (UnsupportedEncodingException e) {
+            				// TODO Auto-generated catch block
+            				e.printStackTrace();
+            			} catch (ClientProtocolException e) {
+            				// TODO Auto-generated catch block
+            				e.printStackTrace();
+            			} catch (IOException e) {
+            				// TODO Auto-generated catch block
+            				e.printStackTrace();
+            			}                        
                     }
                 }
-            } catch (IOException e) {
-                Log.e(getClass().getName(), e.getMessage());
-            }
+            }  catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
     public static LocalSocket sender;
@@ -281,10 +373,10 @@ public class StreamingActivity extends Activity implements
         else if(item.getTitle().equals("Stop"))
         {
         	stopRecording();
-        	mrec.stop();
-            mrec.release();
+        	
             mrec = null;
             item.setTitle("Start");
+            
         }
 
         return super.onOptionsItemSelected(item);
@@ -323,17 +415,17 @@ public class StreamingActivity extends Activity implements
         // If you change sequence it will not work
         mrec.setCamera(mCamera);    
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        //mrec.setAudioSource(MediaRecorder.AudioSource.MIC);     
-//        mrec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+
         mrec.setOutputFormat(8);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        //mrec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-//        mrec.setOutputFile(filename);
+
         mrec.setOutputFile(fd);
+        
         mrec.setVideoEncodingBitRate(600000);
-        //mrec.setAudioEncodingBitRate(44100);
-        mrec.setVideoFrameRate(15);
-        //mrec.setMaxDuration(2000);
+//        mrec.setCaptureRate(12.00);
+//        mrec.setVideoSize(640, 480);
+//        mrec.setVideoFrameRate(12);
+
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
         mrec.prepare();
         mrec.start();
@@ -501,7 +593,7 @@ public class StreamingActivity extends Activity implements
 	
 	@Override
 	public void onStop() {
-		
+		super.onStop();
 	}
 	
 	
@@ -627,7 +719,7 @@ public class StreamingActivity extends Activity implements
 			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 			String formattedDate = dateFormatUTC.format(date);
-			Log.i(TAG, "The StopTime stamp "+formattedDate);
+			Log.i(TAG, "The Stop Timestamp "+formattedDate);
 	
 			try {
 				
@@ -646,7 +738,7 @@ public class StreamingActivity extends Activity implements
 //				httpcon.setRequestProperty("Accept", "application/json");
 				httpcon.setRequestProperty("Cookie", setRterCredentials );
 				Log.i(TAG,"Cookie being sent" + setRterCredentials);
-				httpcon.setRequestMethod("POST");
+				httpcon.setRequestMethod("PUT");
 				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
 				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
 				httpcon.connect();
