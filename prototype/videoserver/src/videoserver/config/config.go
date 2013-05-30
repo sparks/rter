@@ -82,7 +82,6 @@ type ServerConfig struct {
 		Webm_hls struct {
 			Enabled        bool   `json:"enabled"`
 			Segment_length uint64 `json:"segment_length"`
-			Gop_size       uint64 `json:"gop_size"`
 		}
 		Thumb struct {
 			Enabled bool   `json:"enabled"`
@@ -142,7 +141,6 @@ func (c *ServerConfig) ParseConfig() {
 	c.Transcode.Webm.Enabled = false
 	c.Transcode.Webm_hls.Enabled = false
 	c.Transcode.Webm_hls.Segment_length = 2
-	c.Transcode.Webm_hls.Gop_size = 50
 
 	c.Transcode.Thumb.Enabled = false // save live thumbnails
 	c.Transcode.Thumb.Size = "160x90" // thumbnail scaling dimensions

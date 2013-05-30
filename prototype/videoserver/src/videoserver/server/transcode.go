@@ -36,7 +36,6 @@ const (
 type TemplateData struct {
 	C                      *config.ServerConfig
 	S                      *Session
-	Webm_gop_size          uint64
 	Thumb_size             string
 	Thumb_rate             uint64
 	Poster_size            string
@@ -65,7 +64,7 @@ const (
 	TC_ARG_MP4      string = " -codec copy video.mp4 "
 	TC_ARG_OGG      string = " -codec:v libtheora -b:v 1200k -codec:a vorbis -b:a 128k video.ogv "
 	TC_ARG_WEBM     string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -b:v 1200k -qmin 10 -qmax 42 -minrate 1200k -maxrate 1200k -bufsize 1500k -threads 1 -codec:a libvorbis -b:a 128k video.webm "
-	TC_ARG_WEBM_HLS string = " -f webm -codec:v libvpx -quality realtime -cpu-used 0 -keyint_min {{.Webm_gop_size}} -g {{.Webm_gop_size}} -b:v 1200k -qmin 10 -qmax 42 -maxrate 1200k -bufsize 1500k -lag-in-frames 0 -rc_lookahead 0 -flags +global_header -codec:a libvorbis -b:a 128k -flags +global_header -map 0 -f segment -segment_list_flags +live -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format webm -flags +global_header -segment_list webm_index.m3u8 webm/%09d.webm "
+	TC_ARG_WEBM_HLS string = " -f webm -force_key_frames expr:gte(t,n_forced*{{.C.Transcode.Webm_hls.Segment_length}}) -codec:v libvpx -quality realtime -cpu-used 0 -b:v 1200k -qmin 10 -qmax 42 -maxrate 1200k -bufsize 1500k -lag-in-frames 0 -rc_lookahead 0 -flags +global_header -codec:a libvorbis -b:a 128k -flags +global_header -map 0 -f segment -segment_list_flags +live -segment_time {{.C.Transcode.Hls.Segment_length}} -segment_format webm -flags +global_header -segment_list webm_index.m3u8 webm/%09d.webm "
 	TC_ARG_THUMB    string = " -f image2 {{.Thumb_size}} -vsync 1 -vf fps=fps=1/{{.Thumb_rate}} thumb/%09d.jpg "
 	TC_ARG_POSTER   string = " -f image2 {{.Poster_size}} -vsync 1 -vf fps=fps=1/{{.Poster_rate}} {{.Poster_skip}} -vframes {{.Poster_corrected_count}} poster/%09d.jpg "
 )
@@ -82,23 +81,27 @@ const (
 // -vsync 0
 // -copyts
 // -copytb 1
+// -fpsprobesize 15 [frames]
+// -probesize 131072 [bytes] instead of analyzeduration
 
 // Failed options
 //
-// -probesize 2048 [bytes]					-- not needed since it already worked with analyzeduration
 // -avioflags direct 						-- broke format detection
 // -f mpegtsraw -compute_pcr 0 				-- created an invalid MPEGTS bitstream
 // -use_wallclock_as_timestamps 1 [bool] 	-- broke TS timing
 // -fflags +nobuffer                        -- breaks SPS/PPS detection on some TS streams from Android ffmpeg
+//
+// Working with FFMpeg ingest generator, but fails with Android MPEG2/TS
+// " -fflags +genpts+igndts+nobuffer -err_detect compliant -avoid_negative_ts 1 -correct_ts_overflow 1 -max_delay 500000 -analyzeduration 500000 -f mpegts -c:0 h264 -vsync 0 -copyts -copytb 1 "
 
 // Unused Options
 //
+// -dts_delta_threshold <n>
 // -copyinkf:0
 // -fflags +discardcorrupt
-// -fpsprobesize 2
 
 const (
-	TC_ARG_TSIN  string = " -fflags +genpts+igndts -err_detect compliant -avoid_negative_ts 1 -correct_ts_overflow 1 -max_delay 500000 -analyzeduration 500000 -f mpegts -c:0 h264 -vsync 0 -copyts -copytb 1 "
+	TC_ARG_TSIN  string = " -fflags +genpts -err_detect compliant -avoid_negative_ts 1 -fpsprobesize 15 -probesize 131072 -max_delay 0 -f mpegts -c:0 h264 -vsync 0 -copyts -copytb 1 "
 	TC_ARG_AVCIN string = " -fflags +genpts+igndts -max_delay 0 -analyzeduration 0 -f h264 -c:0 h264 -copytb 0 "
 )
 
@@ -262,7 +265,7 @@ func (s *Session) BuildTranscodeCommand() string {
 
 	// combine session and server config for access by template matcher
 	var cmd_writer bytes.Buffer
-	var d = TemplateData{s.c, s, 0, "", 1, "", 1, 1, ""}
+	var d = TemplateData{s.c, s, "", 1, "", 1, 1, ""}
 
 	// Poster
 	if s.c.Transcode.Poster.Enabled {
@@ -306,11 +309,6 @@ func (s *Session) BuildTranscodeCommand() string {
 		if s.c.Transcode.Thumb.Step > 0 {
 			d.Thumb_rate = s.c.Transcode.Thumb.Step
 		}
-	}
-
-	// GOP size (25 fps is a guess)
-	if s.c.Transcode.Webm_hls.Enabled {
-		d.Webm_gop_size = s.c.Transcode.Webm_hls.Gop_size
 	}
 
 	// replace placeholders with config strings

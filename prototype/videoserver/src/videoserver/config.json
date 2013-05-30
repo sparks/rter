@@ -8,7 +8,7 @@
 		"cert_file": "",
 		"key_file": "",
 		"session_timeout": 10,
-		"session_maxage": 30,
+		"session_maxage": 3600000,
 		"logfile": "../../data/log/videoserver.log"
 	},
 	"hack": {
@@ -57,8 +57,7 @@
 		},
 		"webm_hls": {
 			"enabled": true,
-			"segment_length": 2,
-			"gop_size": 50
+			"segment_length": 2
 		},
 		"thumb":  {
 			"enabled": true,
