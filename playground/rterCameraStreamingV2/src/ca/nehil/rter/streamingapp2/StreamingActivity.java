@@ -133,8 +133,8 @@ public class StreamingActivity extends Activity implements
 	private String AndroidId;
 	private String selected_uid; // passed from other activity right now
 
-	private String lati = "" ;
-	private String longi = "" ;
+	private float lati ;
+	private float longi ;
 	
 	private LocationManager locationManager;
 	private String provider;
@@ -576,6 +576,11 @@ public class StreamingActivity extends Activity implements
 						+ " has been selected. and location "+ location);
 				onLocationChanged(location);
 			} else {
+				Toast toast = Toast.makeText(this, "Location not available", Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.TOP, 0, 0);
+				toast.show();
+				lati = (float) (45.505958f);
+				longi = (float)(-73.576254f);
 				Log.d(TAG, "Location not available");
 			}
 		}
@@ -587,12 +592,12 @@ public class StreamingActivity extends Activity implements
 		// test, set desired orienation to north
 		overlay.letFreeRoam(false);
 		overlay.setDesiredOrientation(0.0f);
-		CharSequence text = "Tap to start..";
-		int duration = Toast.LENGTH_SHORT;
-
-		Toast toast = Toast.makeText(this, text, duration);
-		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
-		toast.show();
+//		CharSequence text = "Tap to start..";
+//		int duration = Toast.LENGTH_SHORT;
+//
+//		Toast toast = Toast.makeText(this, text, duration);
+//		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
+//		toast.show();
 		/*surfaceHolder = surfaceView.getHolder();
 	    surfaceHolder.addCallback(this);
 	    surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
@@ -678,11 +683,11 @@ public class StreamingActivity extends Activity implements
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
 		
-		String lati = "" + (location.getLatitude());
-		String longi = "" + (location.getLongitude());
+		lati =  (float) (location.getLatitude());
+		longi =  (float) (location.getLongitude());
 		Log.d(TAG, "Location Changed with lat"+lati+" and lng"+longi);
-		frameInfo.lat = convertStringToByteArray(lati);
-		frameInfo.lon = convertStringToByteArray(longi);
+//		frameInfo.lat = convertfloatToByteArray(lati);
+//		frameInfo.lon = convertStringToByteArray(longi);
 	}
 
 	@Override
@@ -816,9 +821,9 @@ public class StreamingActivity extends Activity implements
 			
 			try {
 				
-				String lat = lati;
-				String lng = longi;
-				String heading = ""+overlay.getCurrentOrientation();
+				float lat = lati;
+				float lng = longi;
+				float heading = overlay.getCurrentOrientation();
 				jsonObjSend.put("Lat", lat );
 				jsonObjSend.put("Lng", lng );
 				jsonObjSend.put("Heading", heading);
@@ -831,7 +836,7 @@ public class StreamingActivity extends Activity implements
 				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
 				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
 				httpcon.setRequestProperty("Cookie", setRterCredentials );
-				
+				httpcon.setRequestProperty("Content-Type", "application/json");
 				httpcon.setRequestMethod("PUT");
 				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
 				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
@@ -886,10 +891,30 @@ public class StreamingActivity extends Activity implements
 				Log.i(TAG,"Status of response " + getStatus);
 				switch (getStatus) {
 	            case 200:
-	               Log.i(TAG,"PUT sensor Feed response = successful");            
+	               Log.i(TAG,"GET sensor Feed response = successful"); 
+	               BufferedReader br = new BufferedReader(new InputStreamReader(httpcon2.getInputStream()));
+	                StringBuilder sb = new StringBuilder();
+	                String line;
+	                while ((line = br.readLine()) != null) {
+	                    sb.append(line+"\n");
+	                }
+	                String result = sb.toString();
+	                br.close();
+	                
+	                JSONObject jObject = new JSONObject(result);
+	                Log.i(TAG,"Response from connection " + jObject.toString(2));
+	                
+	                float heading = Float.parseFloat(jObject.getString("Heading"));
+	              
+	                Log.i(TAG,"Response from connection for heading is : " + heading);
+	                overlay.setDesiredOrientation(heading);
+	               
 				}
 				
-				overlay.setDesiredOrientation(50.0f);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
