@@ -878,7 +878,7 @@ public class StreamingActivity extends Activity implements
 				
 				// Getting the user orientation
 				int TIMEOUT_MILLISEC = 1000;  // = 1 seconds
-				URL getUrl= new URL(SERVER_URL+"/1.0/user/"+setUsername+"/direction");
+				URL getUrl= new URL(SERVER_URL+"/1.0/users/"+setUsername+"/direction");
 				HttpURLConnection httpcon2 = (HttpURLConnection) getUrl.openConnection();
 				httpcon2.setRequestProperty("Cookie", setRterCredentials );
 				Log.i(TAG,"Cookie being sent" + setRterCredentials);
@@ -944,11 +944,7 @@ public class StreamingActivity extends Activity implements
 	    	}	
 				
 	    }
-	}
-	
-	
-	
-	
+	}	
 
 }
 
