@@ -95,8 +95,12 @@ import android.net.wifi.WifiConfiguration;
 public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
-//	private static final String SERVER_URL = "http://132.206.74.145:8000";
+//	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
+	private static final String SERVER_URL = "http://132.206.74.145:8000";
+	
+	private int PutHeadingTimer = 4000; /* Updating the User location, heading and orientation every 4 secs. */
+	
+	
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	private String setRterResource;
@@ -104,6 +108,7 @@ public class StreamingActivity extends Activity implements
 	private String setItemID;
 	private String setRterSignature;
 	private String setRterValidUntil;
+	private String setUsername;
 	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
 	private Handler handler = new Handler();
 	static ParcelFileDescriptor pfd=null;
@@ -128,7 +133,8 @@ public class StreamingActivity extends Activity implements
 	private String AndroidId;
 	private String selected_uid; // passed from other activity right now
 
-	
+	private String lati = "" ;
+	private String longi = "" ;
 	
 	private LocationManager locationManager;
 	private String provider;
@@ -425,7 +431,7 @@ public class StreamingActivity extends Activity implements
         
         mrec.setVideoEncodingBitRate(600000);
 //        mrec.setCaptureRate(12.00);
-//        mrec.setVideoSize(640, 480);
+        mrec.setVideoSize(640, 480);
 //        mrec.setVideoFrameRate(12);
 
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
@@ -481,7 +487,7 @@ public class StreamingActivity extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		stopService(new Intent(StreamingActivity.this, BackgroundService.class));
+//		stopService(new Intent(StreamingActivity.this, BackgroundService.class));
 		Log.e(TAG, "onCreate");
 		// Hide the window title.
 //		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -540,6 +546,7 @@ public class StreamingActivity extends Activity implements
 		}
 		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
 		prefEditor = cookies.edit();
+		setUsername = cookies.getString("Username", "not-set");
 		setRterCredentials = cookies.getString("RterCreds", "not-set");
 		setRterResource = cookies.getString("rter_resource", "not-set");
 		setRterSignature = cookies.getString("rter_signature", "not-set");
@@ -592,6 +599,8 @@ public class StreamingActivity extends Activity implements
 	    // Run new thread to handle socket communications
 	    Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
 	    sendVideo.start();
+	    Thread putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
+	    putHeadingfeed.start();
 	}
 	
 	@Override
@@ -662,13 +671,16 @@ public class StreamingActivity extends Activity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 	}
-
+	
+	
+	
 	@Override
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "Location Changed");
+		
 		String lati = "" + (location.getLatitude());
 		String longi = "" + (location.getLongitude());
+		Log.d(TAG, "Location Changed with lat"+lati+" and lng"+longi);
 		frameInfo.lat = convertStringToByteArray(lati);
 		frameInfo.lon = convertStringToByteArray(longi);
 	}
@@ -688,93 +700,6 @@ public class StreamingActivity extends Activity implements
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
-	}
-	
-	class UpdateOrientationFeed extends Thread {
-	    private Handler handler = null;
-	    private NotificationRunnable runnable = null;
-	    
-	    public UpdateOrientationFeed(Handler handler, NotificationRunnable runnable) {
-	        this.handler = handler;
-	        this.runnable = runnable;
-	        this.handler.post(this.runnable);
-	    }
-	    
-	    /**
-	    * Show UI notification.
-	    * @param message
-	    */
-	    private void showMessage(String message) {
-	        this.runnable.setMessage(message);
-	        this.handler.post(this.runnable);
-	    }
-	    
-	    @Override
-	    public void run() {
-	    	showMessage("Closing feed thread started");
-	    	
-	    	
-	    	JSONObject jsonObjSend = new JSONObject();
-			
-			
-			
-			Date date = new Date();
-			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
-			String formattedDate = dateFormatUTC.format(date);
-			Log.i(TAG, "The Stop Timestamp "+formattedDate);
-	
-			try {
-				
-				jsonObjSend.put("Live", false);
-				jsonObjSend.put("StoptTime", formattedDate);
-				
-				// Output the JSON object we're sending to Logcat:
-				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));
-				
-				
-				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
-				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
-				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-//				httpcon.setDoOutput(true);
-//				httpcon.setRequestProperty("Content-Type", "application/json");
-//				httpcon.setRequestProperty("Accept", "application/json");
-				httpcon.setRequestProperty("Cookie", setRterCredentials );
-				Log.i(TAG,"Cookie being sent" + setRterCredentials);
-				httpcon.setRequestMethod("PUT");
-				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
-				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
-				httpcon.connect();
-				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
-				OutputStream os = httpcon.getOutputStream();
-				os.write(outputBytes);
-
-				os.close();
-				
-				int status = httpcon.getResponseCode();
-				Log.i(TAG,"Status of response " + status);
-				switch (status) {
-	            case 200:
-	            case 201:
-	               Log.i(TAG,"Feed Close successful");              
-	                
-				}
-				 
-			
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
 	}
 
 
@@ -820,8 +745,7 @@ public class StreamingActivity extends Activity implements
 				jsonObjSend.put("StoptTime", formattedDate);
 				
 				// Output the JSON object we're sending to Logcat:
-				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));
-				
+				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));				
 				
 				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
 				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
@@ -866,6 +790,140 @@ public class StreamingActivity extends Activity implements
 			}
 	    }
 	}
+	
+	class PutSensorsFeed extends Thread {
+	    private Handler handler = null;
+	    private NotificationRunnable runnable = null;
+	    
+	    public PutSensorsFeed(Handler handler, NotificationRunnable runnable) {
+	        this.handler = handler;
+	        this.runnable = runnable;
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    /**
+	    * Show UI notification.
+	    * @param message
+	    */
+	    private void showMessage(String message) {
+	        this.runnable.setMessage(message);
+	        this.handler.post(this.runnable);
+	    }
+	    
+	    
+	    private void postHeading(){
+	    	JSONObject jsonObjSend = new JSONObject();								
+			
+			try {
+				
+				String lat = lati;
+				String lng = longi;
+				String heading = ""+overlay.getCurrentOrientation();
+				jsonObjSend.put("Lat", lat );
+				jsonObjSend.put("Lng", lng );
+				jsonObjSend.put("Heading", heading);
+				
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG,"postHeading()::Body of update heading feed json = "+ jsonObjSend.toString(2));				
+				
+				int TIMEOUT_MILLISEC = 1000;  // = 1 seconds
+				Log.i(TAG,"postHeading()Put Request being sent" + SERVER_URL+"/1.0/items/"+setItemID);
+				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+				httpcon.setRequestProperty("Cookie", setRterCredentials );
+				
+				httpcon.setRequestMethod("PUT");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
+				OutputStream os = httpcon.getOutputStream();
+				os.write(outputBytes);
+
+				os.close();
+				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 304:
+	               Log.i(TAG,"PUT sensor Feed response = successful");              
+	                
+				}
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    
+	    private void getHeading()
+	    {
+							
+			try {		
+				
+				// Getting the user orientation
+				int TIMEOUT_MILLISEC = 1000;  // = 1 seconds
+				URL getUrl= new URL(SERVER_URL+"/1.0/user/"+setUsername+"/direction");
+				HttpURLConnection httpcon2 = (HttpURLConnection) getUrl.openConnection();
+				httpcon2.setRequestProperty("Cookie", setRterCredentials );
+				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				httpcon2.setRequestMethod("GET");
+				httpcon2.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon2.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon2.connect();
+				
+				int getStatus = httpcon2.getResponseCode();
+				Log.i(TAG,"Status of response " + getStatus);
+				switch (getStatus) {
+	            case 200:
+	               Log.i(TAG,"PUT sensor Feed response = successful");            
+				}
+				
+				overlay.setDesiredOrientation(50.0f);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    
+	    @Override
+	    public void run() {
+	    	Log.d(TAG," Update heading and location thread started");    	
+	    	while(true) {
+	    	    long millis = System.currentTimeMillis();
+	    	    this.postHeading();
+	    	    this.getHeading();
+	    	    	    	    
+	    	    try {
+					Thread.sleep((PutHeadingTimer - millis % 1000));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    	}	
+				
+	    }
+	}
+	
+	
+	
+	
 
 }
 
