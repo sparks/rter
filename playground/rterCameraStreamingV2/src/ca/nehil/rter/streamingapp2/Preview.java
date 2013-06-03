@@ -50,9 +50,6 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 			mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
 
 			Camera.Parameters p = camera.getParameters();
-			p.set("jpeg-quality", 70);
-			p.setPictureFormat(PixelFormat.JPEG);
-			p.setPictureSize(640, 480);
 			camera.setParameters(p);
 			requestLayout();
 		}

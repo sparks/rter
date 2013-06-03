@@ -45,8 +45,8 @@ public class LoginActivity extends Activity {
 	 */
 	private static final String[] DUMMY_CREDENTIALS = new String[] {
 			"anonymous", "anonymous" };
-//	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
-	private static final String SERVER_URL = "http://132.206.74.145:8000";
+	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
+//	private static final String SERVER_URL = "http://132.206.74.145:8000";
 	/**
 	 * The default email to populate the email field with.
 	 */

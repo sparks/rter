@@ -95,12 +95,10 @@ import android.net.wifi.WifiConfiguration;
 public class StreamingActivity extends Activity implements 
 		LocationListener {
 	
-//	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
-	private static final String SERVER_URL = "http://132.206.74.145:8000";
+	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
+//	private static final String SERVER_URL = "http://132.206.74.145:8000";
 	
 	private int PutHeadingTimer = 4000; /* Updating the User location, heading and orientation every 4 secs. */
-	
-	
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	private String setRterResource;
@@ -246,10 +244,6 @@ public class StreamingActivity extends Activity implements
                     	Log.d(TAG, "LocalSocket reciever running");
                     	DataInputStream in = new DataInputStream (receiver.getInputStream());
                     	
-         			
-            			
-            			
-            		
             			try { 
             				String filename;
                             String root = (Environment.getExternalStorageDirectory()).toString();
@@ -262,26 +256,13 @@ public class StreamingActivity extends Activity implements
                             File file=new File(rootDir,filename);
                             FileOutputStream videoFile = new FileOutputStream(file);
             				
-            				
-            				
-//            				int TIMEOUT_MILLISEC = 100000;  // = 100 seconds
-//            				URL url = new URL(setRterResource+"/ts");
-//            				Log.d(TAG, "The video packet url is ::"+ setRterResource+"/ts with Authorization " );
-//            				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-////            				httpcon.setDoOutput(true);
-//            				
-//            				
-//            				httpcon.setRequestMethod("POST");
-//            				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
-//            				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
-//            				httpcon.connect();
             				int len;
                             int capacity = 1024;
                             byte buffer[] = new byte[capacity];
 //                            OutputStream os = httpcon.getOutputStream(); 
                             while((len = in.read(buffer)) > -1) {                        	
                             	Log.v("videodata",""+buffer.toString());
-                            	videoFile.write(buffer, 0, len);
+//                            	videoFile.write(buffer, 0, len);
                             	PostVideoData(buffer,0, len);
                             	
 //                            	os.write(buffer,0, len);
@@ -295,14 +276,6 @@ public class StreamingActivity extends Activity implements
                             receiver.close();
             				
             				
-//            				int status = httpcon.getResponseCode();
-//            				Log.i(TAG,"Video File Status of response " + status);
-//            				switch (status) {
-//            	            case 200:
-//            	            case 201:
-//            	            			Log.i(TAG,"Feed Close successful");              
-//            	                
-//            				}
             			} catch (UnsupportedEncodingException e) {
             				// TODO Auto-generated catch block
             				e.printStackTrace();
@@ -423,17 +396,17 @@ public class StreamingActivity extends Activity implements
         // If you change sequence it will not work
         mrec.setCamera(mCamera);    
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-
+        //mrec.setAudioSource(MediaRecorder.AudioSource.MIC);     
+//        mrec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mrec.setOutputFormat(8);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-
+        //mrec.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+//        mrec.setOutputFile(filename);
         mrec.setOutputFile(fd);
-        
-        mrec.setVideoEncodingBitRate(600000);
-//        mrec.setCaptureRate(12.00);
-        mrec.setVideoSize(640, 480);
-//        mrec.setVideoFrameRate(12);
-
+        mrec.setVideoEncodingBitRate(120000);
+        //mrec.setAudioEncodingBitRate(44100);
+        mrec.setVideoFrameRate(8);
+        //mrec.setMaxDuration(2000);
         mrec.setPreviewDisplay(mPreview.mHolder.getSurface());
         mrec.prepare();
         mrec.start();
@@ -564,7 +537,7 @@ public class StreamingActivity extends Activity implements
 	    }	
 		Criteria criteria = new Criteria();
 		provider = locationManager.getBestProvider(criteria, false);
-		Log.e(TAG, "Requesting location");
+		Log.d(TAG, "Requesting location");
 		locationManager.requestLocationUpdates(provider, 0, 1, this);
 		// register the overlay control for location updates as well, so we get the geomagnetic field
 		locationManager.requestLocationUpdates(provider, 0, 1000, overlay);
@@ -639,7 +612,7 @@ public class StreamingActivity extends Activity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.e(TAG, "onPause");
+		Log.d(TAG, "onPause");
 		locationManager.removeUpdates(this);
 		locationManager.removeUpdates(overlay);
 		
@@ -744,8 +717,7 @@ public class StreamingActivity extends Activity implements
 			String formattedDate = dateFormatUTC.format(date);
 			Log.i(TAG, "The Stop Timestamp "+formattedDate);
 	
-			try {
-				
+			try {				
 				jsonObjSend.put("Live", false);
 				jsonObjSend.put("StoptTime", formattedDate);
 				
@@ -755,9 +727,7 @@ public class StreamingActivity extends Activity implements
 				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
 				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
 				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-//				httpcon.setDoOutput(true);
-//				httpcon.setRequestProperty("Content-Type", "application/json");
-//				httpcon.setRequestProperty("Accept", "application/json");
+
 				httpcon.setRequestProperty("Cookie", setRterCredentials );
 				Log.i(TAG,"Cookie being sent" + setRterCredentials);
 				httpcon.setRequestMethod("PUT");

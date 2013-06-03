@@ -16,8 +16,10 @@ public final class R {
         public static final int red=0x7f040000;
     }
     public static final class dimen {
-        public static final int button_padding=0x7f050000;
-        public static final int spinner_padding=0x7f050001;
+        /**  Default screen margins, per the Android Design guidelines. 
+         */
+        public static final int activity_horizontal_margin=0x7f050000;
+        public static final int activity_vertical_margin=0x7f050001;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
@@ -26,22 +28,20 @@ public final class R {
         public static final int semi_black=0x7f020001;
     }
     public static final class id {
-        public static final int action_forgot_password=0x7f09000a;
-        public static final int camera=0x7f090009;
-        public static final int login=0x7f090005;
-        public static final int login_form=0x7f090002;
-        public static final int login_status=0x7f090000;
-        public static final int login_status_message=0x7f090001;
-        public static final int password=0x7f090004;
-        public static final int phone_id=0x7f090008;
-        public static final int sign_in_button=0x7f090006;
-        public static final int textView1=0x7f090007;
-        public static final int username=0x7f090003;
+        public static final int action_forgot_password=0x7f090008;
+        public static final int login=0x7f090006;
+        public static final int login_form=0x7f090003;
+        public static final int login_status=0x7f090001;
+        public static final int login_status_message=0x7f090002;
+        public static final int password=0x7f090005;
+        public static final int sign_in_button=0x7f090007;
+        public static final int surface_camera=0x7f090000;
+        public static final int username=0x7f090004;
     }
     public static final class layout {
-        public static final int activity_login=0x7f030000;
-        public static final int activity_token=0x7f030001;
-        public static final int skeleton_activity=0x7f030002;
+        public static final int activity_first=0x7f030000;
+        public static final int activity_login=0x7f030001;
+        public static final int activity_token=0x7f030002;
     }
     public static final class menu {
         public static final int login=0x7f080000;
