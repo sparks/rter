@@ -427,7 +427,7 @@ public class StreamingActivity extends Activity implements
             Log.i(LOG_TAG, "create yuvIplimage");
         }
 
-        recorder = new FFmpegFrameSender("http://132.206.74.145:8080/v1/ingest/1600", imageWidth, imageHeight);
+        recorder = new FFmpegFrameSender(setRterResource, imageWidth, imageHeight);
         recorder.setVideoCodec(28); // H264
         //recorder.setSampleRate(sampleAudioRateInHz);
         // Set in the surface changed method
@@ -652,8 +652,8 @@ public class StreamingActivity extends Activity implements
 		
 		//@Nehil should this be removed?
 		// Open the default i.e. the first rear facing camera.
-		mCamera = Camera.open();
-		cameraCurrentlyLocked = defaultCameraId;
+//		mCamera = Camera.open();
+//		cameraCurrentlyLocked = defaultCameraId;
 		
 		
 		// sensors
