@@ -52,7 +52,7 @@ import org.apache.http.util.EntityUtils;
  * @author Samuel Audet
  */
 public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
-    public static FFmpegFrameSender createDefault(String f, int w, int h) throws Exception { return new FFmpegFrameSender(f, w, h); }
+    public static FFmpegFrameSender createDefault(String f, String t, int w, int h) throws Exception { return new FFmpegFrameSender(f, t, w, h); }
 
     private static Exception loadingException = null;
     public static void tryLoad() throws Exception {
@@ -74,16 +74,17 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
         }
     }
 
-    public FFmpegFrameSender(String rterResource, int imageWidth, int imageHeight) {
-        this(rterResource, imageWidth, imageHeight, 0);
+    public FFmpegFrameSender(String rterResource, String rterToken, int imageWidth, int imageHeight) {
+        this(rterResource, rterToken, imageWidth, imageHeight, 0);
     }
-    public FFmpegFrameSender(String rterResource, int imageWidth, int imageHeight, int audioChannels) {
+    public FFmpegFrameSender(String rterResource, String rterToken, int imageWidth, int imageHeight, int audioChannels) {
         /* initialize libavcodec, and register all codecs and formats */
         av_register_all();
         avformat_network_init();
 
         this.filename      = "/mnt/sdcard/stream.ts";
         this.RterResourceSet = rterResource;
+        this.RterAuthToken = rterToken;
         this.imageWidth    = imageWidth;
         this.imageHeight   = imageHeight;
         this.audioChannels = audioChannels;
@@ -180,6 +181,7 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
 
     private int frame_number;
     private String filename;
+    private String RterAuthToken;
     private String RterResourceSet;
     private AVFrame picture, tmp_picture;
     private BytePointer picture_buf;
@@ -741,6 +743,7 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
             video_pkt.data().get(data);
             Log.d("HTTP", "rter resource" + RterResourceSet);
             HttpPost httpPost = new HttpPost(this.RterResourceSet + "/avc");
+            httpPost.setHeader("Authorization", this.RterAuthToken);
             httpPost.setEntity(new ByteArrayEntity(data));
             
             try {

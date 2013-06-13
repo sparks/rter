@@ -191,7 +191,7 @@ public class RecordActivity extends Activity implements OnClickListener {
             Log.i(LOG_TAG, "create yuvIplimage");
         }
 
-        recorder = new FFmpegFrameSender("http://132.206.74.145:8080/v1/ingest/1600", imageWidth, imageHeight);
+        recorder = new FFmpegFrameSender("http://132.206.74.145:8080/v1/ingest/1600", "",imageWidth, imageHeight);
         recorder.setVideoCodec(28); // H264
         //recorder.setSampleRate(sampleAudioRateInHz);
         // Set in the surface changed method

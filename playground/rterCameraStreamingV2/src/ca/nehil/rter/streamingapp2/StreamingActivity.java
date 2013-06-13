@@ -101,6 +101,7 @@ public class StreamingActivity extends Activity implements
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
 	
+	private Boolean PutHeadingBool = false;
 	private String setUsername = null;
 	private String setRterCredentials = null;
 	
@@ -108,7 +109,7 @@ public class StreamingActivity extends Activity implements
 	private String recievedItemID = null;
 	private String recievedRterSignature;
 	private String recievedRterValidUntil=null;
-	
+	private String authToken; 
 	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
 	private Handler handler = new Handler();
 	static ParcelFileDescriptor pfd=null;
@@ -163,7 +164,7 @@ public class StreamingActivity extends Activity implements
     private int imageWidth = 320;
     private int imageHeight = 240;
     private int frameRate = 30;
-
+    
     /* audio data getting thread */
     //private AudioRecord audioRecord;
     //private AudioRecordRunnable audioRecordRunnable;
@@ -176,17 +177,9 @@ public class StreamingActivity extends Activity implements
 
     private IplImage yuvIplimage = null;
 
-    /* layout setting */
-    //old values
-//    private final int bg_screen_bx = 232;
-//    private final int bg_screen_by = 128;
-//    private final int bg_screen_width = 700;
-//    private final int bg_screen_height = 500;
-//    private final int bg_width = 1123;
-//    private final int bg_height = 715;
-//    private final int live_width = 640;
-//    private final int live_height = 480;
-    
+
+
+    private Button recordButton;
     private final int bg_screen_bx = 232;
     private final int bg_screen_by = 128;
     private final int bg_screen_width = 700;
@@ -253,43 +246,71 @@ public class StreamingActivity extends Activity implements
         Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         screenWidth = display.getWidth();
         screenHeight = display.getHeight();
-        RelativeLayout.LayoutParams layoutParam = null; 
+        FrameLayout.LayoutParams layoutParam = null; 
         LayoutInflater myInflate = null; 
         myInflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        RelativeLayout topLayout = new RelativeLayout(this);
+        FrameLayout topLayout = new FrameLayout(this);
         setContentView(topLayout);
         LinearLayout preViewLayout = (LinearLayout) myInflate.inflate(R.layout.javacvtext_main, null);
-        layoutParam = new RelativeLayout.LayoutParams(screenWidth, screenHeight);
+        layoutParam = new FrameLayout.LayoutParams(screenWidth, screenHeight);
         
         // openGLview
      	mGLView = overlay.getGLView();
         
         topLayout.addView(preViewLayout, layoutParam);
-        topLayout.addView(mGLView, layoutParam);
+        
         /* add control button: start and stop */
         btnRecorderControl = (Button) findViewById(R.id.recorder_control);
         btnRecorderControl.setText("Start");
         btnRecorderControl.setOnClickListener(this);
 
         /* add camera view */
-        int display_width_d = (int) (1.0 * bg_screen_width * screenWidth / bg_width);
-        int display_height_d = (int) (1.0 * bg_screen_height * screenHeight / bg_height);
+//        int display_width_d = (int) (1.0 * bg_screen_width * screenWidth / bg_width);
+//        int display_height_d = (int) (1.0 * bg_screen_height * screenHeight / bg_height);
+//        int prev_rw, prev_rh;
+//        if (1.0 * display_width_d / display_height_d > 1.0 * live_width / live_height) {
+//            prev_rh = display_height_d;
+//            prev_rw = (int) (1.0 * display_height_d * live_width / live_height);
+//        } else {
+//            prev_rw = display_width_d;
+//            prev_rh = (int) (1.0 * display_width_d * live_height / live_width);
+//        }
+//        layoutParam = new RelativeLayout.LayoutParams(prev_rw, prev_rh);
+//        layoutParam.topMargin = (int) (1.0 * bg_screen_by * screenHeight / bg_height);
+//        layoutParam.leftMargin = (int) (1.0 * bg_screen_bx * screenWidth / bg_width);
+        
+        int display_width_d = (int) (1.0 * screenWidth);
+        int display_height_d = (int) (1.0  * screenHeight);
+        int button_width= 0;
+        int button_height= 0;
         int prev_rw, prev_rh;
         if (1.0 * display_width_d / display_height_d > 1.0 * live_width / live_height) {
             prev_rh = display_height_d;
+            button_height = display_height_d; 
             prev_rw = (int) (1.0 * display_height_d * live_width / live_height);
+            button_width = display_width_d - prev_rw;
+            
         } else {
             prev_rw = display_width_d;
             prev_rh = (int) (1.0 * display_width_d * live_height / live_width);
         }
-        layoutParam = new RelativeLayout.LayoutParams(prev_rw, prev_rh);
-        layoutParam.topMargin = (int) (1.0 * bg_screen_by * screenHeight / bg_height);
-        layoutParam.leftMargin = (int) (1.0 * bg_screen_bx * screenWidth / bg_width);
-
+        recordButton.setText("Start");
+        recordButton.setLayoutParams(new LinearLayout.LayoutParams(button_width, button_height, Gravity.RIGHT | Gravity.TOP));
+        
+        layoutParam = new FrameLayout.LayoutParams(prev_rw, prev_rh);
+//        layoutParam.topMargin = (int) (1.0 * bg_screen_by * screenHeight / bg_height);
+//        layoutParam.leftMargin = (int) (1.0 * bg_screen_bx * screenWidth / bg_width);
+        Log.d("LAYOUT", "display_width_d:"+ display_width_d+":: display_height_d:" 
+        		+display_height_d+":: prev_rw:" + prev_rw + ":: prev_rh:" + prev_rh 
+        		+ ":: live_width:" +live_width + ":: live_height:" +live_height
+        		+ ":: button_width:" +button_width + ":: button_height:" +button_height);
         cameraDevice = Camera.open();
         Log.i(LOG_TAG, "cameara open");
         cameraView = new CameraView(this, cameraDevice);
+       
         topLayout.addView(cameraView, layoutParam);
+        topLayout.addView(mGLView, layoutParam);
+        topLayout.addView(recordButton);
         Log.i(LOG_TAG, "cameara preview start: OK");
     }
 
@@ -306,17 +327,18 @@ public class StreamingActivity extends Activity implements
         }
         if(recievedRterResource != null){
         	Log.e(LOG_TAG, "rterResource" + recievedRterResource);
-        	recorder = new FFmpegFrameSender(recievedRterResource, imageWidth, imageHeight);
+        	recorder = new FFmpegFrameSender(recievedRterResource, authToken, imageWidth, imageHeight);
+        	recorder.setVideoCodec(28); // H264
+            //recorder.setSampleRate(sampleAudioRateInHz);
+            // Set in the surface changed method
+            recorder.setFrameRate(frameRate);
+
+            Log.i(LOG_TAG, "recorder initialize success");
         }else{
-        	Log.e(LOG_TAG, "rterResource is null");
+        	Log.e(LOG_TAG, "else rterResource is null");
         }
         
-        recorder.setVideoCodec(28); // H264
-        //recorder.setSampleRate(sampleAudioRateInHz);
-        // Set in the surface changed method
-        recorder.setFrameRate(frameRate);
-
-        Log.i(LOG_TAG, "recorder initialize success");
+        
 
         //audioRecordRunnable = new AudioRecordRunnable();
         //audioThread = new Thread(audioRecordRunnable);
@@ -325,6 +347,7 @@ public class StreamingActivity extends Activity implements
     public void startRecording() {
     	putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
         try {
+        	PutHeadingBool = true;
         	putHeadingfeed.start();
             recorder.start();
             startTime = System.currentTimeMillis();
@@ -337,8 +360,15 @@ public class StreamingActivity extends Activity implements
     }
 
     public void stopRecording() {
+    	PutHeadingBool = false;
+    	if(putHeadingfeed != null){
+    		Log.v(LOG_TAG,"Stopping Put Heading Feed");
+    			putHeadingfeed.interrupt();
+    			
+    	}else{
+    		Log.v(LOG_TAG,"Some Issue with this thread");
+    	}
     	
-    	putHeadingfeed.interrupt();
     	putHeadingfeed = null;
     	CloseFeed closefeed = new CloseFeed(this.handler, this.notificationRunnable);
     	closefeed.start();
@@ -478,7 +508,7 @@ public class StreamingActivity extends Activity implements
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE); 
         mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, CLASS_LABEL); 
         mWakeLock.acquire(); 
-
+        recordButton = new Button(this);
         initLayout();
         
         
@@ -491,12 +521,6 @@ public class StreamingActivity extends Activity implements
 //		Toast toast = Toast.makeText(this, text, duration);
 //		toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, 0);
 //		toast.show();
-		/*surfaceHolder = surfaceView.getHolder();
-	    surfaceHolder.addCallback(this);
-	    surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
-	    // Run new thread to handle socket communications
-	    //Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
-	    //sendVideo.start();
 		
 	    
 	    
@@ -515,9 +539,12 @@ public class StreamingActivity extends Activity implements
 	@Override
 	public void onStop() {
 		super.onStop();
-		if(putHeadingfeed.isAlive()){
-			putHeadingfeed.interrupt();
+		if(putHeadingfeed != null){
+			if(putHeadingfeed.isAlive()){
+				putHeadingfeed.interrupt();
+			}
 		}
+		
 		
 		if (mCamera != null) {			
 			mCamera.release();
@@ -566,9 +593,12 @@ public class StreamingActivity extends Activity implements
 		// stop sensor updates
 		mSensorManager.unregisterListener(overlay);
 		
-		if(putHeadingfeed.isAlive()){
-			putHeadingfeed.interrupt();
+		if(putHeadingfeed != null){
+			if(putHeadingfeed.isAlive()){
+				putHeadingfeed.interrupt();
+			}
 		}
+		
 		
 		//@Nehil should this be removed?
 		// Because the Camera object is a shared resource, it's very
@@ -578,8 +608,10 @@ public class StreamingActivity extends Activity implements
 			mCamera = null;
 			
 		}
-
-		mSensorManager.unregisterListener(overlay);
+		if(mSensorManager != null){
+			mSensorManager.unregisterListener(overlay);
+		}
+		
 
 		 if (mWakeLock != null) {
 	            mWakeLock.release();
@@ -656,7 +688,7 @@ public class StreamingActivity extends Activity implements
 	    
 	    @Override
 	    public void run() {
-	    	showMessage("Closing feed thread started");
+	    	showMessage("Closing feed");
 	    	
 	    	
 	    	JSONObject jsonObjSend = new JSONObject();
@@ -671,8 +703,7 @@ public class StreamingActivity extends Activity implements
 	
 			try {				
 				jsonObjSend.put("Live", false);
-				jsonObjSend.put("StoptTime", formattedDate);
-				
+				jsonObjSend.put("StopTime", formattedDate);
 				// Output the JSON object we're sending to Logcat:
 				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));				
 				
@@ -853,7 +884,8 @@ public class StreamingActivity extends Activity implements
 	    @Override
 	    public void run() {
 	    	Log.d(TAG," Update heading and location thread started");    	
-	    	while(true) {
+	    	Log.d(TAG," PutHedingBool : "+ PutHeadingBool );
+	    	while(PutHeadingBool) {
 	    	    long millis = System.currentTimeMillis();
 	    	    this.postHeading();
 	    	    this.getHeading();
@@ -1043,7 +1075,11 @@ public class StreamingActivity extends Activity implements
 	                recievedRterResource = token.getString("rter_resource");
 	                recievedRterSignature = token.getString("rter_signature");
 	                recievedRterValidUntil = token.getString("rter_valid_until");
-	                Log.i("PREFS","Response after starting item on server rter_resource  : " + recievedRterResource);
+	                authToken = "rtER rter_resource=\""+ recievedRterResource +"\"," +
+	                		" rter_valid_until=\""+recievedRterValidUntil+"\", " +
+	                		"rter_signature=\""+recievedRterSignature+"\"";
+	                Log.v("PREFS","authToken  : " + authToken);
+	                Log.v("PREFS","Response after starting item on server rter_resource  : " + recievedRterResource);
 	                Log.i(TAG,"Response from starting item rter_signature : " + recievedRterSignature);
 	                
 	                prefEditor.putString("ID", recievedItemID); 
