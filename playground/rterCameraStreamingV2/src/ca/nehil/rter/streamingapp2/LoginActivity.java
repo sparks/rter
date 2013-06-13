@@ -307,7 +307,7 @@ public class LoginActivity extends Activity {
 
 			if (success) {				
 				Log.i(TAG, "Calling Intent to Streaming ACtivity");
-				Intent intent = new Intent(LoginActivity.this, GetTokenActivity.class);
+				Intent intent = new Intent(LoginActivity.this, StreamingActivity.class);
 		        startActivity(intent);
 				
 			} else {

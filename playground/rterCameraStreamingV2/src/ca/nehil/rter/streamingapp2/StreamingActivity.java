@@ -41,6 +41,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
@@ -55,6 +56,7 @@ import android.media.MediaRecorder;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -78,6 +80,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import ca.nehil.rter.streamingapp2.GetTokenActivity.HandshakeTask;
 import ca.nehil.rter.streamingapp2.overlay.CameraGLSurfaceView;
 import ca.nehil.rter.streamingapp2.overlay.OverlayController;
 import android.view.KeyEvent;
@@ -93,20 +96,24 @@ public class StreamingActivity extends Activity implements
 //	private static final String SERVER_URL = "http://rter.cim.mcgill.ca";
 	private static final String SERVER_URL = "http://132.206.74.145:8000";
 	
-	private int PutHeadingTimer = 4000; /* Updating the User location, heading and orientation every 4 secs. */
+	private HandShakeTask handshakeTask = null;
+	private int PutHeadingTimer = 2000; /* Updating the User location, heading and orientation every 4 secs. */
 	private SharedPreferences cookies;
 	private SharedPreferences.Editor prefEditor;
-	private String setRterResource;
-	private String setRterCredentials;
-	private String setItemID;
-	private String setRterSignature;
-	private String setRterValidUntil;
-	private String setUsername;
+	
+	private String setUsername = null;
+	private String setRterCredentials = null;
+	
+	private String recievedRterResource = null;
+	private String recievedItemID = null;
+	private String recievedRterSignature;
+	private String recievedRterValidUntil=null;
+	
 	public static String SOCKET_ADDRESS = "ca.nehil.rter.streamingapp2.socketserver";
 	private Handler handler = new Handler();
 	static ParcelFileDescriptor pfd=null;
 	static FileDescriptor  fd=null;
-
+	private Thread putHeadingfeed;
 
 	public MediaRecorder mrec = new MediaRecorder();
 	private FrameLayout mFrame; // need this to merge camera preview and openGL
@@ -170,6 +177,16 @@ public class StreamingActivity extends Activity implements
     private IplImage yuvIplimage = null;
 
     /* layout setting */
+    //old values
+//    private final int bg_screen_bx = 232;
+//    private final int bg_screen_by = 128;
+//    private final int bg_screen_width = 700;
+//    private final int bg_screen_height = 500;
+//    private final int bg_width = 1123;
+//    private final int bg_height = 715;
+//    private final int live_width = 640;
+//    private final int live_height = 480;
+    
     private final int bg_screen_bx = 232;
     private final int bg_screen_by = 128;
     private final int bg_screen_width = 700;
@@ -211,146 +228,7 @@ public class StreamingActivity extends Activity implements
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
     
-    class SocketListener extends Thread {
-        private Handler handler = null;
-        private NotificationRunnable runnable = null;
-        
-        public SocketListener(Handler handler, NotificationRunnable runnable) {
-            this.handler = handler;
-            this.runnable = runnable;
-            this.handler.post(this.runnable);
-        }
-        
-        /**
-        * Show UI notification.
-        * @param message
-        */
-        private void showMessage(String message) {
-            this.runnable.setMessage(message);
-            this.handler.post(this.runnable);
-        }
-        
-        private void PostVideoData(byte[] buffer, int i, int l)
-        {
-        	try {
-        		int TIMEOUT_MILLISEC = 100000;  // = 100 seconds
-				URL url = new URL(setRterResource+"/ts");
-				Log.d(TAG, "The video packet url is ::"+ setRterResource+"/ts with Authorization " );
-				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-				httpcon.setDoOutput(true);
-				
-				
-				httpcon.setRequestMethod("POST");
-				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
-				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
-				httpcon.connect();
-				
-                OutputStream os = httpcon.getOutputStream(); 
-                 
-                os.write(buffer,i, l);
-                Log.d(TAG, "OutputStream closing");
-                os.close();
-                	
-                              				
-				int status = httpcon.getResponseCode();
-				Log.i(TAG,"Video File Status of response " + status);
-				switch (status) {
-	            case 200:
-	            case 201:
-	            			
-	            	Log.i(TAG,"Feed Close successful");              
-	                
-				}
-        		
-        	} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-        @Override
-        public void run() {
-        	 showMessage("SocketListener started!");
-            try {
-                LocalServerSocket server = new LocalServerSocket(SOCKET_ADDRESS);
-                Log.d(TAG, "LocalServerSocket running at"+SOCKET_ADDRESS);
-                while (true) {
-                    LocalSocket receiver = server.accept();
-                    if (receiver != null) {
-                    	Log.d(TAG, "LocalSocket reciever running");
-                    	DataInputStream in = new DataInputStream (receiver.getInputStream());
-                    	
-            			try { 
-            				String filename;
-                            String root = (Environment.getExternalStorageDirectory()).toString();
-                     		File rootDir = new File(Environment.getExternalStorageDirectory()
-                     				+ File.separator + "rter" + File.separator);
-                     		rootDir.mkdirs();
-                            Date date=new Date();
-                            filename="/rec"+date.toString().replace(" ", "_").replace(":", "_")+".ts";
-                            //create empty file it must use
-                            File file=new File(rootDir,filename);
-                            FileOutputStream videoFile = new FileOutputStream(file);
-            				
-            				int len;
-                            int capacity = 1024;
-                            byte buffer[] = new byte[capacity];
-//                            OutputStream os = httpcon.getOutputStream(); 
-                            while((len = in.read(buffer)) > -1) {                        	
-                            	Log.v("videodata",""+buffer.toString());
-//                            	videoFile.write(buffer, 0, len);
-                            	PostVideoData(buffer,0, len);
-                            	
-//                            	os.write(buffer,0, len);
-//                            	os.close();
-                            	
-                            }
-                            Log.d(TAG, "OutputStream closing");
-                            videoFile.close(); 
-//                            os.close();
-                            Log.d(TAG, "Reciever closing");
-                            receiver.close();
-            				
-            				
-            			} catch (UnsupportedEncodingException e) {
-            				// TODO Auto-generated catch block
-            				e.printStackTrace();
-            			} catch (ClientProtocolException e) {
-            				// TODO Auto-generated catch block
-            				e.printStackTrace();
-            			} catch (IOException e) {
-            				// TODO Auto-generated catch block
-            				e.printStackTrace();
-            			}                        
-                    }
-                }
-            }  catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-    }
-    public static LocalSocket sender;
-    public static void writeSocket() throws IOException {
-        sender = new LocalSocket();
-        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
-        Log.d(TAG, "sender Opened");
-        fd = sender.getFileDescriptor();
-        //handle the closing 
-//        sender.getOutputStream().write(message.getBytes());
-//        sender.getOutputStream().close();
-    }
+    
 	
 	
 	@Override
@@ -426,8 +304,13 @@ public class StreamingActivity extends Activity implements
             yuvIplimage = IplImage.create(imageWidth, imageHeight, IPL_DEPTH_8U, 2);
             Log.i(LOG_TAG, "create yuvIplimage");
         }
-
-        recorder = new FFmpegFrameSender(setRterResource, imageWidth, imageHeight);
+        if(recievedRterResource != null){
+        	Log.e(LOG_TAG, "rterResource" + recievedRterResource);
+        	recorder = new FFmpegFrameSender(recievedRterResource, imageWidth, imageHeight);
+        }else{
+        	Log.e(LOG_TAG, "rterResource is null");
+        }
+        
         recorder.setVideoCodec(28); // H264
         //recorder.setSampleRate(sampleAudioRateInHz);
         // Set in the surface changed method
@@ -440,8 +323,9 @@ public class StreamingActivity extends Activity implements
     }
 
     public void startRecording() {
-
+    	
         try {
+        	putHeadingfeed.start();
             recorder.start();
             startTime = System.currentTimeMillis();
             recording = true;
@@ -453,7 +337,11 @@ public class StreamingActivity extends Activity implements
     }
 
     public void stopRecording() {
-
+    	
+    	putHeadingfeed.interrupt();
+    	putHeadingfeed = null;
+    	CloseFeed closefeed = new CloseFeed(this.handler, this.notificationRunnable);
+    	closefeed.start();
         //runAudioThread = false;
 
         if (recorder != null && recording) {
@@ -501,7 +389,8 @@ public class StreamingActivity extends Activity implements
         if(item.getTitle().equals("Start"))
         {            
         	if (!recording) {
-                startRecording();
+                Log.d(TAG,"attemptHandshaking");
+        		attemptHandshake();
                 Log.w(LOG_TAG, "Start Button Pushed");
                 item.setTitle("Stop");
                 btnRecorderControl.setText("Stop");
@@ -544,32 +433,15 @@ public class StreamingActivity extends Activity implements
 		// Find the total number of cameras available
 		numberOfCameras = Camera.getNumberOfCameras();
 
-		/*// Find the ID of the default camera
-		CameraInfo cameraInfo = new CameraInfo();
-		for (int i = 0; i < numberOfCameras; i++) {
-			Camera.getCameraInfo(i, cameraInfo);
-			Log.d(TAG, "Camera Id is " + i);
-			if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
-				Log.d(TAG, "Back facing camera chosen");
-				defaultCameraId = i;
-				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
-				break;
-			}
-//			else if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
-//				Log.d(TAG, "Front facing camera chosen");
-//				defaultCameraId = i;
-//				Log.d(TAG, "defaultcamera ID :"+defaultCameraId );
-//			}
-		}*/
+		
 		cookies = getSharedPreferences("RterUserCreds", MODE_PRIVATE);
 		prefEditor = cookies.edit();
 		setUsername = cookies.getString("Username", "not-set");
 		setRterCredentials = cookies.getString("RterCreds", "not-set");
-		setRterResource = cookies.getString("rter_resource", "not-set");
-		setRterSignature = cookies.getString("rter_signature", "not-set");
-		setRterValidUntil = cookies.getString("rter_valid_until", "not-set");
-		setItemID = cookies.getString("ID", "not-set");
-		Log.d(TAG, "Prefs ==> rter_resource:"+setRterResource+" :: rter_signature:" + setRterSignature );
+		if(setRterCredentials.equalsIgnoreCase("not-set") || setRterCredentials == null){
+			Log.e("PREFS","Login Not successful, please restart");
+		}
+		Log.d("PREFS", "Prefs ==> rter_Creds:" + setRterCredentials);
 		
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -608,7 +480,7 @@ public class StreamingActivity extends Activity implements
         mWakeLock.acquire(); 
 
         initLayout();
-        initRecorder();
+        
         
 		// test, set desired orienation to north
 		overlay.letFreeRoam(false);
@@ -625,13 +497,33 @@ public class StreamingActivity extends Activity implements
 	    // Run new thread to handle socket communications
 	    //Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
 	    //sendVideo.start();
-	    Thread putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
-	    putHeadingfeed.start();
+		putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
+	    
+	    
+	}
+	
+	public void attemptHandshake() {
+		
+		// Show a progress spinner, and kick off a background task to
+		// perform the user login attempt.
+				
+		handshakeTask = new HandShakeTask();
+		handshakeTask.execute();
+	
 	}
 	
 	@Override
 	public void onStop() {
 		super.onStop();
+		if(putHeadingfeed.isAlive()){
+			putHeadingfeed.interrupt();
+		}
+		
+		if (mCamera != null) {			
+			mCamera.release();
+			mCamera = null;
+			
+		}
 	}
 	
 	
@@ -674,11 +566,14 @@ public class StreamingActivity extends Activity implements
 		// stop sensor updates
 		mSensorManager.unregisterListener(overlay);
 		
+		if(putHeadingfeed.isAlive()){
+			putHeadingfeed.interrupt();
+		}
+		
 		//@Nehil should this be removed?
 		// Because the Camera object is a shared resource, it's very
 		// important to release it when the activity is paused.
-		if (mCamera != null) {
-			
+		if (mCamera != null) {			
 			mCamera.release();
 			mCamera = null;
 			
@@ -782,7 +677,7 @@ public class StreamingActivity extends Activity implements
 				Log.i(TAG,"Body of closefeed json = "+ jsonObjSend.toString(2));				
 				
 				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
-				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				URL url = new URL(SERVER_URL+"/1.0/items/"+recievedItemID);
 				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
 
 				httpcon.setRequestProperty("Cookie", setRterCredentials );
@@ -856,11 +751,11 @@ public class StreamingActivity extends Activity implements
 				jsonObjSend.put("Heading", heading);
 				
 				// Output the JSON object we're sending to Logcat:
-				Log.i(TAG,"postHeading()::Body of update heading feed json = "+ jsonObjSend.toString(2));				
+				Log.i(TAG,"PUTHEADNG::Body of update heading feed json = "+ jsonObjSend.toString(2));				
 				
 				int TIMEOUT_MILLISEC = 1000;  // = 1 seconds
-				Log.i(TAG,"postHeading()Put Request being sent" + SERVER_URL+"/1.0/items/"+setItemID);
-				URL url = new URL(SERVER_URL+"/1.0/items/"+setItemID);
+				Log.i(TAG,"postHeading()Put Request being sent" + SERVER_URL+"/1.0/items/"+recievedItemID);
+				URL url = new URL(SERVER_URL+"/1.0/items/"+recievedItemID);
 				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
 				httpcon.setRequestProperty("Cookie", setRterCredentials );
 				httpcon.setRequestProperty("Content-Type", "application/json");
@@ -875,11 +770,11 @@ public class StreamingActivity extends Activity implements
 				os.close();
 				
 				int status = httpcon.getResponseCode();
-				Log.i(TAG,"Status of response " + status);
+				Log.i(TAG,"PUTHEADNG Status of response " + status);
 				switch (status) {
 	            case 200:
 	            case 304:
-	               Log.i(TAG,"PUT sensor Feed response = successful");              
+	               Log.i(TAG,"PUTHEADNG sensor Feed response = successful");              
 	                
 				}
 				
@@ -906,9 +801,10 @@ public class StreamingActivity extends Activity implements
 				// Getting the user orientation
 				int TIMEOUT_MILLISEC = 1000;  // = 1 seconds
 				URL getUrl= new URL(SERVER_URL+"/1.0/users/"+setUsername+"/direction");
+				Log.i(TAG,"Get user heading URL" + getUrl);
+				
 				HttpURLConnection httpcon2 = (HttpURLConnection) getUrl.openConnection();
-				httpcon2.setRequestProperty("Cookie", setRterCredentials );
-				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				httpcon2.setRequestProperty("Cookie", setRterCredentials );				
 				httpcon2.setRequestMethod("GET");
 				httpcon2.setConnectTimeout(TIMEOUT_MILLISEC);
 				httpcon2.setReadTimeout(TIMEOUT_MILLISEC);
@@ -933,7 +829,7 @@ public class StreamingActivity extends Activity implements
 	                
 	                float heading = Float.parseFloat(jObject.getString("Heading"));
 	              
-	                Log.i(TAG,"Response from connection for heading is : " + heading);
+	                Log.i(TAG,"Response from PutHeading Thread for heading is : " + heading);
 	                overlay.setDesiredOrientation(heading);
 	               
 				}
@@ -1067,7 +963,8 @@ public class StreamingActivity extends Activity implements
 	public void onClick(View arg0) {
 		// TODO Auto-generated method stub
 		if (!recording) {
-            startRecording();
+			attemptHandshake();
+			
             Log.w(LOG_TAG, "Start Button Pushed");
             btnRecorderControl.setText("Stop");
         } else {
@@ -1079,6 +976,124 @@ public class StreamingActivity extends Activity implements
 
 	}
 	
+	
+	public class HandShakeTask extends AsyncTask<Void, Void, Boolean> {
+		private static final String TAG = "GetTokenActivity HandshakeTask";
+		
+				
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// TODO: attempt authentication against a network service.
+			
+			JSONObject jsonObjSend = new JSONObject();
+			
+			Date date = new Date();
+			SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+			String formattedDate = dateFormatUTC.format(date);
+			Log.i(TAG, "The Time stamp "+formattedDate);
+			
+					
+			try {
+				jsonObjSend.put("Type", "streaming-video-v1");
+				jsonObjSend.put("Live", true);
+				jsonObjSend.put("StartTime", formattedDate);
+				jsonObjSend.put("HasGeo", true);
+				jsonObjSend.put("HasHeading", true);
+				// Output the JSON object we're sending to Logcat:
+				Log.i(TAG, jsonObjSend.toString(2));
+				Log.i(TAG,"Cookie being sent" + setRterCredentials);
+				
+				int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+				URL url = new URL(SERVER_URL+"/1.0/items");
+				HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+//				httpcon.setDoOutput(true);
+
+				httpcon.setRequestProperty("Cookie", setRterCredentials );
+				httpcon.setRequestMethod("POST");
+				httpcon.setConnectTimeout(TIMEOUT_MILLISEC);
+				httpcon.setReadTimeout(TIMEOUT_MILLISEC);
+				httpcon.connect();
+				byte[] outputBytes = jsonObjSend.toString().getBytes("UTF-8");
+				OutputStream os = httpcon.getOutputStream();
+				os.write(outputBytes);
+
+				os.close();
+				
+				int status = httpcon.getResponseCode();
+				Log.i(TAG,"Status of response " + status);
+				switch (status) {
+	            case 200:
+	            case 201:
+	                BufferedReader br = new BufferedReader(new InputStreamReader(httpcon.getInputStream()));
+	                StringBuilder sb = new StringBuilder();
+	                String line;
+	                while ((line = br.readLine()) != null) {
+	                    sb.append(line+"\n");
+	                }
+	                String result = sb.toString();
+	                br.close();
+	                
+	                JSONObject jObject = new JSONObject(result);
+	                Log.i(TAG,"Response from connection " + jObject.toString(2));
+	                
+	                recievedItemID = jObject.getString("ID");
+	                String uploadURI = jObject.getString("UploadURI");
+	                JSONObject token = jObject.getJSONObject("Token");
+	                recievedRterResource = token.getString("rter_resource");
+	                recievedRterSignature = token.getString("rter_signature");
+	                recievedRterValidUntil = token.getString("rter_valid_until");
+	                Log.i("PREFS","Response after starting item on server rter_resource  : " + recievedRterResource);
+	                Log.i(TAG,"Response from starting item rter_signature : " + recievedRterSignature);
+	                
+	                prefEditor.putString("ID", recievedItemID); 
+	                prefEditor.putString("rter_resource", recievedRterResource);  
+					prefEditor.putString("rter_signature", recievedRterSignature); 
+					prefEditor.putString("rter_valid_until", recievedRterValidUntil); 
+					prefEditor.commit();                
+	                
+				}
+				 
+			
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// TODO: register the new account here.
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+			handshakeTask = null;
+			
+			Log.d(TAG, "in OnPostExecute of Handshake");
+			if (success) {
+				Log.d(TAG, "Success of Handshake");
+				initRecorder();
+				startRecording();
+				
+			} else {
+				
+			}
+		}
+
+		@Override
+		protected void onCancelled() {
+			handshakeTask = null;
+			
+		}
+	}
 	
 	
 

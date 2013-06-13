@@ -74,16 +74,16 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
         }
     }
 
-    public FFmpegFrameSender(String setRterResource, int imageWidth, int imageHeight) {
-        this(setRterResource, imageWidth, imageHeight, 0);
+    public FFmpegFrameSender(String rterResource, int imageWidth, int imageHeight) {
+        this(rterResource, imageWidth, imageHeight, 0);
     }
-    public FFmpegFrameSender(String setRterResource, int imageWidth, int imageHeight, int audioChannels) {
+    public FFmpegFrameSender(String rterResource, int imageWidth, int imageHeight, int audioChannels) {
         /* initialize libavcodec, and register all codecs and formats */
         av_register_all();
         avformat_network_init();
 
         this.filename      = "/mnt/sdcard/stream.ts";
-        this.setRterResource = setRterResource;
+        this.RterResourceSet = rterResource;
         this.imageWidth    = imageWidth;
         this.imageHeight   = imageHeight;
         this.audioChannels = audioChannels;
@@ -180,7 +180,7 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
 
     private int frame_number;
     private String filename;
-    private String setRterResource;
+    private String RterResourceSet;
     private AVFrame picture, tmp_picture;
     private BytePointer picture_buf;
     private BytePointer video_outbuf;
@@ -739,8 +739,8 @@ public class FFmpegFrameSender extends com.googlecode.javacv.FrameRecorder {
             
             byte[] data = new byte[video_pkt.size()];
             video_pkt.data().get(data);
-            
-            HttpPost httpPost = new HttpPost(this.setRterResource + "/avc");
+            Log.d("HTTP", "rter resource" + RterResourceSet);
+            HttpPost httpPost = new HttpPost(this.RterResourceSet + "/avc");
             httpPost.setEntity(new ByteArrayEntity(data));
             
             try {
