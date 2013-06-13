@@ -323,7 +323,7 @@ public class StreamingActivity extends Activity implements
     }
 
     public void startRecording() {
-    	
+    	putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
         try {
         	putHeadingfeed.start();
             recorder.start();
@@ -497,7 +497,7 @@ public class StreamingActivity extends Activity implements
 	    // Run new thread to handle socket communications
 	    //Thread sendVideo = new SocketListener(this.handler, this.notificationRunnable);
 	    //sendVideo.start();
-		putHeadingfeed = new PutSensorsFeed(this.handler, this.notificationRunnable);
+		
 	    
 	    
 	}
