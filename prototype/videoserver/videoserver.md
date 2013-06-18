@@ -1,5 +1,7 @@
 # Video Server Design
 
+*by Alexander Eichhorn (echa@cim.mcgill.ca, echa@kidtsunami.com)*
+
 ## Stream Concept
 
 Here's a try on a concise and practical definition of a stream. It's supposed to help us identifying how to handle and manage many streams originating from different sources over time.
