@@ -154,15 +154,15 @@
 }
 
 -(void)startBackgroundUpdateTimer {
-    // start location updates
-    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
-    {
-        updatedHeading = NO;  // because update might not be instant
-        updatedLocation = NO;
-        locationManager.headingFilter = 5;
-        [locationManager startUpdatingHeading];
-        [locationManager startUpdatingLocation];
-    }
+//    // start location updates
+//    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+//    {
+//        updatedHeading = NO;  // because update might not be instant
+//        updatedLocation = NO;
+//        locationManager.headingFilter = 5;
+//        [locationManager startUpdatingHeading];
+//        [locationManager startUpdatingLocation];
+//    }
     
     backgroundUpdateTimer = [NSTimer timerWithTimeInterval:IDLE_UPDATE_PERIOD target:self selector:@selector(sendBackgroundUpdate) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:backgroundUpdateTimer forMode:NSRunLoopCommonModes];
@@ -173,9 +173,9 @@
 -(void)stopBackgroundUpdateTimer {
     [backgroundUpdateTimer invalidate];
     
-    // stop location updates
-    [locationManager stopUpdatingHeading];
-    [locationManager stopUpdatingLocation];
+//    // stop location updates
+//    [locationManager stopUpdatingHeading];
+//    [locationManager stopUpdatingLocation];
 }
 
 -(void)sendBackgroundUpdate {
