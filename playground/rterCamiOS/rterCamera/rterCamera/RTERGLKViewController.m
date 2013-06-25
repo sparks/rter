@@ -19,6 +19,7 @@
 //    NSOperationQueue *getQueue;
     dispatch_queue_t getQueue;
     NSOperationQueue *putQueue;
+    NSOperationQueue *responseQueue;
     
     float latitude;
     float longitude;
@@ -28,10 +29,13 @@
     
     BOOL updatedHeading;
     BOOL updatedLocation;
+    
 }
 @end
 
 @implementation RTERGLKViewController
+
+@synthesize streaming;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil view:(GLKView *)view previewController:(RTERPreviewController *)prev
 {
@@ -113,6 +117,8 @@
         [debugScreen setTextColor:[UIColor redColor]];
         [debugScreen setBackgroundColor:[UIColor clearColor]];
         
+        responseQueue = [[NSOperationQueue alloc] init];
+        
         [self.view addSubview:debugScreen];
         
         
@@ -122,7 +128,7 @@
 }
 
 -(void)startGetPutTimer {
-    // also start location updates
+    // start location updates, although it should already be started
     if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
     {
         updatedHeading = NO;  // because update might not be instant
@@ -147,9 +153,83 @@
     [locationManager stopUpdatingLocation];
 }
 
+-(void)startBackgroundUpdateTimer {
+    // start location updates
+    if ([CLLocationManager headingAvailable] && [CLLocationManager locationServicesEnabled])
+    {
+        updatedHeading = NO;  // because update might not be instant
+        updatedLocation = NO;
+        locationManager.headingFilter = 5;
+        [locationManager startUpdatingHeading];
+        [locationManager startUpdatingLocation];
+    }
+    
+    backgroundUpdateTimer = [NSTimer timerWithTimeInterval:IDLE_UPDATE_PERIOD target:self selector:@selector(sendBackgroundUpdate) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:backgroundUpdateTimer forMode:NSRunLoopCommonModes];
+    
+    [backgroundUpdateTimer fire];
+}
+
+-(void)stopBackgroundUpdateTimer {
+    [backgroundUpdateTimer invalidate];
+    
+    // stop location updates
+    [locationManager stopUpdatingHeading];
+    [locationManager stopUpdatingLocation];
+}
+
+-(void)sendBackgroundUpdate {
+    
+    NSLog(@"sending background update");
+    
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
+    NSMutableURLRequest *getRequest = [[NSMutableURLRequest alloc]initWithURL:url];
+       
+    [NSURLConnection sendAsynchronousRequest:getRequest
+                                       queue:responseQueue
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error)
+    {
+        
+        NSDictionary *dictionary = [(NSHTTPURLResponse *)response allHeaderFields];
+        NSLog(@"%d - %@\n%@", [(NSHTTPURLResponse *)response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[(NSHTTPURLResponse *)response statusCode]], [dictionary description]);
+        
+        NSInteger code = [(NSHTTPURLResponse *)response statusCode];
+        if (code == 200 || code == 201) {
+            NSError *jsonParsingError = nil;
+            NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonParsingError];
+            
+            if (jsonParsingError) {
+                //something
+            } else {
+                NSString* connect = [jsonResponse objectForKey:@"Command"];
+                if ([connect isEqualToString:@"activate"]) {
+                    NSLog(@"activate command");
+//                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"RTER"
+//                                                                    message:@"Please begin streaming."
+//                                                                   delegate:nil
+//                                                          cancelButtonTitle:@"OK"
+//                                                          otherButtonTitles:nil];
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        [alert show];
+//                    });
+                    if(!streaming) {
+                        UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+                        NSDate *now = [NSDate date];
+                        localNotification.fireDate = now;
+                        localNotification.alertBody = @"Please begin streaming";
+                        localNotification.soundName = UILocalNotificationDefaultSoundName;
+                        localNotification.applicationIconBadgeNumber = 1; // increment
+                        [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+                    }
+                }
+            }
+        }
+    }];
+}
+
 -(void)getHeadingPutCoordindates {
     
-    NSLog(@"getting corrds");
+    //NSLog(@"getting corrds");
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/users/%@/direction",SERVER,[[previewController delegate]userName]]];
     NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]initWithURL:url];

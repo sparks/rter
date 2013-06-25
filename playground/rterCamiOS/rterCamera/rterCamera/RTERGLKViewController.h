@@ -50,6 +50,7 @@
     float orientationTolerance;
     
     NSTimer *getHeadingTimer;
+    NSTimer *backgroundUpdateTimer;
     NSURLConnection *currentGetConnection;
     NSURLConnection *currentPutConnection;
     NSMutableData *headingData;
@@ -57,12 +58,13 @@
     CLLocationManager *locationManager;
     
     UITextView *debugScreen;
-
 }
 
 /*public static enum Indicate {
     LEFT, RIGHT, NONE, FREE
 }*/
+
+@property (assign) BOOL streaming;
 
 typedef NS_ENUM(NSInteger, Indicate) {
    LEFT, RIGHT, NONE, FREE
@@ -78,6 +80,8 @@ typedef NS_ENUM(NSInteger, Indicate) {
 -(void)setDesiredOrientation:(float)dO;
 -(void)startGetPutTimer;
 -(void)stopGetPutTimer;
+-(void)startBackgroundUpdateTimer;
+-(void)stopBackgroundUpdateTimer;
 -(void)onSurfaceChange;
 -(void)onSurfaceChangedWidth:(float)width Height:(float)height;
 -(void)currentFPS:(float)currentFPS;

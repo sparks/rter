@@ -21,6 +21,8 @@
 
 #define SERVER_GEO_UPDATE_PERIOD 1 //in seconds, period at which we will poll the server and send our heading; can be a fraction
 
+#define IDLE_UPDATE_PERIOD 30 // in seconds, period at whic we poll the server when the app is not being used
+
 typedef NS_ENUM(NSInteger,Colour) {
     RED,
     GREEN,

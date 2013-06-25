@@ -188,6 +188,7 @@
     
     //initialize View Controller for the GLKView
     _glkVC = [[RTERGLKViewController alloc]initWithNibName:nil bundle:nil view:_glkView previewController:self];
+    [_glkVC setStreaming:NO];
     
     //hide glk view
     [_glkView setHidden:YES];
@@ -236,6 +237,8 @@
     [captureSession startRunning];
     
     [_glkVC onSurfaceChangedWidth:self.previewView.bounds.size.width Height:self.previewView.bounds.size.height];
+    
+    [_glkVC startBackgroundUpdateTimer];
     
 }
 
@@ -360,6 +363,8 @@
     
     //set glkview visible
     [_glkView setHidden:NO];
+    [_glkVC setStreaming:YES];
+    [_glkVC stopBackgroundUpdateTimer];
     [_glkVC startGetPutTimer];
     
 //    for (NSString *codec in [outputDevice availableVideoCodecTypes]) {
@@ -390,6 +395,8 @@
     //hide glk view
     [_glkView setHidden:YES];
     [_glkVC stopGetPutTimer];
+    [_glkVC setStreaming:NO];
+    [_glkVC startBackgroundUpdateTimer];
     
     NSMutableURLRequest *putRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@/1.0/items/%@",SERVER,[self itemID]]]];
     //142.157.58.153:8080
