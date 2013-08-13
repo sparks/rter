@@ -2,7 +2,7 @@
 
 *by Alexander Eichhorn (echa@cim.mcgill.ca, echa@kidtsunami.com)*
 
-The early RTER prototype is about to evolve into a large-scale Internet services that many people will essentially rely. It is important to understand that RTER lives in a larger ecosystem of end users, emergency operation centers, legal constraints, mobile devices, web standards, server and networking technologies.
+The early RTER prototype is about to evolve into a large-scale Internet services that people are supposed to rely on. It is important to understand that RTER lives in a larger ecosystem of end users, emergency operation centers, legal constraints, mobile devices, web standards, server and networking technologies.
 
 More important than the functional fit to its purpose is to design the entire architecture for robustness, scalability and security from ground up. Scalability, robustness and security don't come as libraries or 3rd party services you can simply plug-in. They are a philosphy behind each single line of code.
 
