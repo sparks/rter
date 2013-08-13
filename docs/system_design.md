@@ -1,4 +1,4 @@
-# RTER System Design - The read ahead
+# RTER System Design - The road ahead
 
 *by Alexander Eichhorn (echa@cim.mcgill.ca, echa@kidtsunami.com)*
 
